@@ -10,7 +10,6 @@ pipelines:
     - step:
         caches:
           - gradle
-        script: # Modify the commands below to build your repository.
-          # You must commit the Gradle wrapper to your repository
-          # https://docs.gradle.org/current/userguide/gradle_wrapper.html
+        script:
+          - cd jhdf
           - bash ./gradlew build
