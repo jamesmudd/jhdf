@@ -35,7 +35,7 @@ public class SuperblockTest {
 //		assertThat(sb.getBaseAddressByte(), is(equalTo(16)));
 //		assertThat(sb.getAddressOfGlobalFreeSpaceIndex(), is(equalTo(8)));
 		assertThat(sb.getEndOfFileAddress(), is(equalTo(raf.length())));
-		assertThat(sb.getRootGroupSymbolTableAddress(), is(equalTo(56)));
+		assertThat(sb.getRootGroupSymbolTableAddress(), is(equalTo(56L)));
 
 
 
