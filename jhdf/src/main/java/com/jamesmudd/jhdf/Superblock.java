@@ -33,7 +33,7 @@ public class Superblock {
 
 	private final long driverInformationBlockAddress;
 
-	private final long rootGroupSymbolTableEntry;
+	private final long rootGroupSymbolTableAddress;
 	
 	public Superblock(RandomAccessFile file) throws IOException {
 		// Reset the file pointer to the start to read the superblock
@@ -122,11 +122,9 @@ public class Superblock {
 			driverInformationBlockAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
 			System.out.println("driverInformationBlockAddress = " + driverInformationBlockAddress);
 
-			// Root Group Symbol Table Entry
-			byte[] fourBytes = new byte[4];
-			file.read(fourBytes);
-			rootGroupSymbolTableEntry = ByteBuffer.wrap(fourBytes).order(LITTLE_ENDIAN).getInt();
-			System.out.println("rootGroupSymbolTableEntry=" + rootGroupSymbolTableEntry);
+			// Root Group Symbol Table Entry Address
+			rootGroupSymbolTableAddress = file.getFilePointer();
+			System.out.println("rootGroupSymbolTableAddress=" + rootGroupSymbolTableAddress);
 
 		} // end of version 0 and 1
 		else if (versionOfSuperblock == 2) {
@@ -181,8 +179,8 @@ public class Superblock {
 		return driverInformationBlockAddress;
 	}
 
-	public long getRootGroupSymbolTableEntry() {
-		return rootGroupSymbolTableEntry;
+	public long getRootGroupSymbolTableAddress() {
+		return rootGroupSymbolTableAddress;
 	}
 
 }
