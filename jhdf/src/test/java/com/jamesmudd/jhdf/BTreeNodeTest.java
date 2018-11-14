@@ -28,8 +28,11 @@ public class BTreeNodeTest {
 		
 		assertThat(bTree.getNodeType(),	is(equalTo((short) 0)));
 		assertThat(bTree.getNodeLevel(), is(equalTo((short) 0)));
-		assertThat(bTree.getEntriesUsed(), is(equalTo((short) 256)));
+		assertThat(bTree.getEntriesUsed(), is(equalTo((short) 1)));
 		assertThat(bTree.getLeftSiblingAddress(), is(equalTo(-1L)));
 		assertThat(bTree.getRightSiblingAddress(), is(equalTo(-1L)));
+		assertThat(bTree.getKeys(), is(equalTo(new long[] {0, 8})));
+		assertThat(bTree.getChildAddresses(), is(equalTo(new long[] {1504})));
+
 	}
 }

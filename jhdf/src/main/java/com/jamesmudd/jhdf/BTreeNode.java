@@ -19,6 +19,8 @@ public class BTreeNode {
 	private final short entriesUsed;
 	private final long leftSiblingAddress;
 	private final long rightSiblingAddress;
+	private final long[] keys;
+	private final long[] childAddresses;
 		
 	public BTreeNode(RandomAccessFile file, long address, int sizeOfOffsets, int sizeOfLengths, int leafK, int internalK) {
 		try {
@@ -42,9 +44,12 @@ public class BTreeNode {
 			header.position(4);
 			nodeType = header.get();
 			nodeLevel = header.get();
-			entriesUsed = header.getShort();
 			
-			System.out.println("Entires = " + getEntriesUsed());
+			final byte[] twoBytes = new byte[2];
+			header.get(twoBytes);
+			entriesUsed = ByteBuffer.wrap(twoBytes).order(LITTLE_ENDIAN).getShort();
+			
+			System.out.println("Entries = " + getEntriesUsed());
 			
 			final byte[] offsetBytes = new byte[sizeOfOffsets];
 			
@@ -56,14 +61,36 @@ public class BTreeNode {
 			header.get(offsetBytes);
 			rightSiblingAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
 			System.out.println("right address = " + getRightSiblingAddress());
-			
-			// FIXME not sure what is happening here
+
 			switch (nodeType) {
 			case 0: // Group nodes
+				int keyBytes = (2 * entriesUsed + 1) * sizeOfLengths;
+				int childPointerBytes = (2 * entriesUsed) * sizeOfOffsets;
+				int keysAndPointersBytes = keyBytes + childPointerBytes; 
+				
+				ByteBuffer keysAndPointersBuffer = ByteBuffer.allocate(keysAndPointersBytes);
+				fc.read(keysAndPointersBuffer, address + headerSize);
+				keysAndPointersBuffer.rewind();
+				
+				keys = new long[entriesUsed + 1];
+				childAddresses = new long[entriesUsed];
+				
+				final byte[] key = new byte[sizeOfLengths];
+				final byte[] child = new byte[sizeOfOffsets];
+				
+				for (int i = 0; i < entriesUsed; i++) {
+					keysAndPointersBuffer.get(key);
+					keys[i] = ByteBuffer.wrap(key).order(LITTLE_ENDIAN).getLong();
+					keysAndPointersBuffer.get(child);
+					childAddresses[i] = ByteBuffer.wrap(child).order(LITTLE_ENDIAN).getLong();
+				}
+				keysAndPointersBuffer.get(key);
+				getKeys()[entriesUsed] = ByteBuffer.wrap(key).order(LITTLE_ENDIAN).getLong();
 				
 				break;
 			case 1: // Raw data
-
+				// TODO implement
+				throw new HdfException("B tree Raw data not implemented");
 			default:
 				throw new HdfException("Unreconized node type = " + nodeType);
 			}
@@ -94,6 +121,14 @@ public class BTreeNode {
 
 	public long getRightSiblingAddress() {
 		return rightSiblingAddress;
+	}
+
+	public long[] getKeys() {
+		return keys;
+	}
+
+	public long[] getChildAddresses() {
+		return childAddresses;
 	}
 
 }
