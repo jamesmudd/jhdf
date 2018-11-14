@@ -73,5 +73,29 @@ public class SymbolTableEntry {
 		}
 		
 	}
+	
+	public long getbTreeAddress() {
+		return bTreeAddress;
+	}
+	
+	public int getCacheType() {
+		return cacheType;
+	}
+	
+	public long getLinkNameOffset() {
+		return linkNameOffset;
+	}
+	
+	public long getLinkValueoffset() {
+		return linkValueoffset;
+	}
+	
+	public long getNameHeapAddress() {
+		return nameHeapAddress;
+	}
+	
+	public long getObjectHeaderAddress() {
+		return objectHeaderAddress;
+	}
 
 }

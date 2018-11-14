@@ -10,6 +10,9 @@ import java.io.RandomAccessFile;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.*;
+
+
 public class SymbolTableEntryTest {
 	private RandomAccessFile raf;
 	
@@ -21,8 +24,11 @@ public class SymbolTableEntryTest {
 	
 	@Test
 	public void testExtractSuperblockFromFile() throws IOException {
-		Superblock sb = new Superblock(raf);
-		
-		SymbolTableEntry ste = new SymbolTableEntry(raf, sb.getRootGroupSymbolTableAddress(), sb.getSizeOfOffsets());
+		SymbolTableEntry ste = new SymbolTableEntry(raf, 56, 8);
+		assertThat(ste.getLinkNameOffset(),	is(equalTo(0L)));
+		assertThat(ste.getObjectHeaderAddress(), is(equalTo(96L)));
+		assertThat(ste.getCacheType(), is(equalTo(1)));
+		assertThat(ste.getbTreeAddress(), is(equalTo(136L)));
+		assertThat(ste.getNameHeapAddress(), is(equalTo(680L)));		
 	}
 }
