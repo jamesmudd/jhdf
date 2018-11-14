@@ -30,7 +30,7 @@ public class SymbolTableEntry {
 		linkNameOffset = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
 		System.out.println("linkNameOffset = " + linkNameOffset);
 		
-		// Link Name Offset
+		// Object Header Address
 		file.read(offsetBytes);
 		objectHeaderAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
 		System.out.println("objectHeaderAddress = " + objectHeaderAddress);
