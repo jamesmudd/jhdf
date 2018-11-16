@@ -7,10 +7,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jamesmudd.jhdf.exceptions.HdfException;
 
 public class GroupSymbolTableNode {
-
+	private static final Logger logger = LoggerFactory.getLogger(GroupSymbolTableNode.class);
+	
 	private static final byte[] NODE_SIGNATURE = "SNOD".getBytes();
 	
 	private final short version;
@@ -47,7 +51,7 @@ public class GroupSymbolTableNode {
 				// Data Segment Size
 				header.get(twoBytes);
 				numberOfEntries = ByteBuffer.wrap(twoBytes).order(LITTLE_ENDIAN).getShort();
-				System.out.println("numberOfSymbols = " + numberOfEntries);
+				logger.trace("numberOfSymbols = {}", numberOfEntries);
 				
 				final int symbolTableEntryBytes = sizeOfOffsets + sizeOfOffsets + 8 + 16;
 							
@@ -74,4 +78,11 @@ public class GroupSymbolTableNode {
 	public SymbolTableEntry[] getSymbolTableEntries() {
 		return symbolTableEntries;
 	}
+
+	@Override
+	public String toString() {
+		return "GroupSymbolTableNode [version=" + version + ", numberOfEntries=" + numberOfEntries
+				+ ", symbolTableEntries=" + Arrays.toString(symbolTableEntries) + "]";
+	}
+
 }

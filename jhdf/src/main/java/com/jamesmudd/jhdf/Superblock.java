@@ -8,9 +8,13 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jamesmudd.jhdf.exceptions.HdfException;
 
 public class Superblock {
+	private static final Logger logger = LoggerFactory.getLogger(Superblock.class); 
 
 	private static final byte[] HDF5_FILE_SIGNATURE = new byte[] { -119, 72, 68, 70, 13, 10, 26, 10 };
 
@@ -49,7 +53,7 @@ public class Superblock {
 
 			// Version # of Superblock
 			versionOfSuperblock = header.get();
-			System.out.println("Version of superblock is = " + versionOfSuperblock);
+			logger.trace("Version of superblock is = {}", versionOfSuperblock);
 
 			if (versionOfSuperblock != 0) {
 				throw new HdfException("Only superblock version 0 si currently supported");
@@ -57,38 +61,37 @@ public class Superblock {
 
 			// Version # of File Free-space Storage
 			versionNumberOfTheFileFreeSpaceInformation = header.get();
-			System.out.println(
-					"Version Number of the File Free-Space Information: " + versionNumberOfTheFileFreeSpaceInformation);
+			logger.trace("Version Number of the File Free-Space Information: {}", versionNumberOfTheFileFreeSpaceInformation);
 
 			// Version # of Root Group Symbol Table Entry
 			versionOfRootGroupSymbolTableEntry = header.get();
-			System.out.println("Version # of Root Group Symbol Table Entry: " + versionOfRootGroupSymbolTableEntry);
+			logger.trace("Version # of Root Group Symbol Table Entry: {}", versionOfRootGroupSymbolTableEntry);
 
 			// Skip reserved byte
 			header.get();
 
 			// Version # of Shared Header Message Format
 			versionOfSharedHeaderMessageFormat = header.get();
-			System.out.println("Version # of Shared Header Message Format: " + versionOfSharedHeaderMessageFormat);
+			logger.trace("Version # of Shared Header Message Format: {}", versionOfSharedHeaderMessageFormat);
 
 			// Size of Offsets
 			sizeOfOffsets = header.get();
-			System.out.println("Size of Offsets: " + sizeOfOffsets);
+			logger.trace("Size of Offsets: {}", sizeOfOffsets);
 
 			// Size of Lengths
 			sizeOfLengths = header.get();
-			System.out.println("Size of Lengths: " + sizeOfLengths);
+			logger.trace("Size of Lengths: {}", sizeOfLengths);
 
 			// Skip reserved byte
 			header.get();
 
 			// Group Leaf Node K
 			groupLeafNodeK = header.getShort();
-			System.out.println("groupLeafNodeK = " + groupLeafNodeK);
+			logger.trace("groupLeafNodeK = {}", groupLeafNodeK);
 
 			// Group Internal Node K
 			groupInternalNodeK = header.getShort();
-			System.out.println("groupInternalNodeK = " + groupInternalNodeK);
+			logger.trace("groupInternalNodeK = {}", groupInternalNodeK);
 
 			// File Consistency Flags (skip)
 			fileLocation += 4;
@@ -104,26 +107,26 @@ public class Superblock {
 			// Base Address
 			header.get(offsetBytes);
 			baseAddressByte = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
-			System.out.println("baseAddressByte = " + baseAddressByte);
+			logger.trace("baseAddressByte = {}", baseAddressByte);
 
 			// Address of Global Free-space Index
 			header.get(offsetBytes);
 			addressOfGlobalFreeSpaceIndex = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
-			System.out.println("addressOfGlobalFreeSpaceIndex = " + addressOfGlobalFreeSpaceIndex);
+			logger.trace("addressOfGlobalFreeSpaceIndex = {}", addressOfGlobalFreeSpaceIndex);
 
 			// End of File Address
 			header.get(offsetBytes);
 			endOfFileAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
-			System.out.println("endOfFileAddress = " + endOfFileAddress);
+			logger.trace("endOfFileAddress = {}", endOfFileAddress);
 
 			// Driver Information Block Address
 			header.get(offsetBytes);
 			driverInformationBlockAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
-			System.out.println("driverInformationBlockAddress = " + driverInformationBlockAddress);
+			logger.trace("driverInformationBlockAddress = {}", driverInformationBlockAddress);
 
 			// Root Group Symbol Table Entry Address
 			rootGroupSymbolTableAddress = offset + fileLocation;
-			System.out.println("rootGroupSymbolTableAddress=" + rootGroupSymbolTableAddress);
+			logger.trace("rootGroupSymbolTableAddress= {}", rootGroupSymbolTableAddress);
 
 		} catch (Exception e) {
 			throw new HdfException("Failed to read superbloack", e);

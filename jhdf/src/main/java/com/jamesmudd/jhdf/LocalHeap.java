@@ -8,9 +8,13 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jamesmudd.jhdf.exceptions.HdfException;
 
 public class LocalHeap {
+	private static final Logger logger = LoggerFactory.getLogger(LocalHeap.class);
 	
 	private static final byte[] HEAP_SIGNATURE = "HEAP".getBytes();
 
@@ -38,6 +42,7 @@ public class LocalHeap {
 				throw new HdfException("Heap signature not matched");
 			}
 			
+			// Version
 			version = header.get();
 			
 			// Move past reserved space
@@ -48,19 +53,19 @@ public class LocalHeap {
 			// Data Segment Size
 			header.get(lengthsBytes);
 			dataSegmentSize = ByteBuffer.wrap(lengthsBytes).order(LITTLE_ENDIAN).getLong();
-			System.out.println("dataSegmentSize = " + getDataSegmentSize());
+			logger.trace("dataSegmentSize = {}", dataSegmentSize);
 
 			// Offset to Head of Free-list
 			header.get(lengthsBytes);
 			offsetToHeadOfFreeList = ByteBuffer.wrap(lengthsBytes).order(LITTLE_ENDIAN).getLong();
-			System.out.println("offsetToHeadOfFreeList = " + getOffsetToHeadOfFreeList());
+			logger.trace("offsetToHeadOfFreeList = {}", offsetToHeadOfFreeList);
 			
 			final byte[] offsetBytes = new byte[sizeOfOffsets];
 
 			// Address of Data Segment
 			header.get(offsetBytes);
 			addressOfDataSegment = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
-			System.out.println("addressOfDataSegment = " + getAddressOfDataSegment());
+			logger.trace("addressOfDataSegment = {}", addressOfDataSegment);
 		}
 		catch (IOException e) {
 			throw new HdfException("Error reading heap", e);

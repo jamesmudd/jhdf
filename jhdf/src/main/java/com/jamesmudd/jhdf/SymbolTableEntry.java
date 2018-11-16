@@ -6,18 +6,17 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SymbolTableEntry {
+	private static final Logger logger = LoggerFactory.getLogger(SymbolTableEntry.class); 
 	
 	private final long linkNameOffset;
-	
 	private final long objectHeaderAddress;
-	
 	private final int cacheType;
-	
 	private long bTreeAddress = -1;
-	
 	private long nameHeapAddress = -1;
-	
 	private long  linkValueoffset = -1;
 	
 	public SymbolTableEntry(RandomAccessFile file, long offset, int sizeOfOffsets) throws IOException {
@@ -28,19 +27,19 @@ public class SymbolTableEntry {
 		// Link Name Offset
 		file.read(offsetBytes);
 		linkNameOffset = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
-		System.out.println("linkNameOffset = " + linkNameOffset);
+		logger.trace("linkNameOffset = {}", linkNameOffset);
 		
 		// Object Header Address
 		file.read(offsetBytes);
 		objectHeaderAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
-		System.out.println("objectHeaderAddress = " + objectHeaderAddress);
+		logger.trace("objectHeaderAddress = {}", objectHeaderAddress);
 		
 		final byte[] fourBytes = new byte[4];
 		
 		// Link Name Offset
 		file.read(fourBytes);
 		cacheType = ByteBuffer.wrap(fourBytes).order(LITTLE_ENDIAN).getInt();
-		System.out.println("cacheType = " + cacheType);
+		logger.trace("cacheType = {}", cacheType);
 		
 		// Reserved 4 bytes
 		file.skipBytes(4);
@@ -55,18 +54,18 @@ public class SymbolTableEntry {
 			// Address of B Tree
 			file.read(offsetBytes);
 			bTreeAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
-			System.out.println("addressOfBTree = " + bTreeAddress);
+			logger.trace("addressOfBTree = {}", bTreeAddress);
 			
 			// Address of Name Heap
 			file.read(offsetBytes);
 			nameHeapAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
-			System.out.println("nameHeapAddress = " + nameHeapAddress);			
+			logger.trace("nameHeapAddress = {}", nameHeapAddress);			
 			break;
 		case 2:
 			// Link
 			file.read(fourBytes);
 			linkValueoffset = ByteBuffer.wrap(fourBytes).order(LITTLE_ENDIAN).getInt();
-			System.out.println("linkValueoffset = " + linkValueoffset);			
+			logger.trace("linkValueoffset = {}", linkValueoffset);			
 			break;
 		default:
 			throw new IllegalStateException("SymbolTableEntry: Unreconized cache type = " + cacheType);
@@ -97,5 +96,17 @@ public class SymbolTableEntry {
 	public long getObjectHeaderAddress() {
 		return objectHeaderAddress;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "SymbolTableEntry [linkNameOffset=" + linkNameOffset + ", objectHeaderAddress=" + objectHeaderAddress
+				+ ", cacheType=" + cacheType + ", bTreeAddress=" + bTreeAddress + ", nameHeapAddress=" + nameHeapAddress
+				+ ", linkValueoffset=" + linkValueoffset + "]";
+	}
+	
+	
 
 }
