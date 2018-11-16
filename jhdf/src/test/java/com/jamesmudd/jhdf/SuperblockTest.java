@@ -12,6 +12,8 @@ import java.io.RandomAccessFile;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jamesmudd.jhdf.exceptions.HdfException;
+
 public class SuperblockTest {
 
 	private RandomAccessFile raf;
@@ -24,7 +26,7 @@ public class SuperblockTest {
 	
 	@Test
 	public void testExtractSuperblockFromFile() throws IOException {
-		Superblock sb = new Superblock(raf);
+		Superblock sb = new Superblock(raf, 0);
 		assertThat(sb.getVersionOfSuperblock(), is(equalTo(0)));
 		assertThat(sb.getVersionNumberOfTheFileFreeSpaceInformation(), is(equalTo(0)));
 		assertThat(sb.getVersionOfRootGroupSymbolTableEntry(), is(equalTo(0)));
@@ -32,22 +34,25 @@ public class SuperblockTest {
 		assertThat(sb.getSizeOfOffsets(), is(equalTo(8)));
 		assertThat(sb.getSizeOfLengths(), is(equalTo(8)));
 		assertThat(sb.getGroupLeafNodeK(), is(equalTo(4)));
-//		assertThat(sb.getBaseAddressByte(), is(equalTo(16)));
-//		assertThat(sb.getAddressOfGlobalFreeSpaceIndex(), is(equalTo(8)));
+		assertThat(sb.getGroupInternalNodeK(), is(equalTo(16)));
+		assertThat(sb.getBaseAddressByte(), is(equalTo(0L)));
+		assertThat(sb.getAddressOfGlobalFreeSpaceIndex(), is(equalTo(-1L)));
 		assertThat(sb.getEndOfFileAddress(), is(equalTo(raf.length())));
 		assertThat(sb.getRootGroupSymbolTableAddress(), is(equalTo(56L)));
-
-
-
-//
-//		public long getDriverInformationBlockAddress() {
-//			return driverInformationBlockAddress;
-//		}
-//
-//		public long getRootGroupSymbolTableEntry() {
-//			return rootGroupSymbolTableEntry;
-//		}
-
+	}
+	
+	@Test
+	public void testVerifySuperblock() throws Exception {
+		assertThat(Superblock.verifySignature(raf, 0), is(true));
 	}
 
+	@Test
+	public void testVerifySuperblockReturnsFalseWhenNotCorrect() throws Exception {
+		assertThat(Superblock.verifySignature(raf, 3), is(false));
+	}
+	
+	@Test(expected=HdfException.class)
+	public void testSuperblockCOnstructorThrowsWhenGivenInvalidOffset() throws Exception {
+		new Superblock(raf, 5);
+	}
 }
