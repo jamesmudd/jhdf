@@ -22,9 +22,9 @@ public class SymbolTableEntry {
 	private long nameHeapAddress = -1;
 	private long linkValueoffset = -1;
 
-	public SymbolTableEntry(RandomAccessFile file, long offset, int sizeOfOffsets) throws IOException {
+	public SymbolTableEntry(RandomAccessFile file, long address, int sizeOfOffsets) throws IOException {
 		this.address = address;
-		file.seek(offset);
+		file.seek(address);
 
 		final byte[] offsetBytes = new byte[sizeOfOffsets];
 
