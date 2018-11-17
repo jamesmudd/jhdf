@@ -2,3 +2,5 @@ Just a place for me to remember ideas.
 
 - Update to Gradle 5
 - Update to JUnit 5
+- Test for user header
+- Checksums

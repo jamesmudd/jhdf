@@ -14,57 +14,59 @@ import com.jamesmudd.jhdf.exceptions.HdfException;
 
 public class GroupSymbolTableNode {
 	private static final Logger logger = LoggerFactory.getLogger(GroupSymbolTableNode.class);
-	
+
 	private static final byte[] NODE_SIGNATURE = "SNOD".getBytes();
-	
+
+	/** The location of this GroupSymbolTableNode in the file */
+	private final long address;
 	private final short version;
 	private final short numberOfEntries;
 	private final SymbolTableEntry[] symbolTableEntries;
-	
+
 	public GroupSymbolTableNode(RandomAccessFile file, long address, int sizeOfOffsets) {
-			try {
-				FileChannel fc = file.getChannel();
-				
-				// B Tree Node Header
-				int headerSize = 8;
-				ByteBuffer header = ByteBuffer.allocate(headerSize);
+		this.address = address;
+		try {
+			FileChannel fc = file.getChannel();
 
-				fc.read(header, address);
-				header.rewind();
-				
-				byte[] formatSignitureByte = new byte[4];
-				header.get(formatSignitureByte, 0, formatSignitureByte.length);
+			// B Tree Node Header
+			int headerSize = 8;
+			ByteBuffer header = ByteBuffer.allocate(headerSize);
 
-				// Verify signature
-				if (!Arrays.equals(NODE_SIGNATURE, formatSignitureByte)) {
-					throw new HdfException("B tree node signature not matched");
-				}
-				
-				// Version Number
-				version = header.get();
+			fc.read(header, address);
+			header.rewind();
 
-				// Move past reserved space
-				header.position(6);
-				
-				final byte[] twoBytes = new byte[2];
+			byte[] formatSignitureByte = new byte[4];
+			header.get(formatSignitureByte, 0, formatSignitureByte.length);
 
-				// Data Segment Size
-				header.get(twoBytes);
-				numberOfEntries = ByteBuffer.wrap(twoBytes).order(LITTLE_ENDIAN).getShort();
-				logger.trace("numberOfSymbols = {}", numberOfEntries);
-				
-				final int symbolTableEntryBytes = sizeOfOffsets + sizeOfOffsets + 8 + 16;
-							
-				symbolTableEntries = new SymbolTableEntry[numberOfEntries];
-				for (int i = 0; i < numberOfEntries; i++) {
-					long offset = address + headerSize + i * symbolTableEntryBytes;
-					symbolTableEntries[i] = new SymbolTableEntry(file, offset, sizeOfOffsets);
-				}
+			// Verify signature
+			if (!Arrays.equals(NODE_SIGNATURE, formatSignitureByte)) {
+				throw new HdfException("B tree node signature not matched");
 			}
-			catch (Exception e) {
-				// TODO improve message
-				throw new HdfException("Error reading Group symbol table node", e);
+
+			// Version Number
+			version = header.get();
+
+			// Move past reserved space
+			header.position(6);
+
+			final byte[] twoBytes = new byte[2];
+
+			// Data Segment Size
+			header.get(twoBytes);
+			numberOfEntries = ByteBuffer.wrap(twoBytes).order(LITTLE_ENDIAN).getShort();
+			logger.trace("numberOfSymbols = {}", numberOfEntries);
+
+			final int symbolTableEntryBytes = sizeOfOffsets + sizeOfOffsets + 8 + 16;
+
+			symbolTableEntries = new SymbolTableEntry[numberOfEntries];
+			for (int i = 0; i < numberOfEntries; i++) {
+				long offset = address + headerSize + i * symbolTableEntryBytes;
+				symbolTableEntries[i] = new SymbolTableEntry(file, offset, sizeOfOffsets);
 			}
+		} catch (Exception e) {
+			// TODO improve message
+			throw new HdfException("Error reading Group symbol table node", e);
+		}
 	}
 
 	public short getVersion() {
@@ -81,8 +83,8 @@ public class GroupSymbolTableNode {
 
 	@Override
 	public String toString() {
-		return "GroupSymbolTableNode [version=" + version + ", numberOfEntries=" + numberOfEntries
-				+ ", symbolTableEntries=" + Arrays.toString(symbolTableEntries) + "]";
+		return "GroupSymbolTableNode [address=" + Utils.toHex(address) + ", version=" + version + ", numberOfEntries="
+				+ numberOfEntries + ", symbolTableEntries=" + Arrays.toString(symbolTableEntries) + "]";
 	}
 
 }

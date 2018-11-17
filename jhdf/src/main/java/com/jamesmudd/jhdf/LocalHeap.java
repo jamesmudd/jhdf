@@ -15,25 +15,28 @@ import com.jamesmudd.jhdf.exceptions.HdfException;
 
 public class LocalHeap {
 	private static final Logger logger = LoggerFactory.getLogger(LocalHeap.class);
-	
+
 	private static final byte[] HEAP_SIGNATURE = "HEAP".getBytes();
 
+	/** The location of this Heap in the file */
+	private final long address;
 	private final short version;
 	private final long dataSegmentSize;
 	private final long offsetToHeadOfFreeList;
 	private final long addressOfDataSegment;
-	
+
 	public LocalHeap(RandomAccessFile file, long address, int sizeOfOffsets, int sizeOfLengths) {
+		this.address = address;
 		try {
 			FileChannel fc = file.getChannel();
-			
+
 			// B Tree Node Header
 			int headerSize = 8 + sizeOfLengths + sizeOfLengths + sizeOfOffsets;
 			ByteBuffer header = ByteBuffer.allocate(headerSize);
 
 			fc.read(header, address);
 			header.rewind();
-			
+
 			byte[] formatSignitureByte = new byte[4];
 			header.get(formatSignitureByte, 0, formatSignitureByte.length);
 
@@ -41,13 +44,13 @@ public class LocalHeap {
 			if (!Arrays.equals(HEAP_SIGNATURE, formatSignitureByte)) {
 				throw new HdfException("Heap signature not matched");
 			}
-			
+
 			// Version
 			version = header.get();
-			
+
 			// Move past reserved space
 			header.position(8);
-			
+
 			final byte[] lengthsBytes = new byte[sizeOfLengths];
 
 			// Data Segment Size
@@ -59,36 +62,44 @@ public class LocalHeap {
 			header.get(lengthsBytes);
 			offsetToHeadOfFreeList = ByteBuffer.wrap(lengthsBytes).order(LITTLE_ENDIAN).getLong();
 			logger.trace("offsetToHeadOfFreeList = {}", offsetToHeadOfFreeList);
-			
+
 			final byte[] offsetBytes = new byte[sizeOfOffsets];
 
 			// Address of Data Segment
 			header.get(offsetBytes);
 			addressOfDataSegment = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
 			logger.trace("addressOfDataSegment = {}", addressOfDataSegment);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new HdfException("Error reading heap", e);
 		}
 	}
-
 
 	public short getVersion() {
 		return version;
 	}
 
-
 	public long getDataSegmentSize() {
 		return dataSegmentSize;
 	}
-
 
 	public long getOffsetToHeadOfFreeList() {
 		return offsetToHeadOfFreeList;
 	}
 
-
 	public long getAddressOfDataSegment() {
 		return addressOfDataSegment;
-	}			
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "LocalHeap [address=" + Utils.toHex(address) + ", version=" + version + ", dataSegmentSize="
+				+ dataSegmentSize + ", offsetToHeadOfFreeList=" + offsetToHeadOfFreeList + ", addressOfDataSegment="
+				+ Utils.toHex(addressOfDataSegment) + "]";
+	}
+
 }

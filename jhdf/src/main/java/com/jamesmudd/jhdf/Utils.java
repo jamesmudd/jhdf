@@ -11,7 +11,7 @@ public final class Utils {
 		if (address == UNDEFINED_ADDRESS) {
 			return "UNDEFINED";
 		}
-		return Long.toHexString(address);
+		return "0x" + Long.toHexString(address);
 	}
 
 }

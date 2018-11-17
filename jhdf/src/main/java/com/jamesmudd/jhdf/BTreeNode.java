@@ -1,5 +1,6 @@
 package com.jamesmudd.jhdf;
 
+import static com.jamesmudd.jhdf.Utils.toHex;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.io.IOException;
@@ -18,7 +19,11 @@ public class BTreeNode {
 
 	private static final byte[] BTREE_NODE_SIGNATURE = "TREE".getBytes();
 
+	/** The location of this B tree in the file */
+	private final long address;
+	/** Type of node. 0 = group, 1 = data */
 	private final short nodeType;
+	/** Level of the node 0 = leaf*/
 	private final short nodeLevel;
 	private final short entriesUsed;
 	private final long leftSiblingAddress;
@@ -28,6 +33,7 @@ public class BTreeNode {
 
 	public BTreeNode(RandomAccessFile file, long address, int sizeOfOffsets, int sizeOfLengths, int leafK,
 			int internalK) {
+		this.address = address;
 		try {
 			FileChannel fc = file.getChannel();
 
@@ -135,4 +141,27 @@ public class BTreeNode {
 		return childAddresses;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "BTreeNode [address=" + toHex(address)
+				+ ", nodeType=" + nodeTypeAsString(nodeType) 
+				+ ", nodeLevel=" + nodeLevel 
+				+ ", entriesUsed=" + entriesUsed
+				+ ", leftSiblingAddress=" + toHex(leftSiblingAddress) 
+				+ ", rightSiblingAddress=" + toHex(rightSiblingAddress) + "]";
+	}
+
+	private String nodeTypeAsString(short nodeType) {
+		switch (nodeType) {
+		case 0:
+			return "GROUP";
+		case 1:
+			return "DATA";
+		default:
+			return "UNKNOWN";
+		}
+	}
 }
