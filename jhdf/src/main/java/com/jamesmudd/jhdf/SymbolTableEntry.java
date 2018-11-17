@@ -1,5 +1,6 @@
 package com.jamesmudd.jhdf;
 
+import static com.jamesmudd.jhdf.Utils.toHex;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.io.IOException;
@@ -102,8 +103,11 @@ public class SymbolTableEntry {
 	 */
 	@Override
 	public String toString() {
-		return "SymbolTableEntry [linkNameOffset=" + linkNameOffset + ", objectHeaderAddress=" + objectHeaderAddress
-				+ ", cacheType=" + cacheType + ", bTreeAddress=" + bTreeAddress + ", nameHeapAddress=" + nameHeapAddress
+		return "SymbolTableEntry [linkNameOffset=" + linkNameOffset 
+				+ ", objectHeaderAddress=" + toHex(objectHeaderAddress)
+				+ ", cacheType=" + cacheType 
+				+ ", bTreeAddress=" + toHex(bTreeAddress)
+				+ ", nameHeapAddress=" + toHex(nameHeapAddress)
 				+ ", linkValueoffset=" + linkValueoffset + "]";
 	}
 	
