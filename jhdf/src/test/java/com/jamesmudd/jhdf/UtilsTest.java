@@ -2,7 +2,7 @@ package com.jamesmudd.jhdf;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.nio.ByteBuffer;
 
@@ -46,5 +46,19 @@ public class UtilsTest {
 		bb.rewind();
 		Utils.readUntilNull(bb);
 	}
+	
+	@Test
+	public void testValidNameReturnsTrue() throws Exception {
+		assertThat(Utils.validateName("hello"), is(true));
+	}
 
+	@Test
+	public void testNameContainingDotIsInvalid() throws Exception {
+		assertThat(Utils.validateName("hello."), is(false));
+	}
+
+	@Test
+	public void testNameContainingSlashIsInvalid() throws Exception {
+		assertThat(Utils.validateName("hello/"), is(false));
+	}
 }
