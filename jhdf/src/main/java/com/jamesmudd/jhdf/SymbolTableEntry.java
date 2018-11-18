@@ -101,11 +101,6 @@ public class SymbolTableEntry {
 		return objectHeaderAddress;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		return "SymbolTableEntry [address=" + toHex(address) + ", linkNameOffset=" + linkNameOffset

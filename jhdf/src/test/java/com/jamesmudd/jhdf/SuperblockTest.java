@@ -1,5 +1,6 @@
 package com.jamesmudd.jhdf;
 
+import static com.jamesmudd.jhdf.Utils.UNDEFINED_ADDRESS;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -17,13 +18,13 @@ import com.jamesmudd.jhdf.exceptions.HdfException;
 public class SuperblockTest {
 
 	private RandomAccessFile raf;
-	
+
 	@Before
 	public void setup() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 	}
-	
+
 	@Test
 	public void testExtractSuperblockFromFile() throws IOException {
 		Superblock sb = new Superblock(raf, 0);
@@ -36,11 +37,11 @@ public class SuperblockTest {
 		assertThat(sb.getGroupLeafNodeK(), is(equalTo(4)));
 		assertThat(sb.getGroupInternalNodeK(), is(equalTo(16)));
 		assertThat(sb.getBaseAddressByte(), is(equalTo(0L)));
-		assertThat(sb.getAddressOfGlobalFreeSpaceIndex(), is(equalTo(-1L)));
+		assertThat(sb.getAddressOfGlobalFreeSpaceIndex(), is(equalTo(UNDEFINED_ADDRESS)));
 		assertThat(sb.getEndOfFileAddress(), is(equalTo(raf.length())));
 		assertThat(sb.getRootGroupSymbolTableAddress(), is(equalTo(56L)));
 	}
-	
+
 	@Test
 	public void testVerifySuperblock() throws Exception {
 		assertThat(Superblock.verifySignature(raf, 0), is(true));
@@ -50,8 +51,8 @@ public class SuperblockTest {
 	public void testVerifySuperblockReturnsFalseWhenNotCorrect() throws Exception {
 		assertThat(Superblock.verifySignature(raf, 3), is(false));
 	}
-	
-	@Test(expected=HdfException.class)
+
+	@Test(expected = HdfException.class)
 	public void testSuperblockCOnstructorThrowsWhenGivenInvalidOffset() throws Exception {
 		new Superblock(raf, 5);
 	}

@@ -1,6 +1,8 @@
 package com.jamesmudd.jhdf;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,29 +12,28 @@ import java.io.RandomAccessFile;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-
-
 public class BTreeNodeTest {
 	private RandomAccessFile raf;
-	
+
 	@Before
 	public void setup() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 	}
-	
+
 	@Test
 	public void testExtractSuperblockFromFile() throws IOException {
 		BTreeNode bTree = new BTreeNode(raf, 136, 8, 8, 4, 16);
-		
-		assertThat(bTree.getNodeType(),	is(equalTo((short) 0)));
+
+		assertThat(bTree.getNodeType(), is(equalTo((short) 0)));
 		assertThat(bTree.getNodeLevel(), is(equalTo((short) 0)));
 		assertThat(bTree.getEntriesUsed(), is(equalTo((short) 1)));
-		assertThat(bTree.getLeftSiblingAddress(), is(equalTo(-1L)));
-		assertThat(bTree.getRightSiblingAddress(), is(equalTo(-1L)));
-		assertThat(bTree.getKeys(), is(equalTo(new long[] {0, 8})));
-		assertThat(bTree.getChildAddresses(), is(equalTo(new long[] {1504})));
-
+		assertThat(bTree.getLeftSiblingAddress(), is(equalTo(Utils.UNDEFINED_ADDRESS)));
+		assertThat(bTree.getRightSiblingAddress(), is(equalTo(Utils.UNDEFINED_ADDRESS)));
+		assertThat(bTree.getKeys(), is(equalTo(new long[] { 0, 8 })));
+		assertThat(bTree.getChildAddresses(), is(equalTo(new long[] { 1504 })));
+		assertThat(bTree.toString(), is(equalTo(
+				"BTreeNode [address=0x88, nodeType=GROUP, nodeLevel=0, entriesUsed=1, leftSiblingAddress=UNDEFINED, rightSiblingAddress=UNDEFINED]")));
 	}
+
 }
