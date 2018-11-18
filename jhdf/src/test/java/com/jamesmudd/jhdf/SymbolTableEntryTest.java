@@ -8,19 +8,28 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 public class SymbolTableEntryTest {
+	private FileChannel	fc;
 	private RandomAccessFile raf;
-
+	
 	@Before
-	public void setup() throws FileNotFoundException {
+	public void setUp() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
+		fc = raf.getChannel();
 	}
-
+	
+	@After
+	public void after() throws IOException {
+		raf.close();
+		fc.close();
+	}
 	@Test
 	public void testExtractSuperblockFromFile() throws IOException {
 		SymbolTableEntry ste = new SymbolTableEntry(raf, 56, 8);
