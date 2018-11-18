@@ -61,4 +61,9 @@ public class UtilsTest {
 	public void testNameContainingSlashIsInvalid() throws Exception {
 		assertThat(Utils.validateName("hello/"), is(false));
 	}
+	
+	@Test
+	public void testNameContainingNonAsciiIsInvalid() throws Exception {
+		assertThat(Utils.validateName("helloμ"), is(false));
+	}
 }
