@@ -20,7 +20,7 @@ public class SymbolTableEntry {
 	private final int cacheType;
 	private long bTreeAddress = -1;
 	private long nameHeapAddress = -1;
-	private long linkValueoffset = -1;
+	private long linkValueOffset = -1;
 
 	public SymbolTableEntry(RandomAccessFile file, long address, int sizeOfOffsets) throws IOException {
 		this.address = address;
@@ -68,8 +68,8 @@ public class SymbolTableEntry {
 		case 2:
 			// Link
 			file.read(fourBytes);
-			linkValueoffset = ByteBuffer.wrap(fourBytes).order(LITTLE_ENDIAN).getInt();
-			logger.trace("linkValueoffset = {}", linkValueoffset);
+			linkValueOffset = ByteBuffer.wrap(fourBytes).order(LITTLE_ENDIAN).getInt();
+			logger.trace("linkValueoffset = {}", linkValueOffset);
 			break;
 		default:
 			throw new IllegalStateException("SymbolTableEntry: Unreconized cache type = " + cacheType);
@@ -89,8 +89,8 @@ public class SymbolTableEntry {
 		return linkNameOffset;
 	}
 
-	public long getLinkValueoffset() {
-		return linkValueoffset;
+	public long getLinkValueOffset() {
+		return linkValueOffset;
 	}
 
 	public long getNameHeapAddress() {
@@ -105,8 +105,8 @@ public class SymbolTableEntry {
 	public String toString() {
 		return "SymbolTableEntry [address=" + toHex(address) + ", linkNameOffset=" + linkNameOffset
 				+ ", objectHeaderAddress=" + toHex(objectHeaderAddress) + ", cacheType=" + cacheType + ", bTreeAddress="
-				+ toHex(bTreeAddress) + ", nameHeapAddress=" + toHex(nameHeapAddress) + ", linkValueoffset="
-				+ linkValueoffset + "]";
+				+ toHex(bTreeAddress) + ", nameHeapAddress=" + toHex(nameHeapAddress) + ", linkValueOffset="
+				+ linkValueOffset + "]";
 	}
 
 }
