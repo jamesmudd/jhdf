@@ -77,7 +77,7 @@ public class SymbolTableEntry {
 
 	}
 
-	public long getbTreeAddress() {
+	public long getBTreeAddress() {
 		return bTreeAddress;
 	}
 
