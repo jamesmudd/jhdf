@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 import java.util.Arrays;
 
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ public class LocalHeap {
 	private final long dataSegmentSize;
 	private final long offsetToHeadOfFreeList;
 	private final long addressOfDataSegment;
+	private final ByteBuffer dataBuffer;
 
 	public LocalHeap(RandomAccessFile file, long address, int sizeOfOffsets, int sizeOfLengths) {
 		this.address = address;
@@ -69,6 +71,8 @@ public class LocalHeap {
 			header.get(offsetBytes);
 			addressOfDataSegment = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
 			logger.trace("addressOfDataSegment = {}", addressOfDataSegment);
+			
+			dataBuffer = fc.map(MapMode.READ_ONLY, addressOfDataSegment, dataSegmentSize);
 		} catch (IOException e) {
 			throw new HdfException("Error reading heap", e);
 		}
@@ -95,6 +99,10 @@ public class LocalHeap {
 		return "LocalHeap [address=" + Utils.toHex(address) + ", version=" + version + ", dataSegmentSize="
 				+ dataSegmentSize + ", offsetToHeadOfFreeList=" + offsetToHeadOfFreeList + ", addressOfDataSegment="
 				+ Utils.toHex(addressOfDataSegment) + "]";
+	}
+	
+	public ByteBuffer getDataBuffer() {
+		return dataBuffer;
 	}
 
 }

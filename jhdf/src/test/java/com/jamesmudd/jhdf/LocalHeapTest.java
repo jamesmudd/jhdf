@@ -2,12 +2,13 @@ package com.jamesmudd.jhdf;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import org.junit.After;
@@ -32,7 +33,7 @@ public class LocalHeapTest {
 	}
 
 	@Test
-	public void testExtractSuperblockFromFile() throws IOException {
+	public void testLocalHeap() throws IOException {
 		LocalHeap heap = new LocalHeap(raf, 680, 8, 8);
 
 		assertThat(heap.getVersion(), is(equalTo((short) 0)));
@@ -41,5 +42,15 @@ public class LocalHeapTest {
 		assertThat(heap.getAddressOfDataSegment(), is(equalTo(712L)));
 		assertThat(heap.toString(), is(equalTo(
 				"LocalHeap [address=0x2a8, version=0, dataSegmentSize=88, offsetToHeadOfFreeList=24, addressOfDataSegment=0x2c8]")));
+	}
+	
+	@Test
+	public void testAccessingData() throws Exception {
+		LocalHeap heap = new LocalHeap(raf, 680, 8, 8);
+		ByteBuffer bb = heap.getDataBuffer(); 
+		assertThat(bb.capacity(), is(equalTo(88)));
+		// Test reading a name from the heap
+		bb.position(8);
+		assertThat(Utils.readUntilNull(bb), is("datasets_group"));
 	}
 }
