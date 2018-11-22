@@ -39,6 +39,6 @@ public class SymbolTableEntryTest {
 		assertThat(ste.getBTreeAddress(), is(equalTo(136L)));
 		assertThat(ste.getNameHeapAddress(), is(equalTo(680L)));
 		assertThat(ste.toString(), is(equalTo(
-				"SymbolTableEntry [address=0x38, linkNameOffset=0, objectHeaderAddress=0x60, cacheType=1, bTreeAddress=0x88, nameHeapAddress=0x2a8, linkValueoffset=-1]")));
+				"SymbolTableEntry [address=0x38, linkNameOffset=0, objectHeaderAddress=0x60, cacheType=1, bTreeAddress=0x88, nameHeapAddress=0x2a8, linkValueOffset=-1]")));
 	}
 }

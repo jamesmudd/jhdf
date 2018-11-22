@@ -15,29 +15,30 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.*;
 
 public class GroupSymbolTableNodeTest {
-	private FileChannel	fc;
+	private FileChannel fc;
 	private RandomAccessFile raf;
-	
+
 	@Before
 	public void setUp() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
 	}
-	
+
 	@After
 	public void after() throws IOException {
 		raf.close();
 		fc.close();
 	}
+
 	@Test
-	public void testExtractSuperblockFromFile() throws IOException {
+	public void testGroupSymbolTableNode() throws IOException {
 		GroupSymbolTableNode node = new GroupSymbolTableNode(raf, 1504, 8);
 
 		assertThat(node.getVersion(), is(equalTo((short) 1)));
 		assertThat(node.getNumberOfEntries(), is(equalTo((short) 1)));
 		assertThat(node.getSymbolTableEntries().length, is(equalTo(1)));
 		assertThat(node.toString(), is(equalTo(
-				"GroupSymbolTableNode [address=0x5e0, version=1, numberOfEntries=1, symbolTableEntries=[SymbolTableEntry [address=0x5e8, linkNameOffset=8, objectHeaderAddress=0x320, cacheType=1, bTreeAddress=0x348, nameHeapAddress=0x568, linkValueoffset=-1]]]")));
+				"GroupSymbolTableNode [address=0x5e0, version=1, numberOfEntries=1, symbolTableEntries=[SymbolTableEntry [address=0x5e8, linkNameOffset=8, objectHeaderAddress=0x320, cacheType=1, bTreeAddress=0x348, nameHeapAddress=0x568, linkValueOffset=-1]]]")));
 	}
 }
