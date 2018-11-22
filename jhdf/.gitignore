@@ -1,0 +1,11 @@
+/bin/
+
+# Gradle
+/.gradle
+/build
+
+# Eclipse
+/.settings
+.classpath
+.project
+.pydevproject
