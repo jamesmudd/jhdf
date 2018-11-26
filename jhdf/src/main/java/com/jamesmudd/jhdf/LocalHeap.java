@@ -1,108 +1,106 @@
 package com.jamesmudd.jhdf;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Arrays;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.jamesmudd.jhdf.exceptions.HdfException;
 
 public class LocalHeap {
-	private static final Logger logger = LoggerFactory.getLogger(LocalHeap.class);
+  private static final Logger logger = LoggerFactory.getLogger(LocalHeap.class);
 
-	private static final byte[] HEAP_SIGNATURE = "HEAP".getBytes();
+  private static final byte[] HEAP_SIGNATURE = "HEAP".getBytes();
 
-	/** The location of this Heap in the file */
-	private final long address;
-	private final short version;
-	private final long dataSegmentSize;
-	private final long offsetToHeadOfFreeList;
-	private final long addressOfDataSegment;
-	private final ByteBuffer dataBuffer;
+  /** The location of this Heap in the file */
+  private final long address;
+  private final short version;
+  private final long dataSegmentSize;
+  private final long offsetToHeadOfFreeList;
+  private final long addressOfDataSegment;
+  private final ByteBuffer dataBuffer;
 
-	public LocalHeap(RandomAccessFile file, long address, int sizeOfOffsets, int sizeOfLengths) {
-		this.address = address;
-		try {
-			FileChannel fc = file.getChannel();
+  public LocalHeap(RandomAccessFile file, long address, int sizeOfOffsets, int sizeOfLengths) {
+    this.address = address;
+    try {
+      FileChannel fc = file.getChannel();
 
-			// B Tree Node Header
-			int headerSize = 8 + sizeOfLengths + sizeOfLengths + sizeOfOffsets;
-			ByteBuffer header = ByteBuffer.allocate(headerSize);
+      // B Tree Node Header
+      int headerSize = 8 + sizeOfLengths + sizeOfLengths + sizeOfOffsets;
+      ByteBuffer header = ByteBuffer.allocate(headerSize);
 
-			fc.read(header, address);
-			header.rewind();
+      fc.read(header, address);
+      header.rewind();
 
-			byte[] formatSignitureByte = new byte[4];
-			header.get(formatSignitureByte, 0, formatSignitureByte.length);
+      byte[] formatSignitureByte = new byte[4];
+      header.get(formatSignitureByte, 0, formatSignitureByte.length);
 
-			// Verify signature
-			if (!Arrays.equals(HEAP_SIGNATURE, formatSignitureByte)) {
-				throw new HdfException("Heap signature not matched");
-			}
+      // Verify signature
+      if (!Arrays.equals(HEAP_SIGNATURE, formatSignitureByte)) {
+        throw new HdfException("Heap signature not matched");
+      }
 
-			// Version
-			version = header.get();
+      // Version
+      version = header.get();
 
-			// Move past reserved space
-			header.position(8);
+      // Move past reserved space
+      header.position(8);
 
-			final byte[] lengthsBytes = new byte[sizeOfLengths];
+      final byte[] lengthsBytes = new byte[sizeOfLengths];
 
-			// Data Segment Size
-			header.get(lengthsBytes);
-			dataSegmentSize = ByteBuffer.wrap(lengthsBytes).order(LITTLE_ENDIAN).getLong();
-			logger.trace("dataSegmentSize = {}", dataSegmentSize);
+      // Data Segment Size
+      header.get(lengthsBytes);
+      dataSegmentSize = ByteBuffer.wrap(lengthsBytes).order(LITTLE_ENDIAN).getLong();
+      logger.trace("dataSegmentSize = {}", dataSegmentSize);
 
-			// Offset to Head of Free-list
-			header.get(lengthsBytes);
-			offsetToHeadOfFreeList = ByteBuffer.wrap(lengthsBytes).order(LITTLE_ENDIAN).getLong();
-			logger.trace("offsetToHeadOfFreeList = {}", offsetToHeadOfFreeList);
+      // Offset to Head of Free-list
+      header.get(lengthsBytes);
+      offsetToHeadOfFreeList = ByteBuffer.wrap(lengthsBytes).order(LITTLE_ENDIAN).getLong();
+      logger.trace("offsetToHeadOfFreeList = {}", offsetToHeadOfFreeList);
 
-			final byte[] offsetBytes = new byte[sizeOfOffsets];
+      final byte[] offsetBytes = new byte[sizeOfOffsets];
 
-			// Address of Data Segment
-			header.get(offsetBytes);
-			addressOfDataSegment = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
-			logger.trace("addressOfDataSegment = {}", addressOfDataSegment);
-			
-			dataBuffer = fc.map(MapMode.READ_ONLY, addressOfDataSegment, dataSegmentSize);
-		} catch (IOException e) {
-			throw new HdfException("Error reading heap", e);
-		}
-	}
+      // Address of Data Segment
+      header.get(offsetBytes);
+      addressOfDataSegment = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
+      logger.trace("addressOfDataSegment = {}", addressOfDataSegment);
 
-	public short getVersion() {
-		return version;
-	}
+      dataBuffer = fc.map(MapMode.READ_ONLY, addressOfDataSegment, dataSegmentSize);
+    } catch (IOException e) {
+      throw new HdfException("Error reading heap", e);
+    }
+  }
 
-	public long getDataSegmentSize() {
-		return dataSegmentSize;
-	}
+  public short getVersion() {
+    return version;
+  }
 
-	public long getOffsetToHeadOfFreeList() {
-		return offsetToHeadOfFreeList;
-	}
+  public long getDataSegmentSize() {
+    return dataSegmentSize;
+  }
 
-	public long getAddressOfDataSegment() {
-		return addressOfDataSegment;
-	}
+  public long getOffsetToHeadOfFreeList() {
+    return offsetToHeadOfFreeList;
+  }
 
-	@Override
-	public String toString() {
-		return "LocalHeap [address=" + Utils.toHex(address) + ", version=" + version + ", dataSegmentSize="
-				+ dataSegmentSize + ", offsetToHeadOfFreeList=" + offsetToHeadOfFreeList + ", addressOfDataSegment="
-				+ Utils.toHex(addressOfDataSegment) + "]";
-	}
-	
-	public ByteBuffer getDataBuffer() {
-		return dataBuffer;
-	}
+  public long getAddressOfDataSegment() {
+    return addressOfDataSegment;
+  }
+
+  @Override
+  public String toString() {
+    return "LocalHeap [address=" + Utils.toHex(address) + ", version=" + version
+        + ", dataSegmentSize=" + dataSegmentSize + ", offsetToHeadOfFreeList="
+        + offsetToHeadOfFreeList + ", addressOfDataSegment=" + Utils.toHex(addressOfDataSegment)
+        + "]";
+  }
+
+  public ByteBuffer getDataBuffer() {
+    return dataBuffer;
+  }
 
 }

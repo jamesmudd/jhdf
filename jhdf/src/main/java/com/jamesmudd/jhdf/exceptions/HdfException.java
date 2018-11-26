@@ -7,13 +7,13 @@ package com.jamesmudd.jhdf.exceptions;
  */
 public class HdfException extends RuntimeException {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public HdfException(String message) {
-		super(message);
-	}
-	
-	public HdfException(String message, Throwable throwable) {
-		super(message, throwable);
-	}
+  public HdfException(String message) {
+    super(message);
+  }
+
+  public HdfException(String message, Throwable throwable) {
+    super(message, throwable);
+  }
 }
