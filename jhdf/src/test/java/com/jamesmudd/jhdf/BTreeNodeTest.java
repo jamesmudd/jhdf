@@ -30,7 +30,7 @@ public class BTreeNodeTest {
   }
 
   @Test
-  public void testExtractSuperblockFromFile() throws IOException {
+  public void testBTreeNode() throws IOException {
     BTreeNode bTree = new BTreeNode(raf, 136, 8, 8, 4, 16);
 
     assertThat(bTree.getNodeType(), is(equalTo((short) 0)));

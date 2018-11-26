@@ -30,7 +30,7 @@ public class SymbolTableEntryTest {
   }
 
   @Test
-  public void testExtractSuperblockFromFile() throws IOException {
+  public void testSymbolTableEntry() throws IOException {
     SymbolTableEntry ste = new SymbolTableEntry(raf, 56, 8);
     assertThat(ste.getLinkNameOffset(), is(equalTo(0L)));
     assertThat(ste.getObjectHeaderAddress(), is(equalTo(96L)));
