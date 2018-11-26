@@ -3,7 +3,6 @@ package com.jamesmudd.jhdf;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;

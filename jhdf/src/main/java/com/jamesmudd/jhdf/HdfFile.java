@@ -23,7 +23,7 @@ public class HdfFile implements AutoCloseable {
 
 	private final RandomAccessFile file;
 	private final FileChannel fc;
-	
+
 	private final long userHeaderSize;
 
 	private final Superblock superblock;
@@ -53,8 +53,9 @@ public class HdfFile implements AutoCloseable {
 			// We have a valid HDF5 file so read the full superblock
 			superblock = new Superblock(fc, offset);
 			userHeaderSize = offset;
-			
-			rootSTE = new SymbolTableEntry(file, superblock.getRootGroupSymbolTableAddress(), superblock.getSizeOfOffsets());
+
+			rootSTE = new SymbolTableEntry(file, superblock.getRootGroupSymbolTableAddress(),
+					superblock.getSizeOfOffsets());
 
 		} catch (IOException e) {
 			throw new HdfException("Failed to open file. Is it a HDF5 file?", e);
@@ -81,7 +82,9 @@ public class HdfFile implements AutoCloseable {
 	 * @throws IOException
 	 * @see java.io.RandomAccessFile#close()
 	 */
+	@Override
 	public void close() throws IOException {
+		fc.close();
 		file.close();
 	}
 
