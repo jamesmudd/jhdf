@@ -204,15 +204,11 @@ public class Superblock {
 		try {
 			fc.read(signatureBuffer, offset);
 		} catch (IOException e) {
-			throw new HdfException("Failed to read file", e);
+			throw new HdfException("Failed to read from address: " + Utils.toHex(offset), e);
 		}
-		signatureBuffer.rewind();
-
-		byte[] formatSignitureByte = new byte[8];
-		signatureBuffer.get(formatSignitureByte);
 
 		// Verify signature
-		return Arrays.equals(HDF5_FILE_SIGNATURE, formatSignitureByte);
+		return Arrays.equals(HDF5_FILE_SIGNATURE, signatureBuffer.array());
 	}
 
 }
