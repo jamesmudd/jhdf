@@ -3,6 +3,7 @@ package com.jamesmudd.jhdf.examples;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
@@ -16,24 +17,22 @@ import com.jamesmudd.jhdf.Utils;
 public class TreeRead {
 
 	public static void main(String[] args) throws Exception {
-		String pathname = "src/test/resources/com/jamesmudd/jhdf/test_file.hdf5";
+		String pathname = "src/test/resources/com/jamesmudd/jhdf/test_flat_file.hdf5";
 
 		File file = new File(pathname);
 		System.out.println(file.getName());
 
 		RandomAccessFile raf = new RandomAccessFile(file, "r");
-		Superblock sb = new Superblock(raf, 0);
+		FileChannel fc = raf.getChannel();
+		Superblock sb = new Superblock(fc, 0);
 		int sizeOfOffsets = sb.getSizeOfOffsets();
 		int sizeOfLengths = sb.getSizeOfLengths();
 		int leafK = sb.getGroupLeafNodeK();
 		int internalK = sb.getGroupInternalNodeK();
 
-		long time = System.currentTimeMillis();
-
 		SymbolTableEntry rootSTE = new SymbolTableEntry(raf, sb.getRootGroupSymbolTableAddress(), sizeOfOffsets);
 
 		printGroup(raf, sizeOfOffsets, sizeOfLengths, leafK, internalK, rootSTE, 0);
-
 	}
 
 	private static void printGroup(RandomAccessFile raf, int sizeOfOffsets, int sizeOfLengths, int leafK, int internalK,
