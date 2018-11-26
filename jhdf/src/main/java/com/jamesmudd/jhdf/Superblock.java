@@ -17,6 +17,7 @@ public class Superblock {
 	private static final Logger logger = LoggerFactory.getLogger(Superblock.class);
 
 	private static final byte[] HDF5_FILE_SIGNATURE = new byte[] { -119, 72, 68, 70, 13, 10, 26, 10 };
+	private static final int HDF5_FILE_SIGNATURE_LENGTH = HDF5_FILE_SIGNATURE.length;
 
 	private final int versionOfSuperblock;
 	private final int versionNumberOfTheFileFreeSpaceInformation;
@@ -32,17 +33,16 @@ public class Superblock {
 	private final long driverInformationBlockAddress;
 	private final long rootGroupSymbolTableAddress;
 
-	public Superblock(RandomAccessFile file, long offset) {
+	public Superblock(FileChannel fc, long offset) {
 		try {
 
-			final boolean verifiedSignature = verifySignature(file, offset);
+			final boolean verifiedSignature = verifySignature(fc, offset);
 			if (!verifiedSignature) {
 				throw new HdfException("Superblock didn't contain valid signature");
 			}
 
 			// Signature is ok read rest of Superblock
 			long fileLocation = offset + 8; // signature is 8 bytes
-			FileChannel fc = file.getChannel();
 
 			ByteBuffer header = ByteBuffer.allocate(12);
 			header.order(LITTLE_ENDIAN);
@@ -191,18 +191,15 @@ public class Superblock {
 	 * Checks if the file provided contains the HDF5 file signature at the given
 	 * offset.
 	 * 
-	 * @param file   The file to test
+	 * @param fc     The file to test
 	 * @param offset The offset into the file where the superblock starts
 	 * @return <code>true</code> if signature is matched <code>false</code>
 	 *         otherwise
 	 */
-	static boolean verifySignature(RandomAccessFile file, long offset) {
-
-		FileChannel fc = file.getChannel();
+	static boolean verifySignature(FileChannel fc, long offset) {
 
 		// Format Signature
-		int signatureSize = 8;
-		ByteBuffer signatureBuffer = ByteBuffer.allocate(signatureSize);
+		ByteBuffer signatureBuffer = ByteBuffer.allocate(HDF5_FILE_SIGNATURE_LENGTH);
 
 		try {
 			fc.read(signatureBuffer, offset);

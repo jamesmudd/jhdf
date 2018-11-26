@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 
 import org.slf4j.Logger;
@@ -21,20 +22,25 @@ public class HdfFile implements AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(HdfFile.class);
 
 	private final RandomAccessFile file;
-	private final Superblock superblock;
+	private final FileChannel fc;
+	
 	private final long userHeaderSize;
+
+	private final Superblock superblock;
+	private final SymbolTableEntry rootSTE;
 
 	public HdfFile(File hdfFile) {
 		logger.info("Opening HDF5 file '{}'", hdfFile.getAbsolutePath());
 		try {
 			file = new RandomAccessFile(hdfFile, "r");
+			fc = file.getChannel();
 
 			// Find out if the file is a HDF5 file
 			boolean validSignature = false;
 			long offset = 0;
 			for (offset = 0; offset < file.length(); offset = nextOffset(offset)) {
 				logger.trace("Checking for signature at offset = {}", offset);
-				validSignature = Superblock.verifySignature(file, offset);
+				validSignature = Superblock.verifySignature(fc, offset);
 				if (validSignature) {
 					logger.debug("Found valid signature at offset = {}", offset);
 					break;
@@ -45,8 +51,10 @@ public class HdfFile implements AutoCloseable {
 			}
 
 			// We have a valid HDF5 file so read the full superblock
-			superblock = new Superblock(this.file, offset);
+			superblock = new Superblock(fc, offset);
 			userHeaderSize = offset;
+			
+			rootSTE = new SymbolTableEntry(file, superblock.getRootGroupSymbolTableAddress(), superblock.getSizeOfOffsets());
 
 		} catch (IOException e) {
 			throw new HdfException("Failed to open file. Is it a HDF5 file?", e);

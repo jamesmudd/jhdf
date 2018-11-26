@@ -36,7 +36,7 @@ public class SuperblockTest {
 
 	@Test
 	public void testExtractSuperblockFromFile() throws IOException {
-		Superblock sb = new Superblock(raf, 0);
+		Superblock sb = new Superblock(fc, 0);
 		assertThat(sb.getVersionOfSuperblock(), is(equalTo(0)));
 		assertThat(sb.getVersionNumberOfTheFileFreeSpaceInformation(), is(equalTo(0)));
 		assertThat(sb.getVersionOfRootGroupSymbolTableEntry(), is(equalTo(0)));
@@ -53,16 +53,16 @@ public class SuperblockTest {
 
 	@Test
 	public void testVerifySuperblock() throws Exception {
-		assertThat(Superblock.verifySignature(raf, 0), is(true));
+		assertThat(Superblock.verifySignature(fc, 0), is(true));
 	}
 
 	@Test
 	public void testVerifySuperblockReturnsFalseWhenNotCorrect() throws Exception {
-		assertThat(Superblock.verifySignature(raf, 3), is(false));
+		assertThat(Superblock.verifySignature(fc, 3), is(false));
 	}
 
 	@Test(expected = HdfException.class)
 	public void testSuperblockCOnstructorThrowsWhenGivenInvalidOffset() throws Exception {
-		new Superblock(raf, 5);
+		new Superblock(fc, 5);
 	}
 }
