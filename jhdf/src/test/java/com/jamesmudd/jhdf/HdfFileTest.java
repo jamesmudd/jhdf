@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.jamesmudd.jhdf.exceptions.HdfException;
 
 
-public class HDFFileTest {
+public class HdfFileTest {
 
   private String testFileUrl;
   private String nonHdfFile;
@@ -25,7 +25,7 @@ public class HDFFileTest {
   @Test
   public void testOpeningValidFile() throws IOException {
     File file = new File(testFileUrl);
-    try (HDFFile hdfFile = new HDFFile(new File(testFileUrl))) {
+    try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
       assertThat(hdfFile.getUserHeaderSize(), is(equalTo(0L)));
       assertThat(hdfFile.length(), is(equalTo(file.length())));
 
@@ -36,7 +36,7 @@ public class HDFFileTest {
 
   @Test(expected = HdfException.class)
   public void testOpeningInvalidFile() throws IOException {
-    try (HDFFile hdfFile = new HDFFile(new File(nonHdfFile))) {
+    try (HdfFile hdfFile = new HdfFile(new File(nonHdfFile))) {
     }
   }
 

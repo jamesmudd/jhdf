@@ -14,14 +14,14 @@ import com.jamesmudd.jhdf.exceptions.HdfException;
  * 
  * @author James Mudd
  */
-public class HDFFile implements AutoCloseable {
-  private static final Logger logger = LoggerFactory.getLogger(HDFFile.class);
+public class HdfFile implements AutoCloseable {
+  private static final Logger logger = LoggerFactory.getLogger(HdfFile.class);
 
   private final RandomAccessFile file;
   private final Superblock superblock;
   private final long userHeaderSize;
 
-  public HDFFile(File hdfFile) {
+  public HdfFile(File hdfFile) {
     logger.info("Opening HDF5 file '{}'", hdfFile.getAbsolutePath());
     try {
       file = new RandomAccessFile(hdfFile, "r");
