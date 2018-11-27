@@ -17,12 +17,14 @@ import org.junit.Test;
 public class BTreeNodeTest {
 	private FileChannel fc;
 	private RandomAccessFile raf;
+	private Superblock sb;
 
 	@Before
 	public void setUp() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
+		sb = new Superblock(fc, 0);
 	}
 
 	@After
@@ -33,7 +35,7 @@ public class BTreeNodeTest {
 
 	@Test
 	public void testBTreeNode() throws IOException {
-		BTreeNode bTree = new BTreeNode(raf, 136, 8, 8, 4, 16);
+		BTreeNode bTree = new BTreeNode(raf, 136, sb);
 
 		assertThat(bTree.getNodeType(), is(equalTo((short) 0)));
 		assertThat(bTree.getNodeLevel(), is(equalTo((short) 0)));

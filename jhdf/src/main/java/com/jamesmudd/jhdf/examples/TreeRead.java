@@ -17,7 +17,7 @@ import com.jamesmudd.jhdf.Utils;
 public class TreeRead {
 
 	public static void main(String[] args) throws Exception {
-		String pathname = "src/test/resources/com/jamesmudd/jhdf/test_flat_file.hdf5";
+		String pathname = "src/test/resources/com/jamesmudd/jhdf/test_file.hdf5";
 
 		File file = new File(pathname);
 		System.out.println(file.getName());
@@ -25,31 +25,25 @@ public class TreeRead {
 		RandomAccessFile raf = new RandomAccessFile(file, "r");
 		FileChannel fc = raf.getChannel();
 		Superblock sb = new Superblock(fc, 0);
-		int sizeOfOffsets = sb.getSizeOfOffsets();
-		int sizeOfLengths = sb.getSizeOfLengths();
-		int leafK = sb.getGroupLeafNodeK();
-		int internalK = sb.getGroupInternalNodeK();
 
-		SymbolTableEntry rootSTE = new SymbolTableEntry(raf, sb.getRootGroupSymbolTableAddress(), sizeOfOffsets);
+		SymbolTableEntry rootSTE = new SymbolTableEntry(raf, sb.getRootGroupSymbolTableAddress(), sb);
 
-		printGroup(raf, sizeOfOffsets, sizeOfLengths, leafK, internalK, rootSTE, 0);
+		printGroup(raf, sb, rootSTE, 0);
 	}
 
-	private static void printGroup(RandomAccessFile raf, int sizeOfOffsets, int sizeOfLengths, int leafK, int internalK,
-			SymbolTableEntry ste, int level) {
+	private static void printGroup(RandomAccessFile raf, Superblock sb, SymbolTableEntry ste, int level) {
 
 		level++;
 
-		BTreeNode rootbTreeNode = new BTreeNode(raf, ste.getBTreeAddress(), sizeOfOffsets, sizeOfLengths, leafK,
-				internalK);
-		LocalHeap rootNameHeap = new LocalHeap(raf, ste.getNameHeapAddress(), sizeOfOffsets, sizeOfLengths);
+		BTreeNode rootbTreeNode = new BTreeNode(raf, ste.getBTreeAddress(), sb);
+		LocalHeap rootNameHeap = new LocalHeap(raf, ste.getNameHeapAddress(), sb);
 		if (rootbTreeNode.getNodeType() == 0) { // groups
 			for (long child : rootbTreeNode.getChildAddresses()) {
-				GroupSymbolTableNode groupSTE = new GroupSymbolTableNode(raf, child, sizeOfOffsets);
+				GroupSymbolTableNode groupSTE = new GroupSymbolTableNode(raf, child, sb);
 				for (SymbolTableEntry e : groupSTE.getSymbolTableEntries()) {
 					printName(rootNameHeap, e.getLinkNameOffset(), level);
 					if (e.getCacheType() == 1) { // Its a group
-						printGroup(raf, sizeOfOffsets, sizeOfLengths, leafK, internalK, e, level);
+						printGroup(raf, sb, e, level);
 					}
 				}
 			}

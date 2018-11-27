@@ -18,12 +18,14 @@ import org.junit.Test;
 public class LocalHeapTest {
 	private FileChannel fc;
 	private RandomAccessFile raf;
+	private Superblock sb;
 
 	@Before
 	public void setUp() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
+		sb = new Superblock(fc, 0);
 	}
 
 	@After
@@ -34,7 +36,7 @@ public class LocalHeapTest {
 
 	@Test
 	public void testLocalHeap() throws IOException {
-		LocalHeap heap = new LocalHeap(raf, 680, 8, 8);
+		LocalHeap heap = new LocalHeap(raf, 680, sb);
 
 		assertThat(heap.getVersion(), is(equalTo((short) 0)));
 		assertThat(heap.getDataSegmentSize(), is(equalTo(88L)));
@@ -46,7 +48,7 @@ public class LocalHeapTest {
 
 	@Test
 	public void testAccessingData() throws Exception {
-		LocalHeap heap = new LocalHeap(raf, 680, 8, 8);
+		LocalHeap heap = new LocalHeap(raf, 680, sb);
 		ByteBuffer bb = heap.getDataBuffer();
 		assertThat(bb.capacity(), is(equalTo(88)));
 		// Test reading a name from the heap

@@ -27,13 +27,13 @@ public class LocalHeap {
 	private final long addressOfDataSegment;
 	private final ByteBuffer dataBuffer;
 
-	public LocalHeap(RandomAccessFile file, long address, int sizeOfOffsets, int sizeOfLengths) {
+	public LocalHeap(RandomAccessFile file, long address, Superblock sb) {
 		this.address = address;
 		try {
 			FileChannel fc = file.getChannel();
 
 			// B Tree Node Header
-			int headerSize = 8 + sizeOfLengths + sizeOfLengths + sizeOfOffsets;
+			int headerSize = 8 + sb.getSizeOfLengths() + sb.getSizeOfLengths() + sb.getSizeOfOffsets();
 			ByteBuffer header = ByteBuffer.allocate(headerSize);
 
 			fc.read(header, address);
@@ -53,7 +53,7 @@ public class LocalHeap {
 			// Move past reserved space
 			header.position(8);
 
-			final byte[] lengthsBytes = new byte[sizeOfLengths];
+			final byte[] lengthsBytes = new byte[sb.getSizeOfLengths()];
 
 			// Data Segment Size
 			header.get(lengthsBytes);
@@ -65,7 +65,7 @@ public class LocalHeap {
 			offsetToHeadOfFreeList = ByteBuffer.wrap(lengthsBytes).order(LITTLE_ENDIAN).getLong();
 			logger.trace("offsetToHeadOfFreeList = {}", offsetToHeadOfFreeList);
 
-			final byte[] offsetBytes = new byte[sizeOfOffsets];
+			final byte[] offsetBytes = new byte[sb.getSizeOfOffsets()];
 
 			// Address of Data Segment
 			header.get(offsetBytes);

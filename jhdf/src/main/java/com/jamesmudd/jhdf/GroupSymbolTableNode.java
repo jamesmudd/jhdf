@@ -23,7 +23,7 @@ public class GroupSymbolTableNode {
 	private final short numberOfEntries;
 	private final SymbolTableEntry[] symbolTableEntries;
 
-	public GroupSymbolTableNode(RandomAccessFile file, long address, int sizeOfOffsets) {
+	public GroupSymbolTableNode(RandomAccessFile file, long address, Superblock sb) {
 		this.address = address;
 		try {
 			FileChannel fc = file.getChannel();
@@ -56,12 +56,12 @@ public class GroupSymbolTableNode {
 			numberOfEntries = ByteBuffer.wrap(twoBytes).order(LITTLE_ENDIAN).getShort();
 			logger.trace("numberOfSymbols = {}", numberOfEntries);
 
-			final int symbolTableEntryBytes = sizeOfOffsets + sizeOfOffsets + 8 + 16;
+			final int symbolTableEntryBytes = sb.getSizeOfOffsets() * 2 + 8 + 16;
 
 			symbolTableEntries = new SymbolTableEntry[numberOfEntries];
 			for (int i = 0; i < numberOfEntries; i++) {
 				long offset = address + headerSize + i * symbolTableEntryBytes;
-				symbolTableEntries[i] = new SymbolTableEntry(file, offset, sizeOfOffsets);
+				symbolTableEntries[i] = new SymbolTableEntry(file, offset, sb);
 			}
 		} catch (Exception e) {
 			// TODO improve message

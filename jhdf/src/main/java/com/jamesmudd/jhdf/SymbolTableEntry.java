@@ -22,11 +22,11 @@ public class SymbolTableEntry {
 	private long nameHeapAddress = -1;
 	private long linkValueOffset = -1;
 
-	public SymbolTableEntry(RandomAccessFile file, long address, int sizeOfOffsets) throws IOException {
+	public SymbolTableEntry(RandomAccessFile file, long address, Superblock sb) throws IOException {
 		this.address = address;
 		file.seek(address);
 
-		final byte[] offsetBytes = new byte[sizeOfOffsets];
+		final byte[] offsetBytes = new byte[sb.getSizeOfOffsets()];
 
 		// Link Name Offset
 		file.read(offsetBytes);

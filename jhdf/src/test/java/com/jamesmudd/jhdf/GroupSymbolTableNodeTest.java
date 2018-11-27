@@ -17,12 +17,14 @@ import org.junit.Test;
 public class GroupSymbolTableNodeTest {
 	private FileChannel fc;
 	private RandomAccessFile raf;
+	private Superblock sb;
 
 	@Before
 	public void setUp() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
+		sb = new Superblock(fc, 0);
 	}
 
 	@After
@@ -33,7 +35,7 @@ public class GroupSymbolTableNodeTest {
 
 	@Test
 	public void testGroupSymbolTableNode() throws IOException {
-		GroupSymbolTableNode node = new GroupSymbolTableNode(raf, 1504, 8);
+		GroupSymbolTableNode node = new GroupSymbolTableNode(raf, 1504, sb);
 
 		assertThat(node.getVersion(), is(equalTo((short) 1)));
 		assertThat(node.getNumberOfEntries(), is(equalTo((short) 1)));

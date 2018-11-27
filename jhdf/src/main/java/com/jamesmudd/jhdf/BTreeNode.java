@@ -31,14 +31,13 @@ public class BTreeNode {
 	private final long[] keys;
 	private final long[] childAddresses;
 
-	public BTreeNode(RandomAccessFile file, long address, int sizeOfOffsets, int sizeOfLengths, int leafK,
-			int internalK) {
+	public BTreeNode(RandomAccessFile file, long address, Superblock sb) {
 		this.address = address;
 		try {
 			FileChannel fc = file.getChannel();
 
 			// B Tree Node Header
-			int headerSize = 8 + 2 * sizeOfOffsets;
+			int headerSize = 8 + 2 * sb.getSizeOfOffsets();
 			ByteBuffer header = ByteBuffer.allocate(headerSize);
 
 			fc.read(header, address);
@@ -62,7 +61,7 @@ public class BTreeNode {
 
 			logger.trace("Entries = {}", getEntriesUsed());
 
-			final byte[] offsetBytes = new byte[sizeOfOffsets];
+			final byte[] offsetBytes = new byte[sb.getSizeOfOffsets()];
 
 			// Link Name Offset
 			header.get(offsetBytes);
@@ -75,8 +74,8 @@ public class BTreeNode {
 
 			switch (nodeType) {
 			case 0: // Group nodes
-				int keyBytes = (2 * entriesUsed + 1) * sizeOfLengths;
-				int childPointerBytes = (2 * entriesUsed) * sizeOfOffsets;
+				int keyBytes = (2 * entriesUsed + 1) * sb.getSizeOfLengths();
+				int childPointerBytes = (2 * entriesUsed) * sb.getSizeOfOffsets();
 				int keysAndPointersBytes = keyBytes + childPointerBytes;
 
 				ByteBuffer keysAndPointersBuffer = ByteBuffer.allocate(keysAndPointersBytes);
@@ -86,8 +85,8 @@ public class BTreeNode {
 				keys = new long[entriesUsed + 1];
 				childAddresses = new long[entriesUsed];
 
-				final byte[] key = new byte[sizeOfLengths];
-				final byte[] child = new byte[sizeOfOffsets];
+				final byte[] key = new byte[sb.getSizeOfLengths()];
+				final byte[] child = new byte[sb.getSizeOfOffsets()];
 
 				for (int i = 0; i < entriesUsed; i++) {
 					keysAndPointersBuffer.get(key);
@@ -141,11 +140,6 @@ public class BTreeNode {
 		return childAddresses;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		return "BTreeNode [address=" + toHex(address) + ", nodeType=" + nodeTypeAsString(nodeType) + ", nodeLevel="

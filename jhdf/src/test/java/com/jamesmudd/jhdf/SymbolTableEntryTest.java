@@ -17,12 +17,14 @@ import org.junit.Test;
 public class SymbolTableEntryTest {
 	private FileChannel fc;
 	private RandomAccessFile raf;
+	private Superblock sb;
 
 	@Before
 	public void setUp() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
+		sb = new Superblock(fc, 0);
 	}
 
 	@After
@@ -33,7 +35,7 @@ public class SymbolTableEntryTest {
 
 	@Test
 	public void testSymbolTableEntry() throws IOException {
-		SymbolTableEntry ste = new SymbolTableEntry(raf, 56, 8);
+		SymbolTableEntry ste = new SymbolTableEntry(raf, 56, sb);
 		assertThat(ste.getLinkNameOffset(), is(equalTo(0L)));
 		assertThat(ste.getObjectHeaderAddress(), is(equalTo(96L)));
 		assertThat(ste.getCacheType(), is(equalTo(1)));
