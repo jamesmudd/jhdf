@@ -17,21 +17,20 @@ import com.jamesmudd.jhdf.Utils;
 public class TreeRead {
 
 	public static void main(String[] args) throws Exception {
+
 		String pathname = "src/test/resources/com/jamesmudd/jhdf/test_file.hdf5";
 
 		File file = new File(pathname);
 		System.out.println(file.getName());
 
-		RandomAccessFile raf = new RandomAccessFile(file, "r");
-		FileChannel fc = raf.getChannel();
-		Superblock sb = new Superblock(fc, 0);
+		try (RandomAccessFile raf = new RandomAccessFile(file, "r"); FileChannel fc = raf.getChannel()) {
 
-		SymbolTableEntry rootSTE = new SymbolTableEntry(fc, sb.getRootGroupSymbolTableAddress(), sb);
+			Superblock sb = new Superblock(fc, 0);
 
-		printGroup(fc, sb, rootSTE, 0);
+			SymbolTableEntry rootSTE = new SymbolTableEntry(fc, sb.getRootGroupSymbolTableAddress(), sb);
 
-		fc.close();
-		raf.close();
+			printGroup(fc, sb, rootSTE, 0);
+		}
 	}
 
 	private static void printGroup(FileChannel fc, Superblock sb, SymbolTableEntry ste, int level) {
