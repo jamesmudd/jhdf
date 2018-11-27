@@ -22,19 +22,27 @@ jobs:
     inputs:
       gradleWrapperFile: 'jhdf/gradlew'
       workingDirectory: jhdf
-      tasks: 'build' 
+      tasks: 'clean build jacocoTestReport' 
       publishJUnitResults: true 
       testResultsFiles: 'jhdf/build/test-results/test/TEST-*.xml'
       testRunTitle: $(osName) $(Agent.JobName)
       #codeCoverageToolOption: 'jaCoCo'
       #codeCoverageClassFilesDirectories: 'build/classes/main/'
       jdkVersionOption: $(java.version)
-  - script: ./gradlew sonarqube \
-  -Dsonar.projectKey=jamesmudd_jhdf \
-  -Dsonar.organization=jamesmudd-github \
-  -Dsonar.host.url=https://sonarcloud.io \
-  -Dsonar.login=${sonar.login}
+  - script: 'cd jhdf;
+    ./gradlew sonarqube
+    -Dsonar.projectKey=jamesmudd_jhdf
+    -Dsonar.organization=jamesmudd-github
+    -Dsonar.host.url=https://sonarcloud.io
+    -Dsonar.login=$(sonar.login)'
     displayName: SonarQube
+  - task: PublishCodeCoverageResults@1
+    inputs:
+      codeCoverageTool: 'JaCoCo'
+      summaryFileLocation: jhdf/build/reports/jacoco
+      #reportDirectory: # Optional
+      #additionalCodeCoverageFiles: # Optional
+      #failIfCoverageEmpty: false # Optional
 
 
 - job: Windows
