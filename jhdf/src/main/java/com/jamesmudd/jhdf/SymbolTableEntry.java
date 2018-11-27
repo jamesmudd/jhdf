@@ -10,6 +10,8 @@ import java.nio.channels.FileChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jamesmudd.jhdf.exceptions.HdfException;
+
 public class SymbolTableEntry {
 	private static final Logger logger = LoggerFactory.getLogger(SymbolTableEntry.class);
 
@@ -22,13 +24,17 @@ public class SymbolTableEntry {
 	private long nameHeapAddress = -1;
 	private long linkValueOffset = -1;
 
-	public SymbolTableEntry(FileChannel fc, long address, Superblock sb) throws IOException {
+	public SymbolTableEntry(FileChannel fc, long address, Superblock sb) {
 		this.address = address;
 
 		int size = sb.getSizeOfOffsets() * 2 + 4 + 4 + 16;
 		ByteBuffer bb = ByteBuffer.allocate(size);
 
-		fc.read(bb, address);
+		try {
+			fc.read(bb, address);
+		} catch (IOException e) {
+			throw new HdfException("Failed to read file at address: " + Utils.toHex(address), e);
+		}
 		bb.rewind();
 		bb.order(LITTLE_ENDIAN);
 
