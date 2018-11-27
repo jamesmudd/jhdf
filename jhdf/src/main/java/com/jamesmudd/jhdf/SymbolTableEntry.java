@@ -89,6 +89,10 @@ public class SymbolTableEntry {
 
 	}
 
+	public long getAddress() {
+		return address;
+	}
+
 	public long getBTreeAddress() {
 		return bTreeAddress;
 	}

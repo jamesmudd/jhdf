@@ -27,7 +27,8 @@ public class HdfFile implements AutoCloseable {
 	private final long userHeaderSize;
 
 	private final Superblock superblock;
-	private final SymbolTableEntry rootSTE;
+
+	private final Group rootGroup;
 
 	public HdfFile(File hdfFile) {
 		logger.info("Opening HDF5 file '{}'", hdfFile.getAbsolutePath());
@@ -53,8 +54,7 @@ public class HdfFile implements AutoCloseable {
 			// We have a valid HDF5 file so read the full superblock
 			superblock = new Superblock(fc, offset);
 			userHeaderSize = offset;
-
-			rootSTE = new SymbolTableEntry(fc, superblock.getRootGroupSymbolTableAddress(), superblock);
+			rootGroup = Group.createGroup(fc, superblock, superblock.getRootGroupSymbolTableAddress(), "/");
 
 		} catch (IOException e) {
 			throw new HdfException("Failed to open file. Is it a HDF5 file?", e);
@@ -94,6 +94,10 @@ public class HdfFile implements AutoCloseable {
 	 */
 	public long length() throws IOException {
 		return file.length();
+	}
+
+	public Group getRootGroup() {
+		return rootGroup;
 	}
 
 }
