@@ -26,8 +26,8 @@ jobs:
       publishJUnitResults: true 
       testResultsFiles: 'jhdf/build/test-results/test/TEST-*.xml'
       testRunTitle: $(osName) $(Agent.JobName)
-      #codeCoverageToolOption: 'jaCoCo'
-      #codeCoverageClassFilesDirectories: 'build/classes/main/'
+      codeCoverageToolOption: 'jaCoCo'
+      codeCoverageClassFilesDirectories: 'build/classes/main/'
       jdkVersionOption: $(java.version)
 
 - job: Windows
@@ -55,6 +55,6 @@ jobs:
       publishJUnitResults: true 
       testResultsFiles: 'jhdf/build/test-results/test/TEST-*.xml'
       testRunTitle: $(osName) $(Agent.JobName)
-      #codeCoverageToolOption: 'jaCoCo'
-      #codeCoverageClassFilesDirectories: 'build/classes/main/'
+      codeCoverageToolOption: 'jaCoCo'
+      codeCoverageClassFilesDirectories: 'build/classes/main/'
       jdkVersionOption: $(java.version)

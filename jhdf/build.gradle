@@ -6,8 +6,11 @@
  * user guide available at https://docs.gradle.org/3.5/userguide/java_library_plugin.html
  */
 
-// Apply the java-library plugin to add support for Java Library
-apply plugin: 'java-library'
+plugins {
+	id 'java'
+    id 'jacoco'
+    id 'org.sonarqube' version '2.6'
+}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
