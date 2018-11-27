@@ -38,7 +38,14 @@ public class HdfFileTest {
 
 	@Test(expected = HdfException.class)
 	public void testOpeningInvalidFile() throws IOException {
-		try (HdfFile hdfFile = new HdfFile(new File(nonHdfFile))) {
+		HdfFile hdfFile = new HdfFile(new File(nonHdfFile));
+		hdfFile.close();
+	}
+
+	@Test
+	public void testRootGroup() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.getRootGroup().getName(), is(equalTo("/")));
 		}
 	}
 
