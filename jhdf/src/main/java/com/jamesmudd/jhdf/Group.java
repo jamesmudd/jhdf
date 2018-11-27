@@ -64,4 +64,9 @@ public class Group implements Node {
 		return name;
 	}
 
+	@Override
+	public String toString() {
+		return "Group [name=" + name + ", children=" + children + "]";
+	}
+
 }
