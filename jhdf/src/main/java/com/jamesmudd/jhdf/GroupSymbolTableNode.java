@@ -2,7 +2,6 @@ package com.jamesmudd.jhdf;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
@@ -23,12 +22,9 @@ public class GroupSymbolTableNode {
 	private final short numberOfEntries;
 	private final SymbolTableEntry[] symbolTableEntries;
 
-	public GroupSymbolTableNode(RandomAccessFile file, long address, Superblock sb) {
+	public GroupSymbolTableNode(FileChannel fc, long address, Superblock sb) {
 		this.address = address;
 		try {
-			FileChannel fc = file.getChannel();
-
-			// B Tree Node Header
 			int headerSize = 8;
 			ByteBuffer header = ByteBuffer.allocate(headerSize);
 
@@ -61,7 +57,7 @@ public class GroupSymbolTableNode {
 			symbolTableEntries = new SymbolTableEntry[numberOfEntries];
 			for (int i = 0; i < numberOfEntries; i++) {
 				long offset = address + headerSize + i * symbolTableEntryBytes;
-				symbolTableEntries[i] = new SymbolTableEntry(file, offset, sb);
+				symbolTableEntries[i] = new SymbolTableEntry(fc, offset, sb);
 			}
 		} catch (Exception e) {
 			// TODO improve message

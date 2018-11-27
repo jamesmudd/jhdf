@@ -35,7 +35,7 @@ public class BTreeNodeTest {
 
 	@Test
 	public void testBTreeNode() throws IOException {
-		BTreeNode bTree = new BTreeNode(raf, 136, sb);
+		BTreeNode bTree = new BTreeNode(fc, 136, sb);
 
 		assertThat(bTree.getNodeType(), is(equalTo((short) 0)));
 		assertThat(bTree.getNodeLevel(), is(equalTo((short) 0)));

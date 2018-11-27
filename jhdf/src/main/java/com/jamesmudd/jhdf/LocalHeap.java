@@ -3,7 +3,6 @@ package com.jamesmudd.jhdf;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
@@ -27,12 +26,10 @@ public class LocalHeap {
 	private final long addressOfDataSegment;
 	private final ByteBuffer dataBuffer;
 
-	public LocalHeap(RandomAccessFile file, long address, Superblock sb) {
+	public LocalHeap(FileChannel fc, long address, Superblock sb) {
 		this.address = address;
 		try {
-			FileChannel fc = file.getChannel();
-
-			// B Tree Node Header
+			// Header
 			int headerSize = 8 + sb.getSizeOfLengths() + sb.getSizeOfLengths() + sb.getSizeOfOffsets();
 			ByteBuffer header = ByteBuffer.allocate(headerSize);
 

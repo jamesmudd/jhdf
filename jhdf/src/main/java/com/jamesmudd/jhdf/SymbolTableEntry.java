@@ -4,8 +4,8 @@ import static com.jamesmudd.jhdf.Utils.toHex;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,31 +22,37 @@ public class SymbolTableEntry {
 	private long nameHeapAddress = -1;
 	private long linkValueOffset = -1;
 
-	public SymbolTableEntry(RandomAccessFile file, long address, Superblock sb) throws IOException {
+	public SymbolTableEntry(FileChannel fc, long address, Superblock sb) throws IOException {
 		this.address = address;
-		file.seek(address);
+
+		int size = sb.getSizeOfOffsets() * 2 + 4 + 4 + 16;
+		ByteBuffer bb = ByteBuffer.allocate(size);
+
+		fc.read(bb, address);
+		bb.rewind();
+		bb.order(LITTLE_ENDIAN);
 
 		final byte[] offsetBytes = new byte[sb.getSizeOfOffsets()];
 
 		// Link Name Offset
-		file.read(offsetBytes);
+		bb.get(offsetBytes);
 		linkNameOffset = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
 		logger.trace("linkNameOffset = {}", linkNameOffset);
 
 		// Object Header Address
-		file.read(offsetBytes);
+		bb.get(offsetBytes);
 		objectHeaderAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
 		logger.trace("objectHeaderAddress = {}", objectHeaderAddress);
 
 		final byte[] fourBytes = new byte[4];
 
 		// Link Name Offset
-		file.read(fourBytes);
+		bb.get(fourBytes);
 		cacheType = ByteBuffer.wrap(fourBytes).order(LITTLE_ENDIAN).getInt();
 		logger.trace("cacheType = {}", cacheType);
 
 		// Reserved 4 bytes
-		file.skipBytes(4);
+		bb.get(new byte[4]);
 
 		// Scratch pad
 		switch (cacheType) {
@@ -56,18 +62,18 @@ public class SymbolTableEntry {
 		case 1:
 			// B Tree
 			// Address of B Tree
-			file.read(offsetBytes);
+			bb.get(offsetBytes);
 			bTreeAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
 			logger.trace("addressOfBTree = {}", bTreeAddress);
 
 			// Address of Name Heap
-			file.read(offsetBytes);
+			bb.get(offsetBytes);
 			nameHeapAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
 			logger.trace("nameHeapAddress = {}", nameHeapAddress);
 			break;
 		case 2:
 			// Link
-			file.read(fourBytes);
+			bb.get(fourBytes);
 			linkValueOffset = ByteBuffer.wrap(fourBytes).order(LITTLE_ENDIAN).getInt();
 			logger.trace("linkValueoffset = {}", linkValueOffset);
 			break;

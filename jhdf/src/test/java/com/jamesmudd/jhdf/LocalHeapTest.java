@@ -36,7 +36,7 @@ public class LocalHeapTest {
 
 	@Test
 	public void testLocalHeap() throws IOException {
-		LocalHeap heap = new LocalHeap(raf, 680, sb);
+		LocalHeap heap = new LocalHeap(fc, 680, sb);
 
 		assertThat(heap.getVersion(), is(equalTo((short) 0)));
 		assertThat(heap.getDataSegmentSize(), is(equalTo(88L)));
@@ -48,7 +48,7 @@ public class LocalHeapTest {
 
 	@Test
 	public void testAccessingData() throws Exception {
-		LocalHeap heap = new LocalHeap(raf, 680, sb);
+		LocalHeap heap = new LocalHeap(fc, 680, sb);
 		ByteBuffer bb = heap.getDataBuffer();
 		assertThat(bb.capacity(), is(equalTo(88)));
 		// Test reading a name from the heap

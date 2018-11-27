@@ -26,24 +26,27 @@ public class TreeRead {
 		FileChannel fc = raf.getChannel();
 		Superblock sb = new Superblock(fc, 0);
 
-		SymbolTableEntry rootSTE = new SymbolTableEntry(raf, sb.getRootGroupSymbolTableAddress(), sb);
+		SymbolTableEntry rootSTE = new SymbolTableEntry(fc, sb.getRootGroupSymbolTableAddress(), sb);
 
-		printGroup(raf, sb, rootSTE, 0);
+		printGroup(fc, sb, rootSTE, 0);
+
+		fc.close();
+		raf.close();
 	}
 
-	private static void printGroup(RandomAccessFile raf, Superblock sb, SymbolTableEntry ste, int level) {
+	private static void printGroup(FileChannel fc, Superblock sb, SymbolTableEntry ste, int level) {
 
 		level++;
 
-		BTreeNode rootbTreeNode = new BTreeNode(raf, ste.getBTreeAddress(), sb);
-		LocalHeap rootNameHeap = new LocalHeap(raf, ste.getNameHeapAddress(), sb);
+		BTreeNode rootbTreeNode = new BTreeNode(fc, ste.getBTreeAddress(), sb);
+		LocalHeap rootNameHeap = new LocalHeap(fc, ste.getNameHeapAddress(), sb);
 		if (rootbTreeNode.getNodeType() == 0) { // groups
 			for (long child : rootbTreeNode.getChildAddresses()) {
-				GroupSymbolTableNode groupSTE = new GroupSymbolTableNode(raf, child, sb);
+				GroupSymbolTableNode groupSTE = new GroupSymbolTableNode(fc, child, sb);
 				for (SymbolTableEntry e : groupSTE.getSymbolTableEntries()) {
 					printName(rootNameHeap, e.getLinkNameOffset(), level);
 					if (e.getCacheType() == 1) { // Its a group
-						printGroup(raf, sb, e, level);
+						printGroup(fc, sb, e, level);
 					}
 				}
 			}

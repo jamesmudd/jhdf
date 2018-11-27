@@ -35,7 +35,7 @@ public class GroupSymbolTableNodeTest {
 
 	@Test
 	public void testGroupSymbolTableNode() throws IOException {
-		GroupSymbolTableNode node = new GroupSymbolTableNode(raf, 1504, sb);
+		GroupSymbolTableNode node = new GroupSymbolTableNode(fc, 1504, sb);
 
 		assertThat(node.getVersion(), is(equalTo((short) 1)));
 		assertThat(node.getNumberOfEntries(), is(equalTo((short) 1)));

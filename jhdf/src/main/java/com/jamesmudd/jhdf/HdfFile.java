@@ -54,7 +54,7 @@ public class HdfFile implements AutoCloseable {
 			superblock = new Superblock(fc, offset);
 			userHeaderSize = offset;
 
-			rootSTE = new SymbolTableEntry(file, superblock.getRootGroupSymbolTableAddress(), superblock);
+			rootSTE = new SymbolTableEntry(fc, superblock.getRootGroupSymbolTableAddress(), superblock);
 
 		} catch (IOException e) {
 			throw new HdfException("Failed to open file. Is it a HDF5 file?", e);
