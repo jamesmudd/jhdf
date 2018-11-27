@@ -26,9 +26,16 @@ jobs:
       publishJUnitResults: true 
       testResultsFiles: 'jhdf/build/test-results/test/TEST-*.xml'
       testRunTitle: $(osName) $(Agent.JobName)
-      codeCoverageToolOption: 'jaCoCo'
-      codeCoverageClassFilesDirectories: 'build/classes/main/'
+      #codeCoverageToolOption: 'jaCoCo'
+      #codeCoverageClassFilesDirectories: 'build/classes/main/'
       jdkVersionOption: $(java.version)
+  - script: ./gradlew sonarqube \
+  -Dsonar.projectKey=jamesmudd_jhdf \
+  -Dsonar.organization=jamesmudd-github \
+  -Dsonar.host.url=https://sonarcloud.io \
+  -Dsonar.login=${sonar.login}
+    displayName: SonarQube
+
 
 - job: Windows
   pool:
@@ -55,6 +62,6 @@ jobs:
       publishJUnitResults: true 
       testResultsFiles: 'jhdf/build/test-results/test/TEST-*.xml'
       testRunTitle: $(osName) $(Agent.JobName)
-      codeCoverageToolOption: 'jaCoCo'
-      codeCoverageClassFilesDirectories: 'build/classes/main/'
+      #codeCoverageToolOption: 'jaCoCo'
+      #codeCoverageClassFilesDirectories: 'build/classes/main/'
       jdkVersionOption: $(java.version)
