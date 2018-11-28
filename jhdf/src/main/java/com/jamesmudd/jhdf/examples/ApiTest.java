@@ -14,9 +14,7 @@ public class ApiTest {
 	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
 
-		String pathname = "src/test/resources/com/jamesmudd/jhdf/test_file.hdf5";
-
-		File file = new File(pathname);
+		File file = new File(args[0]);
 		System.out.println(file.getName());
 
 		try (HdfFile hdfFile = new HdfFile(file)) {
