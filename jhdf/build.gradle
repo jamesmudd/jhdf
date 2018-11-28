@@ -10,6 +10,8 @@ plugins {
 	id 'java'
     id 'jacoco'
     id 'org.sonarqube' version '2.6'
+    id 'eclipse'
+    id 'idea'
 }
 
 // In this section you declare where to find the dependencies of your project
