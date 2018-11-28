@@ -5,9 +5,11 @@ import java.util.Map;
 public class Dataset implements Node {
 
 	private final String name;
+	private final Group parent;
 
-	public Dataset(String name) {
+	public Dataset(String name, Group parent) {
 		this.name = name;
+		this.parent = parent;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -26,6 +28,11 @@ public class Dataset implements Node {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public String getPath() {
+		return parent.getPath() + "/" + name;
 	}
 
 }

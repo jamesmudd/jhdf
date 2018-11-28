@@ -10,4 +10,6 @@ public interface Node {
 
 	String getName();
 
+	String getPath();
+
 }

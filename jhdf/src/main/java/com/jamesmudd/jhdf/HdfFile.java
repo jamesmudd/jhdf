@@ -54,7 +54,7 @@ public class HdfFile implements AutoCloseable {
 			// We have a valid HDF5 file so read the full superblock
 			superblock = new Superblock(fc, offset);
 			userHeaderSize = offset;
-			rootGroup = Group.createGroup(fc, superblock, superblock.getRootGroupSymbolTableAddress(), "/");
+			rootGroup = Group.createRootGroup(fc, superblock, superblock.getRootGroupSymbolTableAddress());
 
 		} catch (IOException e) {
 			throw new HdfException("Failed to open file. Is it a HDF5 file?", e);
