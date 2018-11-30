@@ -66,4 +66,31 @@ public class UtilsTest {
 	public void testNameContainingNonAsciiIsInvalid() throws Exception {
 		assertThat(Utils.validateName("helloμ"), is(false));
 	}
+
+	@Test
+	public void testMovingBufferAlreadyAtEightBytePositionDoesNothing() throws Exception {
+		ByteBuffer bb = ByteBuffer.allocate(11);
+		// Buffer position is 0
+		Utils.seekBufferToNextMultipleOfEight(bb);
+		assertThat(bb.position(), is(equalTo(0)));
+
+		// Move to 8 and test again
+		bb.position(8);
+		Utils.seekBufferToNextMultipleOfEight(bb);
+		assertThat(bb.position(), is(equalTo(8)));
+	}
+
+	@Test
+	public void testMovingBufferToNextEightBytePosition() throws Exception {
+		ByteBuffer bb = ByteBuffer.allocate(20);
+		bb.position(1);
+		// Buffer position is 1 should be moved to 8
+		Utils.seekBufferToNextMultipleOfEight(bb);
+		assertThat(bb.position(), is(equalTo(8)));
+
+		// Move to 14 should be moved to 16
+		bb.position(14);
+		Utils.seekBufferToNextMultipleOfEight(bb);
+		assertThat(bb.position(), is(equalTo(16)));
+	}
 }

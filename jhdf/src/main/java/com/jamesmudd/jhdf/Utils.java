@@ -61,4 +61,19 @@ public final class Utils {
 	public static boolean validateName(String name) {
 		return ASCII.canEncode(name) && !name.contains("/") && !name.contains(".");
 	}
+
+	/**
+	 * Moves the position of the {@link ByteBuffer} to the next position aligned on
+	 * 8 bytes. If the buffer position is already a multiple of 8 the position will
+	 * not be changed.
+	 * 
+	 * @param bb the buffer to be aligned
+	 */
+	public static void seekBufferToNextMultipleOfEight(ByteBuffer bb) {
+		int pos = bb.position();
+		if (pos % 8 == 0) {
+			return; // Already on a 8 byte multiple
+		}
+		bb.position(pos + (8 - (pos % 8)));
+	}
 }
