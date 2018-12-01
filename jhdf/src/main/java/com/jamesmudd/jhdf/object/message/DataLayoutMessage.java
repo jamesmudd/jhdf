@@ -28,8 +28,8 @@ public class DataLayoutMessage extends Message {
 		case 0: // Compact Storage
 			throw new UnsupportedHdfException("Compact storage is not supported");
 		case 1: // Contiguous Storage
-			address = Utils.readBytesAsInt(bb, sb.getSizeOfOffsets());
-			size = Utils.readBytesAsInt(bb, sb.getSizeOfLengths());
+			address = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfOffsets());
+			size = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
 			break;
 		case 2: // Chunked Storage
 			throw new UnsupportedHdfException("Chunked storage is not supported");
