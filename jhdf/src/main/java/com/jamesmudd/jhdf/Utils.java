@@ -76,4 +76,33 @@ public final class Utils {
 		}
 		bb.position(pos + (8 - (pos % 8)));
 	}
+
+	/**
+	 * This reads the requested number of bytes from the buffer and returns the data
+	 * as an int.
+	 * <p>
+	 * This is used in HDF5 to read "size of lengths" and "size of offsets"
+	 * 
+	 * @param buffer to read from
+	 * @param lentgh the number of bytes to read
+	 * @return the int value read from the buffer
+	 * @throws ArithmeticException      if the data cannot be safely converted to an
+	 *                                  int
+	 * @throws IllegalArgumentException if the length requested is not supported;
+	 */
+	public static int readBytesAsInt(ByteBuffer buffer, int lentgh) {
+		switch (lentgh) {
+		case 1:
+			return buffer.get();
+		case 2:
+			return buffer.getShort();
+		case 4:
+			return buffer.getInt();
+		case 8:
+			// Throws if the long can't be converted safely
+			return Math.toIntExact(buffer.getLong());
+		default:
+			throw new IllegalArgumentException("Couldn't read " + lentgh + " bytes as int");
+		}
+	}
 }
