@@ -1,5 +1,6 @@
 package com.jamesmudd.jhdf;
 
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -93,4 +94,52 @@ public class UtilsTest {
 		Utils.seekBufferToNextMultipleOfEight(bb);
 		assertThat(bb.position(), is(equalTo(16)));
 	}
+
+	@Test
+	public void testReadingOneByteToInt() throws Exception {
+		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
+		assertThat(Utils.readBytesAsInt(bb, 1), is(equalTo(12)));
+		assertThat(bb.position(), is(1));
+	}
+
+	@Test
+	public void testReadingTwoBytesToInt() throws Exception {
+		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
+		assertThat(Utils.readBytesAsInt(bb, 2), is(equalTo(12)));
+		assertThat(bb.position(), is(2));
+	}
+
+	@Test
+	public void testReadingFourBytesToInt() throws Exception {
+		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
+		assertThat(Utils.readBytesAsInt(bb, 4), is(equalTo(12)));
+		assertThat(bb.position(), is(4));
+	}
+
+	@Test
+	public void testReadingEightBytesToInt() throws Exception {
+		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
+		assertThat(Utils.readBytesAsInt(bb, 8), is(equalTo(12)));
+		assertThat(bb.position(), is(8));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testReadingUnsupportedLentghThrows() throws Exception {
+		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
+		Utils.readBytesAsInt(bb, 7); // should throw
+	}
+
+	@Test(expected = ArithmeticException.class)
+	public void testReadingLargeLongThrows() throws Exception {
+		ByteBuffer bb = ByteBuffer.allocate(8);
+		bb.putLong(Long.MAX_VALUE);
+		bb.rewind();
+		Utils.readBytesAsInt(bb, 8);
+	}
+
 }
