@@ -6,6 +6,9 @@ f = h5py.File('test_file.hdf5', 'w')
 data = np.arange(-10, 11, 1)
 
 datasets_group = f.create_group('datasets_group')
+datasets_group.attrs['string_attr'] = 'my string attribute'
+datasets_group.attrs['int_attr'] = 123
+datasets_group.attrs['float_attr'] = 123.456
 
 float_group = datasets_group.create_group('float')
 float_group.create_dataset('float16', data=data, dtype='f2')
