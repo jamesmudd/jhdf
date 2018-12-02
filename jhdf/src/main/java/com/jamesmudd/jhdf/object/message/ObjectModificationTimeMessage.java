@@ -7,7 +7,7 @@ import java.time.ZoneOffset;
 public class ObjectModificationTimeMessage extends Message {
 
 	private final byte version;
-	private final long unixEpocTime;
+	private final long unixEpocSecond;
 
 	public ObjectModificationTimeMessage(ByteBuffer bb) {
 		super(bb);
@@ -17,11 +17,20 @@ public class ObjectModificationTimeMessage extends Message {
 		// Skip 3 unused bytes
 		bb.get(new byte[3]);
 
-		// Convert to unsigned int
-		unixEpocTime = (bb.getInt() & 0xffffffffL);
+		// Convert to unsigned long
+		unixEpocSecond = Integer.toUnsignedLong(bb.getInt());
 	}
 
 	public LocalDateTime getModifiedTime() {
-		return LocalDateTime.ofEpochSecond(unixEpocTime, 0, ZoneOffset.UTC);
+		return LocalDateTime.ofEpochSecond(unixEpocSecond, 0, ZoneOffset.UTC);
 	}
+
+	public byte getVersion() {
+		return version;
+	}
+
+	public long getUnixEpocSecond() {
+		return unixEpocSecond;
+	}
+
 }
