@@ -17,7 +17,7 @@ public class SymbolTableEntry {
 
 	/** The location of this symbol table entry in the file */
 	private final long address;
-	private final long linkNameOffset;
+	private final int linkNameOffset;
 	private final long objectHeaderAddress;
 	private final int cacheType;
 	private long bTreeAddress = -1;
@@ -38,23 +38,16 @@ public class SymbolTableEntry {
 		bb.rewind();
 		bb.order(LITTLE_ENDIAN);
 
-		final byte[] offsetBytes = new byte[sb.getSizeOfOffsets()];
-
 		// Link Name Offset
-		bb.get(offsetBytes);
-		linkNameOffset = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
+		linkNameOffset = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfOffsets());
 		logger.trace("linkNameOffset = {}", linkNameOffset);
 
 		// Object Header Address
-		bb.get(offsetBytes);
-		objectHeaderAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
+		objectHeaderAddress = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfOffsets());
 		logger.trace("objectHeaderAddress = {}", objectHeaderAddress);
 
-		final byte[] fourBytes = new byte[4];
-
 		// Link Name Offset
-		bb.get(fourBytes);
-		cacheType = ByteBuffer.wrap(fourBytes).order(LITTLE_ENDIAN).getInt();
+		cacheType = Utils.readBytesAsUnsignedInt(bb, 4);
 		logger.trace("cacheType = {}", cacheType);
 
 		// Reserved 4 bytes
@@ -68,19 +61,16 @@ public class SymbolTableEntry {
 		case 1:
 			// B Tree
 			// Address of B Tree
-			bb.get(offsetBytes);
-			bTreeAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
+			bTreeAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 			logger.trace("addressOfBTree = {}", bTreeAddress);
 
 			// Address of Name Heap
-			bb.get(offsetBytes);
-			nameHeapAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
+			nameHeapAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 			logger.trace("nameHeapAddress = {}", nameHeapAddress);
 			break;
 		case 2:
 			// Link
-			bb.get(fourBytes);
-			linkValueOffset = ByteBuffer.wrap(fourBytes).order(LITTLE_ENDIAN).getInt();
+			linkValueOffset = Utils.readBytesAsUnsignedInt(bb, 4);
 			logger.trace("linkValueoffset = {}", linkValueOffset);
 			break;
 		default:

@@ -35,7 +35,7 @@ public class DataSpace {
 		if (numberOfdimensions != 0) {
 			dimensions = new ArrayList<>(numberOfdimensions);
 			for (int i = 0; i < numberOfdimensions; i++) {
-				dimensions.add(Utils.readBytesAsInt(bb, sb.getSizeOfLengths()));
+				dimensions.add(Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths()));
 			}
 		} else {
 			dimensions = Collections.emptyList();
@@ -45,7 +45,7 @@ public class DataSpace {
 		if (maxSizesPresent) {
 			maxSizes = new ArrayList<>(numberOfdimensions);
 			for (int i = 0; i < numberOfdimensions; i++) {
-				maxSizes.add(Utils.readBytesAsInt(bb, sb.getSizeOfLengths()));
+				maxSizes.add(Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths()));
 			}
 		} else {
 			maxSizes = Collections.emptyList();
@@ -55,7 +55,7 @@ public class DataSpace {
 		if (permutationIndexsPresent) {
 			permutationIndex = new ArrayList<>(numberOfdimensions);
 			for (int i = 0; i < numberOfdimensions; i++) {
-				permutationIndex.add(Utils.readBytesAsInt(bb, sb.getSizeOfLengths()));
+				permutationIndex.add(Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths()));
 			}
 		} else {
 			permutationIndex = Collections.emptyList();

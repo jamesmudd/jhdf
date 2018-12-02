@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 public final class Utils {
 	public static final char NULL = '\0';
+	/** All bits on */
 	public static final long UNDEFINED_ADDRESS = -1;
 
 	private static final CharsetEncoder ASCII = StandardCharsets.US_ASCII.newEncoder();
@@ -79,7 +80,8 @@ public final class Utils {
 
 	/**
 	 * This reads the requested number of bytes from the buffer and returns the data
-	 * as an int.
+	 * as an unsigned int. After this call the buffer position will be advanced by
+	 * the specified length.
 	 * <p>
 	 * This is used in HDF5 to read "size of lengths" and "size of offsets"
 	 * 
@@ -87,20 +89,57 @@ public final class Utils {
 	 * @param lentgh the number of bytes to read
 	 * @return the int value read from the buffer
 	 * @throws ArithmeticException      if the data cannot be safely converted to an
-	 *                                  int
+	 *                                  unsigned int
 	 * @throws IllegalArgumentException if the length requested is not supported;
 	 */
-	public static int readBytesAsInt(ByteBuffer buffer, int lentgh) {
+	public static int readBytesAsUnsignedInt(ByteBuffer buffer, int lentgh) {
 		switch (lentgh) {
 		case 1:
-			return buffer.get();
+			return Byte.toUnsignedInt(buffer.get());
 		case 2:
-			return buffer.getShort();
+			return Short.toUnsignedInt(buffer.getShort());
 		case 4:
-			return buffer.getInt();
+			int value = buffer.getInt();
+			if (value < 0) {
+				throw new ArithmeticException("Could not convert to unsigned");
+			}
+			return value;
 		case 8:
 			// Throws if the long can't be converted safely
 			return Math.toIntExact(buffer.getLong());
+		default:
+			throw new IllegalArgumentException("Couldn't read " + lentgh + " bytes as int");
+		}
+	}
+
+	/**
+	 * This reads the requested number of bytes from the buffer and returns the data
+	 * as an unsigned long. After this call the buffer position will be advanced by
+	 * the specified length.
+	 * <p>
+	 * This is used in HDF5 to read "size of lengths" and "size of offsets"
+	 * 
+	 * @param buffer to read from
+	 * @param lentgh the number of bytes to read
+	 * @return the long value read from the buffer
+	 * @throws ArithmeticException      if the data cannot be safely converted to an
+	 *                                  unsigned long
+	 * @throws IllegalArgumentException if the length requested is not supported;
+	 */
+	public static long readBytesAsUnsignedLong(ByteBuffer buffer, int lentgh) {
+		switch (lentgh) {
+		case 1:
+			return Byte.toUnsignedLong(buffer.get());
+		case 2:
+			return Short.toUnsignedLong(buffer.getShort());
+		case 4:
+			return Integer.toUnsignedLong(buffer.getInt());
+		case 8:
+			long value = buffer.getLong();
+			if (value < 0 && value != UNDEFINED_ADDRESS) {
+				throw new ArithmeticException("Could not convert to unsigned");
+			}
+			return value;
 		default:
 			throw new IllegalArgumentException("Couldn't read " + lentgh + " bytes as int");
 		}
