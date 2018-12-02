@@ -35,6 +35,7 @@ public class LocalHeap {
 
 			fc.read(header, address);
 			header.rewind();
+			header.order(LITTLE_ENDIAN);
 
 			byte[] formatSignitureByte = new byte[4];
 			header.get(formatSignitureByte, 0, formatSignitureByte.length);
@@ -50,23 +51,16 @@ public class LocalHeap {
 			// Move past reserved space
 			header.position(8);
 
-			final byte[] lengthsBytes = new byte[sb.getSizeOfLengths()];
-
 			// Data Segment Size
-			header.get(lengthsBytes);
-			dataSegmentSize = ByteBuffer.wrap(lengthsBytes).order(LITTLE_ENDIAN).getLong();
+			dataSegmentSize = Utils.readBytesAsUnsignedLong(header, sb.getSizeOfLengths());
 			logger.trace("dataSegmentSize = {}", dataSegmentSize);
 
 			// Offset to Head of Free-list
-			header.get(lengthsBytes);
-			offsetToHeadOfFreeList = ByteBuffer.wrap(lengthsBytes).order(LITTLE_ENDIAN).getLong();
+			offsetToHeadOfFreeList = Utils.readBytesAsUnsignedLong(header, sb.getSizeOfLengths());
 			logger.trace("offsetToHeadOfFreeList = {}", offsetToHeadOfFreeList);
 
-			final byte[] offsetBytes = new byte[sb.getSizeOfOffsets()];
-
 			// Address of Data Segment
-			header.get(offsetBytes);
-			addressOfDataSegment = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
+			addressOfDataSegment = Utils.readBytesAsUnsignedLong(header, sb.getSizeOfOffsets());
 			logger.trace("addressOfDataSegment = {}", addressOfDataSegment);
 
 			dataBuffer = fc.map(MapMode.READ_ONLY, addressOfDataSegment, dataSegmentSize);
