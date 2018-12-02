@@ -36,8 +36,8 @@ public class BTreeNode {
 			// B Tree Node Header
 			int headerSize = 8 + 2 * sb.getSizeOfOffsets();
 			ByteBuffer header = ByteBuffer.allocate(headerSize);
-
 			fc.read(header, address);
+			header.order(LITTLE_ENDIAN);
 			header.rewind();
 
 			byte[] formatSignitureByte = new byte[4];
@@ -52,21 +52,13 @@ public class BTreeNode {
 			nodeType = header.get();
 			nodeLevel = header.get();
 
-			final byte[] twoBytes = new byte[2];
-			header.get(twoBytes);
-			entriesUsed = ByteBuffer.wrap(twoBytes).order(LITTLE_ENDIAN).getShort();
-
+			entriesUsed = header.getShort();
 			logger.trace("Entries = {}", getEntriesUsed());
 
-			final byte[] offsetBytes = new byte[sb.getSizeOfOffsets()];
-
-			// Link Name Offset
-			header.get(offsetBytes);
-			leftSiblingAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
+			leftSiblingAddress = Utils.readBytesAsUnsignedLong(header, sb.getSizeOfOffsets());
 			logger.trace("left address = {}", getLeftSiblingAddress());
 
-			header.get(offsetBytes);
-			rightSiblingAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
+			rightSiblingAddress = Utils.readBytesAsUnsignedLong(header, sb.getSizeOfOffsets());
 			logger.trace("right address = {}", getRightSiblingAddress());
 
 			switch (nodeType) {
@@ -77,22 +69,17 @@ public class BTreeNode {
 
 				ByteBuffer keysAndPointersBuffer = ByteBuffer.allocate(keysAndPointersBytes);
 				fc.read(keysAndPointersBuffer, address + headerSize);
+				keysAndPointersBuffer.order(LITTLE_ENDIAN);
 				keysAndPointersBuffer.rewind();
 
 				keys = new long[entriesUsed + 1];
 				childAddresses = new long[entriesUsed];
 
-				final byte[] key = new byte[sb.getSizeOfLengths()];
-				final byte[] child = new byte[sb.getSizeOfOffsets()];
-
 				for (int i = 0; i < entriesUsed; i++) {
-					keysAndPointersBuffer.get(key);
-					keys[i] = ByteBuffer.wrap(key).order(LITTLE_ENDIAN).getLong();
-					keysAndPointersBuffer.get(child);
-					childAddresses[i] = ByteBuffer.wrap(child).order(LITTLE_ENDIAN).getLong();
+					keys[i] = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfLengths());
+					childAddresses[i] = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfOffsets());
 				}
-				keysAndPointersBuffer.get(key);
-				getKeys()[entriesUsed] = ByteBuffer.wrap(key).order(LITTLE_ENDIAN).getLong();
+				getKeys()[entriesUsed] = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfLengths());
 
 				break;
 			case 1: // Raw data
