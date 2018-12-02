@@ -25,9 +25,9 @@ public class Message {
 
 	public static Message readMessage(ByteBuffer bb, Superblock sb) {
 		Utils.seekBufferToNextMultipleOfEight(bb);
-		int pos = bb.position();
+		bb.mark();
 		int messageType = bb.getShort();
-		bb.position(pos); // Move back to before reading the message type
+		bb.reset(); // Move back to before reading the message type
 
 		switch (messageType) {
 		case 0: // 0x0000

@@ -12,8 +12,8 @@ public class DataType {
 	byte[] classBytes;
 
 	public static DataType readDataType(ByteBuffer bb) {
-		// Cache buffer position
-		int pos = bb.position();
+		// Mark buffer position
+		bb.mark();
 
 		// Class and version
 		byte classAndVersion = bb.get();
@@ -21,7 +21,7 @@ public class DataType {
 		int dataClass = classAndVersion & 0xF;
 
 		// Move the buffer back to the start of the data type message
-		bb.position(pos);
+		bb.reset();
 
 		switch (dataClass) {
 		case 0: // Fixed point
