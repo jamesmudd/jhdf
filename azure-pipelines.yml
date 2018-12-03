@@ -13,10 +13,7 @@ jobs:
       # Java 10:
       #   java.version: '1.10'
   steps:
-    # Clone the repo
-  - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
-    fetchDepth: 1 # shallow clone
-    # Build using a Gradle wrapper script
+  # Build using a Gradle wrapper script
   - task: Gradle@2
     displayName: Build/Test
     inputs:
@@ -49,10 +46,7 @@ jobs:
       Java 10:
         java.version: '1.10'
   steps:
-    # Clone the repo
-  - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
-    fetchDepth: 1 # shallow clone
-    # Build using a Gradle wrapper script
+  # Build using a Gradle wrapper script
   - task: Gradle@2
     displayName: Build/Test
     inputs:
