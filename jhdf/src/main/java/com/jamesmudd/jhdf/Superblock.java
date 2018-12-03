@@ -32,22 +32,22 @@ public class Superblock {
 	private final long driverInformationBlockAddress;
 	private final long rootGroupSymbolTableAddress;
 
-	public Superblock(FileChannel fc, long offset) {
+	public Superblock(FileChannel fc, long address) {
 		try {
 
-			final boolean verifiedSignature = verifySignature(fc, offset);
+			final boolean verifiedSignature = verifySignature(fc, address);
 			if (!verifiedSignature) {
 				throw new HdfException("Superblock didn't contain valid signature");
 			}
 
 			// Signature is ok read rest of Superblock
-			long fileLocation = offset + 8; // signature is 8 bytes
+			long fileLocation = address + HDF5_FILE_SIGNATURE_LENGTH;
 
 			ByteBuffer header = ByteBuffer.allocate(12);
-			header.order(LITTLE_ENDIAN);
-
 			fc.read(header, fileLocation);
 			fileLocation += 12;
+
+			header.order(LITTLE_ENDIAN);
 			header.rewind();
 
 			// Version # of Superblock
@@ -55,7 +55,7 @@ public class Superblock {
 			logger.trace("Version of superblock is = {}", versionOfSuperblock);
 
 			if (versionOfSuperblock != 0) {
-				throw new HdfException("Only superblock version 0 si currently supported");
+				throw new HdfException("Only superblock version 0 is currently supported");
 			}
 
 			// Version # of File Free-space Storage
@@ -68,68 +68,63 @@ public class Superblock {
 			logger.trace("Version # of Root Group Symbol Table Entry: {}", versionOfRootGroupSymbolTableEntry);
 
 			// Skip reserved byte
-			header.get();
+			header.position(header.position() + 1);
 
 			// Version # of Shared Header Message Format
 			versionOfSharedHeaderMessageFormat = header.get();
 			logger.trace("Version # of Shared Header Message Format: {}", versionOfSharedHeaderMessageFormat);
 
 			// Size of Offsets
-			sizeOfOffsets = header.get();
+			sizeOfOffsets = Byte.toUnsignedInt(header.get());
 			logger.trace("Size of Offsets: {}", sizeOfOffsets);
 
 			// Size of Lengths
-			sizeOfLengths = header.get();
+			sizeOfLengths = Byte.toUnsignedInt(header.get());
 			logger.trace("Size of Lengths: {}", sizeOfLengths);
 
 			// Skip reserved byte
-			header.get();
+			header.position(header.position() + 1);
 
 			// Group Leaf Node K
-			groupLeafNodeK = header.getShort();
+			groupLeafNodeK = Short.toUnsignedInt(header.getShort());
 			logger.trace("groupLeafNodeK = {}", groupLeafNodeK);
 
 			// Group Internal Node K
-			groupInternalNodeK = header.getShort();
+			groupInternalNodeK = Short.toUnsignedInt(header.getShort());
 			logger.trace("groupInternalNodeK = {}", groupInternalNodeK);
 
 			// File Consistency Flags (skip)
 			fileLocation += 4;
 
-			byte[] offsetBytes = new byte[sizeOfOffsets];
-
 			int nextSectionSize = 4 * sizeOfOffsets;
 			header = ByteBuffer.allocate(nextSectionSize);
 			fc.read(header, fileLocation);
 			fileLocation += nextSectionSize;
+			header.order(LITTLE_ENDIAN);
 			header.rewind();
 
 			// Base Address
-			header.get(offsetBytes);
-			baseAddressByte = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
+			baseAddressByte = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
 			logger.trace("baseAddressByte = {}", baseAddressByte);
 
 			// Address of Global Free-space Index
-			header.get(offsetBytes);
-			addressOfGlobalFreeSpaceIndex = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
+			addressOfGlobalFreeSpaceIndex = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
 			logger.trace("addressOfGlobalFreeSpaceIndex = {}", addressOfGlobalFreeSpaceIndex);
 
 			// End of File Address
-			header.get(offsetBytes);
-			endOfFileAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
+			endOfFileAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
 			logger.trace("endOfFileAddress = {}", endOfFileAddress);
 
 			// Driver Information Block Address
-			header.get(offsetBytes);
-			driverInformationBlockAddress = ByteBuffer.wrap(offsetBytes).order(LITTLE_ENDIAN).getLong();
+			driverInformationBlockAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
 			logger.trace("driverInformationBlockAddress = {}", driverInformationBlockAddress);
 
 			// Root Group Symbol Table Entry Address
-			rootGroupSymbolTableAddress = offset + fileLocation;
+			rootGroupSymbolTableAddress = address + fileLocation;
 			logger.trace("rootGroupSymbolTableAddress= {}", rootGroupSymbolTableAddress);
 
 		} catch (Exception e) {
-			throw new HdfException("Failed to read superbloack", e);
+			throw new HdfException("Failed to read superblock", e);
 		}
 
 	}
