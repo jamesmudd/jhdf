@@ -22,7 +22,7 @@ public class TreeRead {
 
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r"); FileChannel fc = raf.getChannel()) {
 
-			Superblock sb = new Superblock(fc, 0);
+			Superblock sb = Superblock.readSuperblock(fc, 0);
 
 			SymbolTableEntry rootSTE = new SymbolTableEntry(fc, sb.getRootGroupSymbolTableAddress(), sb);
 

@@ -52,7 +52,7 @@ public class HdfFile implements AutoCloseable {
 			}
 
 			// We have a valid HDF5 file so read the full superblock
-			superblock = new Superblock(fc, offset);
+			superblock = Superblock.readSuperblock(fc, offset);
 			userHeaderSize = offset;
 			rootGroup = Group.createRootGroup(fc, superblock, superblock.getRootGroupSymbolTableAddress());
 

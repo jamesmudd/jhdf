@@ -32,7 +32,7 @@ public class Superblock {
 	private final long driverInformationBlockAddress;
 	private final long rootGroupSymbolTableAddress;
 
-	public Superblock(FileChannel fc, long address) {
+	private Superblock(FileChannel fc, long address) {
 		try {
 
 			final boolean verifiedSignature = verifySignature(fc, address);
@@ -203,6 +203,10 @@ public class Superblock {
 
 		// Verify signature
 		return Arrays.equals(HDF5_FILE_SIGNATURE, signatureBuffer.array());
+	}
+
+	public static Superblock readSuperblock(FileChannel fc, long address) {
+		return new Superblock(fc, address);
 	}
 
 }
