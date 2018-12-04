@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jamesmudd.jhdf.exceptions.HdfException;
+import com.jamesmudd.jhdf.exceptions.UnsupportedHdfException;
 
 public class Superblock {
 	private static final Logger logger = LoggerFactory.getLogger(Superblock.class);
@@ -35,17 +36,9 @@ public class Superblock {
 	private Superblock(FileChannel fc, long address) {
 		try {
 
-			final boolean verifiedSignature = verifySignature(fc, address);
-			if (!verifiedSignature) {
-				throw new HdfException("Superblock didn't contain valid signature");
-			}
-
-			// Signature is ok read rest of Superblock
-			long fileLocation = address + HDF5_FILE_SIGNATURE_LENGTH;
-
 			ByteBuffer header = ByteBuffer.allocate(12);
-			fc.read(header, fileLocation);
-			fileLocation += 12;
+			fc.read(header, address);
+			address += 12;
 
 			header.order(LITTLE_ENDIAN);
 			header.rewind();
@@ -94,12 +87,12 @@ public class Superblock {
 			logger.trace("groupInternalNodeK = {}", groupInternalNodeK);
 
 			// File Consistency Flags (skip)
-			fileLocation += 4;
+			address += 4;
 
 			int nextSectionSize = 4 * sizeOfOffsets;
 			header = ByteBuffer.allocate(nextSectionSize);
-			fc.read(header, fileLocation);
-			fileLocation += nextSectionSize;
+			fc.read(header, address);
+			address += nextSectionSize;
 			header.order(LITTLE_ENDIAN);
 			header.rewind();
 
@@ -120,7 +113,7 @@ public class Superblock {
 			logger.trace("driverInformationBlockAddress = {}", driverInformationBlockAddress);
 
 			// Root Group Symbol Table Entry Address
-			rootGroupSymbolTableAddress = address + fileLocation;
+			rootGroupSymbolTableAddress = address;
 			logger.trace("rootGroupSymbolTableAddress= {}", rootGroupSymbolTableAddress);
 
 		} catch (Exception e) {
@@ -206,7 +199,36 @@ public class Superblock {
 	}
 
 	public static Superblock readSuperblock(FileChannel fc, long address) {
-		return new Superblock(fc, address);
+
+		final boolean verifiedSignature = verifySignature(fc, address);
+		if (!verifiedSignature) {
+			throw new HdfException("Superblock didn't contain valid signature");
+		}
+
+		// Signature is ok read rest of Superblock
+		long fileLocation = address + HDF5_FILE_SIGNATURE_LENGTH;
+
+		ByteBuffer version = ByteBuffer.allocate(1);
+		try {
+			fc.read(version, fileLocation);
+		} catch (IOException e) {
+			throw new HdfException("Failed to read superblock at address = " + Utils.toHex(address));
+		}
+		version.rewind();
+
+		// Version # of Superblock
+		final byte versionOfSuperblock = version.get();
+		logger.trace("Version of superblock is = {}", versionOfSuperblock);
+
+		switch (versionOfSuperblock) {
+		case 0:
+		case 1:
+			return new Superblock(fc, fileLocation);
+
+		default:
+			throw new UnsupportedHdfException(
+					"Superblock version is not supported. Detected version = " + versionOfSuperblock);
+		}
 	}
 
 }
