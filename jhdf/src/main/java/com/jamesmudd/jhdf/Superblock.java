@@ -1,5 +1,7 @@
 package com.jamesmudd.jhdf;
 
+import static com.jamesmudd.jhdf.Utils.UNDEFINED_ADDRESS;
+import static com.jamesmudd.jhdf.Utils.toHex;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.io.IOException;
@@ -21,27 +23,13 @@ public abstract class Superblock {
 
 	public abstract int getVersionOfSuperblock();
 
-	public abstract int getVersionNumberOfTheFileFreeSpaceInformation();
-
-	public abstract int getVersionOfRootGroupSymbolTableEntry();
-
-	public abstract int getVersionOfSharedHeaderMessageFormat();
-
 	public abstract int getSizeOfOffsets();
 
 	public abstract int getSizeOfLengths();
 
-	public abstract int getGroupLeafNodeK();
-
-	public abstract int getGroupInternalNodeK();
-
 	public abstract long getBaseAddressByte();
 
-	public abstract long getAddressOfGlobalFreeSpaceIndex();
-
 	public abstract long getEndOfFileAddress();
-
-	public abstract long getDriverInformationBlockAddress();
 
 	public abstract long getRootGroupSymbolTableAddress();
 
@@ -95,14 +83,16 @@ public abstract class Superblock {
 		case 0:
 		case 1:
 			return new SuperblockV0V1(fc, fileLocation);
-
+		case 2:
+		case 3:
+			return new SuperblockV2V3(fc, fileLocation);
 		default:
 			throw new UnsupportedHdfException(
 					"Superblock version is not supported. Detected version = " + versionOfSuperblock);
 		}
 	}
 
-	private static class SuperblockV0V1 extends Superblock {
+	public static class SuperblockV0V1 extends Superblock {
 
 		private final int versionOfSuperblock;
 		private final int versionNumberOfTheFileFreeSpaceInformation;
@@ -204,7 +194,7 @@ public abstract class Superblock {
 				logger.trace("rootGroupSymbolTableAddress= {}", rootGroupSymbolTableAddress);
 
 			} catch (Exception e) {
-				throw new HdfException("Failed to read superblock", e);
+				throw new HdfException("Failed to read superblock from address " + toHex(address), e);
 			}
 
 		}
@@ -220,7 +210,6 @@ public abstract class Superblock {
 		/**
 		 * @return the versionNumberOfTheFileFreeSpaceInformation
 		 */
-		@Override
 		public int getVersionNumberOfTheFileFreeSpaceInformation() {
 			return versionNumberOfTheFileFreeSpaceInformation;
 		}
@@ -228,7 +217,6 @@ public abstract class Superblock {
 		/**
 		 * @return the versionOfRootGroupSymbolTableEntry
 		 */
-		@Override
 		public int getVersionOfRootGroupSymbolTableEntry() {
 			return versionOfRootGroupSymbolTableEntry;
 		}
@@ -236,7 +224,6 @@ public abstract class Superblock {
 		/**
 		 * @return the versionOfSharedHeaderMessageFormat
 		 */
-		@Override
 		public int getVersionOfSharedHeaderMessageFormat() {
 			return versionOfSharedHeaderMessageFormat;
 		}
@@ -260,7 +247,6 @@ public abstract class Superblock {
 		/**
 		 * @return the groupLeafNodeK
 		 */
-		@Override
 		public int getGroupLeafNodeK() {
 			return groupLeafNodeK;
 		}
@@ -268,7 +254,6 @@ public abstract class Superblock {
 		/**
 		 * @return the groupInternalNodeK
 		 */
-		@Override
 		public int getGroupInternalNodeK() {
 			return groupInternalNodeK;
 		}
@@ -284,7 +269,6 @@ public abstract class Superblock {
 		/**
 		 * @return the addressOfGlobalFreeSpaceIndex
 		 */
-		@Override
 		public long getAddressOfGlobalFreeSpaceIndex() {
 			return addressOfGlobalFreeSpaceIndex;
 		}
@@ -300,9 +284,133 @@ public abstract class Superblock {
 		/**
 		 * @return the driverInformationBlockAddress
 		 */
-		@Override
 		public long getDriverInformationBlockAddress() {
 			return driverInformationBlockAddress;
+		}
+
+		/**
+		 * @return the rootGroupSymbolTableAddress
+		 */
+		@Override
+		public long getRootGroupSymbolTableAddress() {
+			return rootGroupSymbolTableAddress;
+		}
+	}
+
+	public static class SuperblockV2V3 extends Superblock {
+
+		private final int versionOfSuperblock;
+		private final int sizeOfOffsets;
+		private final int sizeOfLengths;
+		private final long baseAddressByte;
+		private final long superblockExtensionAddress;
+		private final long endOfFileAddress;
+		private final long rootGroupSymbolTableAddress;
+
+		public SuperblockV2V3(FileChannel fc, long address) {
+			try {
+
+				ByteBuffer header = ByteBuffer.allocate(4);
+				fc.read(header, address);
+				address += 4;
+
+				header.order(LITTLE_ENDIAN);
+				header.rewind();
+
+				// Version # of Superblock
+				versionOfSuperblock = header.get();
+				logger.trace("Version of superblock is = {}", versionOfSuperblock);
+
+				// Size of Offsets
+				sizeOfOffsets = Byte.toUnsignedInt(header.get());
+				logger.trace("Size of Offsets: {}", sizeOfOffsets);
+
+				// Size of Lengths
+				sizeOfLengths = Byte.toUnsignedInt(header.get());
+				logger.trace("Size of Lengths: {}", sizeOfLengths);
+
+				// TODO File consistency flags
+
+				int nextSectionSize = 4 * sizeOfOffsets + 4;
+				header = ByteBuffer.allocate(nextSectionSize);
+				fc.read(header, address);
+				address += nextSectionSize;
+				header.order(LITTLE_ENDIAN);
+				header.rewind();
+
+				// Base Address
+				baseAddressByte = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
+				logger.trace("baseAddressByte = {}", baseAddressByte);
+
+				// Superblock Extension Address
+				superblockExtensionAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
+				logger.trace("addressOfGlobalFreeSpaceIndex = {}", superblockExtensionAddress);
+
+				if (superblockExtensionAddress != UNDEFINED_ADDRESS) {
+					throw new UnsupportedHdfException("Superblock extension is not supported");
+				}
+
+				// End of File Address
+				endOfFileAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
+				logger.trace("endOfFileAddress = {}", endOfFileAddress);
+
+				// Root Group Symbol Table Entry Address
+				rootGroupSymbolTableAddress = address;
+				logger.trace("rootGroupSymbolTableAddress= {}", rootGroupSymbolTableAddress);
+
+				// TODO Superblock checksum
+
+			} catch (Exception e) {
+				throw new HdfException("Failed to read superblock from address " + toHex(address), e);
+			}
+
+		}
+
+		/**
+		 * @return the versionOfSuperblock
+		 */
+		@Override
+		public int getVersionOfSuperblock() {
+			return versionOfSuperblock;
+		}
+
+		/**
+		 * @return the sizeOfOffsets
+		 */
+		@Override
+		public int getSizeOfOffsets() {
+			return sizeOfOffsets;
+		}
+
+		/**
+		 * @return the sizeOfLengths
+		 */
+		@Override
+		public int getSizeOfLengths() {
+			return sizeOfLengths;
+		}
+
+		/**
+		 * @return the baseAddressByte
+		 */
+		@Override
+		public long getBaseAddressByte() {
+			return baseAddressByte;
+		}
+
+		/**
+		 * @return the superblockExtensionAddress
+		 */
+		public long getSuperblockExtensionAddress() {
+			return superblockExtensionAddress;
+		}
+
+		/**
+		 * @return the endOfFileAddress
+		 */
+		@Override
+		public long getEndOfFileAddress() {
+			return endOfFileAddress;
 		}
 
 		/**

@@ -15,6 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jamesmudd.jhdf.Superblock.SuperblockV0V1;
 import com.jamesmudd.jhdf.exceptions.HdfException;
 
 public class SuperblockTest {
@@ -36,7 +37,7 @@ public class SuperblockTest {
 
 	@Test
 	public void testExtractSuperblockFromFile() throws IOException {
-		Superblock sb = Superblock.readSuperblock(fc, 0);
+		SuperblockV0V1 sb = (SuperblockV0V1) Superblock.readSuperblock(fc, 0);
 		assertThat(sb.getVersionOfSuperblock(), is(equalTo(0)));
 		assertThat(sb.getVersionNumberOfTheFileFreeSpaceInformation(), is(equalTo(0)));
 		assertThat(sb.getVersionOfRootGroupSymbolTableEntry(), is(equalTo(0)));
