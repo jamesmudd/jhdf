@@ -13,166 +13,37 @@ import org.slf4j.LoggerFactory;
 import com.jamesmudd.jhdf.exceptions.HdfException;
 import com.jamesmudd.jhdf.exceptions.UnsupportedHdfException;
 
-public class Superblock {
+public abstract class Superblock {
 	private static final Logger logger = LoggerFactory.getLogger(Superblock.class);
 
 	private static final byte[] HDF5_FILE_SIGNATURE = new byte[] { -119, 72, 68, 70, 13, 10, 26, 10 };
 	private static final int HDF5_FILE_SIGNATURE_LENGTH = HDF5_FILE_SIGNATURE.length;
 
-	private final int versionOfSuperblock;
-	private final int versionNumberOfTheFileFreeSpaceInformation;
-	private final int versionOfRootGroupSymbolTableEntry;
-	private final int versionOfSharedHeaderMessageFormat;
-	private final int sizeOfOffsets;
-	private final int sizeOfLengths;
-	private final int groupLeafNodeK;
-	private final int groupInternalNodeK;
-	private final long baseAddressByte;
-	private final long addressOfGlobalFreeSpaceIndex;
-	private final long endOfFileAddress;
-	private final long driverInformationBlockAddress;
-	private final long rootGroupSymbolTableAddress;
+	public abstract int getVersionOfSuperblock();
 
-	private Superblock(FileChannel fc, long address) {
-		try {
+	public abstract int getVersionNumberOfTheFileFreeSpaceInformation();
 
-			ByteBuffer header = ByteBuffer.allocate(12);
-			fc.read(header, address);
-			address += 12;
+	public abstract int getVersionOfRootGroupSymbolTableEntry();
 
-			header.order(LITTLE_ENDIAN);
-			header.rewind();
+	public abstract int getVersionOfSharedHeaderMessageFormat();
 
-			// Version # of Superblock
-			versionOfSuperblock = header.get();
-			logger.trace("Version of superblock is = {}", versionOfSuperblock);
+	public abstract int getSizeOfOffsets();
 
-			if (versionOfSuperblock != 0) {
-				throw new HdfException("Only superblock version 0 is currently supported");
-			}
+	public abstract int getSizeOfLengths();
 
-			// Version # of File Free-space Storage
-			versionNumberOfTheFileFreeSpaceInformation = header.get();
-			logger.trace("Version Number of the File Free-Space Information: {}",
-					versionNumberOfTheFileFreeSpaceInformation);
+	public abstract int getGroupLeafNodeK();
 
-			// Version # of Root Group Symbol Table Entry
-			versionOfRootGroupSymbolTableEntry = header.get();
-			logger.trace("Version # of Root Group Symbol Table Entry: {}", versionOfRootGroupSymbolTableEntry);
+	public abstract int getGroupInternalNodeK();
 
-			// Skip reserved byte
-			header.position(header.position() + 1);
+	public abstract long getBaseAddressByte();
 
-			// Version # of Shared Header Message Format
-			versionOfSharedHeaderMessageFormat = header.get();
-			logger.trace("Version # of Shared Header Message Format: {}", versionOfSharedHeaderMessageFormat);
+	public abstract long getAddressOfGlobalFreeSpaceIndex();
 
-			// Size of Offsets
-			sizeOfOffsets = Byte.toUnsignedInt(header.get());
-			logger.trace("Size of Offsets: {}", sizeOfOffsets);
+	public abstract long getEndOfFileAddress();
 
-			// Size of Lengths
-			sizeOfLengths = Byte.toUnsignedInt(header.get());
-			logger.trace("Size of Lengths: {}", sizeOfLengths);
+	public abstract long getDriverInformationBlockAddress();
 
-			// Skip reserved byte
-			header.position(header.position() + 1);
-
-			// Group Leaf Node K
-			groupLeafNodeK = Short.toUnsignedInt(header.getShort());
-			logger.trace("groupLeafNodeK = {}", groupLeafNodeK);
-
-			// Group Internal Node K
-			groupInternalNodeK = Short.toUnsignedInt(header.getShort());
-			logger.trace("groupInternalNodeK = {}", groupInternalNodeK);
-
-			// File Consistency Flags (skip)
-			address += 4;
-
-			int nextSectionSize = 4 * sizeOfOffsets;
-			header = ByteBuffer.allocate(nextSectionSize);
-			fc.read(header, address);
-			address += nextSectionSize;
-			header.order(LITTLE_ENDIAN);
-			header.rewind();
-
-			// Base Address
-			baseAddressByte = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
-			logger.trace("baseAddressByte = {}", baseAddressByte);
-
-			// Address of Global Free-space Index
-			addressOfGlobalFreeSpaceIndex = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
-			logger.trace("addressOfGlobalFreeSpaceIndex = {}", addressOfGlobalFreeSpaceIndex);
-
-			// End of File Address
-			endOfFileAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
-			logger.trace("endOfFileAddress = {}", endOfFileAddress);
-
-			// Driver Information Block Address
-			driverInformationBlockAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
-			logger.trace("driverInformationBlockAddress = {}", driverInformationBlockAddress);
-
-			// Root Group Symbol Table Entry Address
-			rootGroupSymbolTableAddress = address;
-			logger.trace("rootGroupSymbolTableAddress= {}", rootGroupSymbolTableAddress);
-
-		} catch (Exception e) {
-			throw new HdfException("Failed to read superblock", e);
-		}
-
-	}
-
-	public int getVersionOfSuperblock() {
-		return versionOfSuperblock;
-	}
-
-	public int getVersionNumberOfTheFileFreeSpaceInformation() {
-		return versionNumberOfTheFileFreeSpaceInformation;
-	}
-
-	public int getVersionOfRootGroupSymbolTableEntry() {
-		return versionOfRootGroupSymbolTableEntry;
-	}
-
-	public int getVersionOfSharedHeaderMessageFormat() {
-		return versionOfSharedHeaderMessageFormat;
-	}
-
-	public int getSizeOfOffsets() {
-		return sizeOfOffsets;
-	}
-
-	public int getSizeOfLengths() {
-		return sizeOfLengths;
-	}
-
-	public int getGroupLeafNodeK() {
-		return groupLeafNodeK;
-	}
-
-	public int getGroupInternalNodeK() {
-		return groupInternalNodeK;
-	}
-
-	public long getBaseAddressByte() {
-		return baseAddressByte;
-	}
-
-	public long getAddressOfGlobalFreeSpaceIndex() {
-		return addressOfGlobalFreeSpaceIndex;
-	}
-
-	public long getEndOfFileAddress() {
-		return endOfFileAddress;
-	}
-
-	public long getDriverInformationBlockAddress() {
-		return driverInformationBlockAddress;
-	}
-
-	public long getRootGroupSymbolTableAddress() {
-		return rootGroupSymbolTableAddress;
-	}
+	public abstract long getRootGroupSymbolTableAddress();
 
 	/**
 	 * Checks if the file provided contains the HDF5 file signature at the given
@@ -223,7 +94,7 @@ public class Superblock {
 		switch (versionOfSuperblock) {
 		case 0:
 		case 1:
-			return new Superblock(fc, fileLocation);
+			return new SuperblockV0V1(fc, fileLocation);
 
 		default:
 			throw new UnsupportedHdfException(
@@ -231,4 +102,215 @@ public class Superblock {
 		}
 	}
 
+	private static class SuperblockV0V1 extends Superblock {
+
+		private final int versionOfSuperblock;
+		private final int versionNumberOfTheFileFreeSpaceInformation;
+		private final int versionOfRootGroupSymbolTableEntry;
+		private final int versionOfSharedHeaderMessageFormat;
+		private final int sizeOfOffsets;
+		private final int sizeOfLengths;
+		private final int groupLeafNodeK;
+		private final int groupInternalNodeK;
+		private final long baseAddressByte;
+		private final long addressOfGlobalFreeSpaceIndex;
+		private final long endOfFileAddress;
+		private final long driverInformationBlockAddress;
+		private final long rootGroupSymbolTableAddress;
+
+		public SuperblockV0V1(FileChannel fc, long address) {
+			try {
+
+				ByteBuffer header = ByteBuffer.allocate(12);
+				fc.read(header, address);
+				address += 12;
+
+				header.order(LITTLE_ENDIAN);
+				header.rewind();
+
+				// Version # of Superblock
+				versionOfSuperblock = header.get();
+				logger.trace("Version of superblock is = {}", versionOfSuperblock);
+
+				if (versionOfSuperblock != 0) {
+					throw new HdfException("Only superblock version 0 is currently supported");
+				}
+
+				// Version # of File Free-space Storage
+				versionNumberOfTheFileFreeSpaceInformation = header.get();
+				logger.trace("Version Number of the File Free-Space Information: {}",
+						versionNumberOfTheFileFreeSpaceInformation);
+
+				// Version # of Root Group Symbol Table Entry
+				versionOfRootGroupSymbolTableEntry = header.get();
+				logger.trace("Version # of Root Group Symbol Table Entry: {}", versionOfRootGroupSymbolTableEntry);
+
+				// Skip reserved byte
+				header.position(header.position() + 1);
+
+				// Version # of Shared Header Message Format
+				versionOfSharedHeaderMessageFormat = header.get();
+				logger.trace("Version # of Shared Header Message Format: {}", versionOfSharedHeaderMessageFormat);
+
+				// Size of Offsets
+				sizeOfOffsets = Byte.toUnsignedInt(header.get());
+				logger.trace("Size of Offsets: {}", sizeOfOffsets);
+
+				// Size of Lengths
+				sizeOfLengths = Byte.toUnsignedInt(header.get());
+				logger.trace("Size of Lengths: {}", sizeOfLengths);
+
+				// Skip reserved byte
+				header.position(header.position() + 1);
+
+				// Group Leaf Node K
+				groupLeafNodeK = Short.toUnsignedInt(header.getShort());
+				logger.trace("groupLeafNodeK = {}", groupLeafNodeK);
+
+				// Group Internal Node K
+				groupInternalNodeK = Short.toUnsignedInt(header.getShort());
+				logger.trace("groupInternalNodeK = {}", groupInternalNodeK);
+
+				// File Consistency Flags (skip)
+				address += 4;
+
+				// TODO for version 1 Indexed Storage Internal Node K
+
+				int nextSectionSize = 4 * sizeOfOffsets;
+				header = ByteBuffer.allocate(nextSectionSize);
+				fc.read(header, address);
+				address += nextSectionSize;
+				header.order(LITTLE_ENDIAN);
+				header.rewind();
+
+				// Base Address
+				baseAddressByte = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
+				logger.trace("baseAddressByte = {}", baseAddressByte);
+
+				// Address of Global Free-space Index
+				addressOfGlobalFreeSpaceIndex = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
+				logger.trace("addressOfGlobalFreeSpaceIndex = {}", addressOfGlobalFreeSpaceIndex);
+
+				// End of File Address
+				endOfFileAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
+				logger.trace("endOfFileAddress = {}", endOfFileAddress);
+
+				// Driver Information Block Address
+				driverInformationBlockAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
+				logger.trace("driverInformationBlockAddress = {}", driverInformationBlockAddress);
+
+				// Root Group Symbol Table Entry Address
+				rootGroupSymbolTableAddress = address;
+				logger.trace("rootGroupSymbolTableAddress= {}", rootGroupSymbolTableAddress);
+
+			} catch (Exception e) {
+				throw new HdfException("Failed to read superblock", e);
+			}
+
+		}
+
+		/**
+		 * @return the versionOfSuperblock
+		 */
+		@Override
+		public int getVersionOfSuperblock() {
+			return versionOfSuperblock;
+		}
+
+		/**
+		 * @return the versionNumberOfTheFileFreeSpaceInformation
+		 */
+		@Override
+		public int getVersionNumberOfTheFileFreeSpaceInformation() {
+			return versionNumberOfTheFileFreeSpaceInformation;
+		}
+
+		/**
+		 * @return the versionOfRootGroupSymbolTableEntry
+		 */
+		@Override
+		public int getVersionOfRootGroupSymbolTableEntry() {
+			return versionOfRootGroupSymbolTableEntry;
+		}
+
+		/**
+		 * @return the versionOfSharedHeaderMessageFormat
+		 */
+		@Override
+		public int getVersionOfSharedHeaderMessageFormat() {
+			return versionOfSharedHeaderMessageFormat;
+		}
+
+		/**
+		 * @return the sizeOfOffsets
+		 */
+		@Override
+		public int getSizeOfOffsets() {
+			return sizeOfOffsets;
+		}
+
+		/**
+		 * @return the sizeOfLengths
+		 */
+		@Override
+		public int getSizeOfLengths() {
+			return sizeOfLengths;
+		}
+
+		/**
+		 * @return the groupLeafNodeK
+		 */
+		@Override
+		public int getGroupLeafNodeK() {
+			return groupLeafNodeK;
+		}
+
+		/**
+		 * @return the groupInternalNodeK
+		 */
+		@Override
+		public int getGroupInternalNodeK() {
+			return groupInternalNodeK;
+		}
+
+		/**
+		 * @return the baseAddressByte
+		 */
+		@Override
+		public long getBaseAddressByte() {
+			return baseAddressByte;
+		}
+
+		/**
+		 * @return the addressOfGlobalFreeSpaceIndex
+		 */
+		@Override
+		public long getAddressOfGlobalFreeSpaceIndex() {
+			return addressOfGlobalFreeSpaceIndex;
+		}
+
+		/**
+		 * @return the endOfFileAddress
+		 */
+		@Override
+		public long getEndOfFileAddress() {
+			return endOfFileAddress;
+		}
+
+		/**
+		 * @return the driverInformationBlockAddress
+		 */
+		@Override
+		public long getDriverInformationBlockAddress() {
+			return driverInformationBlockAddress;
+		}
+
+		/**
+		 * @return the rootGroupSymbolTableAddress
+		 */
+		@Override
+		public long getRootGroupSymbolTableAddress() {
+			return rootGroupSymbolTableAddress;
+		}
+	}
 }
