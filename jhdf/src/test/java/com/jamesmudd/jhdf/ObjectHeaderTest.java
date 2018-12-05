@@ -14,6 +14,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jamesmudd.jhdf.ObjectHeader.ObjectHeaderV1;
+
 public class ObjectHeaderTest {
 	private FileChannel fc;
 	private RandomAccessFile raf;
@@ -39,8 +41,11 @@ public class ObjectHeaderTest {
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(800L)));
-		assertThat(oh.getReferenceCount(), is(equalTo(1)));
 		assertThat(oh.getMessages().size(), is(equalTo(7)));
+
+		// V1 specific methods
+		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
+		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
 	}
 
 	@Test
@@ -49,8 +54,11 @@ public class ObjectHeaderTest {
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(7272L)));
-		assertThat(oh.getReferenceCount(), is(equalTo(1)));
 		assertThat(oh.getMessages().size(), is(equalTo(6)));
+
+		// V1 specific methods
+		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
+		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
 	}
 
 	@Test
@@ -59,8 +67,11 @@ public class ObjectHeaderTest {
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(7872L)));
-		assertThat(oh.getReferenceCount(), is(equalTo(1)));
 		assertThat(oh.getMessages().size(), is(equalTo(6)));
+
+		// V1 specific methods
+		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
+		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
 	}
 
 	@Test
@@ -69,8 +80,11 @@ public class ObjectHeaderTest {
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(10240L)));
-		assertThat(oh.getReferenceCount(), is(equalTo(1)));
 		assertThat(oh.getMessages().size(), is(equalTo(6)));
+
+		// V1 specific methods
+		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
+		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
 	}
 
 	@Test
@@ -79,8 +93,11 @@ public class ObjectHeaderTest {
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(11176L)));
-		assertThat(oh.getReferenceCount(), is(equalTo(1)));
 		assertThat(oh.getMessages().size(), is(equalTo(6)));
+
+		// V1 specific methods
+		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
+		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
 	}
 
 }
