@@ -21,7 +21,7 @@ public class HdfFileTest {
 	@Before
 	public void setup() throws FileNotFoundException {
 		testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
-		nonHdfFile = this.getClass().getResource("make_test_file.py").getFile();
+		nonHdfFile = this.getClass().getResource("make_test_files.py").getFile();
 	}
 
 	@Test
@@ -38,8 +38,8 @@ public class HdfFileTest {
 
 	@Test(expected = HdfException.class)
 	public void testOpeningInvalidFile() throws IOException {
-		HdfFile hdfFile = new HdfFile(new File(nonHdfFile));
-		hdfFile.close();
+		HdfFile hdfFile = new HdfFile(new File(nonHdfFile)); // Should throw
+		hdfFile.close(); // Will not be executed
 	}
 
 	@Test
