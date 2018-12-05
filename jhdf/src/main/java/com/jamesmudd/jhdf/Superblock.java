@@ -31,8 +31,6 @@ public abstract class Superblock {
 
 	public abstract long getEndOfFileAddress();
 
-	public abstract long getRootGroupSymbolTableAddress();
-
 	/**
 	 * Checks if the file provided contains the HDF5 file signature at the given
 	 * offset.
@@ -63,6 +61,7 @@ public abstract class Superblock {
 		if (!verifiedSignature) {
 			throw new HdfException("Superblock didn't contain valid signature");
 		}
+		logger.trace("Verified superblock signature");
 
 		// Signature is ok read rest of Superblock
 		long fileLocation = address + HDF5_FILE_SIGNATURE_LENGTH;
@@ -77,7 +76,7 @@ public abstract class Superblock {
 
 		// Version # of Superblock
 		final byte versionOfSuperblock = version.get();
-		logger.trace("Version of superblock is = {}", versionOfSuperblock);
+		logger.debug("Version of superblock is = {}", versionOfSuperblock);
 
 		switch (versionOfSuperblock) {
 		case 0:
@@ -291,7 +290,6 @@ public abstract class Superblock {
 		/**
 		 * @return the rootGroupSymbolTableAddress
 		 */
-		@Override
 		public long getRootGroupSymbolTableAddress() {
 			return rootGroupSymbolTableAddress;
 		}
@@ -305,7 +303,7 @@ public abstract class Superblock {
 		private final long baseAddressByte;
 		private final long superblockExtensionAddress;
 		private final long endOfFileAddress;
-		private final long rootGroupSymbolTableAddress;
+		private final long rootGroupObjectHeaderAddress;
 
 		public SuperblockV2V3(FileChannel fc, long address) {
 			try {
@@ -354,9 +352,9 @@ public abstract class Superblock {
 				endOfFileAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
 				logger.trace("endOfFileAddress = {}", endOfFileAddress);
 
-				// Root Group Symbol Table Entry Address
-				rootGroupSymbolTableAddress = address;
-				logger.trace("rootGroupSymbolTableAddress= {}", rootGroupSymbolTableAddress);
+				// Root Group Object Header Address
+				rootGroupObjectHeaderAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
+				logger.trace("rootGroupObjectHeaderAddress= {}", rootGroupObjectHeaderAddress);
 
 				// TODO Superblock checksum
 
@@ -414,11 +412,10 @@ public abstract class Superblock {
 		}
 
 		/**
-		 * @return the rootGroupSymbolTableAddress
+		 * @return the rootGroupObjectHeaderAddress
 		 */
-		@Override
-		public long getRootGroupSymbolTableAddress() {
-			return rootGroupSymbolTableAddress;
+		public long getRootGroupObjectHeaderAddress() {
+			return rootGroupObjectHeaderAddress;
 		}
 	}
 }

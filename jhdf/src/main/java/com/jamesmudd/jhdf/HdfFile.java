@@ -10,7 +10,9 @@ import java.nio.channels.FileChannel.MapMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jamesmudd.jhdf.Superblock.SuperblockV0V1;
 import com.jamesmudd.jhdf.exceptions.HdfException;
+import com.jamesmudd.jhdf.exceptions.UnsupportedHdfException;
 
 /**
  * The HDF file class this object represents a HDF5 file on disk and provides
@@ -54,7 +56,15 @@ public class HdfFile implements AutoCloseable {
 			// We have a valid HDF5 file so read the full superblock
 			superblock = Superblock.readSuperblock(fc, offset);
 			userHeaderSize = offset;
-			rootGroup = Group.createRootGroup(fc, superblock, superblock.getRootGroupSymbolTableAddress());
+
+			if (superblock.getVersionOfSuperblock() == 0 || superblock.getVersionOfSuperblock() == 1) {
+				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
+				rootGroup = Group.createRootGroup(fc, sb, sb.getRootGroupSymbolTableAddress());
+			} else if (superblock.getVersionOfSuperblock() == 2 || superblock.getVersionOfSuperblock() == 3) {
+				throw new UnsupportedHdfException("Superblock version 2 and 3 are not yet supproted");
+			} else {
+				throw new HdfException("Unreconized superblock version = " + superblock.getVersionOfSuperblock());
+			}
 
 		} catch (IOException e) {
 			throw new HdfException("Failed to open file. Is it a HDF5 file?", e);
