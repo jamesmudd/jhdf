@@ -25,7 +25,7 @@ public class LocalHeapTest {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
-		sb = new Superblock(fc, 0);
+		sb = Superblock.readSuperblock(fc, 0);
 	}
 
 	@After
