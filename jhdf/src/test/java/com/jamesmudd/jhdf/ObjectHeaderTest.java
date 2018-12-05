@@ -35,7 +35,7 @@ public class ObjectHeaderTest {
 
 	@Test
 	public void testObjectHeaderOnGroup() throws IOException {
-		ObjectHeader oh = new ObjectHeader(fc, sb, 800); // dataset_group header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 800); // dataset_group header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(800L)));
@@ -45,7 +45,7 @@ public class ObjectHeaderTest {
 
 	@Test
 	public void testObjectHeaderOnFloat16Dataset() throws IOException {
-		ObjectHeader oh = new ObjectHeader(fc, sb, 7272); // float16 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 7272); // float16 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(7272L)));
@@ -55,7 +55,7 @@ public class ObjectHeaderTest {
 
 	@Test
 	public void testObjectHeaderOnFloat32Dataset() throws IOException {
-		ObjectHeader oh = new ObjectHeader(fc, sb, 7872); // float32 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 7872); // float32 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(7872L)));
@@ -65,7 +65,7 @@ public class ObjectHeaderTest {
 
 	@Test
 	public void testObjectHeaderOnFloat64Dataset() throws IOException {
-		ObjectHeader oh = new ObjectHeader(fc, sb, 10240); // float64 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 10240); // float64 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(10240L)));
@@ -75,7 +75,7 @@ public class ObjectHeaderTest {
 
 	@Test
 	public void testObjectHeaderOnInt8Dataset() throws IOException {
-		ObjectHeader oh = new ObjectHeader(fc, sb, 11176); // int8 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 11176); // int8 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(11176L)));

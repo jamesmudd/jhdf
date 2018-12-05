@@ -26,7 +26,11 @@ public class ObjectHeader {
 
 	private final List<Message> messages;
 
-	public ObjectHeader(FileChannel fc, Superblock sb, long address) {
+	public static ObjectHeader readObjectHeader(FileChannel fc, Superblock sb, long address) {
+		return new ObjectHeader(fc, sb, address);
+	}
+
+	private ObjectHeader(FileChannel fc, Superblock sb, long address) {
 		this.address = address;
 
 		try {
