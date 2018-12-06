@@ -8,20 +8,20 @@ import com.jamesmudd.jhdf.Utils;
 public class ObjectHeaderContinuationMessage extends Message {
 
 	private final long offset;
-	private final long lentgh;
+	private final int lentgh;
 
 	public ObjectHeaderContinuationMessage(ByteBuffer bb, Superblock sb) {
 		super(bb);
 
 		offset = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
-		lentgh = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+		lentgh = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfOffsets());
 	}
 
 	public long getOffset() {
 		return offset;
 	}
 
-	public long getLentgh() {
+	public int getLentgh() {
 		return lentgh;
 	}
 }

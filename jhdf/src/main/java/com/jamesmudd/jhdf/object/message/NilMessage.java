@@ -6,9 +6,6 @@ public class NilMessage extends Message {
 
 	public NilMessage(ByteBuffer bb) {
 		super(bb);
-
-		// Skip size
-		bb.get(new byte[getDataSize()]);
 	}
 
 }
