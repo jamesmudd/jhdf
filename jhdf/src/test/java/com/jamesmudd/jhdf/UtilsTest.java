@@ -217,4 +217,17 @@ public class UtilsTest {
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 8), is(equalTo(UNDEFINED_ADDRESS)));
 	}
 
+	@Test
+	public void testCreatingSubbuffer() throws Exception {
+		byte[] ints = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		ByteBuffer bb = ByteBuffer.wrap(ints);
+
+		ByteBuffer subBuffer = Utils.createSubBuffer(bb, 3);
+		// Check new buffer is of the righ lentgh
+		assertThat(subBuffer.limit(), is(equalTo(3)));
+		// Check original buffer position is moved on
+		assertThat(bb.position(), is(equalTo(3)));
+
+	}
+
 }

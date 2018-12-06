@@ -1,6 +1,7 @@
 package com.jamesmudd.jhdf;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -143,5 +144,27 @@ public final class Utils {
 		default:
 			throw new IllegalArgumentException("Couldn't read " + lentgh + " bytes as int");
 		}
+	}
+
+	/**
+	 * Creates a new {@link ByteBuffer} of the specified length. The new buffer will
+	 * start at the current position of the source buffer and will be of the
+	 * specified length. The {@link ByteOrder} of the new buffer will be the same as
+	 * the source buffer. After the call the source buffer position will be
+	 * incremented by the length of the sub-buffer. The new buffer will share the
+	 * backing data with the source buffer.
+	 * 
+	 * @param source the buffer to take the sub buffer from
+	 * @param lentgh the size of the new sub-buffer
+	 * @return the new sub buffer
+	 */
+	public static ByteBuffer createSubBuffer(ByteBuffer source, int lentgh) {
+		ByteBuffer headerData = source.slice();
+		headerData.limit(lentgh);
+		headerData.order(source.order());
+
+		// Move the buffer past this header
+		source.position(source.position() + lentgh);
+		return headerData;
 	}
 }
