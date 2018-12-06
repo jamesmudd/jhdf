@@ -3,6 +3,7 @@ package com.jamesmudd.jhdf.object.message;
 import java.nio.ByteBuffer;
 
 import com.jamesmudd.jhdf.Superblock;
+import com.jamesmudd.jhdf.Utils;
 
 public class ObjectHeaderContinuationMessage extends Message {
 
@@ -12,9 +13,8 @@ public class ObjectHeaderContinuationMessage extends Message {
 	public ObjectHeaderContinuationMessage(ByteBuffer bb, Superblock sb) {
 		super(bb);
 
-		// FIXME should support variable lentgh and offset
-		offset = bb.getLong();
-		lentgh = bb.getLong();
+		offset = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+		lentgh = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 	}
 
 	public long getOffset() {
