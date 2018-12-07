@@ -28,7 +28,7 @@ public class FillValueMessage extends Message {
 			fillValueDefined = bb.get() == 1;
 
 			if (version == 2 && fillValueDefined) {
-				int size = bb.getInt();
+				int size = Utils.readBytesAsUnsignedInt(bb, 4);
 				fillValue = Utils.createSubBuffer(bb, size);
 			} else {
 				fillValue = null; // No fill value defined
@@ -40,7 +40,7 @@ public class FillValueMessage extends Message {
 			fillValueDefined = (flags & 0xff & FILL_VALUE_UNDEFINED_MASK >>> 5) == 1;
 
 			if (fillValueDefined) {
-				int size = bb.getInt();
+				int size = Utils.readBytesAsUnsignedInt(bb, 4);
 				fillValue = Utils.createSubBuffer(bb, size);
 			} else {
 				fillValue = null; // No fill value defined
