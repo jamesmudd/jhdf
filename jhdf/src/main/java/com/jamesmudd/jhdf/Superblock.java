@@ -107,7 +107,7 @@ public abstract class Superblock {
 		private final long driverInformationBlockAddress;
 		private final long rootGroupSymbolTableAddress;
 
-		public SuperblockV0V1(FileChannel fc, long address) {
+		private SuperblockV0V1(FileChannel fc, long address) {
 			try {
 
 				ByteBuffer header = ByteBuffer.allocate(12);
@@ -305,7 +305,7 @@ public abstract class Superblock {
 		private final long endOfFileAddress;
 		private final long rootGroupObjectHeaderAddress;
 
-		public SuperblockV2V3(FileChannel fc, long address) {
+		private SuperblockV2V3(FileChannel fc, long address) {
 			try {
 
 				ByteBuffer header = ByteBuffer.allocate(4);

@@ -8,15 +8,15 @@ import java.util.List;
 
 import com.jamesmudd.jhdf.Superblock;
 import com.jamesmudd.jhdf.Utils;
+import com.jamesmudd.jhdf.exceptions.HdfException;
 
 public class DataSpace {
 
 	private final byte version;
 	private final boolean maxSizesPresent;
-	private final boolean permutationIndexsPresent;
 	private final List<Integer> dimensions;
 	private final List<Integer> maxSizes;
-	private final List<Integer> permutationIndex;
+	private final byte type;
 
 	private DataSpace(ByteBuffer bb, Superblock sb) {
 
@@ -26,10 +26,16 @@ public class DataSpace {
 		bb.get(flagBits);
 		BitSet flags = BitSet.valueOf(flagBits);
 		maxSizesPresent = flags.get(0);
-		permutationIndexsPresent = flags.get(1);
 
-		// Skip 5 reserved bytes
-		bb.get(new byte[5]);
+		if (version == 1) {
+			// Skip 5 reserved bytes
+			bb.position(bb.position() + 5);
+			type = -1;
+		} else if (version == 2) {
+			type = bb.get();
+		} else {
+			throw new HdfException("Unreconized version = " + version);
+		}
 
 		// Dimensions sizes
 		if (numberOfdimensions != 0) {
@@ -51,15 +57,7 @@ public class DataSpace {
 			maxSizes = Collections.emptyList();
 		}
 
-		// Permutation indices
-		if (permutationIndexsPresent) {
-			permutationIndex = new ArrayList<>(numberOfdimensions);
-			for (int i = 0; i < numberOfdimensions; i++) {
-				permutationIndex.add(Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths()));
-			}
-		} else {
-			permutationIndex = Collections.emptyList();
-		}
+		// Permutation indices - Note never implemented in HDF library!
 	}
 
 	public static DataSpace readDataSpace(ByteBuffer bb, Superblock sb) {
@@ -77,6 +75,14 @@ public class DataSpace {
 			return 1;
 		}
 		return dimensions.stream().mapToInt(Integer::intValue).reduce(1, Math::multiplyExact);
+	}
+
+	public int getType() {
+		return type;
+	}
+
+	public int getVersion() {
+		return version;
 	}
 
 }

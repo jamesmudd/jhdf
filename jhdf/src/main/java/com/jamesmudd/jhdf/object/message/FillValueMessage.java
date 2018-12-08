@@ -3,12 +3,18 @@ package com.jamesmudd.jhdf.object.message;
 import java.nio.ByteBuffer;
 
 import com.jamesmudd.jhdf.Superblock;
+import com.jamesmudd.jhdf.Utils;
+import com.jamesmudd.jhdf.exceptions.HdfException;
 
 public class FillValueMessage extends Message {
 
+	private static final int SPACE_ALLOCATION_TIME_MASK = 0b1100_0000;
+	private static final int FILL_VALUE_TIME_MASK = 0b0011_0000;
+	private static final int FILL_VALUE_UNDEFINED_MASK = 0b0000_1000;
+
 	private final byte version;
-	private final byte spaceAllocationTime;
-	private final byte fillValueWriteTime;
+	private final int spaceAllocationTime;
+	private final int fillValueWriteTime;
 	private final boolean fillValueDefined;
 	private final ByteBuffer fillValue;
 
@@ -16,18 +22,31 @@ public class FillValueMessage extends Message {
 		super(bb);
 
 		version = bb.get();
-		spaceAllocationTime = bb.get();
-		fillValueWriteTime = bb.get();
-		fillValueDefined = bb.get() == 1;
+		if (version == 1 || version == 2) {
+			spaceAllocationTime = bb.get();
+			fillValueWriteTime = bb.get();
+			fillValueDefined = bb.get() == 1;
 
-		if (version == 2 && fillValueDefined) {
-			int size = bb.getInt();
-			fillValue = bb.slice();
-			fillValue.limit(size);
-			fillValue.order(bb.order());
-			fillValue.rewind();
+			if (version == 2 && fillValueDefined) {
+				int size = Utils.readBytesAsUnsignedInt(bb, 4);
+				fillValue = Utils.createSubBuffer(bb, size);
+			} else {
+				fillValue = null; // No fill value defined
+			}
+		} else if (version == 3) {
+			byte flags = bb.get();
+			spaceAllocationTime = flags & 0xff & SPACE_ALLOCATION_TIME_MASK >>> 6;
+			fillValueWriteTime = flags & 0xff & FILL_VALUE_TIME_MASK >>> 4;
+			fillValueDefined = (flags & 0xff & FILL_VALUE_UNDEFINED_MASK >>> 5) == 1;
+
+			if (fillValueDefined) {
+				int size = Utils.readBytesAsUnsignedInt(bb, 4);
+				fillValue = Utils.createSubBuffer(bb, size);
+			} else {
+				fillValue = null; // No fill value defined
+			}
 		} else {
-			fillValue = null; // No fill value defined
+			throw new HdfException("Unreconized version = " + version);
 		}
 	}
 
@@ -35,11 +54,15 @@ public class FillValueMessage extends Message {
 		return fillValueDefined;
 	}
 
-	public byte getSpaceAllocationTime() {
+	public int getSpaceAllocationTime() {
 		return spaceAllocationTime;
 	}
 
-	public byte getFillValueWriteTime() {
+	public int getFillValueWriteTime() {
 		return fillValueWriteTime;
+	}
+
+	public ByteBuffer getFillValue() {
+		return fillValue.asReadOnlyBuffer();
 	}
 }

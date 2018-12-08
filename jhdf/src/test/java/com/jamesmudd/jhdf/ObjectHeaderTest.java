@@ -14,6 +14,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jamesmudd.jhdf.ObjectHeader.ObjectHeaderV1;
+
 public class ObjectHeaderTest {
 	private FileChannel fc;
 	private RandomAccessFile raf;
@@ -35,52 +37,67 @@ public class ObjectHeaderTest {
 
 	@Test
 	public void testObjectHeaderOnGroup() throws IOException {
-		ObjectHeader oh = new ObjectHeader(fc, sb, 800); // dataset_group header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 800); // dataset_group header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(800L)));
-		assertThat(oh.getReferenceCount(), is(equalTo(1)));
 		assertThat(oh.getMessages().size(), is(equalTo(7)));
+
+		// V1 specific methods
+		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
+		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
 	}
 
 	@Test
 	public void testObjectHeaderOnFloat16Dataset() throws IOException {
-		ObjectHeader oh = new ObjectHeader(fc, sb, 7272); // float16 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 7272); // float16 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(7272L)));
-		assertThat(oh.getReferenceCount(), is(equalTo(1)));
 		assertThat(oh.getMessages().size(), is(equalTo(6)));
+
+		// V1 specific methods
+		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
+		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
 	}
 
 	@Test
 	public void testObjectHeaderOnFloat32Dataset() throws IOException {
-		ObjectHeader oh = new ObjectHeader(fc, sb, 7872); // float32 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 7872); // float32 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(7872L)));
-		assertThat(oh.getReferenceCount(), is(equalTo(1)));
 		assertThat(oh.getMessages().size(), is(equalTo(6)));
+
+		// V1 specific methods
+		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
+		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
 	}
 
 	@Test
 	public void testObjectHeaderOnFloat64Dataset() throws IOException {
-		ObjectHeader oh = new ObjectHeader(fc, sb, 10240); // float64 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 10240); // float64 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(10240L)));
-		assertThat(oh.getReferenceCount(), is(equalTo(1)));
 		assertThat(oh.getMessages().size(), is(equalTo(6)));
+
+		// V1 specific methods
+		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
+		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
 	}
 
 	@Test
 	public void testObjectHeaderOnInt8Dataset() throws IOException {
-		ObjectHeader oh = new ObjectHeader(fc, sb, 11176); // int8 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 11176); // int8 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(11176L)));
-		assertThat(oh.getReferenceCount(), is(equalTo(1)));
 		assertThat(oh.getMessages().size(), is(equalTo(6)));
+
+		// V1 specific methods
+		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
+		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
 	}
 
 }
