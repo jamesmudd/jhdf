@@ -18,8 +18,9 @@ public class DataLayoutMessage extends Message {
 
 		version = bb.get();
 
-		if (version != 3) {
-			throw new UnsupportedHdfException("Onlt v3 data layout messages are supported");
+		if (version != 3 && version != 4) {
+			throw new UnsupportedHdfException(
+					"Only v3 and v4 data layout messages are supported. Detected version = " + version);
 		}
 
 		layoutClass = bb.get();
@@ -33,6 +34,8 @@ public class DataLayoutMessage extends Message {
 			break;
 		case 2: // Chunked Storage
 			throw new UnsupportedHdfException("Chunked storage is not supported");
+		case 3: // Virtual storage
+			throw new UnsupportedHdfException("Virtual storage is not supported");
 		default:
 			throw new UnsupportedHdfException("Unknown storage layout " + layoutClass);
 		}
