@@ -248,7 +248,9 @@ public abstract class ObjectHeader {
 				bb.order(LITTLE_ENDIAN);
 				bb.rewind();
 
-				while (bb.hasRemaining()) {
+				// There might be a gap at the end of the header of upto 4 bytes
+				// message type (1_byte) + message size (2 bytes) + message flags (1 byte)
+				while (bb.remaining() > 4) {
 					Message m = Message.readObjectHeaderV2Message(bb, sb);
 					messages.add(m);
 
@@ -257,7 +259,10 @@ public abstract class ObjectHeader {
 						bb = ByteBuffer.allocate(ohcm.getLentgh());
 						fc.read(bb, ohcm.getOffset());
 						bb.order(LITTLE_ENDIAN);
-						bb.rewind();
+
+						// Its a V2 Continuation block so skip the header
+						// TODO should check the 'OCHK' signature might need to refactor...
+						bb.position(4);
 					}
 				}
 

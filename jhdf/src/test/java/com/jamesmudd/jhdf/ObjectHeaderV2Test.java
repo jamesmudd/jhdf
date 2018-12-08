@@ -43,7 +43,7 @@ public class ObjectHeaderV2Test {
 		assertThat(oh.getAddress(), is(equalTo(48L)));
 		assertThat(oh.getMessages().size(), is(equalTo(4)));
 
-		// V1 specific methods
+		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
 		assertThat(ohV2.getAccessTime(), is(equalTo(1544032461L)));
 		assertThat(ohV2.getBirthTime(), is(equalTo(1544032461L)));
@@ -53,74 +53,94 @@ public class ObjectHeaderV2Test {
 		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
 	}
 
-//	@Test
-//	public void testDatasetsGroupObjectHeaderV2() throws IOException {
-//		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 195); // Root group header
-//
-//		assertThat(oh.getVersion(), is(equalTo(2)));
-//		assertThat(oh.getAddress(), is(equalTo(48L)));
-//		assertThat(oh.getMessages().size(), is(equalTo(4)));
-//
-//		// V1 specific methods
-//		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
-//		assertThat(ohV2.getAccessTime(), is(equalTo(1544032461L)));
-//		assertThat(ohV2.getBirthTime(), is(equalTo(1544032461L)));
-//		assertThat(ohV2.getChangeTime(), is(equalTo(1544032461L)));
-//		assertThat(ohV2.getModificationTime(), is(equalTo(1544032461L)));
-//		assertThat(ohV2.getMaximumNumberOfCompactAttributes(), is(equalTo(-1)));
-//		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
-//	}
+	@Test
+	public void testDatasetsGroupObjectHeaderV2() throws IOException {
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 195); // Root group header
 
-//	@Test
-//	public void testObjectHeaderOnFloat16Dataset() throws IOException {
-//		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 7272); // float16 header
-//
-//		assertThat(oh.getVersion(), is(equalTo(1)));
-//		assertThat(oh.getAddress(), is(equalTo(7272L)));
-//		assertThat(oh.getMessages().size(), is(equalTo(6)));
-//
-//		// V1 specific methods
-//		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
-//		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
-//	}
-//
-//	@Test
-//	public void testObjectHeaderOnFloat32Dataset() throws IOException {
-//		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 7872); // float32 header
-//
-//		assertThat(oh.getVersion(), is(equalTo(1)));
-//		assertThat(oh.getAddress(), is(equalTo(7872L)));
-//		assertThat(oh.getMessages().size(), is(equalTo(6)));
-//
-//		// V1 specific methods
-//		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
-//		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
-//	}
-//
-//	@Test
-//	public void testObjectHeaderOnFloat64Dataset() throws IOException {
-//		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 10240); // float64 header
-//
-//		assertThat(oh.getVersion(), is(equalTo(1)));
-//		assertThat(oh.getAddress(), is(equalTo(10240L)));
-//		assertThat(oh.getMessages().size(), is(equalTo(6)));
-//
-//		// V1 specific methods
-//		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
-//		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
-//	}
-//
-//	@Test
-//	public void testObjectHeaderOnInt8Dataset() throws IOException {
-//		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 11176); // int8 header
-//
-//		assertThat(oh.getVersion(), is(equalTo(1)));
-//		assertThat(oh.getAddress(), is(equalTo(11176L)));
-//		assertThat(oh.getMessages().size(), is(equalTo(6)));
-//
-//		// V1 specific methods
-//		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
-//		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
-//	}
+		assertThat(oh.getVersion(), is(equalTo(2)));
+		assertThat(oh.getAddress(), is(equalTo(195L)));
+		assertThat(oh.getMessages().size(), is(equalTo(3)));
+
+		// V2 specific methods
+		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
+		assertThat(ohV2.getAccessTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getBirthTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getChangeTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getModificationTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getMaximumNumberOfCompactAttributes(), is(equalTo(-1)));
+		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
+	}
+
+	@Test
+	public void testObjectHeaderOnFloat16Dataset() throws IOException {
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 608); // float16 header
+
+		assertThat(oh.getVersion(), is(equalTo(2)));
+		assertThat(oh.getAddress(), is(equalTo(608L)));
+		assertThat(oh.getMessages().size(), is(equalTo(5)));
+
+		// V2 specific methods
+		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
+		assertThat(ohV2.getAccessTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getBirthTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getChangeTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getModificationTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getMaximumNumberOfCompactAttributes(), is(equalTo(-1)));
+		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
+	}
+
+	@Test
+	public void testObjectHeaderOnFloat32Dataset() throws IOException {
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 892); // float32 header
+
+		assertThat(oh.getVersion(), is(equalTo(2)));
+		assertThat(oh.getAddress(), is(equalTo(892L)));
+		assertThat(oh.getMessages().size(), is(equalTo(5)));
+
+		// V2 specific methods
+		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
+		assertThat(ohV2.getAccessTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getBirthTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getChangeTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getModificationTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getMaximumNumberOfCompactAttributes(), is(equalTo(-1)));
+		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
+	}
+
+	@Test
+	public void testObjectHeaderOnFloat64Dataset() throws IOException {
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 1176); // float64 header
+
+		assertThat(oh.getVersion(), is(equalTo(2)));
+		assertThat(oh.getAddress(), is(equalTo(1176L)));
+		assertThat(oh.getMessages().size(), is(equalTo(5)));
+
+		// V2 specific methods
+		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
+		assertThat(ohV2.getAccessTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getBirthTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getChangeTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getModificationTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getMaximumNumberOfCompactAttributes(), is(equalTo(-1)));
+		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
+	}
+
+	@Test
+	public void testObjectHeaderOnInt8Dataset() throws IOException {
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 1655); // int8 header
+
+		assertThat(oh.getVersion(), is(equalTo(2)));
+		assertThat(oh.getAddress(), is(equalTo(1655L)));
+		assertThat(oh.getMessages().size(), is(equalTo(5)));
+
+		// V2 specific methods
+		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
+		assertThat(ohV2.getAccessTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getBirthTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getChangeTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getModificationTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getMaximumNumberOfCompactAttributes(), is(equalTo(-1)));
+		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
+	}
 
 }
