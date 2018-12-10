@@ -39,6 +39,25 @@ public class LinkInfoMessage extends Message {
 		} else {
 			bTreeCreationOrderIndexAddress = -1;
 		}
+	}
 
+	public int getVersion() {
+		return version;
+	}
+
+	public long getMaximumCreationIndex() {
+		return maximumCreationIndex;
+	}
+
+	public long getFractalHeapAddress() {
+		return fractalHeapAddress;
+	}
+
+	public long getbTreeNameIndexAddress() {
+		return bTreeNameIndexAddress;
+	}
+
+	public long getbTreeCreationOrderIndexAddress() {
+		return bTreeCreationOrderIndexAddress;
 	}
 }
