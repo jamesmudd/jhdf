@@ -59,7 +59,7 @@ public class ObjectHeaderV2Test {
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(195L)));
-		assertThat(oh.getMessages().size(), is(equalTo(3)));
+		assertThat(oh.getMessages().size(), is(equalTo(9)));
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;

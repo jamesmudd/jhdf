@@ -21,6 +21,9 @@ public class LinkMessage extends Message {
 	private final int linkType;
 	private final long creationOrder;
 	private final String linkName;
+	private long hardLinkAddress;
+	private String softLink;
+	private String externalLink;
 
 	public LinkMessage(ByteBuffer bb, Superblock sb) {
 		super(bb);
@@ -89,23 +92,51 @@ public class LinkMessage extends Message {
 		// Link Information
 		switch (linkType) {
 		case 0: // Hard Link
-			long hardLinkAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+			hardLinkAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 			break;
 		case 1: // Soft link
 			int lentghOfSoftLink = Utils.readBytesAsUnsignedInt(bb, 2);
 			ByteBuffer linkBuffer = Utils.createSubBuffer(bb, lentghOfSoftLink);
-			String softLink = US_ASCII.decode(linkBuffer).toString();
+			softLink = US_ASCII.decode(linkBuffer).toString();
 			break;
 		case 64: // External link
 			int lentghOfExternalLink = Utils.readBytesAsUnsignedInt(bb, 2);
 			ByteBuffer externalLinkBuffer = Utils.createSubBuffer(bb, lentghOfExternalLink);
 			// Skip first byte contains version = 0 and flags = 0
 			externalLinkBuffer.position(1);
-			String externalLink = US_ASCII.decode(externalLinkBuffer).toString();
+			externalLink = US_ASCII.decode(externalLinkBuffer).toString();
 			break;
 		default:
 			throw new HdfException("Unreconized link type = " + linkType);
 		}
+	}
+
+	public byte getVersion() {
+		return version;
+	}
+
+	public int getLinkType() {
+		return linkType;
+	}
+
+	public long getCreationOrder() {
+		return creationOrder;
+	}
+
+	public String getLinkName() {
+		return linkName;
+	}
+
+	public long getHardLinkAddress() {
+		return hardLinkAddress;
+	}
+
+	public String getSoftLink() {
+		return softLink;
+	}
+
+	public String getExternalLink() {
+		return externalLink;
 	}
 
 }

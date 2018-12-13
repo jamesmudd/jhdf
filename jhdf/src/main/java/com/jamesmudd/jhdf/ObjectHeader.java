@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,10 @@ public abstract class ObjectHeader {
 	public abstract int getVersion();
 
 	public abstract List<Message> getMessages();
+
+	public <T> List<T> getMessagesOfType(Class<T> type) {
+		return getMessages().stream().filter(type::isInstance).map(type::cast).collect(Collectors.toList());
+	}
 
 	public static class ObjectHeaderV1 extends ObjectHeader {
 
@@ -250,27 +255,33 @@ public abstract class ObjectHeader {
 
 				// There might be a gap at the end of the header of upto 4 bytes
 				// message type (1_byte) + message size (2 bytes) + message flags (1 byte)
-				while (bb.remaining() > 4) {
-					Message m = Message.readObjectHeaderV2Message(bb, sb);
-					messages.add(m);
-
-					if (m instanceof ObjectHeaderContinuationMessage) {
-						ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
-						bb = ByteBuffer.allocate(ohcm.getLentgh());
-						fc.read(bb, ohcm.getOffset());
-						bb.order(LITTLE_ENDIAN);
-
-						// Its a V2 Continuation block so skip the header
-						// TODO should check the 'OCHK' signature might need to refactor...
-						bb.position(4);
-					}
-				}
+				bb = readMessages(fc, sb, bb);
 
 				logger.debug("Read object header from: {}", Utils.toHex(address));
 
 			} catch (Exception e) {
 				throw new HdfException("Failed to read object header at: " + Utils.toHex(address), e);
 			}
+		}
+
+		private ByteBuffer readMessages(FileChannel fc, Superblock sb, ByteBuffer bb) throws IOException {
+			while (bb.remaining() > 4) {
+				Message m = Message.readObjectHeaderV2Message(bb, sb);
+				messages.add(m);
+
+				if (m instanceof ObjectHeaderContinuationMessage) {
+					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
+					ByteBuffer continuationBuffer = ByteBuffer.allocate(ohcm.getLentgh());
+					fc.read(continuationBuffer, ohcm.getOffset());
+					continuationBuffer.order(LITTLE_ENDIAN);
+
+					// Its a V2 Continuation block so skip the header
+					// TODO should check the 'OCHK' signature might need to refactor...
+					continuationBuffer.position(4);
+					readMessages(fc, sb, continuationBuffer);
+				}
+			}
+			return bb;
 		}
 
 		@Override
