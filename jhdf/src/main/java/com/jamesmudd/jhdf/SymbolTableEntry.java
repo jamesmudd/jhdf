@@ -91,7 +91,7 @@ public class SymbolTableEntry {
 		return cacheType;
 	}
 
-	public long getLinkNameOffset() {
+	public int getLinkNameOffset() {
 		return linkNameOffset;
 	}
 

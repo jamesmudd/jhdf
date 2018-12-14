@@ -36,7 +36,7 @@ public class SymbolTableEntryTest {
 	@Test
 	public void testSymbolTableEntry() throws IOException {
 		SymbolTableEntry ste = new SymbolTableEntry(fc, 56, sb);
-		assertThat(ste.getLinkNameOffset(), is(equalTo(0L)));
+		assertThat(ste.getLinkNameOffset(), is(equalTo(0)));
 		assertThat(ste.getObjectHeaderAddress(), is(equalTo(96L)));
 		assertThat(ste.getCacheType(), is(equalTo(1)));
 		assertThat(ste.getBTreeAddress(), is(equalTo(136L)));
