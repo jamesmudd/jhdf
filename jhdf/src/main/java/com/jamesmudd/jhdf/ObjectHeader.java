@@ -48,6 +48,10 @@ public abstract class ObjectHeader {
 		return getMessages().stream().filter(type::isInstance).map(type::cast).collect(Collectors.toList());
 	}
 
+	public <T> boolean hasMessageOfType(Class<T> type) {
+		return !getMessagesOfType(type).isEmpty();
+	}
+
 	public static class ObjectHeaderV1 extends ObjectHeader {
 
 		/** The location of this B tree in the file */

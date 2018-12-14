@@ -29,6 +29,7 @@ public class ApiTest {
 		String indent = Collections.nCopies(level, "    ").stream().collect(Collectors.joining(""));
 		for (Node node : group.getChildren().values()) {
 			System.out.println(indent + node.getName());
+			System.out.println(indent + node.getAttributes().keySet());
 			if (node instanceof Group) {
 				recursivePrintGroup((Group) node, level);
 			}

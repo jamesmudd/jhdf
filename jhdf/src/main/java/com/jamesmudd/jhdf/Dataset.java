@@ -1,15 +1,20 @@
 package com.jamesmudd.jhdf;
 
+import java.util.Collections;
 import java.util.Map;
+
+import com.jamesmudd.jhdf.object.message.AttributeMessage;
 
 public class Dataset implements Node {
 
 	private final String name;
 	private final Group parent;
+	private final Map<String, AttributeMessage> attributes;
 
 	public Dataset(String name, Group parent) {
 		this.name = name;
 		this.parent = parent;
+		attributes = Collections.emptyMap();
 		// TODO Auto-generated constructor stub
 	}
 
@@ -33,6 +38,10 @@ public class Dataset implements Node {
 	@Override
 	public String getPath() {
 		return parent.getPath() + "/" + name;
+	}
+
+	public Map<String, AttributeMessage> getAttributes() {
+		return attributes;
 	}
 
 }

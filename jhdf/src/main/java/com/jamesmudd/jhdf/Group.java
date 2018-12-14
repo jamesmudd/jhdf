@@ -1,5 +1,8 @@
 package com.jamesmudd.jhdf;
 
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.LinkedHashMap;
@@ -7,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.jamesmudd.jhdf.exceptions.UnsupportedHdfException;
+import com.jamesmudd.jhdf.object.message.AttributeMessage;
 import com.jamesmudd.jhdf.object.message.DataSpaceMessage;
 import com.jamesmudd.jhdf.object.message.LinkInfoMessage;
 import com.jamesmudd.jhdf.object.message.LinkMessage;
@@ -17,6 +21,7 @@ public class Group implements Node {
 	private final long address;
 	private final Group parent;
 	private final Map<String, Node> children;
+	private final Map<String, AttributeMessage> attributes;
 
 	private final BTreeNode rootbTreeNode;
 	private final LocalHeap rootNameHeap;
@@ -46,8 +51,12 @@ public class Group implements Node {
 					children.put(childName, dataset);
 				}
 			}
-
 		}
+
+		// Add attributes
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, ojbectHeaderAddress);
+		attributes = oh.getMessagesOfType(AttributeMessage.class).stream()
+				.collect(toMap(AttributeMessage::getName, identity()));
 	}
 
 	public Group(FileChannel fc, Superblock sb, ObjectHeader oh, String name, Group parent) {
@@ -81,6 +90,10 @@ public class Group implements Node {
 		} else {
 			throw new UnsupportedHdfException("Only compact link storage is supported");
 		}
+
+		// Add attributes
+		attributes = oh.getMessagesOfType(AttributeMessage.class).stream()
+				.collect(toMap(AttributeMessage::getName, identity()));
 
 	}
 
@@ -131,6 +144,11 @@ public class Group implements Node {
 	@Override
 	public String getPath() {
 		return parent.getPath() + "/" + name;
+	}
+
+	@Override
+	public Map<String, AttributeMessage> getAttributes() {
+		return attributes;
 	}
 
 	/**
