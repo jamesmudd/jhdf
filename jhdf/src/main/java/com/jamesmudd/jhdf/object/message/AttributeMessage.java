@@ -102,7 +102,7 @@ public class AttributeMessage extends Message {
 			}
 
 			ByteBuffer nameBuffer = Utils.createSubBuffer(bb, nameSize);
-			name = charset.decode(nameBuffer).toString();
+			name = charset.decode(nameBuffer).toString().trim();
 			logger.trace("Name: {}", name);
 
 			if (flags.get(DATA_TYPE_SHARED)) {

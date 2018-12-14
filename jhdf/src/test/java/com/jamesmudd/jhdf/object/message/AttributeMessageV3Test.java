@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import com.jamesmudd.jhdf.Superblock;
 
-public class AttributeMessageTest {
+public class AttributeMessageV3Test {
 	private FileChannel fc;
 	private RandomAccessFile raf;
 	private Superblock sb;
@@ -28,11 +28,11 @@ public class AttributeMessageTest {
 
 	@Before
 	public void setUp() throws IOException {
-		final String testFileUrl = this.getClass().getResource("../../test_file.hdf5").getFile();
+		final String testFileUrl = this.getClass().getResource("../../test_file2.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
 		sb = Superblock.readSuperblock(fc, 0);
-		bb = fc.map(READ_ONLY, 1864, 80);
+		bb = fc.map(READ_ONLY, 270, 65);
 		bb.order(LITTLE_ENDIAN);
 	}
 
@@ -45,9 +45,12 @@ public class AttributeMessageTest {
 	@Test
 	public void test() throws CharacterCodingException {
 		AttributeMessage am = new AttributeMessage(bb, sb);
+		assertThat(am.getVersion(), is(equalTo(3)));
 		assertThat(am.getName(), is(equalTo("string_attr")));
-		assertThat(am.getDataType().getDataClass(), is(9));
-		assertThat(am.getData().capacity(), is(24));
+		assertThat(am.getDataType().getDataClass(), is(equalTo(9)));
+		assertThat(am.getDataSpace().getTotalLentgh(), is(equalTo(1)));
+		assertThat(am.getData().capacity(), is(equalTo(20)));
+
 		String test = StandardCharsets.UTF_8.newDecoder().decode(am.getData()).toString();
 	}
 
