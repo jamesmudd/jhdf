@@ -1,6 +1,5 @@
 package com.jamesmudd.jhdf;
 
-import static com.jamesmudd.jhdf.Utils.UNDEFINED_ADDRESS;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -52,8 +51,8 @@ public class SuperblockTest {
 		assertThat(sbV0.getVersionOfSharedHeaderMessageFormat(), is(equalTo(0)));
 		assertThat(sbV0.getGroupLeafNodeK(), is(equalTo(4)));
 		assertThat(sbV0.getGroupInternalNodeK(), is(equalTo(16)));
-		assertThat(sbV0.getAddressOfGlobalFreeSpaceIndex(), is(equalTo(UNDEFINED_ADDRESS)));
-		assertThat(sbV0.getDriverInformationBlockAddress(), is(equalTo(UNDEFINED_ADDRESS)));
+		assertThat(sbV0.getAddressOfGlobalFreeSpaceIndex(), is(equalTo(Constants.UNDEFINED_ADDRESS)));
+		assertThat(sbV0.getDriverInformationBlockAddress(), is(equalTo(Constants.UNDEFINED_ADDRESS)));
 		assertThat(sbV0.getRootGroupSymbolTableAddress(), is(equalTo(56L)));
 	}
 

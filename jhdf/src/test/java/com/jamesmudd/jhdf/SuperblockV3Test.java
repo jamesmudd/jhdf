@@ -1,6 +1,5 @@
 package com.jamesmudd.jhdf;
 
-import static com.jamesmudd.jhdf.Utils.UNDEFINED_ADDRESS;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,7 +46,7 @@ public class SuperblockV3Test {
 
 		// Test V3 only methods
 		SuperblockV2V3 sbV3 = (SuperblockV2V3) sb;
-		assertThat(sbV3.getSuperblockExtensionAddress(), is(equalTo(UNDEFINED_ADDRESS)));
+		assertThat(sbV3.getSuperblockExtensionAddress(), is(equalTo(Constants.UNDEFINED_ADDRESS)));
 		assertThat(sbV3.getRootGroupObjectHeaderAddress(), is(equalTo(48L)));
 //		assertThat(sbV0.getVersionOfSharedHeaderMessageFormat(), is(equalTo(0)));
 //		assertThat(sbV0.getGroupLeafNodeK(), is(equalTo(4)));

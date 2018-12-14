@@ -6,10 +6,6 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 
 public final class Utils {
-	public static final char NULL = '\0';
-	/** All bits on */
-	public static final long UNDEFINED_ADDRESS = -1;
-
 	private static final CharsetEncoder ASCII = StandardCharsets.US_ASCII.newEncoder();
 
 	private Utils() {
@@ -23,7 +19,7 @@ public final class Utils {
 	 * @return the address as a hex string
 	 */
 	public static String toHex(long address) {
-		if (address == UNDEFINED_ADDRESS) {
+		if (address == Constants.UNDEFINED_ADDRESS) {
 			return "UNDEFINED";
 		}
 		return "0x" + Long.toHexString(address);
@@ -43,7 +39,7 @@ public final class Utils {
 		StringBuilder sb = new StringBuilder(buffer.remaining());
 		while (buffer.hasRemaining()) {
 			char c = (char) buffer.get();
-			if (c == NULL) {
+			if (c == Constants.NULL) {
 				return sb.toString();
 			}
 			sb.append(c);
@@ -137,7 +133,7 @@ public final class Utils {
 			return Integer.toUnsignedLong(buffer.getInt());
 		case 8:
 			long value = buffer.getLong();
-			if (value < 0 && value != UNDEFINED_ADDRESS) {
+			if (value < 0 && value != Constants.UNDEFINED_ADDRESS) {
 				throw new ArithmeticException("Could not convert to unsigned");
 			}
 			return value;

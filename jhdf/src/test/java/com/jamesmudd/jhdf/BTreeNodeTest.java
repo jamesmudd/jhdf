@@ -40,8 +40,8 @@ public class BTreeNodeTest {
 		assertThat(bTree.getNodeType(), is(equalTo((short) 0)));
 		assertThat(bTree.getNodeLevel(), is(equalTo((short) 0)));
 		assertThat(bTree.getEntriesUsed(), is(equalTo((short) 1)));
-		assertThat(bTree.getLeftSiblingAddress(), is(equalTo(Utils.UNDEFINED_ADDRESS)));
-		assertThat(bTree.getRightSiblingAddress(), is(equalTo(Utils.UNDEFINED_ADDRESS)));
+		assertThat(bTree.getLeftSiblingAddress(), is(equalTo(Constants.UNDEFINED_ADDRESS)));
+		assertThat(bTree.getRightSiblingAddress(), is(equalTo(Constants.UNDEFINED_ADDRESS)));
 		assertThat(bTree.getKeys(), is(equalTo(new long[] { 0, 8 })));
 		assertThat(bTree.getChildAddresses(), is(equalTo(new long[] { 1504 })));
 		assertThat(bTree.toString(), is(equalTo(

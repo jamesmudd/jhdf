@@ -66,7 +66,7 @@ public class Group implements Node {
 
 		LinkInfoMessage linkInfoMessage = oh.getMessagesOfType(LinkInfoMessage.class).get(0);
 
-		if (linkInfoMessage.getbTreeNameIndexAddress() == Utils.UNDEFINED_ADDRESS) {
+		if (linkInfoMessage.getbTreeNameIndexAddress() == Constants.UNDEFINED_ADDRESS) {
 			rootbTreeNode = null;
 			rootNameHeap = null;
 

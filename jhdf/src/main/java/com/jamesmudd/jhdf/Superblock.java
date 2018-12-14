@@ -1,6 +1,5 @@
 package com.jamesmudd.jhdf;
 
-import static com.jamesmudd.jhdf.Utils.UNDEFINED_ADDRESS;
 import static com.jamesmudd.jhdf.Utils.toHex;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
@@ -344,7 +343,7 @@ public abstract class Superblock {
 				superblockExtensionAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
 				logger.trace("addressOfGlobalFreeSpaceIndex = {}", superblockExtensionAddress);
 
-				if (superblockExtensionAddress != UNDEFINED_ADDRESS) {
+				if (superblockExtensionAddress != Constants.UNDEFINED_ADDRESS) {
 					throw new UnsupportedHdfException("Superblock extension is not supported");
 				}
 

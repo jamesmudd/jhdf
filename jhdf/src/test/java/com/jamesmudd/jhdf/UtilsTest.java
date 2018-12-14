@@ -1,6 +1,5 @@
 package com.jamesmudd.jhdf;
 
-import static com.jamesmudd.jhdf.Utils.UNDEFINED_ADDRESS;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -19,13 +18,13 @@ public class UtilsTest {
 
 	@Test
 	public void testToHexWithUndefinedAddress() {
-		assertThat(Utils.toHex(Utils.UNDEFINED_ADDRESS), is(equalTo("UNDEFINED")));
+		assertThat(Utils.toHex(Constants.UNDEFINED_ADDRESS), is(equalTo("UNDEFINED")));
 	}
 
 	@Test
 	public void testReadUntilNull() throws Exception {
 		ByteBuffer bb = ByteBuffer.allocate(4);
-		byte[] b = new byte[] { 'H', 'D', 'F', Utils.NULL };
+		byte[] b = new byte[] { 'H', 'D', 'F', Constants.NULL };
 		bb.put(b);
 		bb.rewind();
 		assertThat(Utils.readUntilNull(bb), is(equalTo("HDF")));
@@ -212,9 +211,9 @@ public class UtilsTest {
 	@Test
 	public void testReadingUndefinedAddressSpecialCaseWorks() throws Exception {
 		ByteBuffer bb = ByteBuffer.allocate(8);
-		bb.putLong(UNDEFINED_ADDRESS);
+		bb.putLong(Constants.UNDEFINED_ADDRESS);
 		bb.rewind();
-		assertThat(Utils.readBytesAsUnsignedLong(bb, 8), is(equalTo(UNDEFINED_ADDRESS)));
+		assertThat(Utils.readBytesAsUnsignedLong(bb, 8), is(equalTo(Constants.UNDEFINED_ADDRESS)));
 	}
 
 	@Test
