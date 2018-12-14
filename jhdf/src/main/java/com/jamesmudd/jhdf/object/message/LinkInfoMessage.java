@@ -30,12 +30,12 @@ public class LinkInfoMessage extends Message {
 			maximumCreationIndex = -1;
 		}
 
-		fractalHeapAddress = Utils.readBytesAsUnsignedLong(bb, 4);
+		fractalHeapAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 
-		bTreeNameIndexAddress = Utils.readBytesAsUnsignedLong(bb, 4);
+		bTreeNameIndexAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 
 		if (flags.get(CREATION_ORDER_INDEXED)) {
-			bTreeCreationOrderIndexAddress = Utils.readBytesAsUnsignedLong(bb, 4);
+			bTreeCreationOrderIndexAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 		} else {
 			bTreeCreationOrderIndexAddress = -1;
 		}

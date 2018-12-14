@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jamesmudd.jhdf.Superblock.SuperblockV0V1;
+import com.jamesmudd.jhdf.Superblock.SuperblockV2V3;
 import com.jamesmudd.jhdf.exceptions.HdfException;
-import com.jamesmudd.jhdf.exceptions.UnsupportedHdfException;
 
 /**
  * The HDF file class this object represents a HDF5 file on disk and provides
@@ -61,7 +61,8 @@ public class HdfFile implements AutoCloseable {
 				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
 				rootGroup = Group.createRootGroup(fc, sb, sb.getRootGroupSymbolTableAddress());
 			} else if (superblock.getVersionOfSuperblock() == 2 || superblock.getVersionOfSuperblock() == 3) {
-				throw new UnsupportedHdfException("Superblock version 2 and 3 are not yet supproted");
+				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
+				rootGroup = Group.createGroupFromObjectHeader(fc, sb, sb.getRootGroupObjectHeaderAddress(), "/", null);
 			} else {
 				throw new HdfException("Unreconized superblock version = " + superblock.getVersionOfSuperblock());
 			}

@@ -40,7 +40,7 @@ public class GroupTest {
 	public void testRootGroup() throws IOException {
 		Group rootGroup = Group.createRootGroup(fc, sb, sb.getRootGroupSymbolTableAddress());
 		assertThat(rootGroup.getPath(), is(equalTo("")));
-		assertThat(rootGroup.toString(), is(equalTo("RootGroup [name=/, path=/, address=0x38]")));
+		assertThat(rootGroup.toString(), is(equalTo("RootGroup [name=/, path=/, address=0x60]")));
 		assertThat(rootGroup.isGroup(), is(true));
 		assertThat(rootGroup.getChildren().keySet(), hasSize(1));
 		assertThat(rootGroup.getName(), is(equalTo("/")));
@@ -51,7 +51,7 @@ public class GroupTest {
 		Group rootGroup = Group.createRootGroup(fc, sb, sb.getRootGroupSymbolTableAddress());
 		Group group = Group.createGroup(fc, sb, 1512, "datasets_group", rootGroup);
 		assertThat(group.getPath(), is(equalTo("/datasets_group")));
-		assertThat(group.toString(), is(equalTo("Group [name=datasets_group, path=/datasets_group, address=0x5e8]")));
+		assertThat(group.toString(), is(equalTo("Group [name=datasets_group, path=/datasets_group, address=0x320]")));
 		assertThat(group.isGroup(), is(true));
 		assertThat(group.getChildren().keySet(), hasSize(2));
 		assertThat(group.getName(), is(equalTo("datasets_group")));
