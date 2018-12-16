@@ -35,23 +35,26 @@ public class LinkMessage extends Message {
 		}
 
 		// Flags
-		byte[] flagsBytes = new byte[] { bb.get() };
-		BitSet flags = BitSet.valueOf(flagsBytes);
+		final BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
 
 		// Size of length of link name
+		final int sizeOfLentghOfLinkNameIndex = Utils.bitsToInt(flags, 0, 2);
 		final int sizeOfLentghOfLinkName;
-		if (flags.get(1)) {
-			if (flags.get(0)) {
-				sizeOfLentghOfLinkName = 8;
-			} else {
-				sizeOfLentghOfLinkName = 4;
-			}
-		} else { // bit 0 = false
-			if (flags.get(0)) {
-				sizeOfLentghOfLinkName = 2;
-			} else {
-				sizeOfLentghOfLinkName = 1;
-			}
+		switch (sizeOfLentghOfLinkNameIndex) {
+		case 0:
+			sizeOfLentghOfLinkName = 1;
+			break;
+		case 1:
+			sizeOfLentghOfLinkName = 2;
+			break;
+		case 2:
+			sizeOfLentghOfLinkName = 4;
+			break;
+		case 3:
+			sizeOfLentghOfLinkName = 8;
+			break;
+		default:
+			throw new HdfException("Unreconized size of link name");
 		}
 
 		if (flags.get(LINK_TYPE_PRESENT)) {

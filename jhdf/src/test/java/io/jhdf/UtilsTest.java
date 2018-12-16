@@ -6,11 +6,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 import org.junit.Test;
-
-import io.jhdf.Constants;
-import io.jhdf.Utils;
 
 public class UtilsTest {
 
@@ -229,7 +227,30 @@ public class UtilsTest {
 		assertThat(subBuffer.limit(), is(equalTo(3)));
 		// Check original buffer position is moved on
 		assertThat(bb.position(), is(equalTo(3)));
-
 	}
 
+	@Test
+	public void testBitsToInt() throws Exception {
+		BitSet bits = new BitSet();
+		assertThat(Utils.bitsToInt(bits, 0, 8), is(equalTo(0)));
+		bits.set(0, true);
+		assertThat(Utils.bitsToInt(bits, 0, 1), is(equalTo(1)));
+		assertThat(Utils.bitsToInt(bits, 0, 5), is(equalTo(1)));
+		bits.set(1, true);
+		assertThat(Utils.bitsToInt(bits, 0, 2), is(equalTo(3)));
+		bits.set(2, true);
+		assertThat(Utils.bitsToInt(bits, 0, 3), is(equalTo(7)));
+		// Test just high bit set
+		bits.set(0, 7, false);
+		bits.set(7, true);
+		assertThat(Utils.bitsToInt(bits, 0, 8), is(equalTo(128)));
+		assertThat(Utils.bitsToInt(bits, 0, 7), is(equalTo(0)));
+		assertThat(Utils.bitsToInt(bits, 5, 3), is(equalTo(4)));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testBitsToIntThrowsWithNegativeLentgh() throws Exception {
+		BitSet bits = new BitSet(8);
+		Utils.bitsToInt(bits, 3, -1); // Should throw
+	}
 }

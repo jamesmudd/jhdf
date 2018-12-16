@@ -1,9 +1,11 @@
 package io.jhdf;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.BitSet;
 
 public final class Utils {
 	private static final CharsetEncoder ASCII = StandardCharsets.US_ASCII.newEncoder();
@@ -162,5 +164,29 @@ public final class Utils {
 		// Move the buffer past this header
 		source.position(source.position() + lentgh);
 		return headerData;
+	}
+
+	private static final BigInteger TWO = BigInteger.valueOf(2);
+
+	/**
+	 * Takes a {@link BitSet} and a range of bits to inspect and converts the bits
+	 * to a integer.
+	 * 
+	 * @param bits   to inspect
+	 * @param start  the first bit
+	 * @param lentgh the number of bits to inspect
+	 * @return the integer represented by the provided bits
+	 */
+	public static int bitsToInt(BitSet bits, int start, int lentgh) {
+		if (lentgh <= 0) {
+			throw new IllegalArgumentException("lentgh must be >0");
+		}
+		BigInteger result = BigInteger.ZERO;
+		for (int i = 0; i < lentgh; i++) {
+			if (bits.get(start + i)) {
+				result = result.add(TWO.pow(i));
+			}
+		}
+		return result.intValue();
 	}
 }
