@@ -5,6 +5,7 @@ import java.util.BitSet;
 
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 
 public class DataType {
 
@@ -21,6 +22,12 @@ public class DataType {
 		BitSet classAndVersion = BitSet.valueOf(new byte[] { bb.get() });
 		int version = Utils.bitsToInt(classAndVersion, 4, 4);
 		int dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
+
+		if (version == 0) {
+			throw new HdfException("Unreconized datatype version 0 detected");
+		} else if (version == 3) {
+			throw new UnsupportedHdfException("VAX byte ordered datatype encountered");
+		}
 
 		// Move the buffer back to the start of the data type message
 		bb.reset();
