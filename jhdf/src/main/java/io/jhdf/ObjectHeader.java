@@ -44,12 +44,25 @@ public abstract class ObjectHeader {
 
 	public abstract List<Message> getMessages();
 
-	public <T> List<T> getMessagesOfType(Class<T> type) {
+	public <T extends Message> List<T> getMessagesOfType(Class<T> type) {
 		return getMessages().stream().filter(type::isInstance).map(type::cast).collect(Collectors.toList());
 	}
 
-	public <T> boolean hasMessageOfType(Class<T> type) {
+	public <T extends Message> boolean hasMessageOfType(Class<T> type) {
 		return !getMessagesOfType(type).isEmpty();
+	}
+
+	public <T extends Message> T getMessageOfType(Class<T> type) {
+		List<T> messages = getMessagesOfType(type);
+		// Validate only one message exists
+		if (messages.isEmpty()) {
+			throw new HdfException("Requested message type '" + type.getSimpleName() + "' not present");
+		}
+		if (messages.size() > 1) {
+			throw new HdfException("Requested message type '" + type.getSimpleName() + "' is not unique");
+		}
+
+		return messages.get(0);
 	}
 
 	public static class ObjectHeaderV1 extends ObjectHeader {

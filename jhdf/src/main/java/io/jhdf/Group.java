@@ -14,6 +14,7 @@ import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
+import io.jhdf.object.message.SymbolTableMessage;
 
 public class Group implements Node {
 
@@ -44,7 +45,7 @@ public class Group implements Node {
 			for (SymbolTableEntry e : groupSTE.getSymbolTableEntries()) {
 				String childName = readName(nameBuffer, e.getLinkNameOffset());
 				if (e.getCacheType() == 1) { // Its a group
-					Group group = createGroup(fc, sb, e.getAddress(), childName, this);
+					Group group = createGroupFromObjectHeader(fc, sb, e.getObjectHeaderAddress(), childName, this);
 					children.put(childName, group);
 				} else { // Dataset
 					Dataset dataset = new Dataset(childName, this);
@@ -59,7 +60,7 @@ public class Group implements Node {
 				.collect(toMap(AttributeMessage::getName, identity()));
 	}
 
-	public Group(FileChannel fc, Superblock sb, ObjectHeader oh, String name, Group parent) {
+	private Group(FileChannel fc, Superblock sb, ObjectHeader oh, String name, Group parent) {
 		this.name = name;
 		this.address = oh.getAddress();
 		this.parent = parent;
@@ -112,23 +113,32 @@ public class Group implements Node {
 		return children;
 	}
 
-	public static Group createGroup(FileChannel fc, Superblock sb, long steAddress, String name, Group parent) {
-		SymbolTableEntry symbolTableEntry = new SymbolTableEntry(fc, steAddress, sb);
-		return new Group(fc, sb, symbolTableEntry.getBTreeAddress(), symbolTableEntry.getNameHeapAddress(),
-				symbolTableEntry.getObjectHeaderAddress(), name, parent);
-	}
-
-	public static Group createGroupFromObjectHeader(FileChannel fc, Superblock sb, long objectHeaderAddress,
+	/* package */ static Group createGroupFromObjectHeader(FileChannel fc, Superblock sb, long objectHeaderAddress,
 			String name, Group parent) {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, objectHeaderAddress);
 
-		return new Group(fc, sb, oh, name, parent);
+		if (oh.hasMessageOfType(SymbolTableMessage.class)) {
+			// Its an old style Group
+			SymbolTableMessage stm = oh.getMessageOfType(SymbolTableMessage.class);
+			return new Group(fc, sb, stm.getbTreeAddress(), stm.getLocalHeapAddress(), objectHeaderAddress, name,
+					parent);
+		} else {
+			// Its a new style group
+			return new Group(fc, sb, oh, name, parent);
+		}
 	}
 
-	protected static Group createRootGroup(FileChannel fc, Superblock sb, long steAddress) {
-		SymbolTableEntry symbolTableEntry = new SymbolTableEntry(fc, steAddress, sb);
-		return new RootGroup(fc, sb, symbolTableEntry.getBTreeAddress(), symbolTableEntry.getNameHeapAddress(),
-				symbolTableEntry.getObjectHeaderAddress());
+	/* package */ static Group createRootGroup(FileChannel fc, Superblock sb, long objectHeaderAddress) {
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, objectHeaderAddress);
+
+		if (oh.hasMessageOfType(SymbolTableMessage.class)) {
+			// Its an old style Group
+			SymbolTableMessage stm = oh.getMessageOfType(SymbolTableMessage.class);
+			return new RootGroup(fc, sb, stm.getbTreeAddress(), stm.getLocalHeapAddress(), objectHeaderAddress);
+		} else {
+			// Its a new style group
+			return new RootGroup(fc, sb, oh);
+		}
 	}
 
 	@Override
@@ -159,6 +169,11 @@ public class Group implements Node {
 
 		private static final String ROOT_GROUP_NAME = "/";
 		private final long address;
+
+		public RootGroup(FileChannel fc, Superblock sb, ObjectHeader objectHeader) {
+			super(fc, sb, objectHeader, ROOT_GROUP_NAME, null);
+			this.address = objectHeader.getAddress();
+		}
 
 		public RootGroup(FileChannel fc, Superblock sb, long bTreeAddress, long nameHeapAddress,
 				long ojbectHeaderAddress) {

@@ -15,8 +15,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.jhdf.Group;
-import io.jhdf.Superblock;
 import io.jhdf.Superblock.SuperblockV0V1;
 
 public class GroupTest {
@@ -40,7 +38,7 @@ public class GroupTest {
 
 	@Test
 	public void testRootGroup() throws IOException {
-		Group rootGroup = Group.createRootGroup(fc, sb, sb.getRootGroupSymbolTableAddress());
+		Group rootGroup = Group.createRootGroup(fc, sb, 96);
 		assertThat(rootGroup.getPath(), is(equalTo("")));
 		assertThat(rootGroup.toString(), is(equalTo("RootGroup [name=/, path=/, address=0x60]")));
 		assertThat(rootGroup.isGroup(), is(true));
@@ -50,8 +48,8 @@ public class GroupTest {
 
 	@Test
 	public void testGroup() throws IOException {
-		Group rootGroup = Group.createRootGroup(fc, sb, sb.getRootGroupSymbolTableAddress());
-		Group group = Group.createGroup(fc, sb, 1512, "datasets_group", rootGroup);
+		Group rootGroup = Group.createRootGroup(fc, sb, 96);
+		Group group = Group.createGroupFromObjectHeader(fc, sb, 800, "datasets_group", rootGroup);
 		assertThat(group.getPath(), is(equalTo("/datasets_group")));
 		assertThat(group.toString(), is(equalTo("Group [name=datasets_group, path=/datasets_group, address=0x320]")));
 		assertThat(group.isGroup(), is(true));
