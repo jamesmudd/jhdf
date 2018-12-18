@@ -1,8 +1,11 @@
 package io.jhdf.object.datatype;
 
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 
+import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 
 public class DataType {
 
@@ -16,9 +19,15 @@ public class DataType {
 		bb.mark();
 
 		// Class and version
-		byte classAndVersion = bb.get();
-		int version = classAndVersion >>> 4;
-		int dataClass = classAndVersion & 0xF;
+		BitSet classAndVersion = BitSet.valueOf(new byte[] { bb.get() });
+		int version = Utils.bitsToInt(classAndVersion, 4, 4);
+		int dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
+
+		if (version == 0) {
+			throw new HdfException("Unreconized datatype version 0 detected");
+		} else if (version == 3) {
+			throw new UnsupportedHdfException("VAX byte ordered datatype encountered");
+		}
 
 		// Move the buffer back to the start of the data type message
 		bb.reset();
@@ -28,6 +37,8 @@ public class DataType {
 			return new FixedPoint(bb);
 		case 1:
 			return new FloatingPoint(bb);
+		case 3:
+			return new StringData(bb);
 		case 9: // Variable length
 			return new VariableLentgh(bb);
 		default:
