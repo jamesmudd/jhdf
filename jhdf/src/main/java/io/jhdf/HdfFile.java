@@ -59,10 +59,11 @@ public class HdfFile implements AutoCloseable {
 
 			if (superblock.getVersionOfSuperblock() == 0 || superblock.getVersionOfSuperblock() == 1) {
 				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
-				rootGroup = Group.createRootGroup(fc, sb, sb.getRootGroupSymbolTableAddress());
+				SymbolTableEntry ste = new SymbolTableEntry(fc, sb.getRootGroupSymbolTableAddress(), sb);
+				rootGroup = Group.createRootGroup(fc, sb, ste.getObjectHeaderAddress());
 			} else if (superblock.getVersionOfSuperblock() == 2 || superblock.getVersionOfSuperblock() == 3) {
 				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
-				rootGroup = Group.createGroupFromObjectHeader(fc, sb, sb.getRootGroupObjectHeaderAddress(), "/", null);
+				rootGroup = Group.createRootGroup(fc, sb, sb.getRootGroupObjectHeaderAddress());
 			} else {
 				throw new HdfException("Unreconized superblock version = " + superblock.getVersionOfSuperblock());
 			}
