@@ -45,7 +45,7 @@ public class Group implements Node {
 			for (SymbolTableEntry e : groupSTE.getSymbolTableEntries()) {
 				String childName = readName(nameBuffer, e.getLinkNameOffset());
 				if (e.getCacheType() == 1) { // Its a group
-					Group group = createGroupFromObjectHeader(fc, sb, e.getObjectHeaderAddress(), childName, this);
+					Group group = createGroup(fc, sb, e.getObjectHeaderAddress(), childName, this);
 					children.put(childName, group);
 				} else { // Dataset
 					Dataset dataset = new Dataset(childName, this);
@@ -81,7 +81,7 @@ public class Group implements Node {
 					children.put(link.getLinkName(), dataset);
 				} else {
 					// Its a group
-					Group group = createGroupFromObjectHeader(fc, sb, link.getHardLinkAddress(), link.getLinkName(),
+					Group group = createGroup(fc, sb, link.getHardLinkAddress(), link.getLinkName(),
 							this);
 					children.put(link.getLinkName(), group);
 				}
@@ -113,7 +113,7 @@ public class Group implements Node {
 		return children;
 	}
 
-	/* package */ static Group createGroupFromObjectHeader(FileChannel fc, Superblock sb, long objectHeaderAddress,
+	/* package */ static Group createGroup(FileChannel fc, Superblock sb, long objectHeaderAddress,
 			String name, Group parent) {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, objectHeaderAddress);
 

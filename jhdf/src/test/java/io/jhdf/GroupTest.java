@@ -49,7 +49,7 @@ public class GroupTest {
 	@Test
 	public void testGroup() throws IOException {
 		Group rootGroup = Group.createRootGroup(fc, sb, 96);
-		Group group = Group.createGroupFromObjectHeader(fc, sb, 800, "datasets_group", rootGroup);
+		Group group = Group.createGroup(fc, sb, 800, "datasets_group", rootGroup);
 		assertThat(group.getPath(), is(equalTo("/datasets_group")));
 		assertThat(group.toString(), is(equalTo("Group [name=datasets_group, path=/datasets_group, address=0x320]")));
 		assertThat(group.isGroup(), is(true));
