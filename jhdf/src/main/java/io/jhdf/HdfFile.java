@@ -25,7 +25,8 @@ import io.jhdf.object.message.AttributeMessage;
 public class HdfFile implements Group, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(HdfFile.class);
 
-	private final RandomAccessFile file;
+	private final File file;
+	private final RandomAccessFile raf;
 	private final FileChannel fc;
 
 	private final long userHeaderSize;
@@ -37,13 +38,14 @@ public class HdfFile implements Group, AutoCloseable {
 	public HdfFile(File hdfFile) {
 		logger.info("Opening HDF5 file '{}'", hdfFile.getAbsolutePath());
 		try {
-			file = new RandomAccessFile(hdfFile, "r");
-			fc = file.getChannel();
+			this.file = hdfFile;
+			raf = new RandomAccessFile(hdfFile, "r");
+			fc = raf.getChannel();
 
 			// Find out if the file is a HDF5 file
 			boolean validSignature = false;
 			long offset = 0;
-			for (offset = 0; offset < file.length(); offset = nextOffset(offset)) {
+			for (offset = 0; offset < raf.length(); offset = nextOffset(offset)) {
 				logger.trace("Checking for signature at offset = {}", offset);
 				validSignature = Superblock.verifySignature(fc, offset);
 				if (validSignature) {
@@ -88,7 +90,7 @@ public class HdfFile implements Group, AutoCloseable {
 	}
 
 	public ByteBuffer getUserHeader() throws IOException {
-		return file.getChannel().map(MapMode.READ_ONLY, 0, userHeaderSize);
+		return raf.getChannel().map(MapMode.READ_ONLY, 0, userHeaderSize);
 	}
 
 	/**
@@ -98,7 +100,7 @@ public class HdfFile implements Group, AutoCloseable {
 	@Override
 	public void close() throws IOException {
 		fc.close();
-		file.close();
+		raf.close();
 	}
 
 	/**
@@ -107,7 +109,7 @@ public class HdfFile implements Group, AutoCloseable {
 	 * @see java.io.RandomAccessFile#length()
 	 */
 	public long length() throws IOException {
-		return file.length();
+		return raf.length();
 	}
 
 	@Override
@@ -122,7 +124,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	@Override
 	public String getName() {
-		return "/";
+		return file.getName();
 	}
 
 	@Override
@@ -133,6 +135,11 @@ public class HdfFile implements Group, AutoCloseable {
 	@Override
 	public Map<String, AttributeMessage> getAttributes() {
 		return rootGroup.getAttributes();
+	}
+
+	@Override
+	public String toString() {
+		return "HdfFile [file=" + file.getName() + "]";
 	}
 
 }
