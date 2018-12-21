@@ -11,18 +11,19 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.jhdf.HdfFile;
 import io.jhdf.exceptions.HdfException;
 
 public class HdfFileTest {
 
+	private static final String NON_HDF5_TEST_FILE_NAME = "make_test_files.py";
+	private static final String HDF5_TEST_FILE_NAME = "test_file.hdf5";
 	private String testFileUrl;
 	private String nonHdfFile;
 
 	@Before
 	public void setup() throws FileNotFoundException {
-		testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
-		nonHdfFile = this.getClass().getResource("make_test_files.py").getFile();
+		testFileUrl = this.getClass().getResource(HDF5_TEST_FILE_NAME).getFile();
+		nonHdfFile = this.getClass().getResource(NON_HDF5_TEST_FILE_NAME).getFile();
 	}
 
 	@Test
@@ -46,7 +47,7 @@ public class HdfFileTest {
 	@Test
 	public void testRootGroup() throws Exception {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
-			assertThat(hdfFile.getRootGroup().getName(), is(equalTo("/")));
+			assertThat(hdfFile.getName(), is(equalTo(HDF5_TEST_FILE_NAME)));
 		}
 	}
 

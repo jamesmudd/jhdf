@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import io.jhdf.Superblock.SuperblockV0V1;
 import io.jhdf.Superblock.SuperblockV2V3;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.object.message.AttributeMessage;
 
 /**
  * The HDF file class this object represents a HDF5 file on disk and provides
@@ -20,10 +22,11 @@ import io.jhdf.exceptions.HdfException;
  * 
  * @author James Mudd
  */
-public class HdfFile implements AutoCloseable {
+public class HdfFile implements Group, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(HdfFile.class);
 
-	private final RandomAccessFile file;
+	private final File file;
+	private final RandomAccessFile raf;
 	private final FileChannel fc;
 
 	private final long userHeaderSize;
@@ -35,13 +38,14 @@ public class HdfFile implements AutoCloseable {
 	public HdfFile(File hdfFile) {
 		logger.info("Opening HDF5 file '{}'", hdfFile.getAbsolutePath());
 		try {
-			file = new RandomAccessFile(hdfFile, "r");
-			fc = file.getChannel();
+			this.file = hdfFile;
+			raf = new RandomAccessFile(hdfFile, "r");
+			fc = raf.getChannel();
 
 			// Find out if the file is a HDF5 file
 			boolean validSignature = false;
 			long offset = 0;
-			for (offset = 0; offset < file.length(); offset = nextOffset(offset)) {
+			for (offset = 0; offset < raf.length(); offset = nextOffset(offset)) {
 				logger.trace("Checking for signature at offset = {}", offset);
 				validSignature = Superblock.verifySignature(fc, offset);
 				if (validSignature) {
@@ -60,10 +64,10 @@ public class HdfFile implements AutoCloseable {
 			if (superblock.getVersionOfSuperblock() == 0 || superblock.getVersionOfSuperblock() == 1) {
 				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
 				SymbolTableEntry ste = new SymbolTableEntry(fc, sb.getRootGroupSymbolTableAddress(), sb);
-				rootGroup = Group.createRootGroup(fc, sb, ste.getObjectHeaderAddress());
+				rootGroup = GroupImpl.createGroup(fc, sb, ste.getObjectHeaderAddress(), "/", this);
 			} else if (superblock.getVersionOfSuperblock() == 2 || superblock.getVersionOfSuperblock() == 3) {
 				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
-				rootGroup = Group.createRootGroup(fc, sb, sb.getRootGroupObjectHeaderAddress());
+				rootGroup = GroupImpl.createGroup(fc, sb, sb.getRootGroupObjectHeaderAddress(), "/", this);
 			} else {
 				throw new HdfException("Unreconized superblock version = " + superblock.getVersionOfSuperblock());
 			}
@@ -86,7 +90,7 @@ public class HdfFile implements AutoCloseable {
 	}
 
 	public ByteBuffer getUserHeader() throws IOException {
-		return file.getChannel().map(MapMode.READ_ONLY, 0, userHeaderSize);
+		return raf.getChannel().map(MapMode.READ_ONLY, 0, userHeaderSize);
 	}
 
 	/**
@@ -96,7 +100,7 @@ public class HdfFile implements AutoCloseable {
 	@Override
 	public void close() throws IOException {
 		fc.close();
-		file.close();
+		raf.close();
 	}
 
 	/**
@@ -105,11 +109,37 @@ public class HdfFile implements AutoCloseable {
 	 * @see java.io.RandomAccessFile#length()
 	 */
 	public long length() throws IOException {
-		return file.length();
+		return raf.length();
 	}
 
-	public Group getRootGroup() {
-		return rootGroup;
+	@Override
+	public boolean isGroup() {
+		return rootGroup.isGroup();
+	}
+
+	@Override
+	public Map<String, Node> getChildren() {
+		return rootGroup.getChildren();
+	}
+
+	@Override
+	public String getName() {
+		return file.getName();
+	}
+
+	@Override
+	public String getPath() {
+		return "/";
+	}
+
+	@Override
+	public Map<String, AttributeMessage> getAttributes() {
+		return rootGroup.getAttributes();
+	}
+
+	@Override
+	public String toString() {
+		return "HdfFile [file=" + file.getName() + "]";
 	}
 
 }
