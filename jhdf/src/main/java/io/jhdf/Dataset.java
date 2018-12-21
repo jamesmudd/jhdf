@@ -8,10 +8,10 @@ import io.jhdf.object.message.AttributeMessage;
 public class Dataset implements Node {
 
 	private final String name;
-	private final Group parent;
+	private final GroupImpl parent;
 	private final Map<String, AttributeMessage> attributes;
 
-	public Dataset(String name, Group parent) {
+	public Dataset(String name, GroupImpl parent) {
 		this.name = name;
 		this.parent = parent;
 		attributes = Collections.emptyMap();

@@ -18,7 +18,7 @@ public class ApiTest {
 		System.out.println(file.getName());
 
 		try (HdfFile hdfFile = new HdfFile(file)) {
-			recursivePrintGroup(hdfFile.getRootGroup(), 0);
+			recursivePrintGroup(hdfFile, 0);
 		}
 
 		System.out.println("Took " + (System.currentTimeMillis() - start) + " ms");

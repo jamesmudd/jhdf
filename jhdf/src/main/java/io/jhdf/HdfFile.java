@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import io.jhdf.Superblock.SuperblockV0V1;
 import io.jhdf.Superblock.SuperblockV2V3;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.object.message.AttributeMessage;
 
 /**
  * The HDF file class this object represents a HDF5 file on disk and provides
@@ -20,7 +22,7 @@ import io.jhdf.exceptions.HdfException;
  * 
  * @author James Mudd
  */
-public class HdfFile implements AutoCloseable {
+public class HdfFile implements Group, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(HdfFile.class);
 
 	private final RandomAccessFile file;
@@ -60,10 +62,10 @@ public class HdfFile implements AutoCloseable {
 			if (superblock.getVersionOfSuperblock() == 0 || superblock.getVersionOfSuperblock() == 1) {
 				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
 				SymbolTableEntry ste = new SymbolTableEntry(fc, sb.getRootGroupSymbolTableAddress(), sb);
-				rootGroup = Group.createRootGroup(fc, sb, ste.getObjectHeaderAddress());
+				rootGroup = GroupImpl.createGroup(fc, sb, ste.getObjectHeaderAddress(), "/", this);
 			} else if (superblock.getVersionOfSuperblock() == 2 || superblock.getVersionOfSuperblock() == 3) {
 				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
-				rootGroup = Group.createRootGroup(fc, sb, sb.getRootGroupObjectHeaderAddress());
+				rootGroup = GroupImpl.createGroup(fc, sb, sb.getRootGroupObjectHeaderAddress(), "/", this);
 			} else {
 				throw new HdfException("Unreconized superblock version = " + superblock.getVersionOfSuperblock());
 			}
@@ -108,8 +110,29 @@ public class HdfFile implements AutoCloseable {
 		return file.length();
 	}
 
-	public Group getRootGroup() {
-		return rootGroup;
+	@Override
+	public boolean isGroup() {
+		return rootGroup.isGroup();
+	}
+
+	@Override
+	public Map<String, Node> getChildren() {
+		return rootGroup.getChildren();
+	}
+
+	@Override
+	public String getName() {
+		return "/";
+	}
+
+	@Override
+	public String getPath() {
+		return "/";
+	}
+
+	@Override
+	public Map<String, AttributeMessage> getAttributes() {
+		return rootGroup.getAttributes();
 	}
 
 }

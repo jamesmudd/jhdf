@@ -11,7 +11,6 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.jhdf.HdfFile;
 import io.jhdf.exceptions.HdfException;
 
 public class HdfFileTest {
@@ -46,7 +45,7 @@ public class HdfFileTest {
 	@Test
 	public void testRootGroup() throws Exception {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
-			assertThat(hdfFile.getRootGroup().getName(), is(equalTo("/")));
+			assertThat(hdfFile.getName(), is(equalTo("/")));
 		}
 	}
 
