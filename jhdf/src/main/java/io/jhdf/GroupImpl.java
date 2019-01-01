@@ -152,4 +152,9 @@ public class GroupImpl implements Group {
 		return "Group";
 	}
 
+	@Override
+	public Node getParent() {
+		return parent;
+	}
+
 }

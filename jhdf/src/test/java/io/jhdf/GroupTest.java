@@ -52,5 +52,6 @@ public class GroupTest {
 		assertThat(group.getChildren().keySet(), hasSize(2));
 		assertThat(group.getName(), is(equalTo("datasets_group")));
 		assertThat(group.getType(), is(equalTo("Group")));
+		assertThat(group.getParent(), is(rootGroup));
 	}
 }

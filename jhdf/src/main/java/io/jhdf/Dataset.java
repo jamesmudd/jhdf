@@ -50,4 +50,8 @@ public class Dataset implements Node {
 		return "Dataset";
 	}
 
+	@Override
+	public Node getParent() {
+		return parent;
+	}
 }
