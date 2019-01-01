@@ -37,7 +37,7 @@ public class Dataset implements Node {
 
 	@Override
 	public String getPath() {
-		return parent.getPath() + "/" + name;
+		return parent.getPath() + name;
 	}
 
 	public Map<String, AttributeMessage> getAttributes() {
