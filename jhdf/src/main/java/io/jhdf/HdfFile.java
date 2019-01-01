@@ -142,4 +142,8 @@ public class HdfFile implements Group, AutoCloseable {
 		return "HdfFile [file=" + file.getName() + "]";
 	}
 
+	@Override
+	public String getType() {
+		return "HDF5 file";
+	}
 }

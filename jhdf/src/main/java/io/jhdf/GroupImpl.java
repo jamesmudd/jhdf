@@ -147,4 +147,9 @@ public class GroupImpl implements Group {
 		return attributes;
 	}
 
+	@Override
+	public String getType() {
+		return "Group";
+	}
+
 }

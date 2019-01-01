@@ -40,8 +40,14 @@ public class Dataset implements Node {
 		return parent.getPath() + name;
 	}
 
+	@Override
 	public Map<String, AttributeMessage> getAttributes() {
 		return attributes;
+	}
+
+	@Override
+	public String getType() {
+		return "Dataset";
 	}
 
 }

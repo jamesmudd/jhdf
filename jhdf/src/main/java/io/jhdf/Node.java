@@ -16,4 +16,6 @@ public interface Node {
 
 	Map<String, AttributeMessage> getAttributes();
 
+	String getType();
+
 }

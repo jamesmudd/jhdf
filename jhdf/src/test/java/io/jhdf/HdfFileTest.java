@@ -48,6 +48,7 @@ public class HdfFileTest {
 	public void testRootGroup() throws Exception {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.getName(), is(equalTo(HDF5_TEST_FILE_NAME)));
+			assertThat(hdfFile.getType(), is(equalTo("HDF5 file")));
 		}
 	}
 
