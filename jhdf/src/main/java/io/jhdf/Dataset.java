@@ -1,6 +1,9 @@
 package io.jhdf;
 
-import java.util.Collections;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
+import java.nio.channels.FileChannel;
 import java.util.Map;
 
 import io.jhdf.object.message.AttributeMessage;
@@ -8,14 +11,18 @@ import io.jhdf.object.message.AttributeMessage;
 public class Dataset implements Node {
 
 	private final String name;
-	private final GroupImpl parent;
+	private final Group parent;
 	private final Map<String, AttributeMessage> attributes;
 
-	public Dataset(String name, GroupImpl parent) {
+	public Dataset(FileChannel fc, Superblock sb, long address, String name, Group parent) {
 		this.name = name;
 		this.parent = parent;
-		attributes = Collections.emptyMap();
-		// TODO Auto-generated constructor stub
+
+		ObjectHeader header = ObjectHeader.readObjectHeader(fc, sb, address);
+
+		// Attributes
+		attributes = header.getMessagesOfType(AttributeMessage.class).stream()
+				.collect(toMap(AttributeMessage::getName, identity()));
 	}
 
 	@Override
