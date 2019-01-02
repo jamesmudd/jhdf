@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toMap;
 import java.nio.channels.FileChannel;
 import java.util.Map;
 
+import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.AttributeMessage;
 
 public class Dataset implements Node {
@@ -18,11 +19,16 @@ public class Dataset implements Node {
 		this.name = name;
 		this.parent = parent;
 
-		ObjectHeader header = ObjectHeader.readObjectHeader(fc, sb, address);
+		try {
+			ObjectHeader header = ObjectHeader.readObjectHeader(fc, sb, address);
 
-		// Attributes
-		attributes = header.getMessagesOfType(AttributeMessage.class).stream()
-				.collect(toMap(AttributeMessage::getName, identity()));
+			// Attributes
+			attributes = header.getMessagesOfType(AttributeMessage.class).stream()
+					.collect(toMap(AttributeMessage::getName, identity()));
+		} catch (Exception e) {
+			throw new HdfException("Error reading dataset '" + getPath() + "' at address " + address, e);
+		}
+
 	}
 
 	@Override
