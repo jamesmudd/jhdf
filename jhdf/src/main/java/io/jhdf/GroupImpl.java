@@ -134,7 +134,7 @@ public class GroupImpl implements Group {
 
 	@Override
 	public String toString() {
-		return "Group [name=" + name + ", path=" + getPath() + ", address=" + Utils.toHex(address) + "]";
+		return "Group [name=" + name + ", path=" + getPath() + ", address=" + Utils.toHex(getAddress()) + "]";
 	}
 
 	@Override
@@ -155,6 +155,10 @@ public class GroupImpl implements Group {
 	@Override
 	public Node getParent() {
 		return parent;
+	}
+
+	public long getAddress() {
+		return address;
 	}
 
 }

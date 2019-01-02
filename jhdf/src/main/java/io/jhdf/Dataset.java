@@ -11,11 +11,13 @@ import io.jhdf.object.message.AttributeMessage;
 
 public class Dataset implements Node {
 
+	private final long address;
 	private final String name;
 	private final Group parent;
 	private final Map<String, AttributeMessage> attributes;
 
 	public Dataset(FileChannel fc, Superblock sb, long address, String name, Group parent) {
+		this.address = address;
 		this.name = name;
 		this.parent = parent;
 
@@ -66,5 +68,10 @@ public class Dataset implements Node {
 	@Override
 	public Node getParent() {
 		return parent;
+	}
+
+	@Override
+	public long getAddress() {
+		return address;
 	}
 }

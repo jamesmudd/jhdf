@@ -29,4 +29,12 @@ public interface Node {
 		return getFile();
 	}
 
+	/**
+	 * This returns the byte offset into the file of the object header for this
+	 * node.
+	 * 
+	 * @return The address of the object header for this node
+	 */
+	long getAddress();
+
 }

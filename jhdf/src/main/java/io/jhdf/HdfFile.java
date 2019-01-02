@@ -157,4 +157,9 @@ public class HdfFile implements Group, AutoCloseable {
 	public File getFile() {
 		return file;
 	}
+
+	@Override
+	public long getAddress() {
+		return rootGroup.getAddress();
+	}
 }
