@@ -68,6 +68,8 @@ public class Message {
 			return new DataLayoutMessage(bb, sb);
 		case 10: // 0x000A
 			return new GroupInfoMessage(bb, sb);
+		case 11: // 0x000B
+			return new FilterpipelineMessage(bb, sb);
 		case 12: // 0x000C
 			return new AttributeMessage(bb, sb);
 		case 16: // 0x0010
