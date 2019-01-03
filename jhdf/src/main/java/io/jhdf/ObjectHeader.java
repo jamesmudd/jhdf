@@ -103,27 +103,35 @@ public abstract class ObjectHeader {
 
 				header = ByteBuffer.allocate(headerSize);
 				fc.read(header, address + 12 // Upto this point
-						+ 4); // Padding missed in format spec);
+						+ 4); // Padding missed in format spec;
 				header.order(LITTLE_ENDIAN);
 				header.rewind();
 
-				for (int i = 0; i < numberOfMessages; i++) {
-					Message m = Message.readObjectHeaderV1Message(header, sb);
-					messages.add(m);
-					if (m instanceof ObjectHeaderContinuationMessage) {
-						ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
-						header = ByteBuffer.allocate(ohcm.getLentgh());
-						fc.read(header, ohcm.getOffset());
-						header.order(LITTLE_ENDIAN);
-						header.rewind();
-					}
-				}
+				header = readMessages(fc, sb, header, numberOfMessages);
 
 				logger.debug("Read object header from: {}", Utils.toHex(address));
 
 			} catch (Exception e) {
 				throw new HdfException("Failed to read object header at: " + Utils.toHex(address), e);
 			}
+		}
+
+		private ByteBuffer readMessages(FileChannel fc, Superblock sb, ByteBuffer bb, short numberOfMessages)
+				throws IOException {
+			while (bb.remaining() > 4 && messages.size() < numberOfMessages) {
+				Message m = Message.readObjectHeaderV1Message(bb, sb);
+				messages.add(m);
+
+				if (m instanceof ObjectHeaderContinuationMessage) {
+					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
+					ByteBuffer continuationBuffer = ByteBuffer.allocate(ohcm.getLentgh());
+					fc.read(continuationBuffer, ohcm.getOffset());
+					continuationBuffer.order(LITTLE_ENDIAN);
+					continuationBuffer.rewind();
+					readMessages(fc, sb, continuationBuffer, numberOfMessages);
+				}
+			}
+			return bb;
 		}
 
 		@Override

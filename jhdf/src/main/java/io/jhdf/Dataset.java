@@ -1,21 +1,36 @@
 package io.jhdf;
 
-import java.util.Collections;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
+import java.nio.channels.FileChannel;
 import java.util.Map;
 
+import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.AttributeMessage;
 
 public class Dataset implements Node {
 
+	private final long address;
 	private final String name;
-	private final GroupImpl parent;
+	private final Group parent;
 	private final Map<String, AttributeMessage> attributes;
 
-	public Dataset(String name, GroupImpl parent) {
+	public Dataset(FileChannel fc, Superblock sb, long address, String name, Group parent) {
+		this.address = address;
 		this.name = name;
 		this.parent = parent;
-		attributes = Collections.emptyMap();
-		// TODO Auto-generated constructor stub
+
+		try {
+			ObjectHeader header = ObjectHeader.readObjectHeader(fc, sb, address);
+
+			// Attributes
+			attributes = header.getMessagesOfType(AttributeMessage.class).stream()
+					.collect(toMap(AttributeMessage::getName, identity()));
+		} catch (Exception e) {
+			throw new HdfException("Error reading dataset '" + getPath() + "' at address " + address, e);
+		}
+
 	}
 
 	@Override
@@ -53,5 +68,10 @@ public class Dataset implements Node {
 	@Override
 	public Node getParent() {
 		return parent;
+	}
+
+	@Override
+	public long getAddress() {
+		return address;
 	}
 }

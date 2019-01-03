@@ -32,6 +32,7 @@ public class HdfFileTest {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.getUserHeaderSize(), is(equalTo(0L)));
 			assertThat(hdfFile.length(), is(equalTo(file.length())));
+			assertThat(hdfFile.getAddress(), is(equalTo(96L)));
 
 			// TODO Add a test file with an actual header and read it.
 			hdfFile.getUserHeader();

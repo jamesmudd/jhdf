@@ -53,5 +53,6 @@ public class GroupTest {
 		assertThat(group.getName(), is(equalTo("datasets_group")));
 		assertThat(group.getType(), is(equalTo("Group")));
 		assertThat(group.getParent(), is(rootGroup));
+		assertThat(group.getAddress(), is(equalTo(800L)));
 	}
 }

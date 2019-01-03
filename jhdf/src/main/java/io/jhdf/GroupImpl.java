@@ -48,7 +48,7 @@ public class GroupImpl implements Group {
 					Group group = createGroup(fc, sb, e.getObjectHeaderAddress(), childName, this);
 					children.put(childName, group);
 				} else { // Dataset
-					Dataset dataset = new Dataset(childName, this);
+					Dataset dataset = new Dataset(fc, sb, e.getObjectHeaderAddress(), childName, this);
 					children.put(childName, dataset);
 				}
 			}
@@ -77,7 +77,7 @@ public class GroupImpl implements Group {
 				ObjectHeader linkHeader = ObjectHeader.readObjectHeader(fc, sb, link.getHardLinkAddress());
 				if (!linkHeader.getMessagesOfType(DataSpaceMessage.class).isEmpty()) {
 					// Its a a Dataset
-					Dataset dataset = new Dataset(link.getLinkName(), this);
+					Dataset dataset = new Dataset(fc, sb, link.getHardLinkAddress(), link.getLinkName(), this);
 					children.put(link.getLinkName(), dataset);
 				} else {
 					// Its a group
@@ -134,7 +134,7 @@ public class GroupImpl implements Group {
 
 	@Override
 	public String toString() {
-		return "Group [name=" + name + ", path=" + getPath() + ", address=" + Utils.toHex(address) + "]";
+		return "Group [name=" + name + ", path=" + getPath() + ", address=" + Utils.toHex(getAddress()) + "]";
 	}
 
 	@Override
@@ -155,6 +155,10 @@ public class GroupImpl implements Group {
 	@Override
 	public Node getParent() {
 		return parent;
+	}
+
+	public long getAddress() {
+		return address;
 	}
 
 }

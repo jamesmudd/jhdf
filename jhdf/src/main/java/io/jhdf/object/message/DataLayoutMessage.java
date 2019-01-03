@@ -10,7 +10,11 @@ public class DataLayoutMessage extends Message {
 
 	private final byte version;
 	private final byte layoutClass;
+
+	/** The meaning depends on the storage layout */
 	private final long address;
+
+	/** The meaning depends on the storage layout */
 	private final long size;
 
 	public DataLayoutMessage(ByteBuffer bb, Superblock sb) {
@@ -29,11 +33,19 @@ public class DataLayoutMessage extends Message {
 		case 0: // Compact Storage
 			throw new UnsupportedHdfException("Compact storage is not supported");
 		case 1: // Contiguous Storage
-			address = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfOffsets());
-			size = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
+			address = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+			size = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 			break;
 		case 2: // Chunked Storage
-			throw new UnsupportedHdfException("Chunked storage is not supported");
+			// Not sure why this needs -1 but seems to be the way its done
+			int chunkDimensionality = Utils.readBytesAsUnsignedInt(bb, 1) - 1;
+			address = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+			long[] dimSizes = new long[chunkDimensionality];
+			for (int i = 0; i < dimSizes.length; i++) {
+				dimSizes[i] = Utils.readBytesAsUnsignedLong(bb, 4);
+			}
+			size = Utils.readBytesAsUnsignedLong(bb, 4);
+			break;
 		case 3: // Virtual storage
 			throw new UnsupportedHdfException("Virtual storage is not supported");
 		default:
