@@ -26,6 +26,16 @@ jobs:
       #codeCoverageToolOption: 'jaCoCo'
       #codeCoverageClassFilesDirectories: 'build/classes/main/'
       jdkVersionOption: $(java.version)
+  
+  # Build using a Gradle wrapper script
+  - task: Gradle@2
+    displayName: Build Sources + JavaDoc Jars
+    inputs:
+      gradleWrapperFile: 'jhdf/gradlew'
+      workingDirectory: jhdf
+      tasks: 'sourcesJar javadocJar'
+      jdkVersionOption: $(java.version)
+  
   - script: 'cd jhdf;
     ./gradlew sonarqube
     -Dsonar.projectKey=jamesmudd_jhdf
@@ -58,4 +68,13 @@ jobs:
       testRunTitle: $(osName) $(Agent.JobName)
       #codeCoverageToolOption: 'jaCoCo'
       #codeCoverageClassFilesDirectories: 'build/classes/main/'
+      jdkVersionOption: $(java.version)
+
+  # Build using a Gradle wrapper script
+  - task: Gradle@2
+    displayName: Build Sources + JavaDoc Jars
+    inputs:
+      gradleWrapperFile: 'jhdf/gradlew'
+      workingDirectory: jhdf
+      tasks: 'sourcesJar javadocJar'
       jdkVersionOption: $(java.version)
