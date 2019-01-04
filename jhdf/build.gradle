@@ -33,7 +33,7 @@ publishing {
 
 bintray {
     user = 'jamesmudd'
-    key = '9eafb69bcc49b6db8f43572a2b448875b9d7ec4f'
+    key = System.getenv('BINTRAY_KEY')
     pkg {
         repo = 'jhdf'
         name = 'jhdf'
