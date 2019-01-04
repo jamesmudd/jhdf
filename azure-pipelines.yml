@@ -10,8 +10,8 @@ jobs:
     matrix:
       Java 8:
         java.version: '1.8'
-      # Java 10:
-      #   java.version: '1.10'
+      Java 11:
+        java.version: '1.11'
   steps:
   # Build using a Gradle wrapper script
   - task: Gradle@2
@@ -53,8 +53,8 @@ jobs:
     matrix:
       Java 8:
         java.version: '1.8'
-      Java 10:
-        java.version: '1.10'
+      Java 11:
+        java.version: '1.11'
   steps:
   # Build using a Gradle wrapper script
   - task: Gradle@2
