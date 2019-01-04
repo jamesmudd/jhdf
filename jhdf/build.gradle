@@ -2,13 +2,15 @@
  * Gradle build file for jHDF
  */
 plugins {
+    // Core plugins
 	id 'java-library'
     id 'jacoco' // Code coverage
-    id 'org.sonarqube' version '2.6'
     id 'eclipse' // To create eclipse project
     id 'idea' // To create InteliJ project
     id 'maven-publish'
+    // Community plugins (need versions)
     id 'com.jfrog.bintray' version '1.8.4' // For publishing to Bintray
+    id 'org.sonarqube' version '2.6.2' // Code quality
 }
 
 // Varibles
