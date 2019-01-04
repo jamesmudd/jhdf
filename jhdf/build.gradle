@@ -7,14 +7,49 @@ plugins {
     id 'org.sonarqube' version '2.6'
     id 'eclipse' // To create eclipse project
     id 'idea' // To create InteliJ project
+    id 'maven-publish'
+    id 'com.jfrog.bintray' version '1.8.4' // For publishing to Bintray
 }
 
 // Varibles
-version = '0.1.0'
+group = 'io.jhdf'
+version = '0.1.1'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-ext.vcsUrl = 'https://github.com/jamesmudd/jhdf.git'
 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            afterEvaluate {  
+                artifact sourcesJar
+                artifact javadocJar
+            }
+        }
+    }
+}
+
+bintray {
+    user = 'jamesmudd'
+    key = '9eafb69bcc49b6db8f43572a2b448875b9d7ec4f'
+    pkg {
+        repo = 'jhdf'
+        name = 'jhdf'
+        userOrg = 'jamesmudd'
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/jamesmudd/jhdf.git'
+        version {
+            name = project.version
+            desc = 'jHDF'
+            released  = new Date()
+        }
+    }
+    // Which files to upload where
+    filesSpec {
+       from 'build/libs'
+       into project.version
+    }
+}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
