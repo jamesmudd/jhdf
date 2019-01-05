@@ -1,6 +1,5 @@
-### jHDF
-
-[![Build Status](https://dev.azure.com/jamesmudd/jhdf/_apis/build/status/jhdf-CI)](https://dev.azure.com/jamesmudd/jhdf/_build/latest?definitionId=3) [![Sonar Status](https://sonarcloud.io/api/project_badges/measure?project=jamesmudd_jhdf&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=jamesmudd_jhdf)
+# jHDF
+[![Build Status](https://dev.azure.com/jamesmudd/jhdf/_apis/build/status/jhdf-CI)](https://dev.azure.com/jamesmudd/jhdf/_build/latest?definitionId=3) [![Sonar Status](https://sonarcloud.io/api/project_badges/measure?project=jamesmudd_jhdf&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=jamesmudd_jhdf) [ ![Download](https://api.bintray.com/packages/jamesmudd/jhdf/jhdf/images/download.svg) ](https://bintray.com/jamesmudd/jhdf/jhdf/_latestVersion)
 
 A pure Java HDF5 library.
 
