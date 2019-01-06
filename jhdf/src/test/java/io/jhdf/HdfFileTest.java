@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -69,6 +70,14 @@ public class HdfFileTest {
 			assertThat(secondLevelGroup.getPath(),
 					is(equalTo("/" + firstGroupName + "/" + secondLevelGroupName + "/")));
 			assertThat(secondLevelGroup.getParent(), is(sameInstance(firstGroup)));
+		}
+	}
+
+	@Test
+	public void testIteratingFile() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			final Iterator<Node> iterator = hdfFile.iterator();
+			assertThat(iterator.hasNext(), is(true));
 		}
 	}
 

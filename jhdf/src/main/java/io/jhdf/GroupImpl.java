@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toMap;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -238,6 +239,11 @@ public class GroupImpl implements Group {
 	@Override
 	public long getAddress() {
 		return address;
+	}
+
+	@Override
+	public Iterator<Node> iterator() {
+		return getChildren().values().iterator();
 	}
 
 }

@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -161,5 +162,10 @@ public class HdfFile implements Group, AutoCloseable {
 	@Override
 	public long getAddress() {
 		return rootGroup.getAddress();
+	}
+
+	@Override
+	public Iterator<Node> iterator() {
+		return rootGroup.iterator();
 	}
 }
