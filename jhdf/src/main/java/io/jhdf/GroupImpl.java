@@ -24,18 +24,14 @@ public class GroupImpl implements Group {
 	private final Map<String, Node> children;
 	private final Map<String, AttributeMessage> attributes;
 
-	private final BTreeNode rootbTreeNode;
-	private final LocalHeap rootNameHeap;
-
 	private GroupImpl(FileChannel fc, Superblock sb, long bTreeAddress, long nameHeapAddress, long ojbectHeaderAddress,
 			String name, Group parent) {
 		this.name = name;
 		this.address = ojbectHeaderAddress;
 		this.parent = parent;
 
-		rootbTreeNode = new BTreeNode(fc, bTreeAddress, sb);
-		rootNameHeap = new LocalHeap(fc, nameHeapAddress, sb);
-
+		final BTreeNode rootbTreeNode = new BTreeNode(fc, bTreeAddress, sb);
+		final LocalHeap rootNameHeap = new LocalHeap(fc, nameHeapAddress, sb);
 		final ByteBuffer nameBuffer = rootNameHeap.getDataBuffer();
 
 		children = new LinkedHashMap<>(rootbTreeNode.getEntriesUsed());
@@ -68,8 +64,6 @@ public class GroupImpl implements Group {
 		LinkInfoMessage linkInfoMessage = oh.getMessagesOfType(LinkInfoMessage.class).get(0);
 
 		if (linkInfoMessage.getbTreeNameIndexAddress() == Constants.UNDEFINED_ADDRESS) {
-			rootbTreeNode = null;
-			rootNameHeap = null;
 
 			List<LinkMessage> links = oh.getMessagesOfType(LinkMessage.class);
 			children = new LinkedHashMap<>(links.size());
@@ -157,6 +151,7 @@ public class GroupImpl implements Group {
 		return parent;
 	}
 
+	@Override
 	public long getAddress() {
 		return address;
 	}
