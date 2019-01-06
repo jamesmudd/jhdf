@@ -9,6 +9,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataSpaceMessage;
@@ -17,11 +23,12 @@ import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.SymbolTableMessage;
 
 public class GroupImpl implements Group {
+	private static final Logger logger = LoggerFactory.getLogger(GroupImpl.class);
 
 	private final String name;
 	private final long address;
 	private final Group parent;
-	private final Map<String, Node> children;
+	private final LazyInitializer<Map<String, Node>> children;
 	private final Map<String, AttributeMessage> attributes;
 
 	private GroupImpl(FileChannel fc, Superblock sb, long bTreeAddress, long nameHeapAddress, long ojbectHeaderAddress,
@@ -30,28 +37,40 @@ public class GroupImpl implements Group {
 		this.address = ojbectHeaderAddress;
 		this.parent = parent;
 
-		final BTreeNode rootbTreeNode = new BTreeNode(fc, bTreeAddress, sb);
-		final LocalHeap rootNameHeap = new LocalHeap(fc, nameHeapAddress, sb);
-		final ByteBuffer nameBuffer = rootNameHeap.getDataBuffer();
+		children = new LazyInitializer<Map<String, Node>>() {
 
-		children = new LinkedHashMap<>(rootbTreeNode.getEntriesUsed());
+			@Override
+			protected Map<String, Node> initialize() throws ConcurrentException {
+				logger.info("Loading children of '{}'", getPath());
 
-		for (long child : rootbTreeNode.getChildAddresses()) {
-			GroupSymbolTableNode groupSTE = new GroupSymbolTableNode(fc, child, sb);
-			for (SymbolTableEntry ste : groupSTE.getSymbolTableEntries()) {
-				String childName = readName(nameBuffer, ste.getLinkNameOffset());
-				if (ste.getCacheType() == 1) { // Its a group
-					Group group = createGroup(fc, sb, ste.getObjectHeaderAddress(), childName, this);
-					children.put(childName, group);
-				} else { // Dataset
-					Dataset dataset = new Dataset(fc, sb, ste.getObjectHeaderAddress(), childName, this);
-					children.put(childName, dataset);
+				final BTreeNode rootbTreeNode = new BTreeNode(fc, bTreeAddress, sb);
+				final LocalHeap rootNameHeap = new LocalHeap(fc, nameHeapAddress, sb);
+				final ByteBuffer nameBuffer = rootNameHeap.getDataBuffer();
+
+				final Map<String, Node> lazyChildren = new LinkedHashMap<>(rootbTreeNode.getEntriesUsed());
+
+				for (long child : rootbTreeNode.getChildAddresses()) {
+					GroupSymbolTableNode groupSTE = new GroupSymbolTableNode(fc, child, sb);
+					for (SymbolTableEntry ste : groupSTE.getSymbolTableEntries()) {
+						String childName = readName(nameBuffer, ste.getLinkNameOffset());
+						if (ste.getCacheType() == 1) { // Its a group
+							Group group = createGroup(fc, sb, ste.getObjectHeaderAddress(), childName, GroupImpl.this);
+							lazyChildren.put(childName, group);
+						} else { // Dataset
+							Dataset dataset = new Dataset(fc, sb, ste.getObjectHeaderAddress(), childName,
+									GroupImpl.this);
+							lazyChildren.put(childName, dataset);
+						}
+					}
 				}
+				return lazyChildren;
 			}
-		}
+		};
 
 		// Add attributes
 		attributes = createAttributes(fc, sb, ObjectHeader.readObjectHeader(fc, sb, ojbectHeaderAddress));
+
+		logger.debug("Created group '{}'", getPath());
 	}
 
 	private Map<String, AttributeMessage> createAttributes(FileChannel fc, Superblock sb, ObjectHeader oh) {
@@ -69,33 +88,44 @@ public class GroupImpl implements Group {
 		this.address = oh.getAddress();
 		this.parent = parent;
 
-		LinkInfoMessage linkInfoMessage = oh.getMessagesOfType(LinkInfoMessage.class).get(0);
+		List<LinkMessage> links = oh.getMessagesOfType(LinkMessage.class);
+		children = new LazyInitializer<Map<String, Node>>() {
 
-		if (linkInfoMessage.getbTreeNameIndexAddress() == Constants.UNDEFINED_ADDRESS) {
+			@Override
+			protected Map<String, Node> initialize() throws ConcurrentException {
+				logger.info("Loading children of '{}'", getPath());
 
-			List<LinkMessage> links = oh.getMessagesOfType(LinkMessage.class);
-			children = new LinkedHashMap<>(links.size());
-			for (LinkMessage link : links) {
-				ObjectHeader linkHeader = ObjectHeader.readObjectHeader(fc, sb, link.getHardLinkAddress());
-				if (!linkHeader.getMessagesOfType(DataSpaceMessage.class).isEmpty()) {
-					// Its a a Dataset
-					Dataset dataset = new Dataset(fc, sb, link.getHardLinkAddress(), link.getLinkName(), this);
-					children.put(link.getLinkName(), dataset);
+				LinkInfoMessage linkInfoMessage = oh.getMessagesOfType(LinkInfoMessage.class).get(0);
+
+				if (linkInfoMessage.getbTreeNameIndexAddress() == Constants.UNDEFINED_ADDRESS) {
+
+					final Map<String, Node> lazyChildren = new LinkedHashMap<>(links.size());
+					for (LinkMessage link : links) {
+						ObjectHeader linkHeader = ObjectHeader.readObjectHeader(fc, sb, link.getHardLinkAddress());
+						if (!linkHeader.getMessagesOfType(DataSpaceMessage.class).isEmpty()) {
+							// Its a a Dataset
+							Dataset dataset = new Dataset(fc, sb, link.getHardLinkAddress(), link.getLinkName(),
+									GroupImpl.this);
+							lazyChildren.put(link.getLinkName(), dataset);
+						} else {
+							// Its a group
+							GroupImpl group = createGroup(fc, sb, link.getHardLinkAddress(), link.getLinkName(),
+									GroupImpl.this);
+							lazyChildren.put(link.getLinkName(), group);
+						}
+
+					}
+					return lazyChildren;
 				} else {
-					// Its a group
-					GroupImpl group = createGroup(fc, sb, link.getHardLinkAddress(), link.getLinkName(), this);
-					children.put(link.getLinkName(), group);
+					throw new UnsupportedHdfException("Only compact link storage is supported");
 				}
-
 			}
-
-		} else {
-			throw new UnsupportedHdfException("Only compact link storage is supported");
-		}
+		};
 
 		// Add attributes
 		attributes = createAttributes(fc, sb, oh);
 
+		logger.debug("Created group '{}'", getPath());
 	}
 
 	/* package */ static GroupImpl createGroup(FileChannel fc, Superblock sb, long objectHeaderAddress, String name,
@@ -120,7 +150,12 @@ public class GroupImpl implements Group {
 
 	@Override
 	public Map<String, Node> getChildren() {
-		return children;
+		try {
+			return children.get();
+		} catch (ConcurrentException e) {
+			throw new HdfException(
+					"Failed to load chirdren for group '" + getPath() + "' at address '" + getAddress() + "'", e);
+		}
 	}
 
 	@Override
