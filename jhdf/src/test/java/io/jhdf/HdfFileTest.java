@@ -61,6 +61,14 @@ public class HdfFileTest {
 			String firstGroupName = firstGroup.getName();
 			assertThat(firstGroup.getPath(), is(equalTo("/" + firstGroupName + "/")));
 			assertThat(firstGroup.getParent(), is(sameInstance(hdfFile)));
+
+			// Check the second level objects also have the right path as the root group is
+			// a special case
+			Node secondLevelGroup = firstGroup.getChildren().values().iterator().next();
+			String secondLevelGroupName = secondLevelGroup.getName();
+			assertThat(secondLevelGroup.getPath(),
+					is(equalTo("/" + firstGroupName + "/" + secondLevelGroupName + "/")));
+			assertThat(secondLevelGroup.getParent(), is(sameInstance(firstGroup)));
 		}
 	}
 
