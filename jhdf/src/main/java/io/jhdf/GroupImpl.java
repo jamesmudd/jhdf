@@ -161,7 +161,7 @@ public class GroupImpl implements Group {
 		// Add attributes
 		attributes = new AttributesLazyInitializer(objectHeader);
 
-		logger.debug("Created group '{}'", getPath());
+		logger.debug("Created root group of file '{}'", parent.getName());
 	}
 
 	/**
