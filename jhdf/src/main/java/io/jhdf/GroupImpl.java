@@ -38,22 +38,30 @@ public class GroupImpl implements Group {
 
 		for (long child : rootbTreeNode.getChildAddresses()) {
 			GroupSymbolTableNode groupSTE = new GroupSymbolTableNode(fc, child, sb);
-			for (SymbolTableEntry e : groupSTE.getSymbolTableEntries()) {
-				String childName = readName(nameBuffer, e.getLinkNameOffset());
-				if (e.getCacheType() == 1) { // Its a group
-					Group group = createGroup(fc, sb, e.getObjectHeaderAddress(), childName, this);
+			for (SymbolTableEntry ste : groupSTE.getSymbolTableEntries()) {
+				String childName = readName(nameBuffer, ste.getLinkNameOffset());
+				if (ste.getCacheType() == 1) { // Its a group
+					Group group = createGroup(fc, sb, ste.getObjectHeaderAddress(), childName, this);
 					children.put(childName, group);
 				} else { // Dataset
-					Dataset dataset = new Dataset(fc, sb, e.getObjectHeaderAddress(), childName, this);
+					Dataset dataset = new Dataset(fc, sb, ste.getObjectHeaderAddress(), childName, this);
 					children.put(childName, dataset);
 				}
 			}
 		}
 
 		// Add attributes
-		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, ojbectHeaderAddress);
-		attributes = oh.getMessagesOfType(AttributeMessage.class).stream()
+		attributes = createAttributes(fc, sb, ObjectHeader.readObjectHeader(fc, sb, ojbectHeaderAddress));
+	}
+
+	private Map<String, AttributeMessage> createAttributes(FileChannel fc, Superblock sb, ObjectHeader oh) {
+		return oh.getMessagesOfType(AttributeMessage.class).stream()
 				.collect(toMap(AttributeMessage::getName, identity()));
+	}
+
+	private String readName(ByteBuffer bb, int linkNameOffset) {
+		bb.position(linkNameOffset);
+		return Utils.readUntilNull(bb);
 	}
 
 	private GroupImpl(FileChannel fc, Superblock sb, ObjectHeader oh, String name, Group parent) {
@@ -86,24 +94,8 @@ public class GroupImpl implements Group {
 		}
 
 		// Add attributes
-		attributes = oh.getMessagesOfType(AttributeMessage.class).stream()
-				.collect(toMap(AttributeMessage::getName, identity()));
+		attributes = createAttributes(fc, sb, oh);
 
-	}
-
-	private String readName(ByteBuffer bb, int linkNameOffset) {
-		bb.position(linkNameOffset);
-		return Utils.readUntilNull(bb);
-	}
-
-	@Override
-	public boolean isGroup() {
-		return true;
-	}
-
-	@Override
-	public Map<String, Node> getChildren() {
-		return children;
 	}
 
 	/* package */ static GroupImpl createGroup(FileChannel fc, Superblock sb, long objectHeaderAddress, String name,
@@ -119,6 +111,16 @@ public class GroupImpl implements Group {
 			// Its a new style group
 			return new GroupImpl(fc, sb, oh, name, parent);
 		}
+	}
+
+	@Override
+	public boolean isGroup() {
+		return true;
+	}
+
+	@Override
+	public Map<String, Node> getChildren() {
+		return children;
 	}
 
 	@Override
