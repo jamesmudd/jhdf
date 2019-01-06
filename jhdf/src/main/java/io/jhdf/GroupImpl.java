@@ -29,7 +29,7 @@ public class GroupImpl implements Group {
 	private final long address;
 	private final Group parent;
 	private final LazyInitializer<Map<String, Node>> children;
-	private final Map<String, AttributeMessage> attributes;
+	private final LazyInitializer<Map<String, AttributeMessage>> attributes;
 
 	private GroupImpl(FileChannel fc, Superblock sb, long bTreeAddress, long nameHeapAddress, long ojbectHeaderAddress,
 			String name, Group parent) {
@@ -68,14 +68,21 @@ public class GroupImpl implements Group {
 		};
 
 		// Add attributes
-		attributes = createAttributes(fc, sb, ObjectHeader.readObjectHeader(fc, sb, ojbectHeaderAddress));
+		attributes = createAttributes(fc, sb, ojbectHeaderAddress);
 
 		logger.debug("Created group '{}'", getPath());
 	}
 
-	private Map<String, AttributeMessage> createAttributes(FileChannel fc, Superblock sb, ObjectHeader oh) {
-		return oh.getMessagesOfType(AttributeMessage.class).stream()
-				.collect(toMap(AttributeMessage::getName, identity()));
+	private LazyInitializer<Map<String, AttributeMessage>> createAttributes(FileChannel fc, Superblock sb,
+			long ojbectHeaderAddress) {
+		return new LazyInitializer<Map<String, AttributeMessage>>() {
+			@Override
+			protected Map<String, AttributeMessage> initialize() throws ConcurrentException {
+				final ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, ojbectHeaderAddress);
+				return oh.getMessagesOfType(AttributeMessage.class).stream()
+						.collect(toMap(AttributeMessage::getName, identity()));
+			}
+		};
 	}
 
 	private String readName(ByteBuffer bb, int linkNameOffset) {
@@ -123,7 +130,7 @@ public class GroupImpl implements Group {
 		};
 
 		// Add attributes
-		attributes = createAttributes(fc, sb, oh);
+		attributes = createAttributes(fc, sb, oh.getAddress());
 
 		logger.debug("Created group '{}'", getPath());
 	}
@@ -175,7 +182,12 @@ public class GroupImpl implements Group {
 
 	@Override
 	public Map<String, AttributeMessage> getAttributes() {
-		return attributes;
+		try {
+			return attributes.get();
+		} catch (ConcurrentException e) {
+			throw new HdfException(
+					"Failed to load attributes for group '" + getPath() + "' at address '" + getAddress() + "'", e);
+		}
 	}
 
 	@Override
