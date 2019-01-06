@@ -12,6 +12,8 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,19 @@ public abstract class ObjectHeader {
 		} else {
 			return new ObjectHeaderV2(fc, sb, address);
 		}
+	}
+
+	public static LazyInitializer<ObjectHeader> lazyReadObjectHeader(FileChannel fc, Superblock sb, long address) {
+		logger.debug("Creating lazy object header at address: " + address);
+		return new LazyInitializer<ObjectHeader>() {
+
+			@Override
+			protected ObjectHeader initialize() throws ConcurrentException {
+				logger.debug("Lazy initalising object header at address: " + address);
+				return readObjectHeader(fc, sb, address);
+			}
+
+		};
 	}
 
 	public abstract long getAddress();
