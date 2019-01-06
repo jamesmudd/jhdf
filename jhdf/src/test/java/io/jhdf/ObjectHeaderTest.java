@@ -3,19 +3,22 @@ package io.jhdf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import io.jhdf.ObjectHeader;
-import io.jhdf.Superblock;
 import io.jhdf.ObjectHeader.ObjectHeaderV1;
 
 public class ObjectHeaderTest {
@@ -100,6 +103,24 @@ public class ObjectHeaderTest {
 		// V1 specific methods
 		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
 		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
+	}
+
+	@Test
+	public void testLazyObjectHeader() throws Exception {
+		FileChannel spyFc = Mockito.spy(fc);
+		LazyInitializer<ObjectHeader> lazyObjectHeader = ObjectHeader.lazyReadObjectHeader(spyFc, sb, 11176); // int8
+																												// header
+		// Creating the lazy object header should not touch the file
+		Mockito.verifyZeroInteractions(spyFc);
+
+		// Get the actual header should cause the file to be read
+		lazyObjectHeader.get();
+
+		// Check the file was read
+		verify(spyFc, Mockito.atLeastOnce()).read(any(ByteBuffer.class), any(Long.class));
+
+		// Ensure nothing else was done to the file
+		Mockito.verifyNoMoreInteractions(spyFc);
 	}
 
 }

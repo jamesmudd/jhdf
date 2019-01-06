@@ -45,7 +45,7 @@ public class GroupTest {
 
 	@Test
 	public void testGroup() throws IOException {
-		GroupImpl group = GroupImpl.createGroup(fc, sb, 800, "datasets_group", rootGroup);
+		Group group = GroupImpl.createGroup(fc, sb, 800, "datasets_group", rootGroup);
 		assertThat(group.getPath(), is(equalTo("/datasets_group/")));
 		assertThat(group.toString(), is(equalTo("Group [name=datasets_group, path=/datasets_group/, address=0x320]")));
 		assertThat(group.isGroup(), is(true));

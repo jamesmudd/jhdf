@@ -2,6 +2,7 @@ package io.jhdf;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
@@ -50,6 +51,24 @@ public class HdfFileTest {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.getName(), is(equalTo(HDF5_TEST_FILE_NAME)));
 			assertThat(hdfFile.getType(), is(equalTo("HDF5 file")));
+		}
+	}
+
+	@Test
+	public void testNodesUnderTheRootGroupHaveTheRightPath() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			Node firstGroup = hdfFile.getChildren().values().iterator().next();
+			String firstGroupName = firstGroup.getName();
+			assertThat(firstGroup.getPath(), is(equalTo("/" + firstGroupName + "/")));
+			assertThat(firstGroup.getParent(), is(sameInstance(hdfFile)));
+
+			// Check the second level objects also have the right path as the root group is
+			// a special case
+			Node secondLevelGroup = firstGroup.getChildren().values().iterator().next();
+			String secondLevelGroupName = secondLevelGroup.getName();
+			assertThat(secondLevelGroup.getPath(),
+					is(equalTo("/" + firstGroupName + "/" + secondLevelGroupName + "/")));
+			assertThat(secondLevelGroup.getParent(), is(sameInstance(firstGroup)));
 		}
 	}
 
