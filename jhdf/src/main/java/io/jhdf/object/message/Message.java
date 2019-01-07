@@ -60,6 +60,8 @@ public class Message {
 			return new LinkInfoMessage(bb, sb);
 		case 3: // 0x0003
 			return new DataTypeMessage(bb);
+		case 4: // 0x0004
+			return new FillValueOldMessage(bb);
 		case 5: // 0x0005
 			return new FillValueMessage(bb, sb);
 		case 6: // 0x0006

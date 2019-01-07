@@ -13,7 +13,7 @@ def write_to_file(f, data):
     float_group = datasets_group.create_group('float')
     float_group.create_dataset('float16', data=data, dtype='f2')
     float_group.create_dataset('float32', data=data, dtype='f4')
-    float_group.create_dataset('float64', data=data, dtype='f8')
+    float_group.create_dataset('float64', data=data, dtype='f8', fillvalue=6)
     
     int_group = datasets_group.create_group('int')
     int_group.create_dataset('int8', data=data, dtype='i1')
