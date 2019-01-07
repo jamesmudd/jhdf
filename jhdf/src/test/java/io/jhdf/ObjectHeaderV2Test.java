@@ -17,6 +17,10 @@ import org.junit.jupiter.api.Test;
 import io.jhdf.ObjectHeader.ObjectHeaderV2;
 
 public class ObjectHeaderV2Test {
+
+	/** This will need to be updated each time the test files are regenerated */
+	private static final long TIMESTAMP = 1546898015L;
+
 	private FileChannel fc;
 	private RandomAccessFile raf;
 	private Superblock sb;
@@ -45,10 +49,10 @@ public class ObjectHeaderV2Test {
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
-		assertThat(ohV2.getAccessTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getBirthTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getChangeTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getModificationTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getAccessTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getBirthTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getChangeTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getModificationTime(), is(equalTo(TIMESTAMP)));
 		assertThat(ohV2.getMaximumNumberOfCompactAttributes(), is(equalTo(-1)));
 		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
 	}
@@ -63,10 +67,10 @@ public class ObjectHeaderV2Test {
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
-		assertThat(ohV2.getAccessTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getBirthTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getChangeTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getModificationTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getAccessTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getBirthTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getChangeTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getModificationTime(), is(equalTo(TIMESTAMP)));
 		assertThat(ohV2.getMaximumNumberOfCompactAttributes(), is(equalTo(-1)));
 		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
 	}
@@ -81,10 +85,10 @@ public class ObjectHeaderV2Test {
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
-		assertThat(ohV2.getAccessTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getBirthTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getChangeTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getModificationTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getAccessTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getBirthTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getChangeTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getModificationTime(), is(equalTo(TIMESTAMP)));
 		assertThat(ohV2.getMaximumNumberOfCompactAttributes(), is(equalTo(-1)));
 		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
 	}
@@ -99,10 +103,10 @@ public class ObjectHeaderV2Test {
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
-		assertThat(ohV2.getAccessTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getBirthTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getChangeTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getModificationTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getAccessTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getBirthTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getChangeTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getModificationTime(), is(equalTo(TIMESTAMP)));
 		assertThat(ohV2.getMaximumNumberOfCompactAttributes(), is(equalTo(-1)));
 		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
 	}
@@ -117,10 +121,10 @@ public class ObjectHeaderV2Test {
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
-		assertThat(ohV2.getAccessTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getBirthTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getChangeTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getModificationTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getAccessTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getBirthTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getChangeTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getModificationTime(), is(equalTo(TIMESTAMP)));
 		assertThat(ohV2.getMaximumNumberOfCompactAttributes(), is(equalTo(-1)));
 		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
 	}
@@ -135,10 +139,10 @@ public class ObjectHeaderV2Test {
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
-		assertThat(ohV2.getAccessTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getBirthTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getChangeTime(), is(equalTo(1544032461L)));
-		assertThat(ohV2.getModificationTime(), is(equalTo(1544032461L)));
+		assertThat(ohV2.getAccessTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getBirthTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getChangeTime(), is(equalTo(TIMESTAMP)));
+		assertThat(ohV2.getModificationTime(), is(equalTo(TIMESTAMP)));
 		assertThat(ohV2.getMaximumNumberOfCompactAttributes(), is(equalTo(-1)));
 		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
 	}
