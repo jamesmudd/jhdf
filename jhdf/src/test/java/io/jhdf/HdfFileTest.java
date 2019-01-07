@@ -1,17 +1,18 @@
 package io.jhdf;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.jhdf.exceptions.HdfException;
 
@@ -22,7 +23,7 @@ public class HdfFileTest {
 	private String testFileUrl;
 	private String nonHdfFile;
 
-	@Before
+	@BeforeEach
 	public void setup() throws FileNotFoundException {
 		testFileUrl = this.getClass().getResource(HDF5_TEST_FILE_NAME).getFile();
 		nonHdfFile = this.getClass().getResource(NON_HDF5_TEST_FILE_NAME).getFile();
@@ -41,10 +42,9 @@ public class HdfFileTest {
 		}
 	}
 
-	@Test(expected = HdfException.class)
+	@Test
 	public void testOpeningInvalidFile() throws IOException {
-		HdfFile hdfFile = new HdfFile(new File(nonHdfFile)); // Should throw
-		hdfFile.close(); // Will not be executed
+		assertThrows(HdfException.class, () -> new HdfFile(new File(nonHdfFile)));
 	}
 
 	@Test

@@ -1,16 +1,13 @@
 package io.jhdf.exceptions;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
 
 import java.io.IOException;
 
-import org.junit.Test;
-
-import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.UnsupportedHdfException;
+import org.junit.jupiter.api.Test;
 
 public class ExceptionsTest {
 

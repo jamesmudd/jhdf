@@ -1,14 +1,15 @@
 package io.jhdf;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class UtilsTest {
 
@@ -31,22 +32,22 @@ public class UtilsTest {
 		assertThat(Utils.readUntilNull(bb), is(equalTo("HDF")));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testReadUntilNullThrowsIfNoNullIsFound() throws Exception {
 		ByteBuffer bb = ByteBuffer.allocate(3);
 		byte[] b = new byte[] { 'H', 'D', 'F' };
 		bb.put(b);
 		bb.rewind();
-		Utils.readUntilNull(bb);
+		assertThrows(IllegalArgumentException.class, () -> Utils.readUntilNull(bb));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testReadUntilNullThrowsIfNonAlphanumericCharacterIsSeen() throws Exception {
 		ByteBuffer bb = ByteBuffer.allocate(3);
 		byte[] b = new byte[] { 'H', 'D', ' ' };
 		bb.put(b);
 		bb.rewind();
-		Utils.readUntilNull(bb);
+		assertThrows(IllegalArgumentException.class, () -> Utils.readUntilNull(bb));
 	}
 
 	@Test
@@ -128,38 +129,29 @@ public class UtilsTest {
 		assertThat(bb.position(), is(8));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testReadingUnsupportedLentghLongThrows() throws Exception {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
-		Utils.readBytesAsUnsignedLong(bb, 7); // should throw
+		assertThrows(IllegalArgumentException.class, () -> Utils.readBytesAsUnsignedLong(bb, 7));
 	}
 
-	@Test(expected = ArithmeticException.class)
-	public void testReadingFourByteNegativeIntegerThrows() throws Exception {
-		ByteBuffer bb = ByteBuffer.allocate(8);
-		bb.rewind();
-		bb.putInt(-462);
-		bb.rewind();
-		Utils.readBytesAsUnsignedInt(bb, 4); // should throw
-	}
-
-	@Test(expected = ArithmeticException.class)
+	@Test
 	public void testReadingEightByteNegativeIntegerThrows() throws Exception {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.rewind();
 		bb.putInt(-462);
 		bb.rewind();
-		Utils.readBytesAsUnsignedInt(bb, 8); // should throw
+		assertThrows(ArithmeticException.class, () -> Utils.readBytesAsUnsignedLong(bb, 8));
 	}
 
-	@Test(expected = ArithmeticException.class)
+	@Test
 	public void testReadingEightByteNegativeLongThrows() throws Exception {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.rewind();
 		bb.putInt(-462);
 		bb.rewind();
-		Utils.readBytesAsUnsignedLong(bb, 8); // should throw
+		assertThrows(ArithmeticException.class, () -> Utils.readBytesAsUnsignedLong(bb, 8));
 	}
 
 	@Test
@@ -194,19 +186,19 @@ public class UtilsTest {
 		assertThat(bb.position(), is(8));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testReadingUnsupportedLentghThrows() throws Exception {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
-		Utils.readBytesAsUnsignedInt(bb, 7); // should throw
+		assertThrows(IllegalArgumentException.class, () -> Utils.readBytesAsUnsignedInt(bb, 7));
 	}
 
-	@Test(expected = ArithmeticException.class)
+	@Test
 	public void testReadingLargeLongThrows() throws Exception {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.putLong(Long.MAX_VALUE);
 		bb.rewind();
-		Utils.readBytesAsUnsignedInt(bb, 8); // should throw
+		assertThrows(ArithmeticException.class, () -> Utils.readBytesAsUnsignedInt(bb, 8));
 	}
 
 	@Test
@@ -248,9 +240,9 @@ public class UtilsTest {
 		assertThat(Utils.bitsToInt(bits, 5, 3), is(equalTo(4)));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testBitsToIntThrowsWithNegativeLentgh() throws Exception {
 		BitSet bits = new BitSet(8);
-		Utils.bitsToInt(bits, 3, -1); // Should throw
+		assertThrows(IllegalArgumentException.class, () -> Utils.bitsToInt(bits, 3, -1)); // Should throw
 	}
 }
