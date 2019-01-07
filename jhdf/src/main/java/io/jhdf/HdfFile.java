@@ -37,7 +37,7 @@ public class HdfFile implements Group, AutoCloseable {
 	private final Group rootGroup;
 
 	public HdfFile(File hdfFile) {
-		logger.info("Opening HDF5 file '{}'", hdfFile.getAbsolutePath());
+		logger.info("Opening HDF5 file '{}'...", hdfFile.getAbsolutePath());
 		try {
 			this.file = hdfFile;
 			raf = new RandomAccessFile(hdfFile, "r");
@@ -76,7 +76,7 @@ public class HdfFile implements Group, AutoCloseable {
 		} catch (IOException e) {
 			throw new HdfException("Failed to open file. Is it a HDF5 file?", e);
 		}
-		logger.info("Opend HDF5 file '{}'", hdfFile.getAbsolutePath());
+		logger.info("Opened HDF5 file '{}'", hdfFile.getAbsolutePath());
 	}
 
 	private long nextOffset(long offset) {

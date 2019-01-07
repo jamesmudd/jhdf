@@ -2,9 +2,9 @@ package io.jhdf.object.message;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,12 +13,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.CharacterCodingException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.jhdf.Superblock;
-import io.jhdf.object.message.AttributeMessage;
 
 public class AttributeMessageV1Test {
 	private FileChannel fc;
@@ -26,7 +25,7 @@ public class AttributeMessageV1Test {
 	private Superblock sb;
 	private ByteBuffer bb;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws IOException {
 		final String testFileUrl = this.getClass().getResource("../../test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
@@ -36,7 +35,7 @@ public class AttributeMessageV1Test {
 		bb.order(LITTLE_ENDIAN);
 	}
 
-	@After
+	@AfterEach
 	public void after() throws IOException {
 		raf.close();
 		fc.close();

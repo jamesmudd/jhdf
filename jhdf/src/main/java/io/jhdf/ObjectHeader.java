@@ -1,6 +1,5 @@
 package io.jhdf;
 
-import static io.jhdf.Utils.toHex;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.io.IOException;
@@ -24,40 +23,24 @@ import io.jhdf.object.message.ObjectHeaderContinuationMessage;
 public abstract class ObjectHeader {
 	private static final Logger logger = LoggerFactory.getLogger(ObjectHeader.class);
 
-	public static ObjectHeader readObjectHeader(FileChannel fc, Superblock sb, long address) {
-		ByteBuffer bb = ByteBuffer.allocate(1);
-		try {
-			fc.read(bb, address);
-		} catch (IOException e) {
-			throw new HdfException("Failed to read object header at address = " + toHex(address));
-		}
-		bb.rewind();
-		byte version = bb.get();
-		if (version == 1) {
-			return new ObjectHeaderV1(fc, sb, address);
-		} else {
-			return new ObjectHeaderV2(fc, sb, address);
-		}
+	/** The location of this Object header in the file */
+	private final long address;
+	/** The messages contained in this object header */
+	protected final List<Message> messages = new ArrayList<>();
+
+	public long getAddress() {
+		return address;
 	}
-
-	public static LazyInitializer<ObjectHeader> lazyReadObjectHeader(FileChannel fc, Superblock sb, long address) {
-		logger.debug("Creating lazy object header at address: " + address);
-		return new LazyInitializer<ObjectHeader>() {
-
-			@Override
-			protected ObjectHeader initialize() throws ConcurrentException {
-				logger.debug("Lazy initalising object header at address: " + address);
-				return readObjectHeader(fc, sb, address);
-			}
-
-		};
-	}
-
-	public abstract long getAddress();
 
 	public abstract int getVersion();
 
-	public abstract List<Message> getMessages();
+	public List<Message> getMessages() {
+		return messages;
+	}
+
+	public ObjectHeader(long address) {
+		this.address = address;
+	}
 
 	public <T extends Message> List<T> getMessagesOfType(Class<T> type) {
 		return getMessages().stream().filter(type::isInstance).map(type::cast).collect(Collectors.toList());
@@ -68,31 +51,27 @@ public abstract class ObjectHeader {
 	}
 
 	public <T extends Message> T getMessageOfType(Class<T> type) {
-		List<T> messages = getMessagesOfType(type);
+		List<T> messagesOfType = getMessagesOfType(type);
 		// Validate only one message exists
-		if (messages.isEmpty()) {
+		if (messagesOfType.isEmpty()) {
 			throw new HdfException("Requested message type '" + type.getSimpleName() + "' not present");
 		}
-		if (messages.size() > 1) {
+		if (messagesOfType.size() > 1) {
 			throw new HdfException("Requested message type '" + type.getSimpleName() + "' is not unique");
 		}
 
-		return messages.get(0);
+		return messagesOfType.get(0);
 	}
 
 	public static class ObjectHeaderV1 extends ObjectHeader {
 
-		/** The location of this B tree in the file */
-		private final long address;
-		/** Type of node. 0 = group, 1 = data */
+		/** version of the header */
 		private final byte version;
 		/** Level of the node 0 = leaf */
 		private final int referenceCount;
-		/** The messages contained in this object header */
-		private final List<Message> messages;
 
 		private ObjectHeaderV1(FileChannel fc, Superblock sb, long address) {
-			this.address = address;
+			super(address);
 
 			try {
 				ByteBuffer header = ByteBuffer.allocate(12);
@@ -102,13 +81,15 @@ public abstract class ObjectHeader {
 
 				// Version
 				version = header.get();
+				if (version != 1) {
+					throw new HdfException("Invalid version detected. Version is = " + version);
+				}
 
 				// Skip reserved byte
-				header.get();
+				header.position(header.position() + 1);
 
 				// Number of messages
-				short numberOfMessages = header.getShort();
-				messages = new ArrayList<>(numberOfMessages);
+				final short numberOfMessages = header.getShort();
 
 				// Reference Count
 				referenceCount = header.getInt();
@@ -117,17 +98,17 @@ public abstract class ObjectHeader {
 				int headerSize = header.getInt();
 
 				header = ByteBuffer.allocate(headerSize);
-				fc.read(header, address + 12 // Upto this point
-						+ 4); // Padding missed in format spec;
+				// 12 up to this point + 4 missed in format spec = 16
+				fc.read(header, address + 16);
 				header.order(LITTLE_ENDIAN);
 				header.rewind();
 
 				header = readMessages(fc, sb, header, numberOfMessages);
 
-				logger.debug("Read object header from: {}", Utils.toHex(address));
+				logger.debug("Read object header from address: {}", address);
 
 			} catch (Exception e) {
-				throw new HdfException("Failed to read object header at: " + Utils.toHex(address), e);
+				throw new HdfException("Failed to read object header at address: " + address, e);
 			}
 		}
 
@@ -150,11 +131,6 @@ public abstract class ObjectHeader {
 		}
 
 		@Override
-		public long getAddress() {
-			return address;
-		}
-
-		@Override
 		public int getVersion() {
 			return version;
 		}
@@ -163,10 +139,6 @@ public abstract class ObjectHeader {
 			return referenceCount;
 		}
 
-		@Override
-		public List<Message> getMessages() {
-			return messages;
-		}
 	}
 
 	/**
@@ -178,14 +150,13 @@ public abstract class ObjectHeader {
 	public static class ObjectHeaderV2 extends ObjectHeader {
 
 		private static final byte[] OBJECT_HEADER_V2_SIGNATURE = "OHDR".getBytes();
+		private static final byte[] OBJECT_HEADER_V2_CONTINUATION_SIGNATURE = "OCHK".getBytes();
 
 		private static final int ATTRIBUTE_CREATION_ORDER_TRACKED = 2;
 		private static final int ATTRIBUTE_CREATION_ORDER_INDEXED = 3;
 		private static final int NUMBER_OF_ATTRIBUTES_PRESENT = 4;
 		private static final int TIMESTAMPS_PRESENT = 5;
 
-		/** The location of this B tree in the file */
-		private final long address;
 		/** Type of node. 0 = group, 1 = data */
 		private final byte version;
 
@@ -199,11 +170,8 @@ public abstract class ObjectHeader {
 		private final int maximumNumberOfCompactAttributes;
 		private final int maximumNumberOfDenseAttributes;
 
-		/** The messages contained in this object header */
-		private final List<Message> messages = new ArrayList<>();
-
 		private ObjectHeaderV2(FileChannel fc, Superblock sb, long address) {
-			this.address = address;
+			super(address);
 
 			try {
 				ByteBuffer bb = ByteBuffer.allocate(6);
@@ -297,10 +265,10 @@ public abstract class ObjectHeader {
 				// message type (1_byte) + message size (2 bytes) + message flags (1 byte)
 				bb = readMessages(fc, sb, bb);
 
-				logger.debug("Read object header from: {}", Utils.toHex(address));
+				logger.debug("Read object header from address: {}", address);
 
 			} catch (Exception e) {
-				throw new HdfException("Failed to read object header at: " + Utils.toHex(address), e);
+				throw new HdfException("Failed to read object header at address: " + address, e);
 			}
 		}
 
@@ -314,10 +282,17 @@ public abstract class ObjectHeader {
 					ByteBuffer continuationBuffer = ByteBuffer.allocate(ohcm.getLentgh());
 					fc.read(continuationBuffer, ohcm.getOffset());
 					continuationBuffer.order(LITTLE_ENDIAN);
+					continuationBuffer.rewind();
 
-					// Its a V2 Continuation block so skip the header
-					// TODO should check the 'OCHK' signature might need to refactor...
-					continuationBuffer.position(4);
+					// Verify continuation block signature
+					byte[] continuationSignitureBytes = new byte[OBJECT_HEADER_V2_CONTINUATION_SIGNATURE.length];
+					continuationBuffer.get(continuationSignitureBytes);
+					if (!Arrays.equals(OBJECT_HEADER_V2_CONTINUATION_SIGNATURE, continuationSignitureBytes)) {
+						throw new HdfException(
+								"Object header conntinuation header not matched, at address: " + ohcm.getOffset());
+					}
+
+					// Recursivly read messages
 					readMessages(fc, sb, continuationBuffer);
 				}
 			}
@@ -325,18 +300,8 @@ public abstract class ObjectHeader {
 		}
 
 		@Override
-		public long getAddress() {
-			return address;
-		}
-
-		@Override
 		public int getVersion() {
 			return version;
-		}
-
-		@Override
-		public List<Message> getMessages() {
-			return messages;
 		}
 
 		public long getAccessTime() {
@@ -363,5 +328,34 @@ public abstract class ObjectHeader {
 			return maximumNumberOfDenseAttributes;
 		}
 
+	}
+
+	public static ObjectHeader readObjectHeader(FileChannel fc, Superblock sb, long address) {
+		ByteBuffer bb = ByteBuffer.allocate(1);
+		try {
+			fc.read(bb, address);
+		} catch (IOException e) {
+			throw new HdfException("Failed to read object header at address = " + address);
+		}
+		bb.rewind();
+		byte version = bb.get();
+		if (version == 1) {
+			return new ObjectHeaderV1(fc, sb, address);
+		} else {
+			return new ObjectHeaderV2(fc, sb, address);
+		}
+	}
+
+	public static LazyInitializer<ObjectHeader> lazyReadObjectHeader(FileChannel fc, Superblock sb, long address) {
+		logger.debug("Creating lazy object header at address: {}", address);
+		return new LazyInitializer<ObjectHeader>() {
+
+			@Override
+			protected ObjectHeader initialize() throws ConcurrentException {
+				logger.debug("Lazy initalising object header at address: {}", address);
+				return readObjectHeader(fc, sb, address);
+			}
+
+		};
 	}
 }

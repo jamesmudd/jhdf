@@ -1,8 +1,8 @@
 package io.jhdf;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,19 +10,16 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import io.jhdf.Superblock;
-import io.jhdf.SymbolTableEntry;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SymbolTableEntryTest {
 	private FileChannel fc;
 	private RandomAccessFile raf;
 	private Superblock sb;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
@@ -30,7 +27,7 @@ public class SymbolTableEntryTest {
 		sb = Superblock.readSuperblock(fc, 0);
 	}
 
-	@After
+	@AfterEach
 	public void after() throws IOException {
 		raf.close();
 		fc.close();

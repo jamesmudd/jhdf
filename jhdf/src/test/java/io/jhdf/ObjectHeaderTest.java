@@ -1,9 +1,10 @@
 package io.jhdf;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
@@ -14,9 +15,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import org.apache.commons.lang3.concurrent.LazyInitializer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import io.jhdf.ObjectHeader.ObjectHeaderV1;
@@ -26,7 +27,7 @@ public class ObjectHeaderTest {
 	private RandomAccessFile raf;
 	private Superblock sb;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
@@ -34,7 +35,7 @@ public class ObjectHeaderTest {
 		sb = Superblock.readSuperblock(fc, 0);
 	}
 
-	@After
+	@AfterEach
 	public void after() throws IOException {
 		raf.close();
 		fc.close();
@@ -117,7 +118,7 @@ public class ObjectHeaderTest {
 		lazyObjectHeader.get();
 
 		// Check the file was read
-		verify(spyFc, Mockito.atLeastOnce()).read(any(ByteBuffer.class), any(Long.class));
+		verify(spyFc, Mockito.atLeastOnce()).read(any(ByteBuffer.class), anyLong());
 
 		// Ensure nothing else was done to the file
 		Mockito.verifyNoMoreInteractions(spyFc);

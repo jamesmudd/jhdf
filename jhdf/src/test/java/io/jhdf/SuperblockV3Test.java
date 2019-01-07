@@ -1,8 +1,9 @@
 package io.jhdf;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,12 +11,10 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import io.jhdf.Constants;
-import io.jhdf.Superblock;
 import io.jhdf.Superblock.SuperblockV2V3;
 import io.jhdf.exceptions.HdfException;
 
@@ -23,14 +22,14 @@ public class SuperblockV3Test {
 	private FileChannel fc;
 	private RandomAccessFile raf;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("test_file2.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
 	}
 
-	@After
+	@AfterEach
 	public void after() throws IOException {
 		raf.close();
 		fc.close();
@@ -50,10 +49,6 @@ public class SuperblockV3Test {
 		SuperblockV2V3 sbV3 = (SuperblockV2V3) sb;
 		assertThat(sbV3.getSuperblockExtensionAddress(), is(equalTo(Constants.UNDEFINED_ADDRESS)));
 		assertThat(sbV3.getRootGroupObjectHeaderAddress(), is(equalTo(48L)));
-//		assertThat(sbV0.getVersionOfSharedHeaderMessageFormat(), is(equalTo(0)));
-//		assertThat(sbV0.getGroupLeafNodeK(), is(equalTo(4)));
-//		assertThat(sbV0.getGroupInternalNodeK(), is(equalTo(16)));
-//		assertThat(sbV0.getAddressOfGlobalFreeSpaceIndex(), is(equalTo(UNDEFINED_ADDRESS)));
 	}
 
 	@Test
@@ -66,8 +61,8 @@ public class SuperblockV3Test {
 		assertThat(Superblock.verifySignature(fc, 3), is(false));
 	}
 
-	@Test(expected = HdfException.class)
+	@Test
 	public void testReadSuperblockThrowsWhenGivenInvalidOffset() throws Exception {
-		Superblock.readSuperblock(fc, 5);
+		assertThrows(HdfException.class, () -> Superblock.readSuperblock(fc, 5));
 	}
 }

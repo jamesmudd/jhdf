@@ -2,7 +2,7 @@ package io.jhdf.examples;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ApiTestTest {
 
