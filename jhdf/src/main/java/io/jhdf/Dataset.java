@@ -6,6 +6,9 @@ import static java.util.stream.Collectors.toMap;
 import java.nio.channels.FileChannel;
 import java.util.Map;
 
+import io.jhdf.api.Group;
+import io.jhdf.api.Node;
+import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.AttributeMessage;
 
@@ -40,12 +43,6 @@ public class Dataset implements Node {
 	}
 
 	@Override
-	public Map<String, Node> getChildren() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String getName() {
 		return name;
 	}
@@ -61,12 +58,12 @@ public class Dataset implements Node {
 	}
 
 	@Override
-	public String getType() {
-		return "Dataset";
+	public NodeType getType() {
+		return NodeType.DATASET;
 	}
 
 	@Override
-	public Node getParent() {
+	public Group getParent() {
 		return parent;
 	}
 

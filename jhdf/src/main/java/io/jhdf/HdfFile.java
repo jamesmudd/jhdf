@@ -14,6 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import io.jhdf.Superblock.SuperblockV0V1;
 import io.jhdf.Superblock.SuperblockV2V3;
+import io.jhdf.api.Group;
+import io.jhdf.api.Node;
+import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.AttributeMessage;
 
@@ -144,12 +147,12 @@ public class HdfFile implements Group, AutoCloseable {
 	}
 
 	@Override
-	public String getType() {
-		return "HDF5 file";
+	public NodeType getType() {
+		return NodeType.FILE;
 	}
 
 	@Override
-	public Node getParent() {
+	public Group getParent() {
 		// The file has no parent so return null
 		return null;
 	}

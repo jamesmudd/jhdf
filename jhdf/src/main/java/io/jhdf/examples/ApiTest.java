@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
-import io.jhdf.Group;
 import io.jhdf.HdfFile;
-import io.jhdf.Node;
+import io.jhdf.api.Group;
+import io.jhdf.api.Node;
 
 public class ApiTest {
 

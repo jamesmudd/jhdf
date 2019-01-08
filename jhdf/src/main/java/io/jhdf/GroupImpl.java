@@ -15,6 +15,9 @@ import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.jhdf.api.Group;
+import io.jhdf.api.Node;
+import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.message.AttributeMessage;
@@ -227,12 +230,12 @@ public class GroupImpl implements Group {
 	}
 
 	@Override
-	public String getType() {
-		return "Group";
+	public NodeType getType() {
+		return NodeType.GROUP;
 	}
 
 	@Override
-	public Node getParent() {
+	public Group getParent() {
 		return parent;
 	}
 
