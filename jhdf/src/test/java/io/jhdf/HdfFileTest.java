@@ -14,6 +14,9 @@ import java.util.Iterator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.jhdf.api.Group;
+import io.jhdf.api.Node;
+import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 
 public class HdfFileTest {
@@ -51,14 +54,14 @@ public class HdfFileTest {
 	public void testRootGroup() throws Exception {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.getName(), is(equalTo(HDF5_TEST_FILE_NAME)));
-			assertThat(hdfFile.getType(), is(equalTo("HDF5 file")));
+			assertThat(hdfFile.getType(), is(equalTo(NodeType.FILE)));
 		}
 	}
 
 	@Test
 	public void testNodesUnderTheRootGroupHaveTheRightPath() throws Exception {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
-			Node firstGroup = hdfFile.getChildren().values().iterator().next();
+			Group firstGroup = (Group) hdfFile.getChildren().values().iterator().next();
 			String firstGroupName = firstGroup.getName();
 			assertThat(firstGroup.getPath(), is(equalTo("/" + firstGroupName + "/")));
 			assertThat(firstGroup.getParent(), is(sameInstance(hdfFile)));

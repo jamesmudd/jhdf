@@ -18,6 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.jhdf.Superblock.SuperblockV0V1;
+import io.jhdf.api.Group;
+import io.jhdf.api.NodeType;
 
 public class GroupTest {
 	private FileChannel fc;
@@ -51,7 +53,7 @@ public class GroupTest {
 		assertThat(group.isGroup(), is(true));
 		assertThat(group.getChildren().keySet(), hasSize(2));
 		assertThat(group.getName(), is(equalTo("datasets_group")));
-		assertThat(group.getType(), is(equalTo("Group")));
+		assertThat(group.getType(), is(equalTo(NodeType.GROUP)));
 		assertThat(group.getParent(), is(rootGroup));
 		assertThat(group.getAddress(), is(equalTo(800L)));
 	}
