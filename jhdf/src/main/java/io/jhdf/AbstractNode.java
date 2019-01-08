@@ -1,5 +1,7 @@
 package io.jhdf;
 
+import java.io.File;
+
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
@@ -39,6 +41,13 @@ public abstract class AbstractNode implements Node {
 	@Override
 	public long getAddress() {
 		return address;
+	}
+
+	@Override
+	public File getFile() {
+		// Recurse back up to the file
+		return getParent().getFile();
+
 	}
 
 }
