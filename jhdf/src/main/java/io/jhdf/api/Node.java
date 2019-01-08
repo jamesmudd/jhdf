@@ -62,13 +62,7 @@ public interface Node {
 	 * 
 	 * @return the file containing this node
 	 */
-	default File getFile() {
-		// Recurse back up to the file
-		if (getParent() != null) {
-			return getParent().getFile();
-		}
-		return getFile();
-	}
+	File getFile();
 
 	/**
 	 * This returns the byte offset into the file of the object header for this

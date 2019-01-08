@@ -200,7 +200,7 @@ public class GroupImpl extends AbstractNode implements Group {
 
 	@Override
 	public String getPath() {
-		return parent.getPath() + name + "/";
+		return super.getPath() + "/";
 	}
 
 	@Override

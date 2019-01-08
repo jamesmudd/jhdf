@@ -2,7 +2,12 @@ package io.jhdf;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isEmptyString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -11,9 +16,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
@@ -21,14 +28,17 @@ import io.jhdf.exceptions.HdfException;
 
 public class HdfFileTest {
 
-	private static final String NON_HDF5_TEST_FILE_NAME = "make_test_files.py";
 	private static final String HDF5_TEST_FILE_NAME = "test_file.hdf5";
+	private static final String HDF5_TEST_FILE_TWO_NAME = "test_file2.hdf5";
+	private static final String NON_HDF5_TEST_FILE_NAME = "make_test_files.py";
 	private String testFileUrl;
 	private String nonHdfFile;
+	private String testFile2Url;
 
 	@BeforeEach
 	public void setup() throws FileNotFoundException {
 		testFileUrl = this.getClass().getResource(HDF5_TEST_FILE_NAME).getFile();
+		testFile2Url = this.getClass().getResource(HDF5_TEST_FILE_TWO_NAME).getFile();
 		nonHdfFile = this.getClass().getResource(NON_HDF5_TEST_FILE_NAME).getFile();
 	}
 
@@ -47,7 +57,16 @@ public class HdfFileTest {
 
 	@Test
 	public void testOpeningInvalidFile() throws IOException {
-		assertThrows(HdfException.class, () -> new HdfFile(new File(nonHdfFile)));
+		HdfException ex = assertThrows(HdfException.class, () -> new HdfFile(new File(nonHdfFile)));
+		assertThat(ex.getMessage(), is(equalTo("No valid HDF5 signature found")));
+	}
+
+	@Test
+	public void testOpeningMissingFile() throws IOException {
+		HdfException ex = assertThrows(HdfException.class,
+				() -> new HdfFile(new File("madeUpFileNameThatDoesntExist.hello")));
+		assertThat(ex.getMessage(), is(equalTo("Failed to open file. Is it a HDF5 file?")));
+		assertThat(ex.getCause(), is(instanceOf(IOException.class)));
 	}
 
 	@Test
@@ -81,6 +100,45 @@ public class HdfFileTest {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			final Iterator<Node> iterator = hdfFile.iterator();
 			assertThat(iterator.hasNext(), is(true));
+		}
+	}
+
+	@Test
+	void testGettingTheFileBackFromAGroup() throws Exception {
+		File file = new File(testFileUrl);
+		try (HdfFile hdfFile = new HdfFile(file)) {
+			for (Node node : hdfFile) {
+				assertThat(node.getFile(), is(Matchers.sameInstance(file)));
+			}
+		}
+	}
+
+	@Test // This is to ensure no exceptions are thrown when inspecting the whole file
+	void recurseThroughTheFileCallingBasicMethodsOnAllNodes() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			recurseGroup(hdfFile);
+		}
+
+		try (HdfFile hdfFile = new HdfFile(new File(testFile2Url))) {
+			recurseGroup(hdfFile);
+		}
+
+	}
+
+	private void recurseGroup(Group group) {
+		for (Node node : group) {
+			assertThat(node.getName(), not(isEmptyString()));
+			assertThat(node.getAddress(), is(greaterThan(1L)));
+			assertThat(node.getParent(), is(notNullValue()));
+			if (node instanceof Dataset) {
+				assertThat(node.isGroup(), is(false));
+				assertThat(node.getType(), is(NodeType.DATASET));
+			}
+			if (node instanceof Group) {
+				assertThat(node.isGroup(), is(true));
+				assertThat(node.getType(), is(NodeType.GROUP));
+				recurseGroup((Group) node);
+			}
 		}
 	}
 
