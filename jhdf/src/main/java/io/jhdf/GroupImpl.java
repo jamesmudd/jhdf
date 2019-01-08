@@ -77,7 +77,7 @@ public class GroupImpl implements Group {
 						if (ste.getCacheType() == 1) { // Its a group
 							node = createGroup(fc, sb, ste.getObjectHeaderAddress(), childName, parent);
 						} else { // Dataset
-							node = new Dataset(fc, sb, ste.getObjectHeaderAddress(), childName, parent);
+							node = new DatasetImpl(fc, sb, ste.getObjectHeaderAddress(), childName, parent);
 						}
 						lazyChildren.put(childName, node);
 					}
@@ -96,7 +96,7 @@ public class GroupImpl implements Group {
 						final Node node;
 						if (linkHeader.hasMessageOfType(DataSpaceMessage.class)) {
 							// Its a a Dataset
-							node = new Dataset(fc, sb, link.getHardLinkAddress(), link.getLinkName(), parent);
+							node = new DatasetImpl(fc, sb, link.getHardLinkAddress(), link.getLinkName(), parent);
 						} else {
 							// Its a group
 							node = createGroup(fc, sb, link.getHardLinkAddress(), link.getLinkName(), parent);

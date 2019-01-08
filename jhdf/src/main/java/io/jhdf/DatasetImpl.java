@@ -6,20 +6,20 @@ import static java.util.stream.Collectors.toMap;
 import java.nio.channels.FileChannel;
 import java.util.Map;
 
+import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
-import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.AttributeMessage;
 
-public class Dataset implements Node {
+public class DatasetImpl implements Dataset {
 
 	private final long address;
 	private final String name;
 	private final Group parent;
 	private final Map<String, AttributeMessage> attributes;
 
-	public Dataset(FileChannel fc, Superblock sb, long address, String name, Group parent) {
+	public DatasetImpl(FileChannel fc, Superblock sb, long address, String name, Group parent) {
 		this.address = address;
 		this.name = name;
 		this.parent = parent;
