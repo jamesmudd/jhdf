@@ -4,7 +4,6 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 import java.nio.channels.FileChannel;
-import java.util.Map;
 
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -12,17 +11,10 @@ import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.AttributeMessage;
 
-public class DatasetImpl implements Dataset {
-
-	private final long address;
-	private final String name;
-	private final Group parent;
-	private final Map<String, AttributeMessage> attributes;
+public class DatasetImpl extends AbstractNode implements Dataset {
 
 	public DatasetImpl(FileChannel fc, Superblock sb, long address, String name, Group parent) {
-		this.address = address;
-		this.name = name;
-		this.parent = parent;
+		super(address, name, parent);
 
 		try {
 			ObjectHeader header = ObjectHeader.readObjectHeader(fc, sb, address);
@@ -37,38 +29,7 @@ public class DatasetImpl implements Dataset {
 	}
 
 	@Override
-	public boolean isGroup() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public String getPath() {
-		return parent.getPath() + name;
-	}
-
-	@Override
-	public Map<String, AttributeMessage> getAttributes() {
-		return attributes;
-	}
-
-	@Override
 	public NodeType getType() {
 		return NodeType.DATASET;
-	}
-
-	@Override
-	public Group getParent() {
-		return parent;
-	}
-
-	@Override
-	public long getAddress() {
-		return address;
 	}
 }
