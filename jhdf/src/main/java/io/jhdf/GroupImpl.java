@@ -26,7 +26,7 @@ import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.SymbolTableMessage;
 
-public class GroupImpl implements Group {
+public class GroupImpl extends AbstractNode implements Group {
 	private final class AttributesLazyInitializer extends LazyInitializer<Map<String, AttributeMessage>> {
 		private final LazyInitializer<ObjectHeader> lazyOjbectHeader;
 
@@ -119,19 +119,14 @@ public class GroupImpl implements Group {
 
 	private static final Logger logger = LoggerFactory.getLogger(GroupImpl.class);
 
-	private final String name;
-	private final long address;
-	private final Group parent;
-
 	private final LazyInitializer<ObjectHeader> objectHeader;
 	private final LazyInitializer<Map<String, Node>> children;
 	private final LazyInitializer<Map<String, AttributeMessage>> attributes;
 
 	private GroupImpl(FileChannel fc, Superblock sb, long address, String name, Group parent) {
+		super(address, name, parent);
 		logger.trace("Creating group '{}'...", name);
-		this.name = name;
-		this.address = address;
-		this.parent = parent;
+
 		this.objectHeader = ObjectHeader.lazyReadObjectHeader(fc, sb, address);
 
 		children = new ChildrenLazyInitializer(fc, sb, this);
@@ -152,10 +147,9 @@ public class GroupImpl implements Group {
 	 * @param parent              For the root group the parent is the file itself.
 	 */
 	private GroupImpl(FileChannel fc, Superblock sb, long objectHeaderAddress, HdfFile parent) {
+		super(objectHeaderAddress, "", parent); // No name special case for root group no name
 		logger.trace("Creating root group...");
-		this.name = ""; // Special case for root group no name
-		this.address = objectHeaderAddress;
-		this.parent = parent;
+
 		this.objectHeader = ObjectHeader.lazyReadObjectHeader(fc, sb, objectHeaderAddress);
 
 		// Special case for root group pass parent instead of this
@@ -190,11 +184,6 @@ public class GroupImpl implements Group {
 	}
 
 	@Override
-	public boolean isGroup() {
-		return true;
-	}
-
-	@Override
 	public Map<String, Node> getChildren() {
 		try {
 			return children.get();
@@ -202,11 +191,6 @@ public class GroupImpl implements Group {
 			throw new HdfException(
 					"Failed to load chirdren for group '" + getPath() + "' at address '" + getAddress() + "'", e);
 		}
-	}
-
-	@Override
-	public String getName() {
-		return name;
 	}
 
 	@Override
@@ -232,16 +216,6 @@ public class GroupImpl implements Group {
 	@Override
 	public NodeType getType() {
 		return NodeType.GROUP;
-	}
-
-	@Override
-	public Group getParent() {
-		return parent;
-	}
-
-	@Override
-	public long getAddress() {
-		return address;
 	}
 
 	@Override
