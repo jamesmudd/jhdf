@@ -118,7 +118,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	@Override
 	public boolean isGroup() {
-		return rootGroup.isGroup();
+		return true;
 	}
 
 	@Override

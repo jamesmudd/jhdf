@@ -149,6 +149,34 @@ public class HdfFileTest {
 			assertThat(hdfFile.getChild("datasets_group"), is(notNullValue()));
 			assertThat(hdfFile.getChild("non_existent_child"), is(nullValue()));
 		}
+	}
+
+	@Test
+	void testHdfFileHasNoParent() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.getParent(), is(nullValue()));
+		}
+	}
+
+	@Test
+	void testHdfFileIsGroup() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.isGroup(), is(true));
+		}
+	}
+
+	@Test
+	void testFormatOfToString() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.toString(), is(equalTo("HdfFile [file=test_file.hdf5]")));
+		}
+	}
+
+	@Test
+	void testGettingHdfFileAttributes() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.getAttributes(), is(notNullValue()));
+		}
 
 	}
 
