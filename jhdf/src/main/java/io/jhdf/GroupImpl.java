@@ -37,7 +37,7 @@ public class GroupImpl extends AbstractNode implements Group {
 
 		@Override
 		protected Map<String, Node> initialize() throws ConcurrentException {
-			logger.info("Loading children of '{}'", getPath());
+			logger.info("Lazy loading children of '{}'", getPath());
 
 			// Load the object header
 			final ObjectHeader oh = objectHeader.get();
@@ -203,6 +203,16 @@ public class GroupImpl extends AbstractNode implements Group {
 	@Override
 	public Iterator<Node> iterator() {
 		return getChildren().values().iterator();
+	}
+
+	@Override
+	public Node getChild(String name) {
+		try {
+			return children.get().get(name);
+		} catch (ConcurrentException e) {
+			throw new HdfException(
+					"Failed to load childen of group '" + getPath() + "' at address '" + getAddress() + "'", e);
+		}
 	}
 
 }

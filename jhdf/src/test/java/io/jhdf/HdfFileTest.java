@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -140,6 +141,15 @@ public class HdfFileTest {
 				recurseGroup((Group) node);
 			}
 		}
+	}
+
+	@Test
+	void testGettingChildByName() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.getChild("datasets_group"), is(notNullValue()));
+			assertThat(hdfFile.getChild("non_existent_child"), is(nullValue()));
+		}
+
 	}
 
 }

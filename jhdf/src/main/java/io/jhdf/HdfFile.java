@@ -171,4 +171,9 @@ public class HdfFile implements Group, AutoCloseable {
 	public Iterator<Node> iterator() {
 		return rootGroup.iterator();
 	}
+
+	@Override
+	public Node getChild(String name) {
+		return rootGroup.getChild(name);
+	}
 }

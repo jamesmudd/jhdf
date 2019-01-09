@@ -4,6 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import io.jhdf.Superblock.SuperblockV0V1;
 import io.jhdf.api.Group;
+import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 
 public class GroupTest {
@@ -56,5 +59,19 @@ public class GroupTest {
 		assertThat(group.getType(), is(equalTo(NodeType.GROUP)));
 		assertThat(group.getParent(), is(rootGroup));
 		assertThat(group.getAddress(), is(equalTo(800L)));
+	}
+
+	@Test
+	void testGettingChildrenByName() throws Exception {
+		Group group = GroupImpl.createGroup(fc, sb, 800, "datasets_group", rootGroup);
+		Node child = group.getChild("int");
+		assertThat(child, is(notNullValue()));
+	}
+
+	@Test
+	void testGettingMissingChildreturnsNull() throws Exception {
+		Group group = GroupImpl.createGroup(fc, sb, 800, "datasets_group", rootGroup);
+		Node child = group.getChild("made_up_missing_child_name");
+		assertThat(child, is(nullValue()));
 	}
 }
