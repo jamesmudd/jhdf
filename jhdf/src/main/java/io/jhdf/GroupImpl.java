@@ -1,8 +1,5 @@
 package io.jhdf;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
-
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
@@ -27,21 +24,6 @@ import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.SymbolTableMessage;
 
 public class GroupImpl extends AbstractNode implements Group {
-	private final class AttributesLazyInitializer extends LazyInitializer<Map<String, AttributeMessage>> {
-		private final LazyInitializer<ObjectHeader> lazyOjbectHeader;
-
-		private AttributesLazyInitializer(LazyInitializer<ObjectHeader> lazyOjbectHeader) {
-			this.lazyOjbectHeader = lazyOjbectHeader;
-		}
-
-		@Override
-		protected Map<String, AttributeMessage> initialize() throws ConcurrentException {
-			final ObjectHeader oh = lazyOjbectHeader.get();
-			return oh.getMessagesOfType(AttributeMessage.class).stream()
-					.collect(toMap(AttributeMessage::getName, identity()));
-		}
-	}
-
 	private final class ChildrenLazyInitializer extends LazyInitializer<Map<String, Node>> {
 		private final FileChannel fc;
 		private final Superblock sb;

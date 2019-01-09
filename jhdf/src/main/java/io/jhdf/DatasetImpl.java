@@ -1,10 +1,10 @@
 package io.jhdf;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
-
 import java.nio.channels.FileChannel;
 import java.util.Map;
+
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
 
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -14,17 +14,17 @@ import io.jhdf.object.message.AttributeMessage;
 
 public class DatasetImpl extends AbstractNode implements Dataset {
 
-	private final Map<String, AttributeMessage> attributes;
+	private final LazyInitializer<Map<String, AttributeMessage>> attributes;
+	private final LazyInitializer<ObjectHeader> header;
 
 	public DatasetImpl(FileChannel fc, Superblock sb, long address, String name, Group parent) {
 		super(address, name, parent);
 
 		try {
-			ObjectHeader header = ObjectHeader.readObjectHeader(fc, sb, address);
+			header = ObjectHeader.lazyReadObjectHeader(fc, sb, address);
 
 			// Attributes
-			attributes = header.getMessagesOfType(AttributeMessage.class).stream()
-					.collect(toMap(AttributeMessage::getName, identity()));
+			attributes = new AttributesLazyInitializer(header);
 		} catch (Exception e) {
 			throw new HdfException("Error reading dataset '" + getPath() + "' at address " + address, e);
 		}
@@ -36,7 +36,13 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 		return NodeType.DATASET;
 	}
 
+	@Override
 	public Map<String, AttributeMessage> getAttributes() {
-		return attributes;
+		try {
+			return attributes.get();
+		} catch (ConcurrentException e) {
+			throw new HdfException(
+					"Failed to load attributes for dataset '" + getPath() + "' at address '" + getAddress() + "'", e);
+		}
 	}
 }
