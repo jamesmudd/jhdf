@@ -81,6 +81,7 @@ jar {
     manifest {
         attributes('Implementation-Title': project.name,
                    'Implementation-Version': project.version,
+                   'Automatic-Module-Name': 'io.jhdf',
                    // OSGi headers
                    'Bundle-ManifestVersion': '2',
                    'Bundle-SymbolicName': 'io.jhdf',
