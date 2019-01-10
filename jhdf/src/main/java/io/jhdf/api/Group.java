@@ -30,4 +30,13 @@ public interface Group extends Node, Iterable<Node> {
 	 */
 	Node getChild(String name);
 
+	/**
+	 * Gets a {@link Node} by path. The path given will be reletive to this node.
+	 * 
+	 * @param path the path to the requested node
+	 * @return the node or <code>null</code> if there is no node at this path
+	 * @throws HdfException if getting the path fails
+	 */
+	Node getByPath(String path);
+
 }

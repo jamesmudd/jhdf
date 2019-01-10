@@ -215,4 +215,23 @@ public class GroupImpl extends AbstractNode implements Group {
 		}
 	}
 
+	@Override
+	public Node getByPath(String path) {
+		// Try splitting into 2 sections the child of this group and the remaining path
+		// to pass down.
+		final String[] pathElements = path.split(Constants.PATH_SEPERATOR, 2);
+		final Node child = getChild(pathElements[0]);
+		if (pathElements.length == 1) {
+			// There is no remaing path to resolve so we have the result
+			return child;
+		} else if (child instanceof Group) {
+			// The next level is also a group so try to keep resolving the remaining path
+			return ((Group) child).getByPath(pathElements[1]);
+		} else {
+			// Path can't be resolved
+			return null;
+		}
+
+	}
+
 }

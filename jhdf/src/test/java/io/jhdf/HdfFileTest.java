@@ -177,7 +177,27 @@ public class HdfFileTest {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.getAttributes(), is(notNullValue()));
 		}
+	}
 
+	@Test
+	void testGettingByPath() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			String path = "datasets_group/float/float32";
+			Node node = hdfFile.getByPath(path);
+			assertThat(node, is(notNullValue()));
+			// Add leading '/' because its the file
+			assertThat(node.getPath(), is(equalTo("/" + path)));
+		}
+	}
+
+	@Test
+	void testGettingByPathWithLeadingSlash() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			String path = "/datasets_group/float/float32";
+			Node node = hdfFile.getByPath(path);
+			assertThat(node, is(notNullValue()));
+			assertThat(node.getPath(), is(equalTo(path)));
+		}
 	}
 
 }

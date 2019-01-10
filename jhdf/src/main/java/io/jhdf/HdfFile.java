@@ -9,6 +9,7 @@ import java.nio.channels.FileChannel.MapMode;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,5 +176,13 @@ public class HdfFile implements Group, AutoCloseable {
 	@Override
 	public Node getChild(String name) {
 		return rootGroup.getChild(name);
+	}
+
+	@Override
+	public Node getByPath(String path) {
+		// As its the file its ok to have a leading slash but strip it here to be
+		// consistent with other groups
+		path = StringUtils.stripStart(path, Constants.PATH_SEPERATOR);
+		return rootGroup.getByPath(path);
 	}
 }

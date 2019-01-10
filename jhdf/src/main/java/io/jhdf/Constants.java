@@ -6,7 +6,7 @@ public final class Constants {
 	/** All bits on */
 	public static final long UNDEFINED_ADDRESS = -1;
 
-	private Constants() {
-		// No instances
-	}
+	public static final String PATH_SEPERATOR = "/";
+
+	private Constants() {} // No instances
 }

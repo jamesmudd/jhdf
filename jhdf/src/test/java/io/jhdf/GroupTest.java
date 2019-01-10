@@ -74,4 +74,27 @@ public class GroupTest {
 		Node child = group.getChild("made_up_missing_child_name");
 		assertThat(child, is(nullValue()));
 	}
+
+	@Test
+	void testGetByPathWithInvalidPathReturnsNull() throws Exception {
+		Group group = GroupImpl.createGroup(fc, sb, 800, "datasets_group", rootGroup);
+		assertThat(group.getByPath("float/missing_node"), is(nullValue()));
+
+	}
+
+	@Test
+	void testGetByPathWithValidPathReturnsNode() throws Exception {
+		Group group = GroupImpl.createGroup(fc, sb, 800, "datasets_group", rootGroup);
+		String path = "float/float32";
+		Node child = group.getByPath(path);
+		assertThat(child.getPath(), is(equalTo(group.getPath() + path)));
+	}
+
+	@Test
+	void testGetByPathThroughDatasetReturnNull() throws Exception {
+		Group group = GroupImpl.createGroup(fc, sb, 800, "datasets_group", rootGroup);
+		// Try to keep resolving a path through a dataset 'float32' this shold return
+		// null
+		assertThat(group.getByPath("float/float32/missing_node"), is(nullValue()));
+	}
 }
