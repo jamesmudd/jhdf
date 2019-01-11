@@ -169,4 +169,10 @@ public class DatasetImplTest {
 		assertArrayEquals(dataset.getDimensions(), new long[] { 21 });
 	}
 
+	@Test
+	void testIntDatasetMaxSizes() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+		assertArrayEquals(dataset.getMaxSize().get(), new long[] { 21 });
+	}
+
 }

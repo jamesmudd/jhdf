@@ -6,6 +6,7 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
@@ -123,5 +124,15 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 	@Override
 	public long[] getDimensions() {
 		return getHeaderMessage(DataSpaceMessage.class).getDataSpace().getDimensions();
+	}
+
+	@Override
+	public Optional<long[]> getMaxSize() {
+		DataSpace dataSpace = getHeaderMessage(DataSpaceMessage.class).getDataSpace();
+		if (dataSpace.isMaxSizesPresent()) {
+			return Optional.of(dataSpace.getMaxSizes());
+		} else {
+			return Optional.empty();
+		}
 	}
 }

@@ -1,6 +1,7 @@
 package io.jhdf.api;
 
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 /**
  * HDF5 dataset. Datasets contain the real data within a HDF5 file.
@@ -9,6 +10,12 @@ import java.nio.ByteBuffer;
  */
 public interface Dataset extends Node {
 
+	/**
+	 * Gets the buffer that holds this datasets data. The returned buffer will be of
+	 * the correct order (endiness).
+	 * 
+	 * @return the data buffer that holds this dataset
+	 */
 	ByteBuffer getDataBuffer();
 
 	/**
@@ -32,5 +39,13 @@ public interface Dataset extends Node {
 	 * @return the dimensions of this dataset
 	 */
 	long[] getDimensions();
+
+	/**
+	 * Gets the max size of this dataset if present or an empty {@link Optional} if
+	 * not present.
+	 * 
+	 * @return the max size of this dataset if present.
+	 */
+	Optional<long[]> getMaxSize();
 
 }
