@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +24,7 @@ import io.jhdf.Superblock.SuperblockV0V1;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
+import io.jhdf.exceptions.HdfInvalidPathException;
 
 public class GroupTest {
 	private FileChannel fc;
@@ -30,16 +32,19 @@ public class GroupTest {
 	private SuperblockV0V1 sb;
 
 	private Group rootGroup;
+	private File file;
 
 	@BeforeEach
 	public void setUp() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
-		raf = new RandomAccessFile(new File(testFileUrl), "r");
+		file = new File(testFileUrl);
+		raf = new RandomAccessFile(file, "r");
 		fc = raf.getChannel();
 		sb = (SuperblockV0V1) Superblock.readSuperblock(fc, 0);
 
 		rootGroup = mock(Group.class);
 		when(rootGroup.getPath()).thenReturn("/");
+		when(rootGroup.getFile()).thenReturn(file);
 	}
 
 	@AfterEach
@@ -91,10 +96,14 @@ public class GroupTest {
 	}
 
 	@Test
-	void testGetByPathThroughDatasetReturnNull() throws Exception {
+	void testGetByPathThroughDatasetThrows() throws Exception {
 		Group group = GroupImpl.createGroup(fc, sb, 800, "datasets_group", rootGroup);
 		// Try to keep resolving a path through a dataset 'float32' this shold return
 		// null
-		assertThat(group.getByPath("float/float32/missing_node"), is(nullValue()));
+		String path = "float/float32/missing_node";
+		HdfInvalidPathException e = assertThrows(HdfInvalidPathException.class, () -> {
+			group.getByPath(path);
+		});
+		assertThat(e.getPath(), is(equalTo("/datasets_group/float/float32/missing_node")));
 	}
 }

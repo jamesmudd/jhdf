@@ -16,6 +16,7 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.HdfInvalidPathException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataSpaceMessage;
@@ -229,7 +230,7 @@ public class GroupImpl extends AbstractNode implements Group {
 			return ((Group) child).getByPath(pathElements[1]);
 		} else {
 			// Path can't be resolved
-			return null;
+			throw new HdfInvalidPathException(getPath() + path, getFile());
 		}
 
 	}
