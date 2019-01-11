@@ -18,10 +18,10 @@ import org.junit.jupiter.api.Test;
 
 import io.jhdf.api.Dataset;
 
-public class DatasetImpleTest {
+public class DatasetImplTest {
 
 	private static final String HDF5_TEST_FILE_NAME = "test_file.hdf5";
-	private static final String TEST_FILE_URL = DatasetImpleTest.class.getResource(HDF5_TEST_FILE_NAME).getFile();
+	private static final String TEST_FILE_URL = DatasetImplTest.class.getResource(HDF5_TEST_FILE_NAME).getFile();
 
 	// These are the "correct" contents of the datasets i.e need to match what was
 	// written by h5py
