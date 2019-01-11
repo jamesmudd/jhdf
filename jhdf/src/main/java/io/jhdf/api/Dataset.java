@@ -3,6 +3,8 @@ package io.jhdf.api;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
+import io.jhdf.object.message.DataLayout;
+
 /**
  * HDF5 dataset. Datasets contain the real data within a HDF5 file.
  * 
@@ -47,5 +49,12 @@ public interface Dataset extends Node {
 	 * @return the max size of this dataset if present.
 	 */
 	Optional<long[]> getMaxSize();
+
+	/**
+	 * Gets the data layout of this dataset.
+	 * 
+	 * @return the data layout of this dataset
+	 */
+	DataLayout getDataLayout();
 
 }

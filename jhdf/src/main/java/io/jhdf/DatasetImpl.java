@@ -21,6 +21,7 @@ import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.OrderedDataType;
 import io.jhdf.object.message.AttributeMessage;
+import io.jhdf.object.message.DataLayout;
 import io.jhdf.object.message.DataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.CompactDataLayoutMessage;
@@ -50,6 +51,15 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 			throw new HdfException("Error reading dataset '" + getPath() + "' at address " + address, e);
 		}
 
+	}
+
+	private <T extends Message> T getHeaderMessage(Class<T> clazz) {
+		try {
+			return header.get().getMessageOfType(clazz);
+		} catch (ConcurrentException e) {
+			throw new HdfException("Failed to get header message of type '" + clazz.hashCode() + "' for dataset '"
+					+ getPath() + "' at address '" + getAddress() + "'", e);
+		}
 	}
 
 	@Override
@@ -112,15 +122,6 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 		return getSize() * dataType.getSize();
 	}
 
-	private <T extends Message> T getHeaderMessage(Class<T> clazz) {
-		try {
-			return header.get().getMessageOfType(clazz);
-		} catch (ConcurrentException e) {
-			throw new HdfException("Failed to get header message of type '" + clazz.hashCode() + "' for dataset '"
-					+ getPath() + "' at address '" + getAddress() + "'", e);
-		}
-	}
-
 	@Override
 	public long[] getDimensions() {
 		return getHeaderMessage(DataSpaceMessage.class).getDataSpace().getDimensions();
@@ -134,5 +135,10 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 		} else {
 			return Optional.empty();
 		}
+	}
+
+	@Override
+	public DataLayout getDataLayout() {
+		return getHeaderMessage(DataLayoutMessage.class).getDataLayout();
 	}
 }

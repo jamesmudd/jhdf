@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import io.jhdf.api.Dataset;
+import io.jhdf.object.message.DataLayout;
 
 public class DatasetImplTest {
 
@@ -180,6 +181,12 @@ public class DatasetImplTest {
 	void testIntDatasetMaxSizes() throws Exception {
 		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
 		assertArrayEquals(dataset.getMaxSize().get(), new long[] { 21 });
+	}
+
+	@Test
+	void testIntDatasetDataLayout() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+		assertThat(dataset.getDataLayout(), is(DataLayout.CONTIGUOUS));
 	}
 
 }
