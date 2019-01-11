@@ -2,25 +2,32 @@ package io.jhdf;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Map;
 
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.object.datatype.DataType;
+import io.jhdf.object.datatype.OrderedDataType;
 import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.CompactDataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ContigiousDataLayoutMessage;
+import io.jhdf.object.message.DataTypeMessage;
 
 public class DatasetImpl extends AbstractNode implements Dataset {
+	private static final Logger logger = LoggerFactory.getLogger(DatasetImpl.class);
 
 	private final LazyInitializer<Map<String, AttributeMessage>> attributes;
 	private final LazyInitializer<ObjectHeader> header;
@@ -59,12 +66,14 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 	@Override
 	public ByteBuffer getDataBuffer() {
 		try {
+			// First get the raw buffer
+			final ByteBuffer dataBuffer;
 			DataLayoutMessage dataLayoutMessage = header.get().getMessageOfType(DataLayoutMessage.class);
 			if (dataLayoutMessage instanceof CompactDataLayoutMessage) {
-				return ((CompactDataLayoutMessage) dataLayoutMessage).getDataBuffer();
+				dataBuffer = ((CompactDataLayoutMessage) dataLayoutMessage).getDataBuffer();
 			} else if (dataLayoutMessage instanceof ContigiousDataLayoutMessage) {
 				ContigiousDataLayoutMessage contigiousDataLayoutMessage = (ContigiousDataLayoutMessage) dataLayoutMessage;
-				return fc.map(MapMode.READ_ONLY, contigiousDataLayoutMessage.getAddress(),
+				dataBuffer = fc.map(MapMode.READ_ONLY, contigiousDataLayoutMessage.getAddress(),
 						contigiousDataLayoutMessage.getSize());
 			} else if (dataLayoutMessage instanceof ChunkedDataLayoutMessage) {
 				throw new UnsupportedHdfException("Chunked datasets not supported yet");
@@ -73,9 +82,20 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 						"Unsupported data layout. Layout class is: " + dataLayoutMessage.getClass().getCanonicalName());
 			}
 
+			// Convert to the correct endiness
+			final DataType dataType = header.get().getMessageOfType(DataTypeMessage.class).getDataType();
+			if (dataType instanceof OrderedDataType) {
+				final ByteOrder order = (((OrderedDataType) dataType).getByteOrder());
+				dataBuffer.order(order);
+				logger.debug("Set buffer oder of '{}' to {}", getPath(), order);
+			}
+
+			return dataBuffer;
+
 		} catch (ConcurrentException | IOException e) {
 			throw new HdfException(
 					"Failed to get data buffer for dataset '" + getPath() + "' at address '" + getAddress() + "'", e);
 		}
+
 	}
 }
