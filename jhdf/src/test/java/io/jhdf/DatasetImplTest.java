@@ -7,13 +7,15 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import io.jhdf.api.Dataset;
@@ -40,11 +42,16 @@ public class DatasetImplTest {
 	private static final float FLOAT_DELTA = 0.000000001f;
 	private static final double DOUBLE_DELTA = 0.000000001;
 
-	private HdfFile hdfFile;
+	private static HdfFile hdfFile;
 
-	@BeforeEach
-	public void before() {
+	@BeforeAll
+	static void beforeAll() {
 		hdfFile = new HdfFile(new File(TEST_FILE_URL));
+	}
+
+	@AfterAll
+	static void afterAll() throws IOException {
+		hdfFile.close();
 	}
 
 	@Test

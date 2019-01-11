@@ -46,7 +46,7 @@ public class AttributeMessageV1Test {
 		AttributeMessage am = new AttributeMessage(bb, sb);
 		assertThat(am.getName(), is(equalTo("string_attr")));
 		assertThat(am.getDataType().getDataClass(), is(equalTo(9)));
-		assertThat(am.getDataSpace().getTotalLentgh(), is(equalTo(1)));
+		assertThat(am.getDataSpace().getTotalLentgh(), is(equalTo(1L)));
 		assertThat(am.getData().capacity(), is(equalTo(24)));
 		assertThat(am.getVersion(), is(equalTo(1)));
 	}
