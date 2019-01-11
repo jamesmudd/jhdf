@@ -13,4 +13,8 @@ public class DataSpaceMessage extends Message {
 
 		dataSpace = DataSpace.readDataSpace(bb, sb);
 	}
+
+	public DataSpace getDataSpace() {
+		return dataSpace;
+	}
 }

@@ -129,4 +129,10 @@ public class DatasetImplTest {
 		assertArrayEquals(REFERENCE_DOUBLE_DATA, data, DOUBLE_DELTA);
 	}
 
+	@Test
+	void testByteDatasetSize() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int8");
+		assertThat(dataset.getSize(), is(equalTo(21L)));
+	}
+
 }

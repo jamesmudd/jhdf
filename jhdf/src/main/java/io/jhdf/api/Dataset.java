@@ -11,4 +11,11 @@ public interface Dataset extends Node {
 
 	ByteBuffer getDataBuffer();
 
+	/**
+	 * Gets the total number of elements in this dataset.
+	 * 
+	 * @return the total number of elements in this dataset
+	 */
+	long getSize();
+
 }
