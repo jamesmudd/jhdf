@@ -11,8 +11,8 @@ public class DataType {
 
 	private final int version;
 	private final int dataClass;
-	private int size; // In bytes
-	byte[] classBytes;
+	private final int size; // In bytes
+	protected final byte[] classBytes;
 
 	public static DataType readDataType(ByteBuffer bb) {
 		// Mark buffer position
@@ -69,11 +69,13 @@ public class DataType {
 		return dataClass;
 	}
 
+	/**
+	 * Gets the number of bytes used to represent each element
+	 * 
+	 * @return the size of each element in bytes
+	 */
 	public int getSize() {
 		return size;
 	}
 
-	public void setSize(int size) {
-		this.size = size;
-	}
 }

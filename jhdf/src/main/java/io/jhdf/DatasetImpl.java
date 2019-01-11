@@ -105,6 +105,12 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 		return dataSpace.getTotalLentgh();
 	}
 
+	@Override
+	public long getDiskSize() {
+		final DataType dataType = getHeaderMessage(DataTypeMessage.class).getDataType();
+		return getSize() * dataType.getSize();
+	}
+
 	private <T extends Message> T getHeaderMessage(Class<T> clazz) {
 		try {
 			return header.get().getMessageOfType(clazz);

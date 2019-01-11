@@ -51,8 +51,6 @@ public class DatasetImplTest {
 	void testByteDatasetBuffer() throws Exception {
 		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int8");
 		// We know this is a float dataset so get the float buffer
-		// TODO the getDataBuffer method should automatically return a buffer of the
-		// right endiness and type if possible
 		ByteBuffer buffer = dataset.getDataBuffer();
 		assertThat(buffer, is(notNullValue()));
 		// Check the size of the buffer is correct, i.e the number of points in this
@@ -133,6 +131,36 @@ public class DatasetImplTest {
 	void testByteDatasetSize() throws Exception {
 		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int8");
 		assertThat(dataset.getSize(), is(equalTo(21L)));
+	}
+
+	@Test
+	void testByteDatasetDiskSize() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int8");
+		assertThat(dataset.getDiskSize(), is(equalTo(21L)));
+	}
+
+	@Test
+	void testShortDatasetSize() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int16");
+		assertThat(dataset.getSize(), is(equalTo(21L)));
+	}
+
+	@Test
+	void testShortDatasetDiskSize() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int16");
+		assertThat(dataset.getDiskSize(), is(equalTo(42L)));
+	}
+
+	@Test
+	void testIntDatasetSize() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+		assertThat(dataset.getSize(), is(equalTo(21L)));
+	}
+
+	@Test
+	void testIntDatasetDiskSize() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+		assertThat(dataset.getDiskSize(), is(equalTo(84L)));
 	}
 
 }
