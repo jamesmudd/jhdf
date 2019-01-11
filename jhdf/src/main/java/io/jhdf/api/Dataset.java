@@ -26,4 +26,11 @@ public interface Dataset extends Node {
 	 */
 	long getDiskSize();
 
+	/**
+	 * Gets the dimensions of this dataset
+	 * 
+	 * @return the dimensions of this dataset
+	 */
+	long[] getDimensions();
+
 }

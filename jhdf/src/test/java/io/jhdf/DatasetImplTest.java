@@ -163,4 +163,10 @@ public class DatasetImplTest {
 		assertThat(dataset.getDiskSize(), is(equalTo(84L)));
 	}
 
+	@Test
+	void testIntDatasetDimensions() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+		assertArrayEquals(dataset.getDimensions(), new long[] { 21 });
+	}
+
 }

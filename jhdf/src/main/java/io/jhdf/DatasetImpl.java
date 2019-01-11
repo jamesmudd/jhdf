@@ -119,4 +119,9 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 					+ getPath() + "' at address '" + getAddress() + "'", e);
 		}
 	}
+
+	@Override
+	public long[] getDimensions() {
+		return getHeaderMessage(DataSpaceMessage.class).getDataSpace().getDimensions();
+	}
 }
