@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.BitSet;
 
-class FixedPoint extends DataType {
+class FixedPoint extends DataType implements OrderedDataType {
 	private final ByteOrder order;
 	private final boolean lowPadding;
 	private final boolean highPadding;
@@ -30,7 +30,8 @@ class FixedPoint extends DataType {
 		bitPrecision = bb.getShort();
 	}
 
-	public ByteOrder getOrder() {
+	@Override
+	public ByteOrder getByteOrder() {
 		return order;
 	}
 
@@ -53,4 +54,5 @@ class FixedPoint extends DataType {
 	public short getBitPrecision() {
 		return bitPrecision;
 	}
+
 }

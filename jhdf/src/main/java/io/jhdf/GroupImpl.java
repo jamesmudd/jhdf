@@ -1,8 +1,5 @@
 package io.jhdf;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
-
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
@@ -19,6 +16,7 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.HdfInvalidPathException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataSpaceMessage;
@@ -27,21 +25,6 @@ import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.SymbolTableMessage;
 
 public class GroupImpl extends AbstractNode implements Group {
-	private final class AttributesLazyInitializer extends LazyInitializer<Map<String, AttributeMessage>> {
-		private final LazyInitializer<ObjectHeader> lazyOjbectHeader;
-
-		private AttributesLazyInitializer(LazyInitializer<ObjectHeader> lazyOjbectHeader) {
-			this.lazyOjbectHeader = lazyOjbectHeader;
-		}
-
-		@Override
-		protected Map<String, AttributeMessage> initialize() throws ConcurrentException {
-			final ObjectHeader oh = lazyOjbectHeader.get();
-			return oh.getMessagesOfType(AttributeMessage.class).stream()
-					.collect(toMap(AttributeMessage::getName, identity()));
-		}
-	}
-
 	private final class ChildrenLazyInitializer extends LazyInitializer<Map<String, Node>> {
 		private final FileChannel fc;
 		private final Superblock sb;
@@ -55,7 +38,7 @@ public class GroupImpl extends AbstractNode implements Group {
 
 		@Override
 		protected Map<String, Node> initialize() throws ConcurrentException {
-			logger.info("Loading children of '{}'", getPath());
+			logger.info("Lazy loading children of '{}'", getPath());
 
 			// Load the object header
 			final ObjectHeader oh = objectHeader.get();
@@ -221,6 +204,35 @@ public class GroupImpl extends AbstractNode implements Group {
 	@Override
 	public Iterator<Node> iterator() {
 		return getChildren().values().iterator();
+	}
+
+	@Override
+	public Node getChild(String name) {
+		try {
+			return children.get().get(name);
+		} catch (ConcurrentException e) {
+			throw new HdfException(
+					"Failed to load childen of group '" + getPath() + "' at address '" + getAddress() + "'", e);
+		}
+	}
+
+	@Override
+	public Node getByPath(String path) {
+		// Try splitting into 2 sections the child of this group and the remaining path
+		// to pass down.
+		final String[] pathElements = path.split(Constants.PATH_SEPERATOR, 2);
+		final Node child = getChild(pathElements[0]);
+		if (pathElements.length == 1) {
+			// There is no remaing path to resolve so we have the result
+			return child;
+		} else if (child instanceof Group) {
+			// The next level is also a group so try to keep resolving the remaining path
+			return ((Group) child).getByPath(pathElements[1]);
+		} else {
+			// Path can't be resolved
+			throw new HdfInvalidPathException(getPath() + path, getFile());
+		}
+
 	}
 
 }

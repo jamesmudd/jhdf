@@ -1,10 +1,8 @@
 package io.jhdf.object.message;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Collections;
-import java.util.List;
+import java.util.stream.LongStream;
 
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
@@ -14,8 +12,8 @@ public class DataSpace {
 
 	private final byte version;
 	private final boolean maxSizesPresent;
-	private final List<Integer> dimensions;
-	private final List<Integer> maxSizes;
+	private final long[] dimensions;
+	private final long[] maxSizes;
 	private final byte type;
 
 	private DataSpace(ByteBuffer bb, Superblock sb) {
@@ -39,22 +37,22 @@ public class DataSpace {
 
 		// Dimensions sizes
 		if (numberOfdimensions != 0) {
-			dimensions = new ArrayList<>(numberOfdimensions);
+			dimensions = new long[numberOfdimensions];
 			for (int i = 0; i < numberOfdimensions; i++) {
-				dimensions.add(Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths()));
+				dimensions[i] = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 			}
 		} else {
-			dimensions = Collections.emptyList();
+			dimensions = new long[0];
 		}
 
 		// Max dimension sizes
 		if (maxSizesPresent) {
-			maxSizes = new ArrayList<>(numberOfdimensions);
+			maxSizes = new long[numberOfdimensions];
 			for (int i = 0; i < numberOfdimensions; i++) {
-				maxSizes.add(Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths()));
+				maxSizes[i] = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 			}
 		} else {
-			maxSizes = Collections.emptyList();
+			maxSizes = new long[0];
 		}
 
 		// Permutation indices - Note never implemented in HDF library!
@@ -70,11 +68,8 @@ public class DataSpace {
 	 * @return the total number of elements in this dataspace
 	 * @throws ArithmeticException if an integer overflow occurs
 	 */
-	public int getTotalLentgh() {
-		if (dimensions.isEmpty()) {
-			return 1;
-		}
-		return dimensions.stream().mapToInt(Integer::intValue).reduce(1, Math::multiplyExact);
+	public long getTotalLentgh() {
+		return LongStream.of(dimensions).reduce(1, Math::multiplyExact);
 	}
 
 	public int getType() {
@@ -83,6 +78,18 @@ public class DataSpace {
 
 	public int getVersion() {
 		return version;
+	}
+
+	public long[] getDimensions() {
+		return dimensions;
+	}
+
+	public long[] getMaxSizes() {
+		return maxSizes;
+	}
+
+	public boolean isMaxSizesPresent() {
+		return maxSizesPresent;
 	}
 
 }

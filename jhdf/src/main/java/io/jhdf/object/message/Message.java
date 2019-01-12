@@ -17,6 +17,9 @@ public class Message {
 		// TODO Is this needed?
 	}
 
+	public Message() {
+	}
+
 	public static Message readObjectHeaderV1Message(ByteBuffer bb, Superblock sb) {
 		Utils.seekBufferToNextMultipleOfEight(bb);
 
@@ -67,7 +70,7 @@ public class Message {
 		case 6: // 0x0006
 			return new LinkMessage(bb, sb);
 		case 8: // 0x0008
-			return new DataLayoutMessage(bb, sb);
+			return DataLayoutMessage.createDataLayoutMessage(bb, sb);
 		case 10: // 0x000A
 			return new GroupInfoMessage(bb, sb);
 		case 11: // 0x000B

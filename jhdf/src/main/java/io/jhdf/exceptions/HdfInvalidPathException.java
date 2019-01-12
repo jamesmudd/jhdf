@@ -1,0 +1,32 @@
+package io.jhdf.exceptions;
+
+import java.io.File;
+
+/**
+ * Thrown when a path inside a HDF5 file is invalid. It may contain invalid
+ * characters or not be found in the file.
+ * 
+ * @author James Mudd
+ */
+public class HdfInvalidPathException extends HdfException {
+
+	private static final long serialVersionUID = 1L;
+
+	private final String path;
+	private final File file;
+
+	public HdfInvalidPathException(String path, File file) {
+		super("The path '" + path + "' cound not be found in the HDF5 file '" + file.getAbsolutePath() + "'");
+		this.path = path;
+		this.file = file;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public File getFile() {
+		return file;
+	}
+
+}

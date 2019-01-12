@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -25,6 +26,7 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.HdfInvalidPathException;
 
 public class HdfFileTest {
 
@@ -139,6 +141,77 @@ public class HdfFileTest {
 				assertThat(node.getType(), is(NodeType.GROUP));
 				recurseGroup((Group) node);
 			}
+		}
+	}
+
+	@Test
+	void testGettingChildByName() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.getChild("datasets_group"), is(notNullValue()));
+			assertThat(hdfFile.getChild("non_existent_child"), is(nullValue()));
+		}
+	}
+
+	@Test
+	void testHdfFileHasNoParent() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.getParent(), is(nullValue()));
+		}
+	}
+
+	@Test
+	void testHdfFileIsGroup() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.isGroup(), is(true));
+		}
+	}
+
+	@Test
+	void testFormatOfToString() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.toString(), is(equalTo("HdfFile [file=test_file.hdf5]")));
+		}
+	}
+
+	@Test
+	void testGettingHdfFileAttributes() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.getAttributes(), is(notNullValue()));
+		}
+	}
+
+	@Test
+	void testGettingByPath() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			String path = "datasets_group/float/float32";
+			Node node = hdfFile.getByPath(path);
+			assertThat(node, is(notNullValue()));
+			// Add leading '/' because its the file
+			assertThat(node.getPath(), is(equalTo("/" + path)));
+		}
+	}
+
+	@Test
+	void testGettingByPathWithLeadingSlash() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			String path = "/datasets_group/float/float32";
+			Node node = hdfFile.getByPath(path);
+			assertThat(node, is(notNullValue()));
+			assertThat(node.getPath(), is(equalTo(path)));
+		}
+	}
+
+	@Test
+	void testGettingByInvalidPathWithLeadingSlashThrows() throws Exception {
+		File file = new File(testFileUrl);
+		try (HdfFile hdfFile = new HdfFile(file)) {
+			String path = "/datasets_group/float/float32/invalid_name";
+			HdfInvalidPathException e = assertThrows(HdfInvalidPathException.class, () -> hdfFile.getByPath(path));
+			assertThat(e.getPath(), is(equalTo(path)));
+			assertThat(e.getFile(), is(sameInstance(file)));
+			assertThat(e.getMessage(), is(equalTo(
+					"The path '/datasets_group/float/float32/invalid_name' cound not be found in the HDF5 file '"
+							+ file.getAbsolutePath() + "'")));
 		}
 	}
 

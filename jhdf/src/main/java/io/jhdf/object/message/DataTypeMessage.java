@@ -14,4 +14,8 @@ public class DataTypeMessage extends Message {
 		dataType = DataType.readDataType(bb);
 	}
 
+	public DataType getDataType() {
+		return dataType;
+	}
+
 }
