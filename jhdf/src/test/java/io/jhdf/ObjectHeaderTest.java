@@ -103,7 +103,8 @@ public class ObjectHeaderTest {
 
 		// V1 specific methods
 		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
-		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
+		// Two refs this one and a hard link /links/hard_link_to_int8
+		assertThat(ohV1.getReferenceCount(), is(equalTo(2)));
 	}
 
 	@Test

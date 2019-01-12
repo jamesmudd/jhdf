@@ -18,6 +18,8 @@ import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.links.ExternalLink;
+import io.jhdf.links.SoftLink;
 import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.LinkInfoMessage;
@@ -36,6 +38,11 @@ public class GroupImpl extends AbstractNode implements Group {
 			this.parent = parent;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.apache.commons.lang3.concurrent.LazyInitializer#initialize()
+		 */
 		@Override
 		protected Map<String, Node> initialize() throws ConcurrentException {
 			logger.info("Lazy loading children of '{}'", getPath());
@@ -75,16 +82,28 @@ public class GroupImpl extends AbstractNode implements Group {
 				if (linkInfoMessage.getbTreeNameIndexAddress() == Constants.UNDEFINED_ADDRESS) {
 					final Map<String, Node> lazyChildren = new LinkedHashMap<>(links.size());
 					for (LinkMessage link : links) {
-						ObjectHeader linkHeader = ObjectHeader.readObjectHeader(fc, sb, link.getHardLinkAddress());
-						final Node node;
-						if (linkHeader.hasMessageOfType(DataSpaceMessage.class)) {
-							// Its a a Dataset
-							node = new DatasetImpl(fc, sb, link.getHardLinkAddress(), link.getLinkName(), parent);
-						} else {
-							// Its a group
-							node = createGroup(fc, sb, link.getHardLinkAddress(), link.getLinkName(), parent);
+						switch (link.getLinkType()) {
+						case HARD:
+							ObjectHeader linkHeader = ObjectHeader.readObjectHeader(fc, sb, link.getHardLinkAddress());
+							final Node node;
+							if (linkHeader.hasMessageOfType(DataSpaceMessage.class)) {
+								// Its a a Dataset
+								node = new DatasetImpl(fc, sb, link.getHardLinkAddress(), link.getLinkName(), parent);
+							} else {
+								// Its a group
+								node = createGroup(fc, sb, link.getHardLinkAddress(), link.getLinkName(), parent);
+							}
+							lazyChildren.put(link.getLinkName(), node);
+							break;
+						case SOFT:
+							lazyChildren.put(link.getLinkName(),
+									new SoftLink(link.getSoftLink(), link.getLinkName(), parent));
+							break;
+						case EXTERNAL:
+							lazyChildren.put(link.getLinkName(), new ExternalLink(link.getExternalFile(),
+									link.getExternalPath(), link.getLinkName(), parent));
+							break;
 						}
-						lazyChildren.put(link.getLinkName(), node);
 
 					}
 					return lazyChildren;

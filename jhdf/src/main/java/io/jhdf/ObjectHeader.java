@@ -335,7 +335,7 @@ public abstract class ObjectHeader {
 		try {
 			fc.read(bb, address);
 		} catch (IOException e) {
-			throw new HdfException("Failed to read object header at address = " + address);
+			throw new HdfException("Failed to read object header at address = " + address, e);
 		}
 		bb.rewind();
 		byte version = bb.get();
