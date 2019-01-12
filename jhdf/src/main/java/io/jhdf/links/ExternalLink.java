@@ -45,7 +45,7 @@ public class ExternalLink implements Link {
 
 		private File getTargetFile() {
 			// Check if the target file path is absolute
-			if (targetFile.startsWith(File.pathSeparator)) {
+			if (targetFile.startsWith(File.separator)) {
 				return Paths.get(targetFile).toFile();
 			} else {
 				// Need to resolve the full path
@@ -79,9 +79,9 @@ public class ExternalLink implements Link {
 	public Node getTarget() {
 		try {
 			return targetNode.get();
-		} catch (ConcurrentException e) {
+		} catch (ConcurrentException | HdfException e) {
 			throw new HdfException("Could not resolve link target '" + targetPath + "' in external file '" + targetFile
-					+ "' from link '" + getPath() + "'");
+					+ "' from link '" + getPath() + "'", e);
 		}
 	}
 

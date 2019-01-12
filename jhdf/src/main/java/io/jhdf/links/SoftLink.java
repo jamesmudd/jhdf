@@ -61,8 +61,8 @@ public class SoftLink implements Link {
 	public Node getTarget() {
 		try {
 			return targetNode.get();
-		} catch (ConcurrentException e) {
-			throw new HdfException("Could not resolve link target '" + target + "' from link '" + getPath() + "'");
+		} catch (ConcurrentException | HdfException e) {
+			throw new HdfException("Could not resolve link target '" + target + "' from link '" + getPath() + "'", e);
 		}
 	}
 
