@@ -13,17 +13,35 @@ import io.jhdf.exceptions.HdfException;
 
 public class LinkMessage extends Message {
 
+	public enum LinkType {
+		HARD, SOFT, EXTERNAL;
+
+		private static LinkType fromInt(int typeInt) {
+			switch (typeInt) {
+			case 0:
+				return HARD;
+			case 1:
+				return SOFT;
+			case 64:
+				return EXTERNAL;
+			default:
+				throw new HdfException("Unreconized link type: " + typeInt);
+			}
+		}
+	}
+
 	private static final int CREATION_ORDER_PRESENT = 2;
 	private static final int LINK_TYPE_PRESENT = 3;
 	private static final int LINK_CHARACTER_SET_PRESENT = 4;
 
 	private final byte version;
-	private final int linkType;
+	private final LinkType linkType;
 	private final long creationOrder;
 	private final String linkName;
 	private long hardLinkAddress;
 	private String softLink;
-	private String externalLink;
+	private String externalFile;
+	private String externalPath;
 
 	public LinkMessage(ByteBuffer bb, Superblock sb) {
 		super(bb);
@@ -58,9 +76,9 @@ public class LinkMessage extends Message {
 		}
 
 		if (flags.get(LINK_TYPE_PRESENT)) {
-			linkType = Utils.readBytesAsUnsignedInt(bb, 1);
+			linkType = LinkType.fromInt(Utils.readBytesAsUnsignedInt(bb, 1));
 		} else {
-			linkType = 0; // No link type specified so is hard link
+			linkType = LinkType.HARD; // No link type specified so is hard link
 		}
 
 		if (flags.get(CREATION_ORDER_PRESENT)) {
@@ -94,20 +112,21 @@ public class LinkMessage extends Message {
 
 		// Link Information
 		switch (linkType) {
-		case 0: // Hard Link
+		case HARD: // Hard Link
 			hardLinkAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 			break;
-		case 1: // Soft link
+		case SOFT: // Soft link
 			int lentghOfSoftLink = Utils.readBytesAsUnsignedInt(bb, 2);
 			ByteBuffer linkBuffer = Utils.createSubBuffer(bb, lentghOfSoftLink);
 			softLink = US_ASCII.decode(linkBuffer).toString();
 			break;
-		case 64: // External link
+		case EXTERNAL: // External link
 			int lentghOfExternalLink = Utils.readBytesAsUnsignedInt(bb, 2);
 			ByteBuffer externalLinkBuffer = Utils.createSubBuffer(bb, lentghOfExternalLink);
 			// Skip first byte contains version = 0 and flags = 0
 			externalLinkBuffer.position(1);
-			externalLink = US_ASCII.decode(externalLinkBuffer).toString();
+			externalFile = Utils.readUntilNull(externalLinkBuffer);
+			externalPath = Utils.readUntilNull(externalLinkBuffer);
 			break;
 		default:
 			throw new HdfException("Unreconized link type = " + linkType);
@@ -118,7 +137,7 @@ public class LinkMessage extends Message {
 		return version;
 	}
 
-	public int getLinkType() {
+	public LinkType getLinkType() {
 		return linkType;
 	}
 
@@ -131,15 +150,34 @@ public class LinkMessage extends Message {
 	}
 
 	public long getHardLinkAddress() {
-		return hardLinkAddress;
+		if (linkType == LinkType.HARD) {
+			return hardLinkAddress;
+		} else {
+			throw new HdfException("This link message is not a hard link. Link type is: " + linkType);
+		}
 	}
 
 	public String getSoftLink() {
-		return softLink;
+		if (linkType == LinkType.SOFT) {
+			return softLink;
+		} else {
+			throw new HdfException("This link message is not a soft link. Link type is: " + linkType);
+		}
 	}
 
-	public String getExternalLink() {
-		return externalLink;
+	public String getExternalFile() {
+		if (linkType == LinkType.EXTERNAL) {
+			return externalFile;
+		} else {
+			throw new HdfException("This link message is not a external link. Link type is: " + linkType);
+		}
 	}
 
+	public String getExternalPath() {
+		if (linkType == LinkType.EXTERNAL) {
+			return externalPath;
+		} else {
+			throw new HdfException("This link message is not a external link. Link type is: " + linkType);
+		}
+	}
 }

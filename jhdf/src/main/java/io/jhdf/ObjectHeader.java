@@ -185,7 +185,7 @@ public abstract class ObjectHeader {
 
 				// Verify signature
 				if (!Arrays.equals(OBJECT_HEADER_V2_SIGNATURE, formatSignitureByte)) {
-					throw new HdfException("Heap signature not matched");
+					throw new HdfException("Object header v2 signature not matched");
 				}
 
 				// Version
@@ -335,7 +335,7 @@ public abstract class ObjectHeader {
 		try {
 			fc.read(bb, address);
 		} catch (IOException e) {
-			throw new HdfException("Failed to read object header at address = " + address);
+			throw new HdfException("Failed to read object header at address = " + address, e);
 		}
 		bb.rewind();
 		byte version = bb.get();

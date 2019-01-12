@@ -6,8 +6,10 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -39,6 +41,8 @@ public class HdfFile implements Group, AutoCloseable {
 	private final Superblock superblock;
 
 	private final Group rootGroup;
+
+	private final Set<HdfFile> openExternalFiles = new HashSet<>();
 
 	public HdfFile(File hdfFile) {
 		logger.info("Opening HDF5 file '{}'...", hdfFile.getAbsolutePath());
@@ -104,8 +108,14 @@ public class HdfFile implements Group, AutoCloseable {
 	 */
 	@Override
 	public void close() throws IOException {
+		for (HdfFile externalhdfFile : openExternalFiles) {
+			externalhdfFile.close();
+			logger.info("Closed external file '{}'", externalhdfFile.getFile().getAbsolutePath());
+		}
+
 		fc.close();
 		raf.close();
+		logger.info("Closed HDF file '{}'", getFile().getAbsolutePath());
 	}
 
 	/**
@@ -184,5 +194,25 @@ public class HdfFile implements Group, AutoCloseable {
 		// consistent with other groups
 		path = StringUtils.stripStart(path, Constants.PATH_SEPERATOR);
 		return rootGroup.getByPath(path);
+	}
+
+	@Override
+	public HdfFile getHdfFile() {
+		return this;
+	}
+
+	/**
+	 * Add an external file to this HDF file. it needed so that external files open
+	 * via links from this file can also be closed when this file is closed.
+	 * 
+	 * @param hdfFile an open external file linked from this file
+	 */
+	public void addExternalFile(HdfFile hdfFile) {
+		openExternalFiles.add(hdfFile);
+	}
+
+	@Override
+	public boolean isLink() {
+		return false;
 	}
 }

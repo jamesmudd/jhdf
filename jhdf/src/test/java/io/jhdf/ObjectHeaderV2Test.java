@@ -19,7 +19,7 @@ import io.jhdf.ObjectHeader.ObjectHeaderV2;
 public class ObjectHeaderV2Test {
 
 	/** This will need to be updated each time the test files are regenerated */
-	private static final long TIMESTAMP = 1546898015L;
+	private static final long TIMESTAMP = 1547298876L;
 
 	private FileChannel fc;
 	private RandomAccessFile raf;
@@ -45,7 +45,7 @@ public class ObjectHeaderV2Test {
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(48L)));
-		assertThat(oh.getMessages().size(), is(equalTo(4)));
+		assertThat(oh.getMessages().size(), is(equalTo(5)));
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
@@ -135,7 +135,7 @@ public class ObjectHeaderV2Test {
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(1655L)));
-		assertThat(oh.getMessages().size(), is(equalTo(5)));
+		assertThat(oh.getMessages().size(), is(equalTo(6)));
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;

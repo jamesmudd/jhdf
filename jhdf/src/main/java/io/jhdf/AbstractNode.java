@@ -76,4 +76,13 @@ public abstract class AbstractNode implements Node {
 		return getParent().getFile();
 	}
 
+	@Override
+	public HdfFile getHdfFile() {
+		return getParent().getHdfFile();
+	}
+
+	@Override
+	public boolean isLink() {
+		return false;
+	}
 }

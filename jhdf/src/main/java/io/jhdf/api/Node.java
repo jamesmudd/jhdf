@@ -3,6 +3,7 @@ package io.jhdf.api;
 import java.io.File;
 import java.util.Map;
 
+import io.jhdf.HdfFile;
 import io.jhdf.object.message.AttributeMessage;
 
 /**
@@ -65,11 +66,27 @@ public interface Node {
 	File getFile();
 
 	/**
+	 * Gets the parent {@link HdfFile} of this node can be useful if you want to
+	 * resolve an absolute path in this file.
+	 * 
+	 * @return The HDF file containing this {@link Node}
+	 */
+	HdfFile getHdfFile();
+
+	/**
 	 * This returns the byte offset into the file of the object header for this
 	 * node.
 	 * 
 	 * @return The address of the object header for this node
 	 */
 	long getAddress();
+
+	/**
+	 * Checks if this {@link Node} is a {@link Link}.
+	 * 
+	 * @return <code>true</code> if this {@link Node} is a link <code>false</code>
+	 *         otherwise
+	 */
+	boolean isLink();
 
 }

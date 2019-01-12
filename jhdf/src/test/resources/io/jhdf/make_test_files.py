@@ -20,6 +20,12 @@ def write_to_file(f, data):
     int_group.create_dataset('int16', data=data, dtype='i2')
     int_group.create_dataset('int32', data=data, dtype='i4')
     
+    links_group = f.create_group('links_group')
+    links_group['hard_link_to_int8'] = int_group['int8']
+    links_group['soft_link_to_int8'] = h5py.SoftLink('/datasets_group/int/int8')
+    # Define the external link path relative to this file, to ease testing
+    links_group['external_link'] = h5py.ExternalLink('test_file_ext.hdf5', '/external_dataset')
+    
     f.flush()
     f.close()
     
@@ -35,5 +41,9 @@ if __name__ == '__main__':
     f2 = h5py.File('test_file2.hdf5', 'w', libver='latest')
     write_to_file(f2, data)
     print('created test_file2.hdf5')
+    
+    f3 = h5py.File('test_file_ext.hdf5', 'w', libver='latest')
+    f3.create_dataset('external_dataset', data=data, dtype='f4')
+    print('test_file_ext.hdf5')
     
     print('Created all test files')

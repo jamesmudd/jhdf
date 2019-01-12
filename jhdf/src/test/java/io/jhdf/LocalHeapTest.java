@@ -40,10 +40,10 @@ public class LocalHeapTest {
 
 		assertThat(heap.getVersion(), is(equalTo((short) 0)));
 		assertThat(heap.getDataSegmentSize(), is(equalTo(88L)));
-		assertThat(heap.getOffsetToHeadOfFreeList(), is(equalTo(24L)));
+		assertThat(heap.getOffsetToHeadOfFreeList(), is(equalTo(40L)));
 		assertThat(heap.getAddressOfDataSegment(), is(equalTo(712L)));
 		assertThat(heap.toString(), is(equalTo(
-				"LocalHeap [address=0x2a8, version=0, dataSegmentSize=88, offsetToHeadOfFreeList=24, addressOfDataSegment=0x2c8]")));
+				"LocalHeap [address=0x2a8, version=0, dataSegmentSize=88, offsetToHeadOfFreeList=40, addressOfDataSegment=0x2c8]")));
 	}
 
 	@Test
