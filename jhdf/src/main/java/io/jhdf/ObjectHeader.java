@@ -185,7 +185,7 @@ public abstract class ObjectHeader {
 
 				// Verify signature
 				if (!Arrays.equals(OBJECT_HEADER_V2_SIGNATURE, formatSignitureByte)) {
-					throw new HdfException("Heap signature not matched");
+					throw new HdfException("Object header v2 signature not matched");
 				}
 
 				// Version
