@@ -81,4 +81,12 @@ public interface Node {
 	 */
 	long getAddress();
 
+	/**
+	 * Checks if this {@link Node} is a {@link Link}.
+	 * 
+	 * @return <code>true</code> if this {@link Node} is a link <code>false</code>
+	 *         otherwise
+	 */
+	boolean isLink();
+
 }

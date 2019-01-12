@@ -110,4 +110,14 @@ public class ExternalLink implements Link {
 		return parent.getHdfFile();
 	}
 
+	@Override
+	public String getTargetPath() {
+		return targetFile + ":" + targetPath;
+	}
+
+	@Override
+	public boolean isLink() {
+		return true;
+	}
+
 }

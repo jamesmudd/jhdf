@@ -210,4 +210,9 @@ public class HdfFile implements Group, AutoCloseable {
 	public void addExternalFile(HdfFile hdfFile) {
 		openExternalFiles.add(hdfFile);
 	}
+
+	@Override
+	public boolean isLink() {
+		return false;
+	}
 }

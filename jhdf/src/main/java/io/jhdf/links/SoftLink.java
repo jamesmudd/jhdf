@@ -67,6 +67,11 @@ public class SoftLink implements Link {
 	}
 
 	@Override
+	public String getTargetPath() {
+		return target;
+	}
+
+	@Override
 	public NodeType getType() {
 		return getTarget().getType();
 	}
@@ -91,4 +96,8 @@ public class SoftLink implements Link {
 		return parent.getHdfFile();
 	}
 
+	@Override
+	public boolean isLink() {
+		return true;
+	}
 }
