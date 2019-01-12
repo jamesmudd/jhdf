@@ -1,11 +1,12 @@
 package io.jhdf.object.message;
 
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 public class NilMessage extends Message {
 
-	public NilMessage(ByteBuffer bb) {
-		super(bb);
+	/* package */ NilMessage(ByteBuffer bb, BitSet flags) {
+		super(flags);
 		// Move buffer to the end
 		bb.position(bb.capacity());
 	}

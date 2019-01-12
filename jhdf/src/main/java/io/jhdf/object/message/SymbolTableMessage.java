@@ -1,17 +1,31 @@
 package io.jhdf.object.message;
 
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 
+/**
+ * <p>
+ * Symbol Table Message
+ * </p>
+ * 
+ * <p>
+ * <a href=
+ * "https://support.hdfgroup.org/HDF5/doc/H5.format.html#SymbolTableMessage">Format
+ * Spec</a>
+ * </p>
+ * 
+ * @author James Mudd
+ */
 public class SymbolTableMessage extends Message {
 
 	private final long bTreeAddress;
 	private final long localHeapAddress;
 
-	public SymbolTableMessage(ByteBuffer bb, Superblock sb) {
-		super(bb);
+	/* package */ SymbolTableMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
+		super(flags);
 
 		bTreeAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 		localHeapAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());

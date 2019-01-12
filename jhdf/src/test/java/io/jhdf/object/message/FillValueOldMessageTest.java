@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
+import java.util.BitSet;
 
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +21,7 @@ class FillValueOldMessageTest {
 		bb.putFloat(123.45f);
 		bb.rewind();
 
-		FillValueOldMessage fillValueOldMessage = new FillValueOldMessage(bb);
+		FillValueOldMessage fillValueOldMessage = new FillValueOldMessage(bb, BitSet.valueOf(new byte[1]));
 
 		ByteBuffer fillValueBuffer = fillValueOldMessage.getFillValue();
 		assertThat(fillValueBuffer.getFloat(), is(equalTo(123.45f)));

@@ -17,8 +17,8 @@ public class LinkInfoMessage extends Message {
 	private final long bTreeNameIndexAddress;
 	private final long bTreeCreationOrderIndexAddress;
 
-	public LinkInfoMessage(ByteBuffer bb, Superblock sb) {
-		super(bb);
+	/* package */ LinkInfoMessage(ByteBuffer bb, Superblock sb, BitSet messageFlags) {
+		super(messageFlags);
 
 		version = bb.get();
 		byte[] flagsBytes = new byte[] { bb.get() };
