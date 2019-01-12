@@ -40,4 +40,9 @@ public class SoftLink extends AbstractLink implements Link {
 		return target;
 	}
 
+	@Override
+	public String toString() {
+		return "SoftLink [name=" + name + ", target=" + target + "]";
+	}
+
 }

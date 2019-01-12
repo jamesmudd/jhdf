@@ -62,4 +62,9 @@ public class ExternalLink extends AbstractLink implements Link {
 		return targetFile + ":" + targetPath;
 	}
 
+	@Override
+	public String toString() {
+		return "ExternalLink [name=" + name + ", targetFile=" + targetFile + ", targetPath=" + targetPath + "]";
+	}
+
 }

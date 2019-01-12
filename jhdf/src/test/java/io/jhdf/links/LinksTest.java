@@ -36,6 +36,8 @@ class LinksTest {
 			assertThat(softLink.getHdfFile(), is(sameInstance(hdfFile)));
 			assertThat(softLink.getFile(), is(sameInstance(file)));
 			assertThat(softLink.getType(), is(equalTo(NodeType.DATASET)));
+			assertThat(softLink.toString(),
+					is(equalTo("SoftLink [name=soft_link_to_int8, target=/datasets_group/int/int8]")));
 		}
 	}
 
@@ -55,15 +57,17 @@ class LinksTest {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
 			Node softLinkNode = hdfFile.getByPath("/links_group/external_link");
-			Link softLink = (Link) softLinkNode;
-			assertThat(softLink.isLink(), is(true));
-			assertThat(softLink.isGroup(), is(false));
-			assertThat(softLink.getPath(), is(equalTo("/links_group/external_link")));
-			assertThat(softLink.getTargetPath(), is(equalTo("test_file_ext.hdf5:/external_dataset")));
-			assertThat(softLink.getTarget(), is(notNullValue()));
-			assertThat(softLink.getHdfFile(), is(sameInstance(hdfFile)));
-			assertThat(softLink.getFile(), is(sameInstance(file)));
-			assertThat(softLink.getType(), is(equalTo(NodeType.DATASET)));
+			Link externalLink = (Link) softLinkNode;
+			assertThat(externalLink.isLink(), is(true));
+			assertThat(externalLink.isGroup(), is(false));
+			assertThat(externalLink.getPath(), is(equalTo("/links_group/external_link")));
+			assertThat(externalLink.getTargetPath(), is(equalTo("test_file_ext.hdf5:/external_dataset")));
+			assertThat(externalLink.getTarget(), is(notNullValue()));
+			assertThat(externalLink.getHdfFile(), is(sameInstance(hdfFile)));
+			assertThat(externalLink.getFile(), is(sameInstance(file)));
+			assertThat(externalLink.getType(), is(equalTo(NodeType.DATASET)));
+			assertThat(externalLink.toString(), is(equalTo(
+					"ExternalLink [name=external_link, targetFile=test_file_ext.hdf5, targetPath=/external_dataset]")));
 		}
 	}
 
@@ -71,8 +75,8 @@ class LinksTest {
 	void testExternalLinkWithInvalidPath() throws IOException {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
-			Link softLink = new ExternalLink("test_file_ext.hdf5", "/non/exisitant/path", "broken_link", hdfFile);
-			HdfException e = assertThrows(HdfException.class, () -> softLink.getTarget());
+			Link externalLink = new ExternalLink("test_file_ext.hdf5", "/non/exisitant/path", "broken_link", hdfFile);
+			HdfException e = assertThrows(HdfException.class, () -> externalLink.getTarget());
 			assertThat(e.getMessage(), is(equalTo(
 					"Could not resolve link target '/non/exisitant/path' in external file 'test_file_ext.hdf5' from link '/broken_link'")));
 		}
@@ -82,8 +86,8 @@ class LinksTest {
 	void testExternalLinkWithInvalidFile() throws IOException {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
-			Link softLink = new ExternalLink("/missing_file.hdf5", "/non/exisitant/path", "broken_link", hdfFile);
-			HdfException e = assertThrows(HdfException.class, () -> softLink.getTarget());
+			Link externalLink = new ExternalLink("/missing_file.hdf5", "/non/exisitant/path", "broken_link", hdfFile);
+			HdfException e = assertThrows(HdfException.class, () -> externalLink.getTarget());
 			assertThat(e.getMessage(), is(equalTo(
 					"Could not resolve link target '/non/exisitant/path' in external file '/missing_file.hdf5' from link '/broken_link'")));
 		}
