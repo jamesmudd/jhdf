@@ -31,9 +31,16 @@ public class Message {
 		bb.position(bb.position() + 3);
 
 		// Create a new buffer holding this header data
-		ByteBuffer headerData = Utils.createSubBuffer(bb, dataSize);
+		final ByteBuffer headerData = Utils.createSubBuffer(bb, dataSize);
 
-		return readMessage(headerData, sb, messageType);
+		final Message message = readMessage(headerData, sb, messageType);
+		logger.debug("Read message: {}", message);
+		if (headerData.hasRemaining()) {
+			logger.warn("After reading message ({}) buffer still has {} bytes remaining",
+					message.getClass().getSimpleName(), headerData.remaining());
+		}
+
+		return message;
 	}
 
 	public static Message readObjectHeaderV2Message(ByteBuffer bb, Superblock sb) {
@@ -42,12 +49,13 @@ public class Message {
 		BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
 
 		// Create a new buffer holding this header data
-		ByteBuffer headerData = Utils.createSubBuffer(bb, dataSize);
+		final ByteBuffer headerData = Utils.createSubBuffer(bb, dataSize);
 
-		Message message = readMessage(headerData, sb, messageType);
+		final Message message = readMessage(headerData, sb, messageType);
 		logger.debug("Read message: {}", message);
 		if (headerData.hasRemaining()) {
-			logger.warn("After reading buffer still has {} bytes remaining", headerData.remaining());
+			logger.warn("After reading message ({}) buffer still has {} bytes remaining",
+					message.getClass().getSimpleName(), headerData.remaining());
 		}
 
 		return message;
