@@ -45,7 +45,7 @@ public class Message {
 
 		final Message message = readMessage(headerData, sb, messageType, flags);
 		logger.debug("Read message: {}", message);
-		if (headerData.hasRemaining()) {
+		if (headerData.remaining() > 7) {
 			logger.warn("After reading message ({}) buffer still has {} bytes remaining",
 					message.getClass().getSimpleName(), headerData.remaining());
 		}
