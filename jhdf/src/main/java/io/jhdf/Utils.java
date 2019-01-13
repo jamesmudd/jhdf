@@ -40,11 +40,11 @@ public final class Utils {
 	public static String readUntilNull(ByteBuffer buffer) {
 		StringBuilder sb = new StringBuilder(buffer.remaining());
 		while (buffer.hasRemaining()) {
-			char c = (char) buffer.get();
-			if (c == Constants.NULL) {
+			byte b = buffer.get();
+			if (b == Constants.NULL) {
 				return sb.toString();
 			}
-			sb.append(c);
+			sb.append((char) b);
 		}
 		throw new IllegalArgumentException("End of buffer reached before NULL");
 	}
