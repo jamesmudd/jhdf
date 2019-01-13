@@ -12,6 +12,7 @@ import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
@@ -252,6 +253,17 @@ public class GroupImpl extends AbstractNode implements Group {
 			throw new HdfInvalidPathException(getPath() + path, getFile());
 		}
 
+	}
+
+	@Override
+	public Dataset getDatasetByPath(String path) {
+		Node node = getByPath(path);
+		if (node instanceof Dataset) {
+			return (Dataset) node;
+		} else {
+			throw new HdfInvalidPathException(getPath() + path, getFile());
+
+		}
 	}
 
 }

@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import io.jhdf.Superblock.SuperblockV0V1;
 import io.jhdf.Superblock.SuperblockV2V3;
+import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
@@ -194,6 +195,14 @@ public class HdfFile implements Group, AutoCloseable {
 		// consistent with other groups
 		path = StringUtils.stripStart(path, Constants.PATH_SEPERATOR);
 		return rootGroup.getByPath(path);
+	}
+
+	@Override
+	public Dataset getDatasetByPath(String path) {
+		// As its the file its ok to have a leading slash but strip it here to be
+		// consistent with other groups
+		path = StringUtils.stripStart(path, Constants.PATH_SEPERATOR);
+		return rootGroup.getDatasetByPath(path);
 	}
 
 	@Override
