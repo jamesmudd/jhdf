@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.BitSet;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +45,7 @@ public class AttributeMessageV3Test {
 
 	@Test
 	public void test() throws CharacterCodingException {
-		AttributeMessage am = new AttributeMessage(bb, sb);
+		AttributeMessage am = new AttributeMessage(bb, sb, BitSet.valueOf(new byte[1]));
 		assertThat(am.getVersion(), is(equalTo(3)));
 		assertThat(am.getName(), is(equalTo("string_attr")));
 		assertThat(am.getDataType().getDataClass(), is(equalTo(9)));

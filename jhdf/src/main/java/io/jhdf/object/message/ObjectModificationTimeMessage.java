@@ -3,30 +3,45 @@ package io.jhdf.object.message;
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.BitSet;
 
+import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfException;
+
+/**
+ * <p>
+ * Object Modification Time Message
+ * </p>
+ * 
+ * <p>
+ * <a href=
+ * "https://support.hdfgroup.org/HDF5/doc/H5.format.html#ModificationTimeMessage">Format
+ * Spec</a>
+ * </p>
+ * 
+ * @author James Mudd
+ */
 public class ObjectModificationTimeMessage extends Message {
 
-	private final byte version;
 	private final long unixEpocSecond;
 
-	public ObjectModificationTimeMessage(ByteBuffer bb) {
-		super(bb);
+	/* package */ ObjectModificationTimeMessage(ByteBuffer bb, BitSet flags) {
+		super(flags);
 
-		version = bb.get();
+		final byte version = bb.get();
+		if (version != 1) {
+			throw new HdfException("Unreconised version " + version);
+		}
 
 		// Skip 3 unused bytes
-		bb.get(new byte[3]);
+		bb.position(bb.position() + 3);
 
 		// Convert to unsigned long
-		unixEpocSecond = Integer.toUnsignedLong(bb.getInt());
+		unixEpocSecond = Utils.readBytesAsUnsignedLong(bb, 4);
 	}
 
 	public LocalDateTime getModifiedTime() {
 		return LocalDateTime.ofEpochSecond(unixEpocSecond, 0, ZoneOffset.UTC);
-	}
-
-	public byte getVersion() {
-		return version;
 	}
 
 	public long getUnixEpocSecond() {

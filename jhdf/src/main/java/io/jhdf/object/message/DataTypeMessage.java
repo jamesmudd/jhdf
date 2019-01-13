@@ -1,6 +1,7 @@
 package io.jhdf.object.message;
 
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 import io.jhdf.object.datatype.DataType;
 
@@ -8,8 +9,8 @@ public class DataTypeMessage extends Message {
 
 	private final DataType dataType;
 
-	public DataTypeMessage(ByteBuffer bb) {
-		super(bb);
+	/* package */ DataTypeMessage(ByteBuffer bb, BitSet flags) {
+		super(flags);
 
 		dataType = DataType.readDataType(bb);
 	}

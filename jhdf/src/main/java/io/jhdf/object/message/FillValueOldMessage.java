@@ -1,6 +1,7 @@
 package io.jhdf.object.message;
 
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 import io.jhdf.Utils;
 
@@ -21,8 +22,8 @@ public class FillValueOldMessage extends Message {
 
 	private final ByteBuffer fillValue;
 
-	/* package */ FillValueOldMessage(ByteBuffer bb) {
-		super(bb);
+	/* package */ FillValueOldMessage(ByteBuffer bb, BitSet flags) {
+		super(flags);
 
 		final int size = Utils.readBytesAsUnsignedInt(bb, 4);
 		fillValue = Utils.createSubBuffer(bb, size);

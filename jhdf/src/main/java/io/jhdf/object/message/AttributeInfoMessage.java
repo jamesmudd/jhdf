@@ -5,22 +5,38 @@ import java.util.BitSet;
 
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfException;
 
+/**
+ * <p>
+ * Attribute Info Message
+ * </p>
+ * 
+ * <p>
+ * <a href=
+ * "https://support.hdfgroup.org/HDF5/doc/H5.format.html#AinfoMessage">Format
+ * Spec</a>
+ * </p>
+ * 
+ * @author James Mudd
+ */
 public class AttributeInfoMessage extends Message {
 
 	private static final int MAXIMUM_CREATION_INDEX_PRESENT = 0;
 	private static final int ATTRIBUTE_CREATION_ORDER_PRESENT = 1;
 
-	private final byte version;
 	private final int maximumCreationIndex;
 	private final long fractalHeapAddress;
 	private final long attributeNameBTreeAddress;
 	private final long attributeCreationOrderBTreeAddress;
 
-	public AttributeInfoMessage(ByteBuffer bb, Superblock sb) {
-		super(bb);
+	/* package */ AttributeInfoMessage(ByteBuffer bb, Superblock sb, BitSet messageFlags) {
+		super(messageFlags);
 
-		version = bb.get();
+		final byte version = bb.get();
+		if (version != 0) {
+			throw new HdfException("Unreconised version " + version);
+		}
 
 		BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
 
@@ -39,10 +55,6 @@ public class AttributeInfoMessage extends Message {
 		} else {
 			attributeCreationOrderBTreeAddress = -1;
 		}
-	}
-
-	public byte getVersion() {
-		return version;
 	}
 
 	public int getMaximumCreationIndex() {

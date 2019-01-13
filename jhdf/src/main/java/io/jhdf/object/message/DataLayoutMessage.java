@@ -1,6 +1,7 @@
 package io.jhdf.object.message;
 
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
@@ -8,9 +9,13 @@ import io.jhdf.exceptions.UnsupportedHdfException;
 
 public abstract class DataLayoutMessage extends Message {
 
+	public DataLayoutMessage(BitSet flags) {
+		super(flags);
+	}
+
 	public abstract DataLayout getDataLayout();
 
-	public static DataLayoutMessage createDataLayoutMessage(ByteBuffer bb, Superblock sb) {
+	public static DataLayoutMessage createDataLayoutMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
 		final byte version = bb.get();
 
 		if (version != 3 && version != 4) {
@@ -22,11 +27,11 @@ public abstract class DataLayoutMessage extends Message {
 
 		switch (layoutClass) {
 		case 0: // Compact Storage
-			return new CompactDataLayoutMessage(bb, sb);
+			return new CompactDataLayoutMessage(bb, flags);
 		case 1: // Contiguous Storage
-			return new ContigiousDataLayoutMessage(bb, sb);
+			return new ContigiousDataLayoutMessage(bb, sb, flags);
 		case 2: // Chunked Storage
-			return new ChunkedDataLayoutMessage(bb, sb);
+			return new ChunkedDataLayoutMessage(bb, sb, flags);
 		case 3: // Virtual storage
 			throw new UnsupportedHdfException("Virtual storage is not supported");
 		default:
@@ -38,7 +43,8 @@ public abstract class DataLayoutMessage extends Message {
 
 		private final ByteBuffer dataBuffer;
 
-		private CompactDataLayoutMessage(ByteBuffer bb, Superblock sb) {
+		private CompactDataLayoutMessage(ByteBuffer bb, BitSet flags) {
+			super(flags);
 			final int compactDataSize = Utils.readBytesAsUnsignedInt(bb, 2);
 			dataBuffer = Utils.createSubBuffer(bb, compactDataSize);
 		}
@@ -58,7 +64,8 @@ public abstract class DataLayoutMessage extends Message {
 		private final long address;
 		private final long size;
 
-		private ContigiousDataLayoutMessage(ByteBuffer bb, Superblock sb) {
+		private ContigiousDataLayoutMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
+			super(flags);
 			address = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 			size = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 		}
@@ -82,7 +89,8 @@ public abstract class DataLayoutMessage extends Message {
 		private final long address;
 		private final long size;
 
-		private ChunkedDataLayoutMessage(ByteBuffer bb, Superblock sb) {
+		private ChunkedDataLayoutMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
+			super(flags);
 			// Not sure why this needs -1 but seems to be the way its done
 			int chunkDimensionality = Utils.readBytesAsUnsignedInt(bb, 1) - 1;
 			address = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());

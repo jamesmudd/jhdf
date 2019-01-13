@@ -43,8 +43,8 @@ public class LinkMessage extends Message {
 	private String externalFile;
 	private String externalPath;
 
-	public LinkMessage(ByteBuffer bb, Superblock sb) {
-		super(bb);
+	/* package */ LinkMessage(ByteBuffer bb, Superblock sb, BitSet messageFlags) {
+		super(messageFlags);
 
 		// Version
 		version = bb.get();

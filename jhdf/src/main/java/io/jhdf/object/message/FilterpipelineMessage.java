@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 
-import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.UnsupportedHdfException;
 
@@ -14,8 +13,8 @@ public class FilterpipelineMessage extends Message {
 	private final byte version;
 	private final List<Filter> filters;
 
-	public FilterpipelineMessage(ByteBuffer bb, Superblock sb) {
-		super(bb);
+	public FilterpipelineMessage(ByteBuffer bb, BitSet messageFlags) {
+		super(messageFlags);
 
 		version = bb.get();
 
