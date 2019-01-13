@@ -25,7 +25,7 @@ public class ObjectModificationTimeMessage extends Message {
 
 	private final long unixEpocSecond;
 
-	public ObjectModificationTimeMessage(ByteBuffer bb, BitSet flags) {
+	/* package */ ObjectModificationTimeMessage(ByteBuffer bb, BitSet flags) {
 		super(flags);
 
 		final byte version = bb.get();
