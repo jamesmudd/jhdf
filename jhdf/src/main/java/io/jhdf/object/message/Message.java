@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 
 public class Message {
 	private static final Logger logger = LoggerFactory.getLogger(Message.class);
@@ -88,12 +89,16 @@ public class Message {
 			return new LinkMessage(bb, sb, flags);
 		case 8: // 0x0008
 			return DataLayoutMessage.createDataLayoutMessage(bb, sb, flags);
+		case 9: // 0x0009
+			throw new HdfException("Encountered Bogus message. Is this a valid HDF5 file?");
 		case 10: // 0x000A
 			return new GroupInfoMessage(bb, flags);
 		case 11: // 0x000B
 			return new FilterpipelineMessage(bb, flags);
 		case 12: // 0x000C
 			return new AttributeMessage(bb, sb, flags);
+		case 13: // 0x000D
+			return new ObjectCommentMessage(bb, flags);
 		case 16: // 0x0010
 			return new ObjectHeaderContinuationMessage(bb, sb, flags);
 		case 17: // 0x0011
@@ -102,6 +107,8 @@ public class Message {
 			return new ObjectModificationTimeMessage(bb, flags);
 		case 19: // 0x0013
 			return new BTreeKValuesMessage(bb, flags);
+		case 20: // 0x0014
+			throw new UnsupportedHdfException("Encountered Driver Info Message, this is not supported by jHDF");
 		case 21: // 0x0015
 			return new AttributeInfoMessage(bb, sb, flags);
 		case 22: // 0x0016
