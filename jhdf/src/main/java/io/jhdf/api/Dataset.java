@@ -57,4 +57,8 @@ public interface Dataset extends Node {
 	 */
 	DataLayout getDataLayout();
 
+	Object getData();
+
+	public Class<?> getJavaType();
+
 }

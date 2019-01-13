@@ -59,4 +59,9 @@ public class StringData extends DataType {
 				+ ", charset=" + charset + "]";
 	}
 
+	@Override
+	public Class<?> getJavaType() {
+		return String.class;
+	}
+
 }

@@ -160,33 +160,63 @@ public class DatasetImplTest {
 	}
 
 	@Test
-	void testIntDatasetSize() throws Exception {
+	void testInt32DatasetSize() throws Exception {
 		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
 		assertThat(dataset.getSize(), is(equalTo(21L)));
 	}
 
 	@Test
-	void testIntDatasetDiskSize() throws Exception {
+	void testInt32DatasetDiskSize() throws Exception {
 		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
 		assertThat(dataset.getDiskSize(), is(equalTo(84L)));
 	}
 
 	@Test
-	void testIntDatasetDimensions() throws Exception {
+	void testInt32DatasetDimensions() throws Exception {
 		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
 		assertArrayEquals(dataset.getDimensions(), new long[] { 21 });
 	}
 
 	@Test
-	void testIntDatasetMaxSizes() throws Exception {
+	void testInt32DatasetMaxSizes() throws Exception {
 		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
 		assertArrayEquals(dataset.getMaxSize().get(), new long[] { 21 });
 	}
 
 	@Test
-	void testIntDatasetDataLayout() throws Exception {
+	void testInt32DatasetDataLayout() throws Exception {
 		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
 		assertThat(dataset.getDataLayout(), is(DataLayout.CONTIGUOUS));
+	}
+
+	@Test
+	void testInt32DatasetJavaType() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+		assertThat(dataset.getJavaType(), is(equalTo(int.class)));
+	}
+
+	@Test
+	void testInt32GetData() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+		assertArrayEquals((int[]) dataset.getData(), REFERENCE_INT_DATA);
+	}
+
+	@Test
+	void testFloat32DatasetJavaType() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/float/float32");
+		assertThat(dataset.getJavaType(), is(equalTo(float.class)));
+	}
+
+	@Test
+	void testFloat32DatasetGetData() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/float/float32");
+		assertArrayEquals((float[]) dataset.getData(), REFERENCE_FLOAT_DATA);
+	}
+
+	@Test
+	void testFloat64DatasetGetData() throws Exception {
+		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/float/float64");
+		assertArrayEquals((double[]) dataset.getData(), REFERENCE_DOUBLE_DATA);
 	}
 
 }

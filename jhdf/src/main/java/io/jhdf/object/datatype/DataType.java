@@ -7,7 +7,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 
-public class DataType {
+public abstract class DataType {
 
 	private final int version;
 	private final int dataClass;
@@ -77,5 +77,7 @@ public class DataType {
 	public int getSize() {
 		return size;
 	}
+
+	public abstract Class<?> getJavaType();
 
 }
