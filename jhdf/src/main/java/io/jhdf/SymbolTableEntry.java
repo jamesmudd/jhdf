@@ -43,7 +43,7 @@ public class SymbolTableEntry {
 		logger.trace("linkNameOffset = {}", linkNameOffset);
 
 		// Object Header Address
-		objectHeaderAddress = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfOffsets());
+		objectHeaderAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 		logger.trace("objectHeaderAddress = {}", objectHeaderAddress);
 
 		// Link Name Offset
