@@ -38,9 +38,9 @@ public class GroupSymbolTableNodeTest {
 		GroupSymbolTableNode node = new GroupSymbolTableNode(fc, 1504, sb);
 
 		assertThat(node.getVersion(), is(equalTo((short) 1)));
-		assertThat(node.getNumberOfEntries(), is(equalTo((short) 2)));
-		assertThat(node.getSymbolTableEntries().length, is(equalTo(2)));
+		assertThat(node.getNumberOfEntries(), is(equalTo((short) 3)));
+		assertThat(node.getSymbolTableEntries().length, is(equalTo(3)));
 		assertThat(node.toString(), is(equalTo(
-				"GroupSymbolTableNode [address=0x5e0, version=1, numberOfEntries=2, symbolTableEntries=[SymbolTableEntry [address=0x5e8, linkNameOffset=8, objectHeaderAddress=0x320, cacheType=1, bTreeAddress=0x348, nameHeapAddress=0x568, linkValueOffset=-1], SymbolTableEntry [address=0x610, linkNameOffset=24, objectHeaderAddress=0x3020, cacheType=1, bTreeAddress=0x3048, nameHeapAddress=0x3268, linkValueOffset=-1]]]")));
+				"GroupSymbolTableNode [address=0x5e0, version=1, numberOfEntries=3, symbolTableEntries=[SymbolTableEntry [address=0x5e8, linkNameOffset=8, objectHeaderAddress=0x320, cacheType=1, bTreeAddress=0x348, nameHeapAddress=0x568, linkValueOffset=-1], SymbolTableEntry [address=0x610, linkNameOffset=24, objectHeaderAddress=0x3020, cacheType=1, bTreeAddress=0x3048, nameHeapAddress=0x3268, linkValueOffset=-1], SymbolTableEntry [address=0x638, linkNameOffset=40, objectHeaderAddress=0x3500, cacheType=1, bTreeAddress=0x3528, nameHeapAddress=0x3748, linkValueOffset=-1]]]")));
 	}
 }

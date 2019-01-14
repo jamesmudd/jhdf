@@ -174,13 +174,13 @@ public class DatasetImplTest {
 	@Test
 	void testInt32DatasetDimensions() throws Exception {
 		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
-		assertArrayEquals(dataset.getDimensions(), new long[] { 21 });
+		assertArrayEquals(dataset.getDimensions(), new int[] { 21 });
 	}
 
 	@Test
 	void testInt32DatasetMaxSizes() throws Exception {
 		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
-		assertArrayEquals(dataset.getMaxSize().get(), new long[] { 21 });
+		assertArrayEquals(dataset.getMaxSize().get(), new int[] { 21 });
 	}
 
 	@Test

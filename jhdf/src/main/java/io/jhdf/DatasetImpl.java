@@ -123,12 +123,12 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 	}
 
 	@Override
-	public long[] getDimensions() {
+	public int[] getDimensions() {
 		return getHeaderMessage(DataSpaceMessage.class).getDataSpace().getDimensions();
 	}
 
 	@Override
-	public Optional<long[]> getMaxSize() {
+	public Optional<int[]> getMaxSize() {
 		DataSpace dataSpace = getHeaderMessage(DataSpaceMessage.class).getDataSpace();
 		if (dataSpace.isMaxSizesPresent()) {
 			return Optional.of(dataSpace.getMaxSizes());
@@ -144,49 +144,18 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 
 	@Override
 	public Class<?> getJavaType() {
-		DataType dataType = getHeaderMessage(DataTypeMessage.class).getDataType();
+		DataType dataType = getDataType();
 		return dataType.getJavaType();
+	}
+
+	private DataType getDataType() {
+		return getHeaderMessage(DataTypeMessage.class).getDataType();
 	}
 
 	@Override
 	public Object getData() {
-		final Class<?> type = getJavaType();
-		if (type.isPrimitive()) {
-			// Fixed point
-			if (type.equals(byte.class)) {
-				byte[] data = new byte[Math.toIntExact(getDimensions()[0])];
-				getDataBuffer().get(data);
-				return data;
-			}
-			if (type.equals(short.class)) {
-				short[] data = new short[Math.toIntExact(getDimensions()[0])];
-				getDataBuffer().asShortBuffer().get(data);
-				return data;
-			}
-			if (type.equals(int.class)) {
-				int[] data = new int[Math.toIntExact(getDimensions()[0])];
-				getDataBuffer().asIntBuffer().get(data);
-				return data;
-			}
-			if (type.equals(long.class)) {
-				long[] data = new long[Math.toIntExact(getDimensions()[0])];
-				getDataBuffer().asLongBuffer().get(data);
-				return data;
-			}
-			// Floating point
-			if (type.equals(float.class)) {
-				float[] data = new float[Math.toIntExact(getDimensions()[0])];
-				getDataBuffer().asFloatBuffer().get(data);
-				return data;
-			}
-			if (type.equals(double.class)) {
-				double[] data = new double[Math.toIntExact(getDimensions()[0])];
-				getDataBuffer().asDoubleBuffer().get(data);
-				return data;
-			}
-		} else { // Not primitives
-			throw new HdfException("Unsupported type");
-		}
-		return null;
+		logger.debug("Getting data for '{}'...", getPath());
+		return DatasetReader.readDataset(getDataType(), getDataBuffer(), getDimensions());
 	}
+
 }

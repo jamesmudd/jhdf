@@ -7,7 +7,7 @@ import java.util.BitSet;
 
 import io.jhdf.exceptions.HdfTypeException;
 
-class FixedPoint extends DataType implements OrderedDataType {
+public class FixedPoint extends DataType implements OrderedDataType {
 	private final ByteOrder order;
 	private final boolean lowPadding;
 	private final boolean highPadding;
@@ -76,7 +76,7 @@ class FixedPoint extends DataType implements OrderedDataType {
 		} else { // Unsigned need promotion for Java
 			switch (bitPrecision) {
 			case 8:
-				return short.class;
+				return int.class; // Just go to int could go to short by java short support is poor
 			case 16:
 				return int.class;
 			case 32:
