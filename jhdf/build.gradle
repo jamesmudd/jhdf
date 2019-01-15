@@ -7,7 +7,8 @@ plugins {
     id 'jacoco' // Code coverage
     id 'eclipse' // To create eclipse project
     id 'idea' // To create InteliJ project
-    id 'maven-publish'
+    id 'maven-publish' // For the artifact collections to publish
+    id 'signing' // For GPG signing artifacts
     // Community plugins (need versions)
     id 'com.jfrog.bintray' version '1.8.4' // For publishing to Bintray
     id 'org.sonarqube' version '2.6.2' // Code quality
@@ -15,40 +16,9 @@ plugins {
 
 // Varibles
 group = 'io.jhdf'
-version = '0.1.5'
+version = '0.2.0'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from components.java
-            afterEvaluate {  
-                artifact sourcesJar
-                artifact javadocJar
-            }
-        }
-    }
-}
-
-bintray {
-    user = 'jamesmudd'
-    key = System.getenv('BINTRAY_KEY')
-    pkg {
-        repo = 'jhdf'
-        name = 'jhdf'
-        userOrg = 'jamesmudd'
-        licenses = ['MIT']
-        vcsUrl = 'https://github.com/jamesmudd/jhdf.git'
-        version {
-            name = project.version
-            desc = 'jHDF'
-            released  = new Date()
-        }
-    }
-    // Upload the 'maven' publication i.e jar, sourcesJar, javadocJar, POM
-    publications = ['maven']
-}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -64,7 +34,7 @@ dependencies {
     runtime group: 'org.slf4j', name: 'slf4j-simple', version: '1.8.0-beta2'
 
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.+'
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
     
     // Use JUnit 5 test framework
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.+'
@@ -75,6 +45,13 @@ dependencies {
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.23.+'
 	// Matchers
 	testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+}
+
+test {
+	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+	}
 }
 
 jar {
@@ -103,9 +80,37 @@ task javadocJar(type: Jar) {
     classifier = 'javadoc'
 }
 
-test {
-	useJUnitPlatform()
-	testLogging {
-		events "passed", "skipped", "failed"
-	}
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            afterEvaluate {  
+                artifact sourcesJar
+                artifact javadocJar
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.maven
+}
+
+bintray {
+    user = 'jamesmudd'
+    key = System.getenv('BINTRAY_KEY')
+    pkg {
+        repo = 'jhdf'
+        name = 'jhdf'
+        userOrg = 'jamesmudd'
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/jamesmudd/jhdf.git'
+        version {
+            name = project.version
+            desc = 'jHDF'
+            released  = new Date()
+        }
+    }
+    // Upload the 'maven' publication i.e jar, sourcesJar, javadocJar, POM
+    publications = ['maven']
 }

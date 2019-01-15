@@ -158,4 +158,9 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 		return DatasetReader.readDataset(getDataType(), getDataBuffer(), getDimensions());
 	}
 
+	@Override
+	public String toString() {
+		return "DatasetImpl [path=" + getPath() + "]";
+	}
+
 }
