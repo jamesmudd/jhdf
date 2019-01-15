@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import io.jhdf.Superblock.SuperblockV0V1;
 import io.jhdf.Superblock.SuperblockV2V3;
+import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
@@ -98,33 +99,46 @@ public class HdfFile implements Group, AutoCloseable {
 		return userHeaderSize;
 	}
 
-	public ByteBuffer getUserHeader() throws IOException {
-		return raf.getChannel().map(MapMode.READ_ONLY, 0, userHeaderSize);
+	public ByteBuffer getUserHeader() {
+		try {
+			return raf.getChannel().map(MapMode.READ_ONLY, 0, userHeaderSize);
+		} catch (IOException e) {
+			throw new HdfException("Error accessing user header for HDF file '" + getFile().getAbsolutePath() + "'", e);
+		}
 	}
 
 	/**
-	 * @throws IOException
+	 * @throws HdfException if closing the file fails
 	 * @see java.io.RandomAccessFile#close()
 	 */
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		for (HdfFile externalhdfFile : openExternalFiles) {
 			externalhdfFile.close();
 			logger.info("Closed external file '{}'", externalhdfFile.getFile().getAbsolutePath());
 		}
 
-		fc.close();
-		raf.close();
+		try {
+			fc.close();
+			raf.close();
+		} catch (IOException e) {
+			throw new HdfException("Error closing HDF file '" + getFile().getAbsolutePath() + "'", e);
+		}
 		logger.info("Closed HDF file '{}'", getFile().getAbsolutePath());
 	}
 
 	/**
-	 * @return
-	 * @throws IOException
+	 * Returns the length of this file.
+	 * 
+	 * @return the lentgh/size of this file in bytes
 	 * @see java.io.RandomAccessFile#length()
 	 */
-	public long length() throws IOException {
-		return raf.length();
+	public long length() {
+		try {
+			return raf.length();
+		} catch (IOException e) {
+			throw new HdfException("Error getting lentgh of file '" + getFile().getAbsolutePath() + "'", e);
+		}
 	}
 
 	@Override
@@ -194,6 +208,14 @@ public class HdfFile implements Group, AutoCloseable {
 		// consistent with other groups
 		path = StringUtils.stripStart(path, Constants.PATH_SEPERATOR);
 		return rootGroup.getByPath(path);
+	}
+
+	@Override
+	public Dataset getDatasetByPath(String path) {
+		// As its the file its ok to have a leading slash but strip it here to be
+		// consistent with other groups
+		path = StringUtils.stripStart(path, Constants.PATH_SEPERATOR);
+		return rootGroup.getDatasetByPath(path);
 	}
 
 	@Override

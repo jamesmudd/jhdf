@@ -40,7 +40,7 @@ public interface Dataset extends Node {
 	 * 
 	 * @return the dimensions of this dataset
 	 */
-	long[] getDimensions();
+	int[] getDimensions();
 
 	/**
 	 * Gets the max size of this dataset if present or an empty {@link Optional} if
@@ -48,7 +48,7 @@ public interface Dataset extends Node {
 	 * 
 	 * @return the max size of this dataset if present.
 	 */
-	Optional<long[]> getMaxSize();
+	Optional<int[]> getMaxSize();
 
 	/**
 	 * Gets the data layout of this dataset.
@@ -56,5 +56,9 @@ public interface Dataset extends Node {
 	 * @return the data layout of this dataset
 	 */
 	DataLayout getDataLayout();
+
+	Object getData();
+
+	public Class<?> getJavaType();
 
 }

@@ -5,6 +5,7 @@ import java.nio.ByteOrder;
 import java.util.BitSet;
 
 import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 
 public class FloatingPoint extends DataType implements OrderedDataType {
@@ -108,6 +109,20 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 
 	public int getExponentBias() {
 		return exponentBias;
+	}
+
+	@Override
+	public Class<?> getJavaType() {
+		switch (bitPrecision) {
+		case 16:
+			return float.class;
+		case 32:
+			return float.class;
+		case 64:
+			return double.class;
+		default:
+			throw new HdfTypeException("Unsupported signed fixed point data type");
+		}
 	}
 
 }

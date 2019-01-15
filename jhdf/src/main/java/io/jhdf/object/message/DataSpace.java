@@ -2,7 +2,7 @@ package io.jhdf.object.message;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
-import java.util.stream.LongStream;
+import java.util.stream.IntStream;
 
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
@@ -12,8 +12,8 @@ public class DataSpace {
 
 	private final byte version;
 	private final boolean maxSizesPresent;
-	private final long[] dimensions;
-	private final long[] maxSizes;
+	private final int[] dimensions;
+	private final int[] maxSizes;
 	private final byte type;
 
 	private DataSpace(ByteBuffer bb, Superblock sb) {
@@ -37,22 +37,22 @@ public class DataSpace {
 
 		// Dimensions sizes
 		if (numberOfdimensions != 0) {
-			dimensions = new long[numberOfdimensions];
+			dimensions = new int[numberOfdimensions];
 			for (int i = 0; i < numberOfdimensions; i++) {
-				dimensions[i] = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
+				dimensions[i] = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
 			}
 		} else {
-			dimensions = new long[0];
+			dimensions = new int[0];
 		}
 
 		// Max dimension sizes
 		if (maxSizesPresent) {
-			maxSizes = new long[numberOfdimensions];
+			maxSizes = new int[numberOfdimensions];
 			for (int i = 0; i < numberOfdimensions; i++) {
-				maxSizes[i] = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
+				maxSizes[i] = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
 			}
 		} else {
-			maxSizes = new long[0];
+			maxSizes = new int[0];
 		}
 
 		// Permutation indices - Note never implemented in HDF library!
@@ -69,7 +69,7 @@ public class DataSpace {
 	 * @throws ArithmeticException if an integer overflow occurs
 	 */
 	public long getTotalLentgh() {
-		return LongStream.of(dimensions).reduce(1, Math::multiplyExact);
+		return IntStream.of(dimensions).reduce(1, Math::multiplyExact);
 	}
 
 	public int getType() {
@@ -80,11 +80,11 @@ public class DataSpace {
 		return version;
 	}
 
-	public long[] getDimensions() {
+	public int[] getDimensions() {
 		return dimensions;
 	}
 
-	public long[] getMaxSizes() {
+	public int[] getMaxSizes() {
 		return maxSizes;
 	}
 

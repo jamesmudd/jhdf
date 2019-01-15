@@ -39,4 +39,13 @@ public interface Group extends Node, Iterable<Node> {
 	 */
 	Node getByPath(String path);
 
+	/**
+	 * Gets a {@link Dataset} by path. The path given will be reletive to this node.
+	 * 
+	 * @param path the path to the requested dataset
+	 * @return the dataset
+	 * @throws HdfException if getting the path fails
+	 */
+	Dataset getDatasetByPath(String path);
+
 }

@@ -123,12 +123,12 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 	}
 
 	@Override
-	public long[] getDimensions() {
+	public int[] getDimensions() {
 		return getHeaderMessage(DataSpaceMessage.class).getDataSpace().getDimensions();
 	}
 
 	@Override
-	public Optional<long[]> getMaxSize() {
+	public Optional<int[]> getMaxSize() {
 		DataSpace dataSpace = getHeaderMessage(DataSpaceMessage.class).getDataSpace();
 		if (dataSpace.isMaxSizesPresent()) {
 			return Optional.of(dataSpace.getMaxSizes());
@@ -141,4 +141,21 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 	public DataLayout getDataLayout() {
 		return getHeaderMessage(DataLayoutMessage.class).getDataLayout();
 	}
+
+	@Override
+	public Class<?> getJavaType() {
+		DataType dataType = getDataType();
+		return dataType.getJavaType();
+	}
+
+	private DataType getDataType() {
+		return getHeaderMessage(DataTypeMessage.class).getDataType();
+	}
+
+	@Override
+	public Object getData() {
+		logger.debug("Getting data for '{}'...", getPath());
+		return DatasetReader.readDataset(getDataType(), getDataBuffer(), getDimensions());
+	}
+
 }

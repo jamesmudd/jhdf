@@ -1,10 +1,13 @@
 package io.jhdf.object.datatype;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.BitSet;
 
-class FixedPoint extends DataType implements OrderedDataType {
+import io.jhdf.exceptions.HdfTypeException;
+
+public class FixedPoint extends DataType implements OrderedDataType {
 	private final ByteOrder order;
 	private final boolean lowPadding;
 	private final boolean highPadding;
@@ -53,6 +56,37 @@ class FixedPoint extends DataType implements OrderedDataType {
 
 	public short getBitPrecision() {
 		return bitPrecision;
+	}
+
+	@Override
+	public Class<?> getJavaType() {
+		if (signed) {
+			switch (bitPrecision) {
+			case 8:
+				return byte.class;
+			case 16:
+				return short.class;
+			case 32:
+				return int.class;
+			case 64:
+				return long.class;
+			default:
+				throw new HdfTypeException("Unsupported signed fixed point data type");
+			}
+		} else { // Unsigned need promotion for Java
+			switch (bitPrecision) {
+			case 8:
+				return int.class; // Just go to int could go to short by java short support is poor
+			case 16:
+				return int.class;
+			case 32:
+				return long.class;
+			case 64:
+				return BigInteger.class;
+			default:
+				throw new HdfTypeException("Unsupported signed fixed point data type");
+			}
+		}
 	}
 
 }

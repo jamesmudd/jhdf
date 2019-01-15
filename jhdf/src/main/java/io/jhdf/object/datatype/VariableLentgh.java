@@ -51,4 +51,10 @@ class VariableLentgh extends DataType {
 		return parent;
 	}
 
+	@Override
+	public Class<?> getJavaType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

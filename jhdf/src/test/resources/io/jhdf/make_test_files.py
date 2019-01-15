@@ -1,7 +1,9 @@
 import h5py
 import numpy as np
+from timeit import timeit
 
 data = np.arange(-10, 11, 1)
+data_3d = np.arange(1000).reshape((2,5,100)) 
 
 def write_to_file(f, data):
     datasets_group = f.create_group('datasets_group')
@@ -25,6 +27,10 @@ def write_to_file(f, data):
     links_group['soft_link_to_int8'] = h5py.SoftLink('/datasets_group/int/int8')
     # Define the external link path relative to this file, to ease testing
     links_group['external_link'] = h5py.ExternalLink('test_file_ext.hdf5', '/external_dataset')
+    
+    multiDimensionDatasets = f.create_group('nD_Datasets');
+    multiDimensionDatasets.create_dataset('3D_float32', data=data_3d, dtype='f4')
+    multiDimensionDatasets.create_dataset('3D_int32', data=data_3d, dtype='i4')
     
     f.flush()
     f.close()
