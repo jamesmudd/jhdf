@@ -16,7 +16,7 @@ plugins {
 
 // Varibles
 group = 'io.jhdf'
-version = '0.2.0'
+version = '0.2.1'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -83,10 +83,32 @@ task javadocJar(type: Jar) {
 publishing {
     publications {
         maven(MavenPublication) {
-            from components.java
-            afterEvaluate {  
-                artifact sourcesJar
-                artifact javadocJar
+            from components.java 
+            artifact sourcesJar
+            artifact javadocJar
+                        
+            pom {
+                name = 'jhdf'
+                description = 'A pure Java HDF5 library'
+                url = 'http://jhdf.io/'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'jamesmudd'
+                        name = 'James Mudd'
+                        email = 'james.mudd@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/jamesmudd/jhdf.git'
+                    developerConnection = 'scm:git:git://github.com/jamesmudd/jhdf.git'
+                    url = 'https://github.com/jamesmudd/jhdf.git'
+                }
             }
         }
     }
@@ -113,4 +135,12 @@ bintray {
     }
     // Upload the 'maven' publication i.e jar, sourcesJar, javadocJar, POM
     publications = ['maven']
+    // Use filesSpec to copy the signatures not sure this is the best way but it works
+    filesSpec {
+    	from "$buildDir/libs", "$buildDir/publications/maven/pom-default.xml.asc"
+    	include "*.asc" // Signature files
+    	into "io/jhdf/jhdf/${project.version}"
+    	rename 'pom-default.xml.asc', "jhdf-${project.version}.pom.asc"
+    }
+    
 }
