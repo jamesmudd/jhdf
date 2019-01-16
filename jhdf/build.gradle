@@ -83,11 +83,10 @@ task javadocJar(type: Jar) {
 publishing {
     publications {
         maven(MavenPublication) {
-            from components.java
-            afterEvaluate {  
-                artifact sourcesJar
-                artifact javadocJar
-            }
+            from components.java 
+            artifact sourcesJar
+            artifact javadocJar
+                        
             pom {
                 name = 'jhdf'
                 description = 'A pure Java HDF5 library'
@@ -136,4 +135,12 @@ bintray {
     }
     // Upload the 'maven' publication i.e jar, sourcesJar, javadocJar, POM
     publications = ['maven']
+    // Use filesSpec to copy the signatures not sure this is the best way but it works
+    filesSpec {
+    	from "$buildDir/libs", "$buildDir/publications/maven/pom-default.xml.asc"
+    	include "*.asc" // Signature files
+    	into "io/jhdf/jhdf/${project.version}"
+    	rename 'pom-default.xml.asc', "jhdf-${project.version}.pom.asc"
+    }
+    
 }
