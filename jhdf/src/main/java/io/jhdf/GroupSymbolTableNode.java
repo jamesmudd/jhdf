@@ -36,7 +36,7 @@ public class GroupSymbolTableNode {
 
 			// Verify signature
 			if (!Arrays.equals(NODE_SIGNATURE, formatSignitureByte)) {
-				throw new HdfException("B tree node signature not matched");
+				throw new HdfException("Group symbol table Node signature not matched");
 			}
 
 			// Version Number
