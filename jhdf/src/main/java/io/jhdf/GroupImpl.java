@@ -2,6 +2,7 @@ package io.jhdf;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,6 +12,8 @@ import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.primitives.Longs;
 
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -58,9 +61,12 @@ public class GroupImpl extends AbstractNode implements Group {
 				final LocalHeap rootNameHeap = new LocalHeap(fc, stm.getLocalHeapAddress(), sb);
 				final ByteBuffer nameBuffer = rootNameHeap.getDataBuffer();
 
-				final Map<String, Node> lazyChildren = new LinkedHashMap<>(rootbTreeNode.getEntriesUsed());
+				List<Long> childAddresses = new ArrayList<>();
+				getAllChildAddresses(rootbTreeNode, childAddresses);
 
-				for (long child : rootbTreeNode.getChildAddresses()) {
+				final Map<String, Node> lazyChildren = new LinkedHashMap<>(childAddresses.size());
+
+				for (long child : childAddresses) {
 					GroupSymbolTableNode groupSTE = new GroupSymbolTableNode(fc, child, sb);
 					for (SymbolTableEntry ste : groupSTE.getSymbolTableEntries()) {
 						String childName = readName(nameBuffer, ste.getLinkNameOffset());
@@ -109,8 +115,22 @@ public class GroupImpl extends AbstractNode implements Group {
 					}
 					return lazyChildren;
 				} else {
+					// Links are not stored compactly
+					final long bTreeNameIndexAddress = linkInfoMessage.getbTreeNameIndexAddress();
+					BTreeNode bTreeNode = new BTreeNode(fc, bTreeNameIndexAddress, sb);
 					throw new UnsupportedHdfException("Only compact link storage is supported");
 				}
+			}
+		}
+
+		private void getAllChildAddresses(BTreeNode rootbTreeNode, List<Long> childAddresses) {
+			if (rootbTreeNode.getNodeLevel() > 0) {
+				for (long child : rootbTreeNode.getChildAddresses()) {
+					BTreeNode bTreeNode = new BTreeNode(fc, child, sb);
+					getAllChildAddresses(bTreeNode, childAddresses);
+				}
+			} else {
+				childAddresses.addAll(Longs.asList(rootbTreeNode.getChildAddresses()));
 			}
 		}
 
