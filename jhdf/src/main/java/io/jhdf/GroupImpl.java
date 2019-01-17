@@ -57,7 +57,7 @@ public class GroupImpl extends AbstractNode implements Group {
 			if (oh.hasMessageOfType(SymbolTableMessage.class)) {
 				// Its an old style Group
 				final SymbolTableMessage stm = oh.getMessageOfType(SymbolTableMessage.class);
-				final BTreeNode rootbTreeNode = new BTreeNode(fc, stm.getbTreeAddress(), sb);
+				final BTreeNode rootbTreeNode = BTreeNode.createBTreeNode(fc, sb, stm.getbTreeAddress());
 				final LocalHeap rootNameHeap = new LocalHeap(fc, stm.getLocalHeapAddress(), sb);
 				final ByteBuffer nameBuffer = rootNameHeap.getDataBuffer();
 
@@ -117,7 +117,7 @@ public class GroupImpl extends AbstractNode implements Group {
 				} else {
 					// Links are not stored compactly
 					final long bTreeNameIndexAddress = linkInfoMessage.getbTreeNameIndexAddress();
-					BTreeNode bTreeNode = new BTreeNode(fc, bTreeNameIndexAddress, sb);
+					BTreeNode bTreeNode = BTreeNode.createBTreeNode(fc, sb, bTreeNameIndexAddress);
 					throw new UnsupportedHdfException("Only compact link storage is supported");
 				}
 			}
@@ -126,7 +126,7 @@ public class GroupImpl extends AbstractNode implements Group {
 		private void getAllChildAddresses(BTreeNode rootbTreeNode, List<Long> childAddresses) {
 			if (rootbTreeNode.getNodeLevel() > 0) {
 				for (long child : rootbTreeNode.getChildAddresses()) {
-					BTreeNode bTreeNode = new BTreeNode(fc, child, sb);
+					BTreeNode bTreeNode = BTreeNode.createBTreeNode(fc, sb, child);
 					getAllChildAddresses(bTreeNode, childAddresses);
 				}
 			} else {

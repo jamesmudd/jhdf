@@ -1,6 +1,5 @@
 package io.jhdf;
 
-import static io.jhdf.Utils.toHex;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.io.IOException;
@@ -12,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 
 public class BTreeNode {
 	private static final Logger logger = LoggerFactory.getLogger(BTreeNode.class);
@@ -30,7 +30,7 @@ public class BTreeNode {
 	private final long[] keys;
 	private final long[] childAddresses;
 
-	public BTreeNode(FileChannel fc, long address, Superblock sb) {
+	private BTreeNode(FileChannel fc, Superblock sb, long address) {
 		this.address = address;
 		try {
 			// B Tree Node Header
@@ -84,16 +84,19 @@ public class BTreeNode {
 				break;
 			case 1: // Raw data
 				// TODO implement
-				throw new HdfException("B tree Raw data not implemented");
+				throw new UnsupportedHdfException("B tree Raw data not implemented");
 			default:
 				throw new HdfException("Unreconized node type = " + nodeType);
 			}
 
 		} catch (IOException e) {
-			// TODO improve message
 			throw new HdfException("Error reading B Tree node", e);
 		}
 
+	}
+
+	public static BTreeNode createBTreeNode(FileChannel fc, Superblock sb, long address) {
+		return new BTreeNode(fc, sb, address);
 	}
 
 	public short getNodeType() {
@@ -126,19 +129,7 @@ public class BTreeNode {
 
 	@Override
 	public String toString() {
-		return "BTreeNode [address=" + toHex(address) + ", nodeType=" + nodeTypeAsString(nodeType) + ", nodeLevel="
-				+ nodeLevel + ", entriesUsed=" + entriesUsed + ", leftSiblingAddress=" + toHex(leftSiblingAddress)
-				+ ", rightSiblingAddress=" + toHex(rightSiblingAddress) + "]";
+		return "BTreeNode [address=" + address + ", nodeType=" + nodeType + ", nodeLevel=" + nodeLevel + "]";
 	}
 
-	private String nodeTypeAsString(short nodeType) {
-		switch (nodeType) {
-		case 0:
-			return "GROUP";
-		case 1:
-			return "DATA";
-		default:
-			return "UNKNOWN";
-		}
-	}
 }
