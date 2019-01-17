@@ -44,7 +44,7 @@ public class BTreeNodeTest {
 //		assertThat(bTree.getRightSiblingAddress(), is(equalTo(Constants.UNDEFINED_ADDRESS)));
 //		assertThat(bTree.getKeys(), is(equalTo(new long[] { 0, 40 })));
 		assertThat(bTree.getChildAddresses(), is(equalTo(new long[] { 1504 })));
-		assertThat(bTree.toString(), is(equalTo("BTreeNode [address=136, nodeType=0, nodeLevel=0]")));
+		assertThat(bTree.toString(), is(equalTo("BTreeNodeV1 [address=136, nodeType=0, nodeLevel=0]")));
 	}
 
 }

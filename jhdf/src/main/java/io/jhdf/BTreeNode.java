@@ -21,7 +21,8 @@ import io.jhdf.exceptions.UnsupportedHdfException;
 public abstract class BTreeNode {
 	private static final Logger logger = LoggerFactory.getLogger(BTreeNode.class);
 
-	private static final byte[] BTREE_NODE_SIGNATURE = "TREE".getBytes();
+	private static final byte[] BTREE_NODE_V1_SIGNATURE = "TREE".getBytes();
+	private static final byte[] BTREE_NODE_V2_SIGNATURE = "BTHD".getBytes();
 
 	/** The location of this B tree in the file */
 	private final long address;
@@ -36,7 +37,7 @@ public abstract class BTreeNode {
 		private final short nodeType;
 		/** Level of the node 0 = leaf */
 		private final short nodeLevel;
-		private final short entriesUsed;
+		private final int entriesUsed;
 		private final long leftSiblingAddress;
 		private final long rightSiblingAddress;
 		private final long[] keys;
@@ -46,25 +47,19 @@ public abstract class BTreeNode {
 			super(address);
 			try {
 				// B Tree Node Header
+				// Something a little strange here this should be 4 + 2*sbOffsers but that
+				// doesn't
+				// work?
 				int headerSize = 8 + 2 * sb.getSizeOfOffsets();
 				ByteBuffer header = ByteBuffer.allocate(headerSize);
-				fc.read(header, address);
+				fc.read(header, address + 4); // Skip signature already checked
 				header.order(LITTLE_ENDIAN);
 				header.rewind();
 
-				byte[] formatSignitureByte = new byte[4];
-				header.get(formatSignitureByte, 0, formatSignitureByte.length);
-
-				// Verify signature
-				if (!Arrays.equals(BTREE_NODE_SIGNATURE, formatSignitureByte)) {
-					throw new HdfException("B tree node signature not matched");
-				}
-
-				header.position(4);
 				nodeType = header.get();
 				nodeLevel = header.get();
 
-				entriesUsed = header.getShort();
+				entriesUsed = Utils.readBytesAsUnsignedInt(header, 2);
 				logger.trace("Entries = {}", getEntriesUsed());
 
 				leftSiblingAddress = Utils.readBytesAsUnsignedLong(header, sb.getSizeOfOffsets());
@@ -117,7 +112,7 @@ public abstract class BTreeNode {
 			return nodeLevel;
 		}
 
-		public short getEntriesUsed() {
+		public int getEntriesUsed() {
 			return entriesUsed;
 		}
 
@@ -144,8 +139,102 @@ public abstract class BTreeNode {
 		}
 	}
 
+	private static class BTreeNodeV2 extends BTreeNode {
+
+		/** Type of node. 0 = group, 1 = data */
+		private final short nodeType;
+
+		/** Level of the node 0 = leaf */
+//		private final short nodeLevel;
+//		private final int entriesUsed;
+//		private final long leftSiblingAddress;
+//		private final long rightSiblingAddress;
+//		private final long[] keys;
+//		private final long[] childAddresses;
+
+		private BTreeNodeV2(FileChannel fc, Superblock sb, long address) {
+			super(address);
+			try {
+				// B Tree V2 Header
+				// Something a little strange here this should be 4 + 2*sbOffsers but that
+				// doesn't
+				// work?
+				int headerSize = 12 + sb.getSizeOfOffsets() + 2 + sb.getSizeOfLengths() + 4;
+				ByteBuffer bb = ByteBuffer.allocate(headerSize);
+				fc.read(bb, address + 4); // Skip signature already checked
+				bb.order(LITTLE_ENDIAN);
+				bb.rewind();
+
+				final byte version = bb.get();
+				if (version != 0) {
+					throw new HdfException("Unsupported B tree v2 version detected. Version; " + version);
+				}
+
+				nodeType = bb.get();
+				final long nodeSize = Utils.readBytesAsUnsignedLong(bb, 4);
+				final int recordSize = Utils.readBytesAsUnsignedInt(bb, 2);
+				final int depth = Utils.readBytesAsUnsignedInt(bb, 2);
+
+				final int splitPercent = Utils.readBytesAsUnsignedInt(bb, 1);
+				final int mergePercent = Utils.readBytesAsUnsignedInt(bb, 1);
+
+				final long rootNodeAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+
+				final int numberOfRecordsInRoot = Utils.readBytesAsUnsignedInt(bb, 2);
+				final int totalNumberOfRecordsInTree = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
+
+				final long checksum = Utils.readBytesAsUnsignedLong(bb, 4);
+
+			} catch (IOException e) {
+				throw new HdfException("Error reading B Tree node", e);
+			}
+
+		}
+
+		public short getNodeType() {
+			return nodeType;
+		}
+
+		@Override
+		public String toString() {
+			return "BTreeNodeV2 [address=" + getAddress() + ", nodeType=" + nodeType + "]";
+		}
+
+		@Override
+		public long[] getChildAddresses() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public short getNodeLevel() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+	}
+
 	public static BTreeNode createBTreeNode(FileChannel fc, Superblock sb, long address) {
-		return new BTreeNodeV1(fc, sb, address);
+
+		ByteBuffer signatureBuffer = ByteBuffer.allocate(4);
+
+		try {
+			fc.read(signatureBuffer, address);
+		} catch (IOException e) {
+			throw new HdfException("Failed to read B Tree signature", e);
+		}
+
+		byte[] formatSignitureByte = new byte[4];
+		signatureBuffer.rewind();
+		signatureBuffer.get(formatSignitureByte, 0, formatSignitureByte.length);
+
+		// Verify signature
+		if (Arrays.equals(BTREE_NODE_V1_SIGNATURE, formatSignitureByte)) {
+			return new BTreeNodeV1(fc, sb, address);
+		} else if (Arrays.equals(BTREE_NODE_V2_SIGNATURE, formatSignitureByte)) {
+			return new BTreeNodeV2(fc, sb, address);
+		} else {
+			throw new HdfException("B tree node signature not matched");
+		}
 	}
 
 	public abstract long[] getChildAddresses();
