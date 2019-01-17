@@ -19,6 +19,7 @@ import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
+import io.jhdf.btree.BTreeNode;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
 import io.jhdf.exceptions.UnsupportedHdfException;
