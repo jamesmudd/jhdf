@@ -47,7 +47,7 @@ public abstract class BTreeNode {
 		if (Arrays.equals(BTREE_NODE_V1_SIGNATURE, formatSignitureByte)) {
 			return new BTreeNodeV1(fc, sb, address);
 		} else if (Arrays.equals(BTREE_NODE_V2_SIGNATURE, formatSignitureByte)) {
-			return new BTreeNodeV2(fc, sb, address);
+			return new BTreeV2(fc, sb, address);
 		} else {
 			throw new HdfException("B tree node signature not matched");
 		}
