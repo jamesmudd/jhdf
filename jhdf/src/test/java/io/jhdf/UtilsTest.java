@@ -114,11 +114,43 @@ public class UtilsTest {
 	}
 
 	@Test
+	public void testReadingThreeBytesToLong() throws Exception {
+		byte[] bytes = new byte[] { 1, 0, 0 };
+		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
+		assertThat(Utils.readBytesAsUnsignedLong(bb, 3), is(equalTo(65536L)));
+		assertThat(bb.position(), is(3));
+	}
+
+	@Test
 	public void testReadingFourBytesToLong() throws Exception {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 4), is(equalTo(12L)));
 		assertThat(bb.position(), is(4));
+	}
+
+	@Test
+	public void testReadingFiveBytesToLong() throws Exception {
+		byte[] bytes = new byte[] { 1, 0, 0, 0, 0 };
+		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
+		assertThat(Utils.readBytesAsUnsignedLong(bb, 5), is(equalTo(4294967296L)));
+		assertThat(bb.position(), is(5));
+	}
+
+	@Test
+	public void testReadingSixBytesToLong() throws Exception {
+		byte[] bytes = new byte[] { 1, 0, 0, 0, 0, 0 };
+		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
+		assertThat(Utils.readBytesAsUnsignedLong(bb, 6), is(equalTo(1099511627776L)));
+		assertThat(bb.position(), is(6));
+	}
+
+	@Test
+	public void testReadingSevenBytesToLong() throws Exception {
+		byte[] bytes = new byte[] { 1, 0, 0, 0, 0, 0, 0 };
+		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
+		assertThat(Utils.readBytesAsUnsignedLong(bb, 7), is(equalTo(281474976710656L)));
+		assertThat(bb.position(), is(7));
 	}
 
 	@Test
@@ -133,7 +165,7 @@ public class UtilsTest {
 	public void testReadingUnsupportedLentghLongThrows() throws Exception {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
-		assertThrows(IllegalArgumentException.class, () -> Utils.readBytesAsUnsignedLong(bb, 7));
+		assertThrows(IllegalArgumentException.class, () -> Utils.readBytesAsUnsignedLong(bb, 9));
 	}
 
 	@Test
@@ -171,11 +203,26 @@ public class UtilsTest {
 	}
 
 	@Test
+	public void testReadingThreeBytesToInt() throws Exception {
+		byte[] bytes = new byte[] { 1, 0, 0 };
+		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
+		assertThat(Utils.readBytesAsUnsignedInt(bb, 3), is(equalTo(65536)));
+		assertThat(bb.position(), is(3));
+	}
+
+	@Test
 	public void testReadingFourBytesToInt() throws Exception {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedInt(bb, 4), is(equalTo(12)));
 		assertThat(bb.position(), is(4));
+	}
+
+	@Test
+	public void testReadingFourBytesToIntThatCantBeUnsigned() throws Exception {
+		byte[] bytes = new byte[] { -127, -127, -127, -127 };
+		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
+		assertThrows(ArithmeticException.class, () -> Utils.readBytesAsUnsignedInt(bb, 4));
 	}
 
 	@Test
@@ -190,7 +237,7 @@ public class UtilsTest {
 	public void testReadingUnsupportedLentghThrows() throws Exception {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
-		assertThrows(IllegalArgumentException.class, () -> Utils.readBytesAsUnsignedInt(bb, 7));
+		assertThrows(IllegalArgumentException.class, () -> Utils.readBytesAsUnsignedInt(bb, 6));
 	}
 
 	@Test
