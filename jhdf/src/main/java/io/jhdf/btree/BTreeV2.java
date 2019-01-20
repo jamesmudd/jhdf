@@ -13,6 +13,7 @@ import java.util.List;
 
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
+import io.jhdf.btree.record.Record;
 import io.jhdf.exceptions.HdfException;
 
 class BTreeV2 extends BTreeNode {
@@ -101,7 +102,7 @@ class BTreeV2 extends BTreeNode {
 		final byte type = bb.get();
 
 		for (int i = 0; i < numberOfRecords; i++) {
-			Utils.createSubBuffer(bb, recordSize);
+			records.add(Record.readRecord(type, Utils.createSubBuffer(bb, recordSize)));
 			counter++;
 		}
 
