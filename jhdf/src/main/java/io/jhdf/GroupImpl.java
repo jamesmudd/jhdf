@@ -1,5 +1,8 @@
 package io.jhdf;
 
+import static java.util.Arrays.asList;
+import static org.apache.commons.lang3.ArrayUtils.toObject;
+
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -12,8 +15,6 @@ import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.primitives.Longs;
 
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -157,7 +158,7 @@ public class GroupImpl extends AbstractNode implements Group {
 					getAllChildAddresses(bTreeNode, childAddresses);
 				}
 			} else {
-				childAddresses.addAll(Longs.asList(rootbTreeNode.getChildAddresses()));
+				childAddresses.addAll(asList(toObject(rootbTreeNode.getChildAddresses())));
 			}
 		}
 
