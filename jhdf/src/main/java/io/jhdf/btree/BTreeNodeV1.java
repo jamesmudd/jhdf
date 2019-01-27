@@ -1,58 +1,44 @@
-package io.jhdf;
+package io.jhdf.btree;
 
-import static io.jhdf.Utils.toHex;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.Arrays;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.jhdf.Superblock;
+import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 
-public class BTreeNode {
-	private static final Logger logger = LoggerFactory.getLogger(BTreeNode.class);
+class BTreeNodeV1 extends BTreeNode {
 
-	private static final byte[] BTREE_NODE_SIGNATURE = "TREE".getBytes();
-
-	/** The location of this B tree in the file */
-	private final long address;
 	/** Type of node. 0 = group, 1 = data */
 	private final short nodeType;
 	/** Level of the node 0 = leaf */
 	private final short nodeLevel;
-	private final short entriesUsed;
+	private final int entriesUsed;
 	private final long leftSiblingAddress;
 	private final long rightSiblingAddress;
 	private final long[] keys;
 	private final long[] childAddresses;
 
-	public BTreeNode(FileChannel fc, long address, Superblock sb) {
-		this.address = address;
+	BTreeNodeV1(FileChannel fc, Superblock sb, long address) {
+		super(address);
 		try {
 			// B Tree Node Header
+			// Something a little strange here this should be 4 + 2*sbOffsers but that
+			// doesn't work?
 			int headerSize = 8 + 2 * sb.getSizeOfOffsets();
 			ByteBuffer header = ByteBuffer.allocate(headerSize);
-			fc.read(header, address);
+			fc.read(header, address + 4); // Skip signature already checked
 			header.order(LITTLE_ENDIAN);
 			header.rewind();
 
-			byte[] formatSignitureByte = new byte[4];
-			header.get(formatSignitureByte, 0, formatSignitureByte.length);
-
-			// Verify signature
-			if (!Arrays.equals(BTREE_NODE_SIGNATURE, formatSignitureByte)) {
-				throw new HdfException("B tree node signature not matched");
-			}
-
-			header.position(4);
 			nodeType = header.get();
 			nodeLevel = header.get();
 
-			entriesUsed = header.getShort();
+			entriesUsed = Utils.readBytesAsUnsignedInt(header, 2);
 			logger.trace("Entries = {}", getEntriesUsed());
 
 			leftSiblingAddress = Utils.readBytesAsUnsignedLong(header, sb.getSizeOfOffsets());
@@ -84,13 +70,12 @@ public class BTreeNode {
 				break;
 			case 1: // Raw data
 				// TODO implement
-				throw new HdfException("B tree Raw data not implemented");
+				throw new UnsupportedHdfException("B tree Raw data not implemented");
 			default:
 				throw new HdfException("Unreconized node type = " + nodeType);
 			}
 
 		} catch (IOException e) {
-			// TODO improve message
 			throw new HdfException("Error reading B Tree node", e);
 		}
 
@@ -100,11 +85,12 @@ public class BTreeNode {
 		return nodeType;
 	}
 
+	@Override
 	public short getNodeLevel() {
 		return nodeLevel;
 	}
 
-	public short getEntriesUsed() {
+	public int getEntriesUsed() {
 		return entriesUsed;
 	}
 
@@ -120,25 +106,13 @@ public class BTreeNode {
 		return keys;
 	}
 
+	@Override
 	public long[] getChildAddresses() {
 		return childAddresses;
 	}
 
 	@Override
 	public String toString() {
-		return "BTreeNode [address=" + toHex(address) + ", nodeType=" + nodeTypeAsString(nodeType) + ", nodeLevel="
-				+ nodeLevel + ", entriesUsed=" + entriesUsed + ", leftSiblingAddress=" + toHex(leftSiblingAddress)
-				+ ", rightSiblingAddress=" + toHex(rightSiblingAddress) + "]";
-	}
-
-	private String nodeTypeAsString(short nodeType) {
-		switch (nodeType) {
-		case 0:
-			return "GROUP";
-		case 1:
-			return "DATA";
-		default:
-			return "UNKNOWN";
-		}
+		return "BTreeNodeV1 [address=" + getAddress() + ", nodeType=" + nodeType + ", nodeLevel=" + nodeLevel + "]";
 	}
 }
