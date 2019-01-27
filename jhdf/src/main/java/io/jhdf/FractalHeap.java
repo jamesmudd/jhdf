@@ -31,6 +31,8 @@ public class FractalHeap {
 	private static final byte[] INDIRECT_BLOCK_SIGNATURE = "FHIB".getBytes();
 	private static final byte[] DIRECT_BLOCK_SIGNATURE = "FHDB".getBytes();
 
+	private static final BigInteger TWO = BigInteger.valueOf(2L);
+
 	private final long address;
 
 	private final byte version;
@@ -324,7 +326,7 @@ public class FractalHeap {
 		if (row < 2) {
 			return startingBlockSize;
 		} else {
-			int size = startingBlockSize * BigInteger.TWO.pow(row - 1).intValueExact();
+			int size = startingBlockSize * TWO.pow(row - 1).intValueExact();
 			if (size < maxDirectBlockSize) {
 				return size;
 			} else {
