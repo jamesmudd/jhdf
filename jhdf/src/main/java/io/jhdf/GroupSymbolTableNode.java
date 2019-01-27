@@ -79,8 +79,7 @@ public class GroupSymbolTableNode {
 
 	@Override
 	public String toString() {
-		return "GroupSymbolTableNode [address=" + Utils.toHex(address) + ", version=" + version + ", numberOfEntries="
-				+ numberOfEntries + ", symbolTableEntries=" + Arrays.toString(symbolTableEntries) + "]";
+		return "GroupSymbolTableNode [address=" + address + ", numberOfEntries=" + numberOfEntries + "]";
 	}
 
 }
