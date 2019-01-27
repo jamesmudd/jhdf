@@ -79,17 +79,18 @@ public final class Utils {
 
 	/**
 	 * This reads the requested number of bytes from the buffer and returns the data
-	 * as an unsigned int. After this call the buffer position will be advanced by
-	 * the specified length.
+	 * as an unsigned <code>int</code>. After this call the buffer position will be
+	 * advanced by the specified length.
 	 * <p>
 	 * This is used in HDF5 to read "size of lengths" and "size of offsets"
 	 * 
 	 * @param buffer to read from
 	 * @param lentgh the number of bytes to read
-	 * @return the int value read from the buffer
+	 * @return the <code>int</code> value read from the buffer
 	 * @throws ArithmeticException      if the data cannot be safely converted to an
-	 *                                  unsigned int
-	 * @throws IllegalArgumentException if the length requested is not supported;
+	 *                                  unsigned <code>int</code>
+	 * @throws IllegalArgumentException if the length requested is not supported i.e
+	 *                                  &gt; 8
 	 */
 	public static int readBytesAsUnsignedInt(ByteBuffer buffer, int lentgh) {
 		switch (lentgh) {
@@ -97,6 +98,11 @@ public final class Utils {
 			return Byte.toUnsignedInt(buffer.get());
 		case 2:
 			return Short.toUnsignedInt(buffer.getShort());
+		case 3:
+			// Pad out to 4 bytes then call again
+			byte[] fourBytes = new byte[4];
+			buffer.get(fourBytes, 4 - 3, 3);
+			return readBytesAsUnsignedInt(ByteBuffer.wrap(fourBytes), 4);
 		case 4:
 			int value = buffer.getInt();
 			if (value < 0) {
@@ -131,8 +137,20 @@ public final class Utils {
 			return Byte.toUnsignedLong(buffer.get());
 		case 2:
 			return Short.toUnsignedLong(buffer.getShort());
+		case 3:
+			// Pad out to 4 bytes then call again
+			byte[] fourBytes = new byte[4];
+			buffer.get(fourBytes, 4 - 3, 3);
+			return readBytesAsUnsignedLong(ByteBuffer.wrap(fourBytes), 4);
 		case 4:
 			return Integer.toUnsignedLong(buffer.getInt());
+		case 5:
+		case 6:
+		case 7:
+			// Pad out to 8 bytes then call again
+			byte[] bytes = new byte[8];
+			buffer.get(bytes, 8 - lentgh, lentgh);
+			return readBytesAsUnsignedLong(ByteBuffer.wrap(bytes), 8);
 		case 8:
 			long value = buffer.getLong();
 			if (value < 0 && value != Constants.UNDEFINED_ADDRESS) {
