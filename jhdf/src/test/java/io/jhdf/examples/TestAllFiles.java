@@ -51,8 +51,8 @@ public class TestAllFiles {
 		List<Path> files = Files.walk(path).filter(hdf5::matches).collect(Collectors.toList());
 
 		// Check at least some files have been discovered
-		assertThat("Less than 3 HDF5 test files discovered searched paths below: " + path, files.size(),
-				is(greaterThan(2)));
+		assertThat("Less than 3 HDF5 test files discovered searched paths below: " + path.toAbsolutePath(),
+				files.size(), is(greaterThan(2)));
 
 		// Make a test for each file
 		return files.stream().map(this::createTest);

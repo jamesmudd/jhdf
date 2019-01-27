@@ -13,7 +13,6 @@ def write_to_file(f, data):
     datasets_group.attrs['float_attr'] = 123.456
     
     float_group = datasets_group.create_group('float')
-    float_group.create_dataset('float16', data=data, dtype='f2')
     float_group.create_dataset('float32', data=data, dtype='f4')
     float_group.create_dataset('float64', data=data, dtype='f8', fillvalue=6)
     

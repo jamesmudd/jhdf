@@ -73,7 +73,7 @@ public class ObjectHeaderTest {
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(7872L)));
-		assertThat(oh.getMessages().size(), is(equalTo(6)));
+		assertThat(oh.getMessages().size(), is(equalTo(7)));
 
 		// V1 specific methods
 		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
@@ -82,10 +82,10 @@ public class ObjectHeaderTest {
 
 	@Test
 	public void testObjectHeaderOnFloat64Dataset() throws IOException {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 10240); // float64 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 7872); // float64 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
-		assertThat(oh.getAddress(), is(equalTo(10240L)));
+		assertThat(oh.getAddress(), is(equalTo(7872L)));
 		assertThat(oh.getMessages().size(), is(equalTo(7)));
 
 		// V1 specific methods
@@ -95,10 +95,10 @@ public class ObjectHeaderTest {
 
 	@Test
 	public void testObjectHeaderOnInt8Dataset() throws IOException {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 11176); // int8 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, 10904); // int8 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
-		assertThat(oh.getAddress(), is(equalTo(11176L)));
+		assertThat(oh.getAddress(), is(equalTo(10904L)));
 		assertThat(oh.getMessages().size(), is(equalTo(6)));
 
 		// V1 specific methods
@@ -110,7 +110,7 @@ public class ObjectHeaderTest {
 	@Test
 	public void testLazyObjectHeader() throws Exception {
 		FileChannel spyFc = Mockito.spy(fc);
-		LazyInitializer<ObjectHeader> lazyObjectHeader = ObjectHeader.lazyReadObjectHeader(spyFc, sb, 11176); // int8
+		LazyInitializer<ObjectHeader> lazyObjectHeader = ObjectHeader.lazyReadObjectHeader(spyFc, sb, 10904); // int8
 																												// header
 		// Creating the lazy object header should not touch the file
 		Mockito.verifyZeroInteractions(spyFc);
