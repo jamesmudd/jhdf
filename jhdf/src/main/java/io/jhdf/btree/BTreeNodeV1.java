@@ -28,8 +28,7 @@ class BTreeNodeV1 extends BTreeNode {
 		try {
 			// B Tree Node Header
 			// Something a little strange here this should be 4 + 2*sbOffsers but that
-			// doesn't
-			// work?
+			// doesn't work?
 			int headerSize = 8 + 2 * sb.getSizeOfOffsets();
 			ByteBuffer header = ByteBuffer.allocate(headerSize);
 			fc.read(header, address + 4); // Skip signature already checked
@@ -66,8 +65,7 @@ class BTreeNodeV1 extends BTreeNode {
 					keys[i] = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfLengths());
 					childAddresses[i] = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfOffsets());
 				}
-				getKeys()[entriesUsed] = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer,
-						sb.getSizeOfLengths());
+				getKeys()[entriesUsed] = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfLengths());
 
 				break;
 			case 1: // Raw data

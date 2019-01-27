@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import io.jhdf.Utils;
 
-public class LinkNameForIndexedGroupRecord extends Record {
+public class LinkNameForIndexedGroupRecord extends BTreeRecord {
 
 	private final long hash;
 	private final ByteBuffer id;

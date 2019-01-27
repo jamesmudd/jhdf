@@ -39,8 +39,8 @@ public abstract class BTreeNode {
 			throw new HdfException("Failed to read B Tree signature", e);
 		}
 
-		byte[] formatSignitureByte = new byte[4];
 		signatureBuffer.rewind();
+		byte[] formatSignitureByte = new byte[4];
 		signatureBuffer.get(formatSignitureByte, 0, formatSignitureByte.length);
 
 		// Verify signature

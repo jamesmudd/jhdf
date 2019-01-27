@@ -8,8 +8,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
@@ -24,8 +22,8 @@ import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.btree.BTreeNode;
 import io.jhdf.btree.BTreeV2;
+import io.jhdf.btree.record.BTreeRecord;
 import io.jhdf.btree.record.LinkNameForIndexedGroupRecord;
-import io.jhdf.btree.record.Record;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
 import io.jhdf.links.ExternalLink;
@@ -113,28 +111,22 @@ public class GroupImpl extends AbstractNode implements Group {
 
 					}
 				} else {
-					Set<String> names = new TreeSet<>();
 					// Links are not stored compactly
 					final long bTreeNameIndexAddress = linkInfoMessage.getbTreeNameIndexAddress();
 					BTreeNode bTreeNode = BTreeNode.createBTreeNode(fc, sb, bTreeNameIndexAddress);
 					FractalHeap fh = new FractalHeap(fc, sb, linkInfoMessage.getFractalHeapAddress());
 
-					for (Record record : ((BTreeV2) bTreeNode).getRecords()) {
+					for (BTreeRecord record : ((BTreeV2) bTreeNode).getRecords()) {
 						LinkNameForIndexedGroupRecord linkName = (LinkNameForIndexedGroupRecord) record;
 						ByteBuffer id = linkName.getId();
 						// Get the name data from the fractal heap
 						ByteBuffer bb = fh.getId(id);
 
-						bb.position(2); // TODO what is this byte?
+						bb.position(2); // TODO what is this?
 						int nameLentgh = Utils.readBytesAsUnsignedInt(bb, 1);
-
 						ByteBuffer nameBuffer = Utils.createSubBuffer(bb, nameLentgh);
 						String name = StandardCharsets.US_ASCII.decode(nameBuffer).toString();
-
-						System.out.println(name);
-						names.add(name);
 						long objectHeaderAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
-						System.out.println(objectHeaderAddress);
 						Node node = createNode(name, objectHeaderAddress);
 						lazyChildren.put(name, node);
 					}

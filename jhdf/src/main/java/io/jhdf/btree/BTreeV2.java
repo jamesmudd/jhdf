@@ -13,7 +13,7 @@ import java.util.List;
 
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
-import io.jhdf.btree.record.Record;
+import io.jhdf.btree.record.BTreeRecord;
 import io.jhdf.exceptions.HdfException;
 
 public class BTreeV2 extends BTreeNode {
@@ -21,21 +21,18 @@ public class BTreeV2 extends BTreeNode {
 	private static final int NODE_OVERHEAD_BYTES = 10;
 
 	private static final byte[] BTREE_INTERNAL_NODE_SIGNATURE = "BTIN".getBytes();
-
 	private static final byte[] BTREE_LEAF_NODE_SIGNATURE = "BTLF".getBytes();
 
 	/** Type of node. */
 	private final short nodeType;
 
-	private int counter;
+	private final List<BTreeRecord> records;
 
-	private final List<Record> records;
-
-	public List<Record> getRecords() {
+	public List<BTreeRecord> getRecords() {
 		return records;
 	}
 
-	BTreeV2(FileChannel fc, Superblock sb, long address) {
+	/* package */ BTreeV2(FileChannel fc, Superblock sb, long address) {
 		super(address);
 		try {
 			// B Tree V2 Header
@@ -66,6 +63,7 @@ public class BTreeV2 extends BTreeNode {
 			final long checksum = Utils.readBytesAsUnsignedLong(bb, 4);
 
 			records = new ArrayList<>(totalNumberOfRecordsInTree);
+
 			readRecords(fc, sb, rootNodeAddress, nodeSize, recordSize, depth, numberOfRecordsInRoot,
 					totalNumberOfRecordsInTree, records);
 
@@ -76,9 +74,8 @@ public class BTreeV2 extends BTreeNode {
 	}
 
 	private void readRecords(FileChannel fc, Superblock sb, long address, int nodeSize, int recordSize, int depth,
-			int numberOfRecords, int totalRecords, List<Record> records) {
+			int numberOfRecords, int totalRecords, List<BTreeRecord> records) {
 
-		System.out.println("depth = " + depth);
 		ByteBuffer bb = ByteBuffer.allocate(nodeSize);
 		try {
 			fc.read(bb, address);
@@ -108,8 +105,7 @@ public class BTreeV2 extends BTreeNode {
 		final byte type = bb.get();
 
 		for (int i = 0; i < numberOfRecords; i++) {
-			records.add(Record.readRecord(type, Utils.createSubBuffer(bb, recordSize)));
-			counter++;
+			records.add(BTreeRecord.readRecord(type, Utils.createSubBuffer(bb, recordSize)));
 		}
 
 		if (!leafNode) {
@@ -117,14 +113,11 @@ public class BTreeV2 extends BTreeNode {
 				final long childAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 				int sizeOfNumberOfRecords = getSizeOfNumberOfRecords(nodeSize, depth, totalRecords, recordSize,
 						sb.getSizeOfOffsets());
-				System.out.println("sizeOfNumberOfRecords = " + sizeOfNumberOfRecords);
 				final int numberOfChildRecords = readBytesAsUnsignedInt(bb, sizeOfNumberOfRecords);
-				System.out.println("numberOfChildRecords = " + numberOfChildRecords);
 				final int totalNumberOfChildRecords;
 				if (depth > 1) {
 					totalNumberOfChildRecords = readBytesAsUnsignedInt(bb,
 							getSizeOfTotalNumberOfChildRecords(nodeSize, depth, recordSize));
-					System.out.println("totalNumberOfChildRecords = " + totalNumberOfChildRecords);
 				} else {
 					totalNumberOfChildRecords = -1;
 				}
@@ -132,9 +125,6 @@ public class BTreeV2 extends BTreeNode {
 						totalNumberOfChildRecords, records);
 			}
 		}
-
-		System.out.println(counter);
-
 		// TODO Checksum
 	}
 
