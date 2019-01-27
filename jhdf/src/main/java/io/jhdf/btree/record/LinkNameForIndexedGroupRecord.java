@@ -7,18 +7,18 @@ import io.jhdf.Utils;
 public class LinkNameForIndexedGroupRecord extends Record {
 
 	private final long hash;
-	private final long id;
+	private final ByteBuffer id;
 
 	public LinkNameForIndexedGroupRecord(ByteBuffer bb) {
 		hash = Utils.readBytesAsUnsignedLong(bb, 4);
-		id = Utils.readBytesAsUnsignedLong(bb, 7);
+		id = Utils.createSubBuffer(bb, 7);
 	}
 
 	public long getHash() {
 		return hash;
 	}
 
-	public long getId() {
+	public ByteBuffer getId() {
 		return id;
 	}
 

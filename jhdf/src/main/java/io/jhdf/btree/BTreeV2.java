@@ -16,7 +16,7 @@ import io.jhdf.Utils;
 import io.jhdf.btree.record.Record;
 import io.jhdf.exceptions.HdfException;
 
-class BTreeV2 extends BTreeNode {
+public class BTreeV2 extends BTreeNode {
 
 	private static final int NODE_OVERHEAD_BYTES = 10;
 
@@ -28,6 +28,12 @@ class BTreeV2 extends BTreeNode {
 	private final short nodeType;
 
 	private int counter;
+
+	private final List<Record> records;
+
+	public List<Record> getRecords() {
+		return records;
+	}
 
 	BTreeV2(FileChannel fc, Superblock sb, long address) {
 		super(address);
@@ -59,7 +65,7 @@ class BTreeV2 extends BTreeNode {
 
 			final long checksum = Utils.readBytesAsUnsignedLong(bb, 4);
 
-			List<Object> records = new ArrayList<>(totalNumberOfRecordsInTree);
+			records = new ArrayList<>(totalNumberOfRecordsInTree);
 			readRecords(fc, sb, rootNodeAddress, nodeSize, recordSize, depth, numberOfRecordsInRoot,
 					totalNumberOfRecordsInTree, records);
 
@@ -70,7 +76,7 @@ class BTreeV2 extends BTreeNode {
 	}
 
 	private void readRecords(FileChannel fc, Superblock sb, long address, int nodeSize, int recordSize, int depth,
-			int numberOfRecords, int totalRecords, List<Object> records) {
+			int numberOfRecords, int totalRecords, List<Record> records) {
 
 		System.out.println("depth = " + depth);
 		ByteBuffer bb = ByteBuffer.allocate(nodeSize);

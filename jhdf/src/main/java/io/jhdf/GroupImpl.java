@@ -2,11 +2,14 @@ package io.jhdf;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
@@ -20,9 +23,11 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.btree.BTreeNode;
+import io.jhdf.btree.BTreeV2;
+import io.jhdf.btree.record.LinkNameForIndexedGroupRecord;
+import io.jhdf.btree.record.Record;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
-import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.links.ExternalLink;
 import io.jhdf.links.SoftLink;
 import io.jhdf.object.message.AttributeMessage;
@@ -86,42 +91,70 @@ public class GroupImpl extends AbstractNode implements Group {
 				// Its a new style group
 				final List<LinkMessage> links = oh.getMessagesOfType(LinkMessage.class);
 				final LinkInfoMessage linkInfoMessage = oh.getMessageOfType(LinkInfoMessage.class);
+				final Map<String, Node> lazyChildren = new LinkedHashMap<>(links.size());
 
 				if (linkInfoMessage.getbTreeNameIndexAddress() == Constants.UNDEFINED_ADDRESS) {
-					final Map<String, Node> lazyChildren = new LinkedHashMap<>(links.size());
 					for (LinkMessage link : links) {
+						String linkName = link.getLinkName();
 						switch (link.getLinkType()) {
 						case HARD:
-							ObjectHeader linkHeader = ObjectHeader.readObjectHeader(fc, sb, link.getHardLinkAddress());
-							final Node node;
-							if (linkHeader.hasMessageOfType(DataSpaceMessage.class)) {
-								// Its a a Dataset
-								node = new DatasetImpl(fc, sb, link.getHardLinkAddress(), link.getLinkName(), parent);
-							} else {
-								// Its a group
-								node = createGroup(fc, sb, link.getHardLinkAddress(), link.getLinkName(), parent);
-							}
-							lazyChildren.put(link.getLinkName(), node);
+							long hardLinkAddress = link.getHardLinkAddress();
+							final Node node = createNode(linkName, hardLinkAddress);
+							lazyChildren.put(linkName, node);
 							break;
 						case SOFT:
-							lazyChildren.put(link.getLinkName(),
-									new SoftLink(link.getSoftLink(), link.getLinkName(), parent));
+							lazyChildren.put(linkName, new SoftLink(link.getSoftLink(), linkName, parent));
 							break;
 						case EXTERNAL:
-							lazyChildren.put(link.getLinkName(), new ExternalLink(link.getExternalFile(),
-									link.getExternalPath(), link.getLinkName(), parent));
+							lazyChildren.put(linkName,
+									new ExternalLink(link.getExternalFile(), link.getExternalPath(), linkName, parent));
 							break;
 						}
 
 					}
-					return lazyChildren;
 				} else {
+					Set<String> names = new TreeSet<>();
 					// Links are not stored compactly
 					final long bTreeNameIndexAddress = linkInfoMessage.getbTreeNameIndexAddress();
 					BTreeNode bTreeNode = BTreeNode.createBTreeNode(fc, sb, bTreeNameIndexAddress);
-					throw new UnsupportedHdfException("Only compact link storage is supported");
+					FractalHeap fh = new FractalHeap(fc, sb, linkInfoMessage.getFractalHeapAddress());
+
+					for (Record record : ((BTreeV2) bTreeNode).getRecords()) {
+						LinkNameForIndexedGroupRecord linkName = (LinkNameForIndexedGroupRecord) record;
+						ByteBuffer id = linkName.getId();
+						// Get the name data from the fractal heap
+						ByteBuffer bb = fh.getId(id);
+
+						bb.position(2); // TODO what is this byte?
+						int nameLentgh = Utils.readBytesAsUnsignedInt(bb, 1);
+
+						ByteBuffer nameBuffer = Utils.createSubBuffer(bb, nameLentgh);
+						String name = StandardCharsets.US_ASCII.decode(nameBuffer).toString();
+
+						System.out.println(name);
+						names.add(name);
+						long objectHeaderAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+						System.out.println(objectHeaderAddress);
+						Node node = createNode(name, objectHeaderAddress);
+						lazyChildren.put(name, node);
+					}
+
 				}
+				return lazyChildren;
 			}
+		}
+
+		private Node createNode(String name, long address) {
+			ObjectHeader linkHeader = ObjectHeader.readObjectHeader(fc, sb, address);
+			final Node node;
+			if (linkHeader.hasMessageOfType(DataSpaceMessage.class)) {
+				// Its a a Dataset
+				node = new DatasetImpl(fc, sb, address, name, parent);
+			} else {
+				// Its a group
+				node = createGroup(fc, sb, address, name, parent);
+			}
+			return node;
 		}
 
 		private void getAllChildAddresses(BTreeNode rootbTreeNode, List<Long> childAddresses) {
