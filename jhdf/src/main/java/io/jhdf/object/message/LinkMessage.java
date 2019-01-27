@@ -43,6 +43,10 @@ public class LinkMessage extends Message {
 	private String externalFile;
 	private String externalPath;
 
+	public static LinkMessage fromBuffer(ByteBuffer bb, Superblock sb) {
+		return new LinkMessage(bb, sb, null);
+	}
+
 	/* package */ LinkMessage(ByteBuffer bb, Superblock sb, BitSet messageFlags) {
 		super(messageFlags);
 

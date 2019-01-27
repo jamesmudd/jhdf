@@ -2,7 +2,6 @@ package io.jhdf;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -46,11 +45,6 @@ public class GroupImpl extends AbstractNode implements Group {
 			this.parent = parent;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.lang3.concurrent.LazyInitializer#initialize()
-		 */
 		@Override
 		protected Map<String, Node> initialize() throws ConcurrentException {
 			logger.info("Lazy loading children of '{}'", getPath());
@@ -60,80 +54,87 @@ public class GroupImpl extends AbstractNode implements Group {
 
 			if (oh.hasMessageOfType(SymbolTableMessage.class)) {
 				// Its an old style Group
-				final SymbolTableMessage stm = oh.getMessageOfType(SymbolTableMessage.class);
-				final BTreeNode rootbTreeNode = BTreeNode.createBTreeNode(fc, sb, stm.getbTreeAddress());
-				final LocalHeap rootNameHeap = new LocalHeap(fc, stm.getLocalHeapAddress(), sb);
-				final ByteBuffer nameBuffer = rootNameHeap.getDataBuffer();
-
-				List<Long> childAddresses = new ArrayList<>();
-				getAllChildAddresses(rootbTreeNode, childAddresses);
-
-				final Map<String, Node> lazyChildren = new LinkedHashMap<>(childAddresses.size());
-
-				for (long child : childAddresses) {
-					GroupSymbolTableNode groupSTE = new GroupSymbolTableNode(fc, child, sb);
-					for (SymbolTableEntry ste : groupSTE.getSymbolTableEntries()) {
-						String childName = readName(nameBuffer, ste.getLinkNameOffset());
-						final Node node;
-						if (ste.getCacheType() == 1) { // Its a group
-							node = createGroup(fc, sb, ste.getObjectHeaderAddress(), childName, parent);
-						} else { // Dataset
-							node = new DatasetImpl(fc, sb, ste.getObjectHeaderAddress(), childName, parent);
-						}
-						lazyChildren.put(childName, node);
-					}
-				}
-				return lazyChildren;
-
+				return createOldStyleGroup(oh);
 			} else {
-				// Its a new style group
-				final List<LinkMessage> links = oh.getMessagesOfType(LinkMessage.class);
-				final LinkInfoMessage linkInfoMessage = oh.getMessageOfType(LinkInfoMessage.class);
-				final Map<String, Node> lazyChildren = new LinkedHashMap<>(links.size());
-
-				if (linkInfoMessage.getbTreeNameIndexAddress() == Constants.UNDEFINED_ADDRESS) {
-					for (LinkMessage link : links) {
-						String linkName = link.getLinkName();
-						switch (link.getLinkType()) {
-						case HARD:
-							long hardLinkAddress = link.getHardLinkAddress();
-							final Node node = createNode(linkName, hardLinkAddress);
-							lazyChildren.put(linkName, node);
-							break;
-						case SOFT:
-							lazyChildren.put(linkName, new SoftLink(link.getSoftLink(), linkName, parent));
-							break;
-						case EXTERNAL:
-							lazyChildren.put(linkName,
-									new ExternalLink(link.getExternalFile(), link.getExternalPath(), linkName, parent));
-							break;
-						}
-
-					}
-				} else {
-					// Links are not stored compactly
-					final long bTreeNameIndexAddress = linkInfoMessage.getbTreeNameIndexAddress();
-					BTreeNode bTreeNode = BTreeNode.createBTreeNode(fc, sb, bTreeNameIndexAddress);
-					FractalHeap fh = new FractalHeap(fc, sb, linkInfoMessage.getFractalHeapAddress());
-
-					for (BTreeRecord record : ((BTreeV2) bTreeNode).getRecords()) {
-						LinkNameForIndexedGroupRecord linkName = (LinkNameForIndexedGroupRecord) record;
-						ByteBuffer id = linkName.getId();
-						// Get the name data from the fractal heap
-						ByteBuffer bb = fh.getId(id);
-
-						bb.position(2); // TODO what is this?
-						int nameLentgh = Utils.readBytesAsUnsignedInt(bb, 1);
-						ByteBuffer nameBuffer = Utils.createSubBuffer(bb, nameLentgh);
-						String name = StandardCharsets.US_ASCII.decode(nameBuffer).toString();
-						long objectHeaderAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
-						Node node = createNode(name, objectHeaderAddress);
-						lazyChildren.put(name, node);
-					}
-
-				}
-				return lazyChildren;
+				return createNewStyleGroup(oh);
 			}
+		}
+
+		private Map<String, Node> createNewStyleGroup(final ObjectHeader oh) {
+			logger.debug("Loading 'new' style group");
+			// Need to get a list of LinkMessages
+			final List<LinkMessage> links;
+
+			final LinkInfoMessage linkInfoMessage = oh.getMessageOfType(LinkInfoMessage.class);
+			if (linkInfoMessage.getbTreeNameIndexAddress() == Constants.UNDEFINED_ADDRESS) {
+				// Links stored compactly i.e in the object header, so get directly
+				links = oh.getMessagesOfType(LinkMessage.class);
+				logger.debug("Loaded group links from object header");
+			} else {
+				// Links are not stored compactly i.e in the fractal heap
+				final BTreeNode bTreeNode = BTreeNode.createBTreeNode(fc, sb,
+						linkInfoMessage.getbTreeNameIndexAddress());
+				final FractalHeap fractalHeap = new FractalHeap(fc, sb, linkInfoMessage.getFractalHeapAddress());
+
+				links = new ArrayList<>(); // TODO would be good to get the size here from the b-tree
+				for (BTreeRecord record : ((BTreeV2) bTreeNode).getRecords()) {
+					LinkNameForIndexedGroupRecord linkName = (LinkNameForIndexedGroupRecord) record;
+					ByteBuffer id = linkName.getId();
+					// Get the name data from the fractal heap
+					ByteBuffer bb = fractalHeap.getId(id);
+					links.add(LinkMessage.fromBuffer(bb, sb));
+				}
+				logger.debug("Loaded group links from fractal heap");
+			}
+
+			final Map<String, Node> lazyChildren = new LinkedHashMap<>(links.size());
+			for (LinkMessage link : links) {
+				String linkName = link.getLinkName();
+				switch (link.getLinkType()) {
+				case HARD:
+					long hardLinkAddress = link.getHardLinkAddress();
+					final Node node = createNode(linkName, hardLinkAddress);
+					lazyChildren.put(linkName, node);
+					break;
+				case SOFT:
+					lazyChildren.put(linkName, new SoftLink(link.getSoftLink(), linkName, parent));
+					break;
+				case EXTERNAL:
+					lazyChildren.put(linkName,
+							new ExternalLink(link.getExternalFile(), link.getExternalPath(), linkName, parent));
+					break;
+				}
+			}
+
+			return lazyChildren;
+		}
+
+		private Map<String, Node> createOldStyleGroup(final ObjectHeader oh) {
+			logger.debug("Loading 'old' style group");
+			final SymbolTableMessage stm = oh.getMessageOfType(SymbolTableMessage.class);
+			final BTreeNode rootbTreeNode = BTreeNode.createBTreeNode(fc, sb, stm.getbTreeAddress());
+			final LocalHeap rootNameHeap = new LocalHeap(fc, stm.getLocalHeapAddress(), sb);
+			final ByteBuffer nameBuffer = rootNameHeap.getDataBuffer();
+
+			List<Long> childAddresses = new ArrayList<>();
+			getAllChildAddresses(rootbTreeNode, childAddresses);
+
+			final Map<String, Node> lazyChildren = new LinkedHashMap<>(childAddresses.size());
+
+			for (long child : childAddresses) {
+				GroupSymbolTableNode groupSTE = new GroupSymbolTableNode(fc, child, sb);
+				for (SymbolTableEntry ste : groupSTE.getSymbolTableEntries()) {
+					String childName = readName(nameBuffer, ste.getLinkNameOffset());
+					final Node node;
+					if (ste.getCacheType() == 1) { // Its a group
+						node = createGroup(fc, sb, ste.getObjectHeaderAddress(), childName, parent);
+					} else { // Dataset
+						node = new DatasetImpl(fc, sb, ste.getObjectHeaderAddress(), childName, parent);
+					}
+					lazyChildren.put(childName, node);
+				}
+			}
+			return lazyChildren;
 		}
 
 		private Node createNode(String name, long address) {
