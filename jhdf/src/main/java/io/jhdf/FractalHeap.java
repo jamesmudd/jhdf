@@ -166,6 +166,8 @@ public class FractalHeap {
 			if (addressOfRootBlock != UNDEFINED_ADDRESS) {
 				if (currentRowsInRootIndirectBlock == 0) {
 					// Read direct block
+					DirectBlock db = new DirectBlock(addressOfRootBlock);
+					directBlocks.put(db.blockOffset, db);
 				} else {
 					// Read indirect block
 					IndirectBlock indirectBlock = new IndirectBlock(addressOfRootBlock);
