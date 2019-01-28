@@ -16,7 +16,7 @@ plugins {
 
 // Varibles
 group = 'io.jhdf'
-version = '0.2.2'
+version = '0.2.3'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -31,7 +31,6 @@ dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta2' // Need 1.8 for modules
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
-	compile group: 'com.google.guava', name: 'guava', version: '27.0.1-jre'
 
     runtime group: 'org.slf4j', name: 'slf4j-simple', version: '1.8.0-beta2'
     
