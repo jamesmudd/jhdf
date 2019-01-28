@@ -23,7 +23,7 @@ import io.jhdf.object.datatype.OrderedDataType;
 import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataLayout;
 import io.jhdf.object.message.DataLayoutMessage;
-import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessage;
+import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
 import io.jhdf.object.message.DataLayoutMessage.CompactDataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ContigiousDataLayoutMessage;
 import io.jhdf.object.message.DataSpace;
@@ -92,7 +92,7 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 			} catch (IOException e) {
 				throw new HdfException("Failed to map data buffer for dataset '" + getPath() + "'", e);
 			}
-		} else if (dataLayoutMessage instanceof ChunkedDataLayoutMessage) {
+		} else if (dataLayoutMessage instanceof ChunkedDataLayoutMessageV3) {
 			throw new UnsupportedHdfException("Chunked datasets not supported yet");
 		} else {
 			throw new HdfException(
