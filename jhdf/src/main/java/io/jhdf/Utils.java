@@ -207,4 +207,21 @@ public final class Utils {
 		}
 		return result.intValue();
 	}
+
+	/**
+	 * Calculates how many bytes are needed to store the given unsigned number.
+	 * 
+	 * @param number to store
+	 * @return the number of bytes needed to hold this number
+	 * @throws IllegalArgumentException if a negative number is given
+	 */
+	public static int bytesNeededToHoldNumber(long number) {
+		if (number < 0) {
+			throw new IllegalArgumentException("Only for unsigned numbers");
+		}
+		if (number == 0) {
+			return 1;
+		}
+		return (int) Math.ceil(BigInteger.valueOf(number).bitLength() / 8.0);
+	}
 }
