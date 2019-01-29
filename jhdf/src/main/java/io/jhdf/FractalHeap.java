@@ -1,6 +1,8 @@
 package io.jhdf;
 
 import static io.jhdf.Constants.UNDEFINED_ADDRESS;
+import static io.jhdf.Utils.bitsToInt;
+import static io.jhdf.Utils.createSubBuffer;
 import static io.jhdf.Utils.readBytesAsUnsignedInt;
 import static io.jhdf.Utils.readBytesAsUnsignedLong;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
@@ -13,16 +15,16 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 
 public class FractalHeap {
 	private static final Logger logger = LoggerFactory.getLogger(FractalHeap.class);
@@ -89,7 +91,7 @@ public class FractalHeap {
 
 	private int blockIndex = 0;
 
-	private Map<Long, DirectBlock> directBlocks = new TreeMap<>(); // Sorted map
+	private NavigableMap<Long, DirectBlock> directBlocks = new TreeMap<>(); // Sorted map
 
 	public FractalHeap(FileChannel fc, Superblock sb, long address) {
 		this.fc = fc;
@@ -159,7 +161,7 @@ public class FractalHeap {
 			currentRowsInRootIndirectBlock = readBytesAsUnsignedInt(bb, 2);
 
 			if (ioFiltersLength > 0) {
-				// TODO read IO filters
+				throw new UnsupportedHdfException("IO filters are currently not supported");
 			}
 
 			// Read the root block
@@ -175,7 +177,7 @@ public class FractalHeap {
 						int blockSize = getSizeOfDirectBlock(blockIndex++);
 						if (blockSize != -1) {
 							DirectBlock db = new DirectBlock(directBlockAddres);
-							directBlocks.put(db.blockOffset, db);
+							directBlocks.put(db.getBlockOffset(), db);
 						} else {
 							new IndirectBlock(address);
 						}
@@ -203,50 +205,44 @@ public class FractalHeap {
 
 		BitSet flags = BitSet.valueOf(new byte[] { buffer.get() });
 
-		final int version = Utils.bitsToInt(flags, 6, 2);
+		final int version = bitsToInt(flags, 6, 2);
 		if (version != 0) {
 			throw new HdfException("Unsupported B tree v2 version detected. Version: " + version);
 		}
 
-		final int type = Utils.bitsToInt(flags, 4, 2);
-		if (type != 0) {
-			System.out.println("Hi");
-		}
+		final int type = bitsToInt(flags, 4, 2);
 
 		switch (type) {
 		case 0: // Managed Objects
-			int offset = Utils.readBytesAsUnsignedInt(buffer, 4); // bytesNeededToHoldNumber(maxHeapSize));
-			int lentgh = Utils.readBytesAsUnsignedInt(buffer, 2);
+			int offset = readBytesAsUnsignedInt(buffer, 4); // bytesNeededToHoldNumber(maxHeapSize));
+			int lentgh = readBytesAsUnsignedInt(buffer, 2);
 //					bytesNeededToHoldNumber(Math.min(maxHeapSize, maxSizeOfMangledObjects)));
 
 			logger.debug("Getting ID at offset={} lentgh={}", offset, lentgh);
-			// Figure out which direct block holds the offset
-			Iterator<Entry<Long, DirectBlock>> i = directBlocks.entrySet().iterator();
-			long blockOffset = 0;
-			while (i.hasNext()) {
-				long nextBlockOffset = i.next().getKey();
-				if (offset > nextBlockOffset) {
-					blockOffset = nextBlockOffset;
-				} else {
-					break;
-				}
-			}
-			ByteBuffer bb = directBlocks.get(blockOffset).getData();
-			bb.order(LITTLE_ENDIAN);
-			bb.position((int) (offset - blockOffset));
-			return Utils.createSubBuffer(bb, lentgh);
 
+			// Figure out which direct block holds the offset
+			Entry<Long, DirectBlock> entry = directBlocks.floorEntry((long) offset);
+
+			ByteBuffer bb = entry.getValue().getData();
+			bb.order(LITTLE_ENDIAN);
+			bb.position((int) (offset - entry.getKey()));
+			return createSubBuffer(bb, lentgh);
+
+		case 1:
+			throw new UnsupportedHdfException("Huge objects are currently not supported");
+		case 2:
+			throw new UnsupportedHdfException("Tiny objects are currently not supported");
 		default:
 			break;
 		}
 
-		// Might no be set depending on type
-		final int lentgh = Utils.bitsToInt(flags, 0, 3);
+		// Might not be set depending on type
+		final int lentgh = bitsToInt(flags, 0, 3);
 
 		if (buffer.capacity() < 19) {
 			// Tiny data in id itself
 			buffer.position(1);
-			return Utils.createSubBuffer(buffer, buffer.remaining());
+			return createSubBuffer(buffer, buffer.remaining());
 		}
 		return null;
 	}
@@ -281,22 +277,22 @@ public class FractalHeap {
 			}
 
 			// Version Number
-			byte version = bb.get();
-			if (version != 0) {
-				throw new HdfException("Unsupported indirect block version detected. Version: " + version);
+			byte indirectBlockversion = bb.get();
+			if (indirectBlockversion != 0) {
+				throw new HdfException("Unsupported indirect block version detected. Version: " + indirectBlockversion);
 			}
 
-			long heapAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+			long heapAddress = readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 			if (heapAddress != FractalHeap.this.address) {
 				throw new HdfException("Indirect block read from invalid fractal heap");
 			}
 
-			blockOffset = Utils.readBytesAsUnsignedLong(bb, getBlockOffsetSize());
+			blockOffset = readBytesAsUnsignedLong(bb, getBlockOffsetSize());
 
 			childBlockAddresses = new ArrayList<>(currentRowsInRootIndirectBlock * tableWidth);
 			for (int i = 0; i < currentRowsInRootIndirectBlock * tableWidth; i++) {
 				// TODO only works for unfiltered
-				long childAddress = Utils.readBytesAsUnsignedLong(bb, getRowSize());
+				long childAddress = readBytesAsUnsignedLong(bb, getRowSize());
 				if (childAddress == UNDEFINED_ADDRESS) {
 					break;
 				} else {
@@ -369,12 +365,12 @@ public class FractalHeap {
 				throw new HdfException("Unsupported direct block version detected. Version: " + directBlockersion);
 			}
 
-			long heapAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+			long heapAddress = readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 			if (heapAddress != FractalHeap.this.address) {
 				throw new HdfException("Indirect block read from invalid fractal heap");
 			}
 
-			blockOffset = Utils.readBytesAsUnsignedLong(bb, getBlockOffsetSize());
+			blockOffset = readBytesAsUnsignedLong(bb, getBlockOffsetSize());
 
 			if (checksumPresent()) {
 				// TODO Checksum for now skip over
@@ -387,21 +383,12 @@ public class FractalHeap {
 			return flags.get(CHECKSUM_PRESENT_BIT);
 		}
 
-		private int getRowSize() {
-			int size = sb.getSizeOfOffsets();
-			if (isIoFilters()) {
-				size += sb.getSizeOfLengths();
-				size += 4; // filter mask
-			}
-			return size;
-		}
-
 		private int getBlockOffsetSize() {
 			return (int) Math.ceil(maxHeapSize / 8.0);
 		}
 
 		public ByteBuffer getData() {
-			return data;
+			return data.order(LITTLE_ENDIAN);
 		}
 
 		public long getBlockOffset() {
