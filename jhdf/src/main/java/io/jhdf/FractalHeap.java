@@ -2,6 +2,7 @@ package io.jhdf;
 
 import static io.jhdf.Constants.UNDEFINED_ADDRESS;
 import static io.jhdf.Utils.bitsToInt;
+import static io.jhdf.Utils.bytesNeededToHoldNumber;
 import static io.jhdf.Utils.createSubBuffer;
 import static io.jhdf.Utils.readBytesAsUnsignedInt;
 import static io.jhdf.Utils.readBytesAsUnsignedLong;
@@ -38,8 +39,6 @@ public class FractalHeap {
 	private final long address;
 
 	private final byte version;
-
-	private final int maxHeapSize;
 
 	private final int maxDirectBlockSize;
 
@@ -92,6 +91,10 @@ public class FractalHeap {
 	private int blockIndex = 0;
 
 	private NavigableMap<Long, DirectBlock> directBlocks = new TreeMap<>(); // Sorted map
+
+	private final int bytesToStoreOffset;
+
+	private final int bytesToStoreLentgh;
 
 	public FractalHeap(FileChannel fc, Superblock sb, long address) {
 		this.fc = fc;
@@ -153,7 +156,12 @@ public class FractalHeap {
 			startingBlockSize = readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
 			maxDirectBlockSize = readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
 
-			maxHeapSize = readBytesAsUnsignedInt(bb, 2);
+			// Value stored is log2 of this value
+			final int maxHeapSize = readBytesAsUnsignedInt(bb, 2);
+			// Calculate byte sizes needed later
+			bytesToStoreOffset = (int) Math.ceil(maxHeapSize / 8.0);
+			bytesToStoreLentgh = bytesNeededToHoldNumber(Math.min(maxDirectBlockSize, maxSizeOfManagedObjects));
+
 			startingRowsInRootIndirectBlock = readBytesAsUnsignedInt(bb, 2);
 
 			addressOfRootBlock = readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
@@ -214,9 +222,8 @@ public class FractalHeap {
 
 		switch (type) {
 		case 0: // Managed Objects
-			int offset = readBytesAsUnsignedInt(buffer, 4); // bytesNeededToHoldNumber(maxHeapSize));
-			int lentgh = readBytesAsUnsignedInt(buffer, 2);
-//					bytesNeededToHoldNumber(Math.min(maxHeapSize, maxSizeOfMangledObjects)));
+			int offset = readBytesAsUnsignedInt(buffer, bytesToStoreOffset);
+			int lentgh = readBytesAsUnsignedInt(buffer, bytesToStoreLentgh);
 
 			logger.debug("Getting ID at offset={} lentgh={}", offset, lentgh);
 
@@ -247,18 +254,13 @@ public class FractalHeap {
 		return null;
 	}
 
-	private int bytesNeededToHoldNumber(long number) {
-		return BigInteger.valueOf(number).bitLength() / 8;
-//		return (Long.numberOfTrailingZeros(Long.highestOneBit(number)) + 8) / 8;
-	}
-
 	private class IndirectBlock {
 
 		private final List<Long> childBlockAddresses;
 		private final long blockOffset;
 
 		public IndirectBlock(long address) throws IOException {
-			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + getBlockOffsetSize()
+			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset
 					+ currentRowsInRootIndirectBlock * tableWidth * getRowSize() + 4;
 
 			ByteBuffer bb = ByteBuffer.allocate(headerSize);
@@ -287,7 +289,7 @@ public class FractalHeap {
 				throw new HdfException("Indirect block read from invalid fractal heap");
 			}
 
-			blockOffset = readBytesAsUnsignedLong(bb, getBlockOffsetSize());
+			blockOffset = readBytesAsUnsignedLong(bb, bytesToStoreOffset);
 
 			childBlockAddresses = new ArrayList<>(currentRowsInRootIndirectBlock * tableWidth);
 			for (int i = 0; i < currentRowsInRootIndirectBlock * tableWidth; i++) {
@@ -298,7 +300,6 @@ public class FractalHeap {
 				} else {
 					childBlockAddresses.add(childAddress);
 				}
-				System.out.println(childBlockAddresses.size());
 			}
 
 			// TODO Checksum
@@ -311,10 +312,6 @@ public class FractalHeap {
 				size += 4; // filter mask
 			}
 			return size;
-		}
-
-		private int getBlockOffsetSize() {
-			return (int) Math.ceil(maxHeapSize / 8.0);
 		}
 
 	}
@@ -343,7 +340,7 @@ public class FractalHeap {
 		public DirectBlock(long address) throws IOException {
 			this.address = address;
 
-			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + getBlockOffsetSize() + 4;
+			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset + 4;
 
 			ByteBuffer bb = ByteBuffer.allocate(headerSize);
 			fc.read(bb, address);
@@ -370,7 +367,7 @@ public class FractalHeap {
 				throw new HdfException("Indirect block read from invalid fractal heap");
 			}
 
-			blockOffset = readBytesAsUnsignedLong(bb, getBlockOffsetSize());
+			blockOffset = readBytesAsUnsignedLong(bb, bytesToStoreOffset);
 
 			if (checksumPresent()) {
 				// TODO Checksum for now skip over
@@ -381,10 +378,6 @@ public class FractalHeap {
 
 		private boolean checksumPresent() {
 			return flags.get(CHECKSUM_PRESENT_BIT);
-		}
-
-		private int getBlockOffsetSize() {
-			return (int) Math.ceil(maxHeapSize / 8.0);
 		}
 
 		public ByteBuffer getData() {
