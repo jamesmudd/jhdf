@@ -1,7 +1,6 @@
 package io.jhdf.examples;
 
 import java.io.File;
-import java.util.Arrays;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
@@ -14,12 +13,11 @@ import io.jhdf.api.Dataset;
 public class ReadDataset {
 	public static void main(String[] args) {
 		File file = new File(args[0]);
-		System.out.println(file.getName());
 
 		try (HdfFile hdfFile = new HdfFile(file)) {
-			Dataset dataset = hdfFile.getDatasetByPath("/nD_Datasets/3D_float32");
-			float[][][] arrayData = (float[][][]) dataset.getData();
-			System.out.println(Arrays.deepToString(arrayData));
+			Dataset dataset = hdfFile.getDatasetByPath(args[1]);
+			// data will be a java array of the dimensions of the HDF5 dataset
+			Object data = dataset.getData();
 		}
 	}
 }
