@@ -27,6 +27,17 @@ import org.slf4j.LoggerFactory;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 
+/**
+ * Fractal heap implementation. Used for storing data which can be looked up via
+ * an ID.
+ * <p>
+ * <a href=
+ * "https://support.hdfgroup.org/HDF5/doc/H5.format.html#FractalHeap">Format
+ * Spec</a>
+ * </p>
+ * 
+ * @author James Mudd
+ */
 public class FractalHeap {
 	private static final Logger logger = LoggerFactory.getLogger(FractalHeap.class);
 
@@ -37,63 +48,41 @@ public class FractalHeap {
 	private static final BigInteger TWO = BigInteger.valueOf(2L);
 
 	private final long address;
-
-	private final byte version;
+	private final FileChannel fc;
+	private final Superblock sb;
 
 	private final int maxDirectBlockSize;
-
 	private final long maxSizeOfManagedObjects;
-
-	private final FileChannel fc;
-
 	private final long addressOfRootBlock;
-
-	private int idLength;
-
-	private int ioFiltersLength;
-
-	private int currentRowsInRootIndirectBlock;
-
-	private int startingRowsInRootIndirectBlock;
-
-	private int startingBlockSize;
-
-	private int tableWidth;
-
-	private long numberOfTinyObjectsInHeap;
-
-	private long sizeOfTinyObjectsInHeap;
-
-	private long numberOfHugeObjectsInHeap;
-
-	private long sizeOfHugeObjectsInHeap;
-
-	private long numberOfManagedObjectsInHeap;
-
-	private long offsetOfDirectBlockAllocationIteratorInManagedSpace;
-
-	private long amountOfAllocatedManagedSpaceInHeap;
-
-	private long amountOfManagedSpaceInHeap;
-
-	private long addressOfManagedBlocksFreeSpaceManager;
-
-	private long freeSpaceInManagedBlocks;
-
-	private long bTreeAddressOfHugeObjects;
-
-	private long nextHugeObjectId;
-
-	private BitSet flags;
-
-	private Superblock sb;
+	private final int idLength;
+	private final int ioFiltersLength;
+	private final int currentRowsInRootIndirectBlock;
+	private final int startingRowsInRootIndirectBlock;
+	private final int startingBlockSize;
+	private final int tableWidth;
+	private final long numberOfTinyObjectsInHeap;
+	private final long sizeOfTinyObjectsInHeap;
+	private final long numberOfHugeObjectsInHeap;
+	private final long sizeOfHugeObjectsInHeap;
+	private final long numberOfManagedObjectsInHeap;
+	private final long offsetOfDirectBlockAllocationIteratorInManagedSpace;
+	private final long amountOfAllocatedManagedSpaceInHeap;
+	private final long amountOfManagedSpaceInHeap;
+	private final long addressOfManagedBlocksFreeSpaceManager;
+	private final long freeSpaceInManagedBlocks;
+	private final long bTreeAddressOfHugeObjects;
+	private final long nextHugeObjectId;
+	private final BitSet flags;
 
 	private int blockIndex = 0;
 
-	private NavigableMap<Long, DirectBlock> directBlocks = new TreeMap<>(); // Sorted map
+	/**
+	 * This map is that holds all the direct blocks keyed by their offset in the
+	 * heap address space.
+	 */
+	private final NavigableMap<Long, DirectBlock> directBlocks = new TreeMap<>(); // Sorted map
 
 	private final int bytesToStoreOffset;
-
 	private final int bytesToStoreLentgh;
 
 	public FractalHeap(FileChannel fc, Superblock sb, long address) {
@@ -116,12 +105,11 @@ public class FractalHeap {
 
 			// Verify signature
 			if (!Arrays.equals(FRACTAL_HEAP_SIGNATURE, formatSignitureByte)) {
-				throw new HdfException(
-						"Fractal heap signature '" + FRACTAL_HEAP_SIGNATURE + "' not matched, at address " + address);
+				throw new HdfException("Fractal heap signature 'FRHP' not matched, at address " + address);
 			}
 
 			// Version Number
-			version = bb.get();
+			final byte version = bb.get();
 			if (version != 0) {
 				throw new HdfException("Unsupported fractal heap version detected. Version: " + version);
 			}
@@ -156,7 +144,7 @@ public class FractalHeap {
 			startingBlockSize = readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
 			maxDirectBlockSize = readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
 
-			// Value stored is log2 of this value
+			// Value stored in bits
 			final int maxHeapSize = readBytesAsUnsignedInt(bb, 2);
 			// Calculate byte sizes needed later
 			bytesToStoreOffset = (int) Math.ceil(maxHeapSize / 8.0);
@@ -201,24 +189,20 @@ public class FractalHeap {
 
 	}
 
-	private boolean isIoFilters() {
-		return ioFiltersLength > 0;
-	}
-
 	public ByteBuffer getId(ByteBuffer buffer) {
 		if (buffer.capacity() != idLength) {
 			throw new HdfException("ID lentgh is incorrect accessing fractal heap at address " + address
 					+ ". IDs should be " + idLength + "bytes but was " + buffer.capacity() + "bytes.");
 		}
 
-		BitSet flags = BitSet.valueOf(new byte[] { buffer.get() });
+		BitSet idFlags = BitSet.valueOf(new byte[] { buffer.get() });
 
-		final int version = bitsToInt(flags, 6, 2);
+		final int version = bitsToInt(idFlags, 6, 2);
 		if (version != 0) {
-			throw new HdfException("Unsupported B tree v2 version detected. Version: " + version);
+			throw new HdfException("Unsupported btree v2 ID version detected. Version: " + version);
 		}
 
-		final int type = bitsToInt(flags, 4, 2);
+		final int type = bitsToInt(idFlags, 4, 2);
 
 		switch (type) {
 		case 0: // Managed Objects
@@ -235,23 +219,13 @@ public class FractalHeap {
 			bb.position((int) (offset - entry.getKey()));
 			return createSubBuffer(bb, lentgh);
 
-		case 1:
+		case 1: // Huge objects
 			throw new UnsupportedHdfException("Huge objects are currently not supported");
-		case 2:
+		case 2: // Tiny objects
 			throw new UnsupportedHdfException("Tiny objects are currently not supported");
 		default:
-			break;
+			throw new HdfException("Unreconized ID type, type=" + type);
 		}
-
-		// Might not be set depending on type
-		final int lentgh = bitsToInt(flags, 0, 3);
-
-		if (buffer.capacity() < 19) {
-			// Tiny data in id itself
-			buffer.position(1);
-			return createSubBuffer(buffer, buffer.remaining());
-		}
-		return null;
 	}
 
 	private class IndirectBlock {
@@ -259,7 +233,7 @@ public class FractalHeap {
 		private final List<Long> childBlockAddresses;
 		private final long blockOffset;
 
-		public IndirectBlock(long address) throws IOException {
+		private IndirectBlock(long address) throws IOException {
 			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset
 					+ currentRowsInRootIndirectBlock * tableWidth * getRowSize() + 4;
 
@@ -274,8 +248,8 @@ public class FractalHeap {
 
 			// Verify signature
 			if (!Arrays.equals(INDIRECT_BLOCK_SIGNATURE, formatSignitureByte)) {
-				throw new HdfException("Fractal heap indirect block signature '" + INDIRECT_BLOCK_SIGNATURE
-						+ "' not matched, at address " + address);
+				throw new HdfException(
+						"Fractal heap indirect block signature 'FHIB' not matched, at address " + address);
 			}
 
 			// Version Number
@@ -305,6 +279,10 @@ public class FractalHeap {
 			// TODO Checksum
 		}
 
+		private boolean isIoFilters() {
+			return ioFiltersLength > 0;
+		}
+
 		private int getRowSize() {
 			int size = sb.getSizeOfOffsets();
 			if (isIoFilters()) {
@@ -316,20 +294,6 @@ public class FractalHeap {
 
 	}
 
-	private int getSizeOfDirectBlock(int blockIndex) {
-		int row = blockIndex / tableWidth; // int division
-		if (row < 2) {
-			return startingBlockSize;
-		} else {
-			int size = startingBlockSize * TWO.pow(row - 1).intValueExact();
-			if (size < maxDirectBlockSize) {
-				return size;
-			} else {
-				return -1; // Indicates the block is an indirect block
-			}
-		}
-	}
-
 	private class DirectBlock {
 
 		private static final int CHECKSUM_PRESENT_BIT = 1;
@@ -337,7 +301,7 @@ public class FractalHeap {
 		private final ByteBuffer data;
 		private final long blockOffset;
 
-		public DirectBlock(long address) throws IOException {
+		private DirectBlock(long address) throws IOException {
 			this.address = address;
 
 			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset + 4;
@@ -352,8 +316,7 @@ public class FractalHeap {
 
 			// Verify signature
 			if (!Arrays.equals(DIRECT_BLOCK_SIGNATURE, formatSignitureByte)) {
-				throw new HdfException("Fractal heap direct block signature '" + DIRECT_BLOCK_SIGNATURE
-						+ "' not matched, at address " + address);
+				throw new HdfException("Fractal heap direct block signature 'FHDB' not matched, at address " + address);
 			}
 
 			// Version Number
@@ -395,11 +358,97 @@ public class FractalHeap {
 
 	}
 
+	private int getSizeOfDirectBlock(int blockIndex) {
+		int row = blockIndex / tableWidth; // int division
+		if (row < 2) {
+			return startingBlockSize;
+		} else {
+			int size = startingBlockSize * TWO.pow(row - 1).intValueExact();
+			if (size < maxDirectBlockSize) {
+				return size;
+			} else {
+				return -1; // Indicates the block is an indirect block
+			}
+		}
+	}
+
 	@Override
 	public String toString() {
 		return "FractalHeap [address=" + address + ", idLength=" + idLength + ", numberOfTinyObjectsInHeap="
 				+ numberOfTinyObjectsInHeap + ", numberOfHugeObjectsInHeap=" + numberOfHugeObjectsInHeap
 				+ ", numberOfManagedObjectsInHeap=" + numberOfManagedObjectsInHeap + "]";
+	}
+
+	public long getAddress() {
+		return address;
+	}
+
+	public int getMaxDirectBlockSize() {
+		return maxDirectBlockSize;
+	}
+
+	public long getMaxSizeOfManagedObjects() {
+		return maxSizeOfManagedObjects;
+	}
+
+	public int getIdLength() {
+		return idLength;
+	}
+
+	public int getIoFiltersLength() {
+		return ioFiltersLength;
+	}
+
+	public int getStartingRowsInRootIndirectBlock() {
+		return startingRowsInRootIndirectBlock;
+	}
+
+	public long getNumberOfTinyObjectsInHeap() {
+		return numberOfTinyObjectsInHeap;
+	}
+
+	public long getSizeOfTinyObjectsInHeap() {
+		return sizeOfTinyObjectsInHeap;
+	}
+
+	public long getNumberOfHugeObjectsInHeap() {
+		return numberOfHugeObjectsInHeap;
+	}
+
+	public long getSizeOfHugeObjectsInHeap() {
+		return sizeOfHugeObjectsInHeap;
+	}
+
+	public long getNumberOfManagedObjectsInHeap() {
+		return numberOfManagedObjectsInHeap;
+	}
+
+	public long getOffsetOfDirectBlockAllocationIteratorInManagedSpace() {
+		return offsetOfDirectBlockAllocationIteratorInManagedSpace;
+	}
+
+	public long getAmountOfAllocatedManagedSpaceInHeap() {
+		return amountOfAllocatedManagedSpaceInHeap;
+	}
+
+	public long getAmountOfManagedSpaceInHeap() {
+		return amountOfManagedSpaceInHeap;
+	}
+
+	public long getAddressOfManagedBlocksFreeSpaceManager() {
+		return addressOfManagedBlocksFreeSpaceManager;
+	}
+
+	public long getFreeSpaceInManagedBlocks() {
+		return freeSpaceInManagedBlocks;
+	}
+
+	public long getbTreeAddressOfHugeObjects() {
+		return bTreeAddressOfHugeObjects;
+	}
+
+	public long getNextHugeObjectId() {
+		return nextHugeObjectId;
 	}
 
 }
