@@ -292,4 +292,26 @@ public class UtilsTest {
 		BitSet bits = new BitSet(8);
 		assertThrows(IllegalArgumentException.class, () -> Utils.bitsToInt(bits, 3, -1)); // Should throw
 	}
+
+	@Test
+	public void testbytesNeededToHoldNumber() throws Exception {
+		// Edge case 0
+		assertThat(Utils.bytesNeededToHoldNumber(0), is(equalTo(1)));
+
+		// Simple cases
+		assertThat(Utils.bytesNeededToHoldNumber(1), is(equalTo(1)));
+		assertThat(Utils.bytesNeededToHoldNumber(2), is(equalTo(1)));
+		// On the 1 byte boundary
+		assertThat(Utils.bytesNeededToHoldNumber(255), is(equalTo(1)));
+		assertThat(Utils.bytesNeededToHoldNumber(256), is(equalTo(2)));
+		// On the 2 byte boundry
+		assertThat(Utils.bytesNeededToHoldNumber(65535), is(equalTo(2)));
+		assertThat(Utils.bytesNeededToHoldNumber(65536), is(equalTo(3)));
+	}
+
+	@Test
+	public void testbytesNeededToHoldNumberThrowsWithNegative() throws Exception {
+		assertThrows(IllegalArgumentException.class, () -> Utils.bytesNeededToHoldNumber(-123));
+	}
+
 }
