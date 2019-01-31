@@ -92,13 +92,13 @@ public abstract class DataLayoutMessage extends Message {
 
 		private final long address;
 		private final long size;
+		private long[] dimSizes;
 
 		private ChunkedDataLayoutMessageV3(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
-			// Not sure why this needs -1 but seems to be the way its done
-			int chunkDimensionality = Utils.readBytesAsUnsignedInt(bb, 1) - 1;
+			final int chunkDimensionality = bb.get() - 1;
 			address = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
-			long[] dimSizes = new long[chunkDimensionality];
+			dimSizes = new long[chunkDimensionality];
 			for (int i = 0; i < dimSizes.length; i++) {
 				dimSizes[i] = Utils.readBytesAsUnsignedLong(bb, 4);
 			}
@@ -110,12 +110,16 @@ public abstract class DataLayoutMessage extends Message {
 			return DataLayout.CHUNKED;
 		}
 
-		public long getAddress() {
+		public long getBTreeAddress() {
 			return address;
 		}
 
 		public long getSize() {
 			return size;
+		}
+
+		public long[] getDimSizes() {
+			return dimSizes;
 		}
 	}
 
@@ -135,6 +139,7 @@ public abstract class DataLayoutMessage extends Message {
 		private int nodeSize;
 		private byte splitPercent;
 		private byte mergePercent;
+		private long[] dimSizes;
 
 		private ChunkedDataLayoutMessageV4(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
@@ -143,7 +148,7 @@ public abstract class DataLayoutMessage extends Message {
 			final int chunkDimensionality = bb.get();
 			final int dimSizeBytes = bb.get();
 
-			long[] dimSizes = new long[chunkDimensionality];
+			dimSizes = new long[chunkDimensionality];
 			for (int i = 0; i < dimSizes.length; i++) {
 				dimSizes[i] = Utils.readBytesAsUnsignedLong(bb, dimSizeBytes);
 			}
@@ -260,6 +265,10 @@ public abstract class DataLayoutMessage extends Message {
 
 		public byte getIndexingType() {
 			return indexingType;
+		}
+
+		public long[] getDimSizes() {
+			return dimSizes;
 		}
 
 	}
