@@ -11,7 +11,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 
-class BTreeNodeV1 extends BTreeNode {
+class BTreeV1 extends BTree {
 
 	/** Type of node. 0 = group, 1 = data */
 	private final short nodeType;
@@ -23,7 +23,7 @@ class BTreeNodeV1 extends BTreeNode {
 	private final long[] keys;
 	private final long[] childAddresses;
 
-	BTreeNodeV1(FileChannel fc, Superblock sb, long address) {
+	BTreeV1(FileChannel fc, Superblock sb, long address) {
 		super(address);
 		try {
 			// B Tree Node Header
@@ -113,6 +113,6 @@ class BTreeNodeV1 extends BTreeNode {
 
 	@Override
 	public String toString() {
-		return "BTreeNodeV1 [address=" + getAddress() + ", nodeType=" + nodeType + ", nodeLevel=" + nodeLevel + "]";
+		return "BTreeV1 [address=" + getAddress() + ", nodeType=" + nodeType + ", nodeLevel=" + nodeLevel + "]";
 	}
 }

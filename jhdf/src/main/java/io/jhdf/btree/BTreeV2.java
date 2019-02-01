@@ -16,7 +16,7 @@ import io.jhdf.Utils;
 import io.jhdf.btree.record.BTreeRecord;
 import io.jhdf.exceptions.HdfException;
 
-public class BTreeV2 extends BTreeNode {
+public class BTreeV2 extends BTree {
 
 	private static final int NODE_OVERHEAD_BYTES = 10;
 

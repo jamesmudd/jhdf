@@ -16,8 +16,8 @@ import io.jhdf.exceptions.HdfException;
  * 
  * @author James Mudd
  */
-public abstract class BTreeNode {
-	static final Logger logger = LoggerFactory.getLogger(BTreeNode.class);
+public abstract class BTree {
+	static final Logger logger = LoggerFactory.getLogger(BTree.class);
 
 	private static final byte[] BTREE_NODE_V1_SIGNATURE = "TREE".getBytes();
 	private static final byte[] BTREE_NODE_V2_SIGNATURE = "BTHD".getBytes();
@@ -25,11 +25,11 @@ public abstract class BTreeNode {
 	/** The location of this B tree in the file */
 	private final long address;
 
-	public BTreeNode(long address) {
+	public BTree(long address) {
 		this.address = address;
 	}
 
-	public static BTreeNode createBTreeNode(FileChannel fc, Superblock sb, long address) {
+	public static BTree createBTreeNode(FileChannel fc, Superblock sb, long address) {
 
 		ByteBuffer signatureBuffer = ByteBuffer.allocate(4);
 
@@ -45,7 +45,7 @@ public abstract class BTreeNode {
 
 		// Verify signature
 		if (Arrays.equals(BTREE_NODE_V1_SIGNATURE, formatSignitureByte)) {
-			return new BTreeNodeV1(fc, sb, address);
+			return new BTreeV1(fc, sb, address);
 		} else if (Arrays.equals(BTREE_NODE_V2_SIGNATURE, formatSignitureByte)) {
 			return new BTreeV2(fc, sb, address);
 		} else {
