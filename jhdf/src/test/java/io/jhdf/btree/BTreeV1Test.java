@@ -1,5 +1,6 @@
-package io.jhdf;
+package io.jhdf.btree;
 
+import static io.jhdf.Constants.UNDEFINED_ADDRESS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -14,16 +15,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.jhdf.btree.BTree;
+import io.jhdf.Superblock;
 
-public class BTreeNodeTest {
+public class BTreeV1Test {
 	private FileChannel fc;
 	private RandomAccessFile raf;
 	private Superblock sb;
 
 	@BeforeEach
 	public void setUp() throws FileNotFoundException {
-		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
+		final String testFileUrl = this.getClass().getResource("../test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
 		sb = Superblock.readSuperblock(fc, 0);
@@ -37,14 +38,14 @@ public class BTreeNodeTest {
 
 	@Test
 	public void testBTreeNode() throws IOException {
-		BTree bTree = BTree.createBTreeNode(fc, sb, 136);
+		BTreeV1 bTree = new BTreeV1(fc, sb, 136);
 
-//		assertThat(bTree.getNodeType(), is(equalTo((short) 0)));
-//		assertThat(bTree.getNodeLevel(), is(equalTo((short) 0)));
-//		assertThat(bTree.getEntriesUsed(), is(equalTo((short) 1)));
-//		assertThat(bTree.getLeftSiblingAddress(), is(equalTo(Constants.UNDEFINED_ADDRESS)));
-//		assertThat(bTree.getRightSiblingAddress(), is(equalTo(Constants.UNDEFINED_ADDRESS)));
-//		assertThat(bTree.getKeys(), is(equalTo(new long[] { 0, 40 })));
+		assertThat(bTree.getNodeType(), is(equalTo((short) 0)));
+		assertThat(bTree.getNodeLevel(), is(equalTo((short) 0)));
+		assertThat(bTree.getEntriesUsed(), is(equalTo(1)));
+		assertThat(bTree.getLeftSiblingAddress(), is(equalTo(UNDEFINED_ADDRESS)));
+		assertThat(bTree.getRightSiblingAddress(), is(equalTo(UNDEFINED_ADDRESS)));
+		assertThat(bTree.getKeys(), is(equalTo(new long[] { 0, 40 })));
 		assertThat(bTree.getChildAddresses(), is(equalTo(new long[] { 1504 })));
 		assertThat(bTree.toString(), is(equalTo("BTreeV1 [address=136, nodeType=0, nodeLevel=0]")));
 	}
