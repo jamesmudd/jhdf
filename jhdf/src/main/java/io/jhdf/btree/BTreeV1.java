@@ -5,7 +5,9 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +17,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 
-public class BTreeV1 {
+public abstract class BTreeV1 {
 	private static final Logger logger = LoggerFactory.getLogger(BTreeV1.class);
 
 	private static final byte[] BTREE_NODE_V1_SIGNATURE = "TREE".getBytes();
@@ -23,80 +25,145 @@ public class BTreeV1 {
 	/** The location of this B tree in the file */
 	private final long address;
 	/** Type of node. 0 = group, 1 = data */
-	private final short nodeType;
+	private short nodeType;
 	/** Level of the node 0 = leaf */
-	private final short nodeLevel;
-	private final int entriesUsed;
-	private final long leftSiblingAddress;
-	private final long rightSiblingAddress;
-	private final long[] keys;
-	private final long[] childAddresses;
+	private short nodeLevel;
+	protected int entriesUsed;
+	private long leftSiblingAddress;
+	private long rightSiblingAddress;
 
 	public static BTreeV1 createBTree(FileChannel fc, Superblock sb, long address) {
-		return new BTreeV1(fc, sb, address);
+		// B Tree Node Header
+		int headerSize = 6;
+		ByteBuffer header = ByteBuffer.allocate(headerSize);
+		try {
+			fc.read(header, address);
+		} catch (IOException e) {
+			throw new HdfException("Error reading BTreeV1 header at address: " + address);
+		}
+		header.order(LITTLE_ENDIAN);
+		header.rewind();
+
+		// Verify signature
+		byte[] formatSignitureByte = new byte[4];
+		header.get(formatSignitureByte, 0, formatSignitureByte.length);
+		if (!Arrays.equals(BTREE_NODE_V1_SIGNATURE, formatSignitureByte)) {
+			throw new HdfException("B tree V1 node signature not matched");
+		}
+
+		final byte nodeType = header.get();
+		final byte nodeLevel = header.get();
+
+		switch (nodeType) {
+		case 0: // Group nodes
+			if (nodeLevel > 0) {
+				return new BTreeV1NonLeafNode(fc, sb, address);
+			} else {
+				return new BTreeV1LeafNode(fc, sb, address);
+			}
+		case 1: // Raw data chunk nodes
+			throw new UnsupportedHdfException("Raw data not supported yet");
+		default:
+			throw new HdfException("Unreconized BTreeV1 node type: " + nodeType);
+		}
 	}
 
 	private BTreeV1(FileChannel fc, Superblock sb, long address) {
 		this.address = address;
+
+		int headerSize = 8 * sb.getSizeOfOffsets();
+		ByteBuffer header = ByteBuffer.allocate(headerSize);
 		try {
-			// B Tree Node Header
-			int headerSize = 8 + 2 * sb.getSizeOfOffsets();
-			ByteBuffer header = ByteBuffer.allocate(headerSize);
-			fc.read(header, address);
-			header.order(LITTLE_ENDIAN);
-			header.rewind();
+			fc.read(header, address + 6);
+		} catch (IOException e) {
+			throw new HdfException("Error reading BTreeV1 header at address: " + address);
+		}
+		header.order(LITTLE_ENDIAN);
+		header.rewind();
 
-			// Verify signature
-			byte[] formatSignitureByte = new byte[4];
-			header.get(formatSignitureByte, 0, formatSignitureByte.length);
-			if (!Arrays.equals(BTREE_NODE_V1_SIGNATURE, formatSignitureByte)) {
-				throw new HdfException("B tree V1 node signature not matched");
-			}
+		entriesUsed = Utils.readBytesAsUnsignedInt(header, 2);
+		logger.trace("Entries = {}", getEntriesUsed());
 
-			nodeType = header.get();
-			nodeLevel = header.get();
+		leftSiblingAddress = Utils.readBytesAsUnsignedLong(header, sb.getSizeOfOffsets());
+		logger.trace("left address = {}", getLeftSiblingAddress());
 
-			entriesUsed = Utils.readBytesAsUnsignedInt(header, 2);
-			logger.trace("Entries = {}", getEntriesUsed());
+		rightSiblingAddress = Utils.readBytesAsUnsignedLong(header, sb.getSizeOfOffsets());
+		logger.trace("right address = {}", getRightSiblingAddress());
 
-			leftSiblingAddress = Utils.readBytesAsUnsignedLong(header, sb.getSizeOfOffsets());
-			logger.trace("left address = {}", getLeftSiblingAddress());
+	}
 
-			rightSiblingAddress = Utils.readBytesAsUnsignedLong(header, sb.getSizeOfOffsets());
-			logger.trace("right address = {}", getRightSiblingAddress());
+	private static class BTreeV1LeafNode extends BTreeV1 {
 
-			final int keysAndPointersBytes;
-			switch (nodeType) {
-			case 0: // Group nodes
-				int keyBytes = (2 * entriesUsed + 1) * sb.getSizeOfLengths();
-				int childPointerBytes = (2 * entriesUsed) * sb.getSizeOfOffsets();
-				keysAndPointersBytes = keyBytes + childPointerBytes;
-				break;
-			case 1: // Raw data
+		private final List<Long> childAddresses;
 
-				throw new UnsupportedHdfException("B tree Raw data not implemented");
-			default:
-				throw new HdfException("Unreconized node type = " + nodeType);
-			}
+		private BTreeV1LeafNode(FileChannel fc, Superblock sb, long address) {
+			super(fc, sb, address);
+
+			int keyBytes = (2 * entriesUsed + 1) * sb.getSizeOfLengths();
+			int childPointerBytes = (2 * entriesUsed) * sb.getSizeOfOffsets();
+			final int keysAndPointersBytes = keyBytes + childPointerBytes;
 
 			ByteBuffer keysAndPointersBuffer = ByteBuffer.allocate(keysAndPointersBytes);
-			fc.read(keysAndPointersBuffer, address + headerSize);
+			try {
+				fc.read(keysAndPointersBuffer, address + 8 + 2 * sb.getSizeOfOffsets());
+			} catch (IOException e) {
+				throw new HdfException("Error reading BTreeV1NonLeafNode at address: " + address);
+			}
 			keysAndPointersBuffer.order(LITTLE_ENDIAN);
 			keysAndPointersBuffer.rewind();
 
-			keys = new long[entriesUsed + 1];
-			childAddresses = new long[entriesUsed];
+			childAddresses = new ArrayList<>(entriesUsed);
 
 			for (int i = 0; i < entriesUsed; i++) {
-				keys[i] = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfLengths());
-				childAddresses[i] = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfOffsets());
+				keysAndPointersBuffer.position(keysAndPointersBuffer.position() + sb.getSizeOfLengths());
+				childAddresses.add(Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfOffsets()));
 			}
-			keys[entriesUsed] = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfLengths());
-
-		} catch (IOException e) {
-			throw new HdfException("Error reading B Tree node", e);
 		}
 
+		@Override
+		public List<Long> getChildAddresses() {
+			return childAddresses;
+		}
+	}
+
+	private static class BTreeV1NonLeafNode extends BTreeV1 {
+
+		private final List<BTreeV1> childNodes;
+
+		private BTreeV1NonLeafNode(FileChannel fc, Superblock sb, long address) {
+			super(fc, sb, address);
+
+			int keyBytes = (2 * entriesUsed + 1) * sb.getSizeOfLengths();
+			int childPointerBytes = (2 * entriesUsed) * sb.getSizeOfOffsets();
+			final int keysAndPointersBytes = keyBytes + childPointerBytes;
+
+			ByteBuffer keysAndPointersBuffer = ByteBuffer.allocate(keysAndPointersBytes);
+			try {
+				fc.read(keysAndPointersBuffer, address + 8 + 2 * sb.getSizeOfOffsets());
+			} catch (IOException e) {
+				throw new HdfException("Error reading BTreeV1NonLeafNode at address: " + address);
+			}
+			keysAndPointersBuffer.order(LITTLE_ENDIAN);
+			keysAndPointersBuffer.rewind();
+
+			childNodes = new ArrayList<>(entriesUsed);
+
+			for (int i = 0; i < entriesUsed; i++) {
+				keysAndPointersBuffer.position(keysAndPointersBuffer.position() + sb.getSizeOfOffsets());
+				long childAddress = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfOffsets());
+				childNodes.add(createBTree(fc, sb, childAddress));
+			}
+
+		}
+
+		@Override
+		public List<Long> getChildAddresses() {
+			List<Long> childAddresses = new ArrayList<>();
+			for (BTreeV1 child : childNodes) {
+				childAddresses.addAll(child.getChildAddresses());
+			}
+			return childAddresses;
+		}
 	}
 
 	public short getNodeType() {
@@ -119,13 +186,7 @@ public class BTreeV1 {
 		return rightSiblingAddress;
 	}
 
-	public long[] getKeys() {
-		return keys;
-	}
-
-	public long[] getChildAddresses() {
-		return childAddresses;
-	}
+	public abstract List<Long> getChildAddresses();
 
 	@Override
 	public String toString() {

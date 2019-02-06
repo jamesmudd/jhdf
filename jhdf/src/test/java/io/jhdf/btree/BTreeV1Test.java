@@ -2,6 +2,7 @@ package io.jhdf.btree;
 
 import static io.jhdf.Constants.UNDEFINED_ADDRESS;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
@@ -45,8 +46,7 @@ public class BTreeV1Test {
 		assertThat(bTree.getEntriesUsed(), is(equalTo(1)));
 		assertThat(bTree.getLeftSiblingAddress(), is(equalTo(UNDEFINED_ADDRESS)));
 		assertThat(bTree.getRightSiblingAddress(), is(equalTo(UNDEFINED_ADDRESS)));
-		assertThat(bTree.getKeys(), is(equalTo(new long[] { 0, 40 })));
-		assertThat(bTree.getChildAddresses(), is(equalTo(new long[] { 1504 })));
+		assertThat(bTree.getChildAddresses(), contains(1504L));
 		assertThat(bTree.toString(), is(equalTo("BTreeV1 [address=136, nodeType=0, nodeLevel=0]")));
 	}
 

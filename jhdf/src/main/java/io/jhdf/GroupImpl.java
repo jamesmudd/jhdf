@@ -1,8 +1,5 @@
 package io.jhdf;
 
-import static java.util.Arrays.asList;
-import static org.apache.commons.lang3.ArrayUtils.toObject;
-
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -116,9 +113,7 @@ public class GroupImpl extends AbstractNode implements Group {
 			final LocalHeap rootNameHeap = new LocalHeap(fc, stm.getLocalHeapAddress(), sb);
 			final ByteBuffer nameBuffer = rootNameHeap.getDataBuffer();
 
-			List<Long> childAddresses = new ArrayList<>();
-			getAllChildAddresses(rootbTreeNode, childAddresses);
-
+			final List<Long> childAddresses = rootbTreeNode.getChildAddresses();
 			final Map<String, Node> lazyChildren = new LinkedHashMap<>(childAddresses.size());
 
 			for (long child : childAddresses) {
@@ -148,17 +143,6 @@ public class GroupImpl extends AbstractNode implements Group {
 				node = createGroup(fc, sb, address, name, parent);
 			}
 			return node;
-		}
-
-		private void getAllChildAddresses(BTreeV1 rootbTreeNode, List<Long> childAddresses) {
-			if (rootbTreeNode.getNodeLevel() > 0) {
-				for (long child : rootbTreeNode.getChildAddresses()) {
-					BTreeV1 bTreeNode = BTreeV1.createBTree(fc, sb, child);
-					getAllChildAddresses(bTreeNode, childAddresses);
-				}
-			} else {
-				childAddresses.addAll(asList(toObject(rootbTreeNode.getChildAddresses())));
-			}
 		}
 
 		private String readName(ByteBuffer bb, int linkNameOffset) {
