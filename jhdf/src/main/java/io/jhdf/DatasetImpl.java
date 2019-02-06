@@ -8,6 +8,7 @@ import java.nio.channels.FileChannel.MapMode;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
@@ -16,8 +17,10 @@ import org.slf4j.LoggerFactory;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
+import io.jhdf.btree.BTreeV1;
+import io.jhdf.btree.BTreeV1.BTreeV1Data;
+import io.jhdf.btree.BTreeV1.BTreeV1Data.Chunk;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.OrderedDataType;
 import io.jhdf.object.message.AttributeMessage;
@@ -37,10 +40,12 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 	private final LazyInitializer<Map<String, AttributeMessage>> attributes;
 	private final LazyInitializer<ObjectHeader> header;
 	private final FileChannel fc;
+	private final Superblock sb;
 
 	public DatasetImpl(FileChannel fc, Superblock sb, long address, String name, Group parent) {
 		super(address, name, parent);
 		this.fc = fc;
+		this.sb = sb;
 
 		try {
 			header = ObjectHeader.lazyReadObjectHeader(fc, sb, address);
@@ -93,7 +98,26 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 				throw new HdfException("Failed to map data buffer for dataset '" + getPath() + "'", e);
 			}
 		} else if (dataLayoutMessage instanceof ChunkedDataLayoutMessageV3) {
-			throw new UnsupportedHdfException("Chunked datasets not supported yet");
+			ChunkedDataLayoutMessageV3 chunkedLayout = (ChunkedDataLayoutMessageV3) dataLayoutMessage;
+			BTreeV1Data bTree = BTreeV1.createDataBTree(fc, sb, chunkedLayout.getBTreeAddress(),
+					getDimensions().length);
+
+			byte[] dataArray = new byte[0];
+
+			for (Chunk chunk : bTree.getChunks()) {
+				int size = chunk.getSize();
+				ByteBuffer bb = ByteBuffer.allocate(size);
+				try {
+					fc.read(bb, chunk.getAddress());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				dataArray = ArrayUtils.addAll(dataArray, bb.array());
+			}
+			return ByteBuffer.wrap(dataArray);
+
+//			throw new UnsupportedHdfException("Chunked datasets not supported yet");
 		} else {
 			throw new HdfException(
 					"Unsupported data layout. Layout class is: " + dataLayoutMessage.getClass().getCanonicalName());
