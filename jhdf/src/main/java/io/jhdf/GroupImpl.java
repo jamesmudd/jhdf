@@ -20,7 +20,7 @@ import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
-import io.jhdf.btree.BTree;
+import io.jhdf.btree.BTreeV1;
 import io.jhdf.btree.BTreeV2;
 import io.jhdf.btree.record.BTreeRecord;
 import io.jhdf.btree.record.LinkNameForIndexedGroupRecord;
@@ -73,12 +73,11 @@ public class GroupImpl extends AbstractNode implements Group {
 				logger.debug("Loaded group links from object header");
 			} else {
 				// Links are not stored compactly i.e in the fractal heap
-				final BTree bTreeNode = BTree.createBTreeNode(fc, sb,
-						linkInfoMessage.getbTreeNameIndexAddress());
+				final BTreeV2 bTreeNode = BTreeV2.createBTree(fc, sb, linkInfoMessage.getbTreeNameIndexAddress());
 				final FractalHeap fractalHeap = new FractalHeap(fc, sb, linkInfoMessage.getFractalHeapAddress());
 
 				links = new ArrayList<>(); // TODO would be good to get the size here from the b-tree
-				for (BTreeRecord record : ((BTreeV2) bTreeNode).getRecords()) {
+				for (BTreeRecord record : bTreeNode.getRecords()) {
 					LinkNameForIndexedGroupRecord linkName = (LinkNameForIndexedGroupRecord) record;
 					ByteBuffer id = linkName.getId();
 					// Get the name data from the fractal heap
@@ -113,7 +112,7 @@ public class GroupImpl extends AbstractNode implements Group {
 		private Map<String, Node> createOldStyleGroup(final ObjectHeader oh) {
 			logger.debug("Loading 'old' style group");
 			final SymbolTableMessage stm = oh.getMessageOfType(SymbolTableMessage.class);
-			final BTree rootbTreeNode = BTree.createBTreeNode(fc, sb, stm.getbTreeAddress());
+			final BTreeV1 rootbTreeNode = BTreeV1.createBTree(fc, sb, stm.getbTreeAddress());
 			final LocalHeap rootNameHeap = new LocalHeap(fc, stm.getLocalHeapAddress(), sb);
 			final ByteBuffer nameBuffer = rootNameHeap.getDataBuffer();
 
@@ -151,10 +150,10 @@ public class GroupImpl extends AbstractNode implements Group {
 			return node;
 		}
 
-		private void getAllChildAddresses(BTree rootbTreeNode, List<Long> childAddresses) {
+		private void getAllChildAddresses(BTreeV1 rootbTreeNode, List<Long> childAddresses) {
 			if (rootbTreeNode.getNodeLevel() > 0) {
 				for (long child : rootbTreeNode.getChildAddresses()) {
-					BTree bTreeNode = BTree.createBTreeNode(fc, sb, child);
+					BTreeV1 bTreeNode = BTreeV1.createBTree(fc, sb, child);
 					getAllChildAddresses(bTreeNode, childAddresses);
 				}
 			} else {

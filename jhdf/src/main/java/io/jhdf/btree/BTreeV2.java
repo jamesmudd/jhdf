@@ -16,13 +16,16 @@ import io.jhdf.Utils;
 import io.jhdf.btree.record.BTreeRecord;
 import io.jhdf.exceptions.HdfException;
 
-public class BTreeV2 extends BTree {
+public class BTreeV2 {
 
 	private static final int NODE_OVERHEAD_BYTES = 10;
 
+	private static final byte[] BTREE_NODE_V2_SIGNATURE = "BTHD".getBytes();
 	private static final byte[] BTREE_INTERNAL_NODE_SIGNATURE = "BTIN".getBytes();
 	private static final byte[] BTREE_LEAF_NODE_SIGNATURE = "BTLF".getBytes();
 
+	/** The location of this B tree in the file */
+	private final long address;
 	/** Type of node. */
 	private final short nodeType;
 
@@ -32,15 +35,26 @@ public class BTreeV2 extends BTree {
 		return records;
 	}
 
-	/* package */ BTreeV2(FileChannel fc, Superblock sb, long address) {
-		super(address);
+	public static BTreeV2 createBTree(FileChannel fc, Superblock sb, long address) {
+		return new BTreeV2(fc, sb, address);
+	}
+
+	private BTreeV2(FileChannel fc, Superblock sb, long address) {
+		this.address = address;
 		try {
 			// B Tree V2 Header
-			int headerSize = 12 + sb.getSizeOfOffsets() + 2 + sb.getSizeOfLengths() + 4;
+			int headerSize = 16 + sb.getSizeOfOffsets() + 2 + sb.getSizeOfLengths() + 4;
 			ByteBuffer bb = ByteBuffer.allocate(headerSize);
-			fc.read(bb, address + 4); // Skip signature already checked
+			fc.read(bb, address); // Skip signature already checked
 			bb.order(LITTLE_ENDIAN);
 			bb.rewind();
+
+			// Verify signature
+			byte[] formatSignitureByte = new byte[4];
+			bb.get(formatSignitureByte, 0, formatSignitureByte.length);
+			if (!Arrays.equals(BTREE_NODE_V2_SIGNATURE, formatSignitureByte)) {
+				throw new HdfException("B tree V1 node signature not matched");
+			}
 
 			final byte version = bb.get();
 			if (version != 0) {
@@ -159,16 +173,14 @@ public class BTreeV2 extends BTree {
 
 	@Override
 	public String toString() {
-		return "BTreeNodeV2 [address=" + getAddress() + ", nodeType=" + nodeType + "]";
+		return "BTreeNodeV2 [address=" + address + ", nodeType=" + nodeType + "]";
 	}
 
-	@Override
 	public long[] getChildAddresses() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public short getNodeLevel() {
 		// TODO Auto-generated method stub
 		return 0;
