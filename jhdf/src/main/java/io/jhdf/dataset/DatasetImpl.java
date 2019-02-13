@@ -10,12 +10,10 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.jhdf.AbstractNode;
-import io.jhdf.ObjectHeader;
 import io.jhdf.Superblock;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -40,25 +38,13 @@ import io.jhdf.object.message.Message;
 public class DatasetImpl extends AbstractNode implements Dataset {
 	private static final Logger logger = LoggerFactory.getLogger(DatasetImpl.class);
 
-	private final LazyInitializer<Map<String, AttributeMessage>> attributes;
-	private final LazyInitializer<ObjectHeader> header;
 	private final FileChannel fc;
 	private final Superblock sb;
 
 	public DatasetImpl(FileChannel fc, Superblock sb, long address, String name, Group parent) {
-		super(address, name, parent);
+		super(fc, sb, address, name, parent);
 		this.fc = fc;
 		this.sb = sb;
-
-		try {
-			header = ObjectHeader.lazyReadObjectHeader(fc, sb, address);
-
-			// Attributes
-			attributes = new AttributesLazyInitializer(header);
-		} catch (Exception e) {
-			throw new HdfException("Error reading dataset '" + getPath() + "' at address " + address, e);
-		}
-
 	}
 
 	private <T extends Message> T getHeaderMessage(Class<T> clazz) {

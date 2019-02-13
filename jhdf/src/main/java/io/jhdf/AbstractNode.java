@@ -4,6 +4,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.File;
+import java.nio.channels.FileChannel;
 import java.util.Map;
 
 import org.apache.commons.lang3.concurrent.ConcurrentException;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
+import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.AttributeMessage;
 
 public abstract class AbstractNode implements Node {
@@ -38,11 +40,22 @@ public abstract class AbstractNode implements Node {
 	protected final long address;
 	protected final String name;
 	protected final Group parent;
+	protected final LazyInitializer<ObjectHeader> header;
+	protected final AttributesLazyInitializer attributes;
 
-	public AbstractNode(long address, String name, Group parent) {
+	public AbstractNode(FileChannel fc, Superblock sb, long address, String name, Group parent) {
 		this.address = address;
 		this.name = name;
 		this.parent = parent;
+
+		try {
+			header = ObjectHeader.lazyReadObjectHeader(fc, sb, address);
+
+			// Attributes
+			attributes = new AttributesLazyInitializer(header);
+		} catch (Exception e) {
+			throw new HdfException("Error reading node '" + getPath() + "' at address " + address, e);
+		}
 	}
 
 	@Override

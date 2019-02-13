@@ -48,14 +48,11 @@ public class GroupImpl extends AbstractNode implements Group {
 		protected Map<String, Node> initialize() throws ConcurrentException {
 			logger.info("Lazy loading children of '{}'", getPath());
 
-			// Load the object header
-			final ObjectHeader oh = objectHeader.get();
-
-			if (oh.hasMessageOfType(SymbolTableMessage.class)) {
+			if (header.get().hasMessageOfType(SymbolTableMessage.class)) {
 				// Its an old style Group
-				return createOldStyleGroup(oh);
+				return createOldStyleGroup(header.get());
 			} else {
-				return createNewStyleGroup(oh);
+				return createNewStyleGroup(header.get());
 			}
 		}
 
@@ -154,20 +151,13 @@ public class GroupImpl extends AbstractNode implements Group {
 
 	private static final Logger logger = LoggerFactory.getLogger(GroupImpl.class);
 
-	private final LazyInitializer<ObjectHeader> objectHeader;
 	private final LazyInitializer<Map<String, Node>> children;
-	private final LazyInitializer<Map<String, AttributeMessage>> attributes;
 
 	private GroupImpl(FileChannel fc, Superblock sb, long address, String name, Group parent) {
-		super(address, name, parent);
+		super(fc, sb, address, name, parent);
 		logger.trace("Creating group '{}'...", name);
 
-		this.objectHeader = ObjectHeader.lazyReadObjectHeader(fc, sb, address);
-
 		children = new ChildrenLazyInitializer(fc, sb, this);
-
-		// Add attributes
-		attributes = new AttributesLazyInitializer(objectHeader);
 
 		logger.debug("Created group '{}'", getPath());
 	}
@@ -182,16 +172,11 @@ public class GroupImpl extends AbstractNode implements Group {
 	 * @param parent              For the root group the parent is the file itself.
 	 */
 	private GroupImpl(FileChannel fc, Superblock sb, long objectHeaderAddress, HdfFile parent) {
-		super(objectHeaderAddress, "", parent); // No name special case for root group no name
+		super(fc, sb, objectHeaderAddress, "", parent); // No name special case for root group no name
 		logger.trace("Creating root group...");
-
-		this.objectHeader = ObjectHeader.lazyReadObjectHeader(fc, sb, objectHeaderAddress);
 
 		// Special case for root group pass parent instead of this
 		children = new ChildrenLazyInitializer(fc, sb, parent);
-
-		// Add attributes
-		attributes = new AttributesLazyInitializer(objectHeader);
 
 		logger.debug("Created root group of file '{}'", parent.getName());
 	}
