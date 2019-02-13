@@ -5,11 +5,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
-import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +22,6 @@ import io.jhdf.btree.BTreeV1.BTreeV1Data.Chunk;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.OrderedDataType;
-import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataLayout;
 import io.jhdf.object.message.DataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
@@ -33,7 +30,6 @@ import io.jhdf.object.message.DataLayoutMessage.ContigiousDataLayoutMessage;
 import io.jhdf.object.message.DataSpace;
 import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.DataTypeMessage;
-import io.jhdf.object.message.Message;
 
 public class DatasetImpl extends AbstractNode implements Dataset {
 	private static final Logger logger = LoggerFactory.getLogger(DatasetImpl.class);
@@ -47,28 +43,9 @@ public class DatasetImpl extends AbstractNode implements Dataset {
 		this.sb = sb;
 	}
 
-	private <T extends Message> T getHeaderMessage(Class<T> clazz) {
-		try {
-			return header.get().getMessageOfType(clazz);
-		} catch (ConcurrentException e) {
-			throw new HdfException("Failed to get header message of type '" + clazz.hashCode() + "' for dataset '"
-					+ getPath() + "' at address '" + getAddress() + "'", e);
-		}
-	}
-
 	@Override
 	public NodeType getType() {
 		return NodeType.DATASET;
-	}
-
-	@Override
-	public Map<String, AttributeMessage> getAttributes() {
-		try {
-			return attributes.get();
-		} catch (ConcurrentException e) {
-			throw new HdfException(
-					"Failed to load attributes for dataset '" + getPath() + "' at address '" + getAddress() + "'", e);
-		}
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.AttributeMessage;
+import io.jhdf.object.message.Message;
 
 public abstract class AbstractNode implements Node {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractNode.class);
@@ -97,5 +98,24 @@ public abstract class AbstractNode implements Node {
 	@Override
 	public boolean isLink() {
 		return false;
+	}
+
+	protected <T extends Message> T getHeaderMessage(Class<T> clazz) {
+		try {
+			return header.get().getMessageOfType(clazz);
+		} catch (ConcurrentException e) {
+			throw new HdfException("Failed to get header message of type '" + clazz.hashCode() + "' for '"
+					+ getPath() + "' at address '" + getAddress() + "'", e);
+		}
+	}
+
+	@Override
+	public Map<String, AttributeMessage> getAttributes() {
+		try {
+			return attributes.get();
+		} catch (ConcurrentException e) {
+			throw new HdfException(
+					"Failed to load attributes for '" + getPath() + "' at address '" + getAddress() + "'", e);
+		}
 	}
 }

@@ -26,7 +26,6 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
 import io.jhdf.links.ExternalLink;
 import io.jhdf.links.SoftLink;
-import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
@@ -221,16 +220,6 @@ public class GroupImpl extends AbstractNode implements Group {
 	@Override
 	public String getPath() {
 		return super.getPath() + "/";
-	}
-
-	@Override
-	public Map<String, AttributeMessage> getAttributes() {
-		try {
-			return attributes.get();
-		} catch (ConcurrentException e) {
-			throw new HdfException(
-					"Failed to load attributes for group '" + getPath() + "' at address '" + getAddress() + "'", e);
-		}
 	}
 
 	@Override
