@@ -167,22 +167,9 @@ public class BTreeV2 {
 		return (BigInteger.valueOf(recordsInLeafNode).pow(depth).bitLength() + 8) / 8;
 	}
 
-	public short getNodeType() {
-		return nodeType;
-	}
-
 	@Override
 	public String toString() {
 		return "BTreeNodeV2 [address=" + address + ", nodeType=" + nodeType + "]";
 	}
 
-	public long[] getChildAddresses() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public short getNodeLevel() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 }
