@@ -1,4 +1,4 @@
-package io.jhdf;
+package io.jhdf.dataset;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -14,6 +14,9 @@ import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.jhdf.AbstractNode;
+import io.jhdf.ObjectHeader;
+import io.jhdf.Superblock;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;

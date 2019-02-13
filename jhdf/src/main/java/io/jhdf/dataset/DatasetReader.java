@@ -1,4 +1,4 @@
-package io.jhdf;
+package io.jhdf.dataset;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;

@@ -21,6 +21,7 @@ import io.jhdf.btree.BTreeV1;
 import io.jhdf.btree.BTreeV2;
 import io.jhdf.btree.record.BTreeRecord;
 import io.jhdf.btree.record.LinkNameForIndexedGroupRecord;
+import io.jhdf.dataset.DatasetImpl;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
 import io.jhdf.links.ExternalLink;

@@ -22,7 +22,7 @@ public abstract class AbstractNode implements Node {
 	protected final class AttributesLazyInitializer extends LazyInitializer<Map<String, AttributeMessage>> {
 		private final LazyInitializer<ObjectHeader> lazyOjbectHeader;
 
-		protected AttributesLazyInitializer(LazyInitializer<ObjectHeader> lazyOjbectHeader) {
+		public AttributesLazyInitializer(LazyInitializer<ObjectHeader> lazyOjbectHeader) {
 			this.lazyOjbectHeader = lazyOjbectHeader;
 		}
 
