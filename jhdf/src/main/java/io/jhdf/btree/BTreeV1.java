@@ -141,40 +141,20 @@ public abstract class BTreeV1 {
 		return nodeType;
 	}
 
-	public void setNodeType(short nodeType) {
-		this.nodeType = nodeType;
-	}
-
 	public short getNodeLevel() {
 		return nodeLevel;
-	}
-
-	public void setNodeLevel(short nodeLevel) {
-		this.nodeLevel = nodeLevel;
 	}
 
 	public int getEntriesUsed() {
 		return entriesUsed;
 	}
 
-	public void setEntriesUsed(int entriesUsed) {
-		this.entriesUsed = entriesUsed;
-	}
-
 	public long getLeftSiblingAddress() {
 		return leftSiblingAddress;
 	}
 
-	public void setLeftSiblingAddress(long leftSiblingAddress) {
-		this.leftSiblingAddress = leftSiblingAddress;
-	}
-
 	public long getRightSiblingAddress() {
 		return rightSiblingAddress;
-	}
-
-	public void setRightSiblingAddress(long rightSiblingAddress) {
-		this.rightSiblingAddress = rightSiblingAddress;
 	}
 
 	public long getAddress() {
