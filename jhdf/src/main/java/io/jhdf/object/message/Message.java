@@ -94,7 +94,7 @@ public class Message {
 		case 10: // 0x000A
 			return new GroupInfoMessage(bb, flags);
 		case 11: // 0x000B
-			return new FilterpipelineMessage(bb, flags);
+			return new FilterPipelineMessage(bb, flags);
 		case 12: // 0x000C
 			return new AttributeMessage(bb, sb, flags);
 		case 13: // 0x000D
