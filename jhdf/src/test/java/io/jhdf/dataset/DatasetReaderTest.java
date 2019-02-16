@@ -1,4 +1,4 @@
-package io.jhdf;
+package io.jhdf.dataset;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
+import io.jhdf.dataset.DatasetReader;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.FixedPoint;

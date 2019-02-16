@@ -1,8 +1,5 @@
 package io.jhdf;
 
-import static java.util.Arrays.asList;
-import static org.apache.commons.lang3.ArrayUtils.toObject;
-
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -20,15 +17,15 @@ import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
-import io.jhdf.btree.BTreeNode;
+import io.jhdf.btree.BTreeV1;
 import io.jhdf.btree.BTreeV2;
 import io.jhdf.btree.record.BTreeRecord;
 import io.jhdf.btree.record.LinkNameForIndexedGroupRecord;
+import io.jhdf.dataset.DatasetLoader;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
 import io.jhdf.links.ExternalLink;
 import io.jhdf.links.SoftLink;
-import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
@@ -50,14 +47,11 @@ public class GroupImpl extends AbstractNode implements Group {
 		protected Map<String, Node> initialize() throws ConcurrentException {
 			logger.info("Lazy loading children of '{}'", getPath());
 
-			// Load the object header
-			final ObjectHeader oh = objectHeader.get();
-
-			if (oh.hasMessageOfType(SymbolTableMessage.class)) {
+			if (header.get().hasMessageOfType(SymbolTableMessage.class)) {
 				// Its an old style Group
-				return createOldStyleGroup(oh);
+				return createOldStyleGroup(header.get());
 			} else {
-				return createNewStyleGroup(oh);
+				return createNewStyleGroup(header.get());
 			}
 		}
 
@@ -73,12 +67,11 @@ public class GroupImpl extends AbstractNode implements Group {
 				logger.debug("Loaded group links from object header");
 			} else {
 				// Links are not stored compactly i.e in the fractal heap
-				final BTreeNode bTreeNode = BTreeNode.createBTreeNode(fc, sb,
-						linkInfoMessage.getbTreeNameIndexAddress());
+				final BTreeV2 bTreeNode = BTreeV2.createBTree(fc, sb, linkInfoMessage.getbTreeNameIndexAddress());
 				final FractalHeap fractalHeap = new FractalHeap(fc, sb, linkInfoMessage.getFractalHeapAddress());
 
 				links = new ArrayList<>(); // TODO would be good to get the size here from the b-tree
-				for (BTreeRecord record : ((BTreeV2) bTreeNode).getRecords()) {
+				for (BTreeRecord record : bTreeNode.getRecords()) {
 					LinkNameForIndexedGroupRecord linkName = (LinkNameForIndexedGroupRecord) record;
 					ByteBuffer id = linkName.getId();
 					// Get the name data from the fractal heap
@@ -113,13 +106,11 @@ public class GroupImpl extends AbstractNode implements Group {
 		private Map<String, Node> createOldStyleGroup(final ObjectHeader oh) {
 			logger.debug("Loading 'old' style group");
 			final SymbolTableMessage stm = oh.getMessageOfType(SymbolTableMessage.class);
-			final BTreeNode rootbTreeNode = BTreeNode.createBTreeNode(fc, sb, stm.getbTreeAddress());
+			final BTreeV1 rootbTreeNode = BTreeV1.createBTree(fc, sb, stm.getbTreeAddress());
 			final LocalHeap rootNameHeap = new LocalHeap(fc, stm.getLocalHeapAddress(), sb);
 			final ByteBuffer nameBuffer = rootNameHeap.getDataBuffer();
 
-			List<Long> childAddresses = new ArrayList<>();
-			getAllChildAddresses(rootbTreeNode, childAddresses);
-
+			final List<Long> childAddresses = rootbTreeNode.getChildAddresses();
 			final Map<String, Node> lazyChildren = new LinkedHashMap<>(childAddresses.size());
 
 			for (long child : childAddresses) {
@@ -130,7 +121,7 @@ public class GroupImpl extends AbstractNode implements Group {
 					if (ste.getCacheType() == 1) { // Its a group
 						node = createGroup(fc, sb, ste.getObjectHeaderAddress(), childName, parent);
 					} else { // Dataset
-						node = new DatasetImpl(fc, sb, ste.getObjectHeaderAddress(), childName, parent);
+						node = DatasetLoader.createDataset(fc, sb, ste.getObjectHeaderAddress(), childName, parent);
 					}
 					lazyChildren.put(childName, node);
 				}
@@ -143,23 +134,12 @@ public class GroupImpl extends AbstractNode implements Group {
 			final Node node;
 			if (linkHeader.hasMessageOfType(DataSpaceMessage.class)) {
 				// Its a a Dataset
-				node = new DatasetImpl(fc, sb, address, name, parent);
+				node = DatasetLoader.createDataset(fc, sb, address, name, parent);
 			} else {
 				// Its a group
 				node = createGroup(fc, sb, address, name, parent);
 			}
 			return node;
-		}
-
-		private void getAllChildAddresses(BTreeNode rootbTreeNode, List<Long> childAddresses) {
-			if (rootbTreeNode.getNodeLevel() > 0) {
-				for (long child : rootbTreeNode.getChildAddresses()) {
-					BTreeNode bTreeNode = BTreeNode.createBTreeNode(fc, sb, child);
-					getAllChildAddresses(bTreeNode, childAddresses);
-				}
-			} else {
-				childAddresses.addAll(asList(toObject(rootbTreeNode.getChildAddresses())));
-			}
 		}
 
 		private String readName(ByteBuffer bb, int linkNameOffset) {
@@ -170,20 +150,13 @@ public class GroupImpl extends AbstractNode implements Group {
 
 	private static final Logger logger = LoggerFactory.getLogger(GroupImpl.class);
 
-	private final LazyInitializer<ObjectHeader> objectHeader;
 	private final LazyInitializer<Map<String, Node>> children;
-	private final LazyInitializer<Map<String, AttributeMessage>> attributes;
 
 	private GroupImpl(FileChannel fc, Superblock sb, long address, String name, Group parent) {
-		super(address, name, parent);
+		super(fc, sb, address, name, parent);
 		logger.trace("Creating group '{}'...", name);
 
-		this.objectHeader = ObjectHeader.lazyReadObjectHeader(fc, sb, address);
-
 		children = new ChildrenLazyInitializer(fc, sb, this);
-
-		// Add attributes
-		attributes = new AttributesLazyInitializer(objectHeader);
 
 		logger.debug("Created group '{}'", getPath());
 	}
@@ -198,16 +171,11 @@ public class GroupImpl extends AbstractNode implements Group {
 	 * @param parent              For the root group the parent is the file itself.
 	 */
 	private GroupImpl(FileChannel fc, Superblock sb, long objectHeaderAddress, HdfFile parent) {
-		super(objectHeaderAddress, "", parent); // No name special case for root group no name
+		super(fc, sb, objectHeaderAddress, "", parent); // No name special case for root group no name
 		logger.trace("Creating root group...");
-
-		this.objectHeader = ObjectHeader.lazyReadObjectHeader(fc, sb, objectHeaderAddress);
 
 		// Special case for root group pass parent instead of this
 		children = new ChildrenLazyInitializer(fc, sb, parent);
-
-		// Add attributes
-		attributes = new AttributesLazyInitializer(objectHeader);
 
 		logger.debug("Created root group of file '{}'", parent.getName());
 	}
@@ -252,16 +220,6 @@ public class GroupImpl extends AbstractNode implements Group {
 	@Override
 	public String getPath() {
 		return super.getPath() + "/";
-	}
-
-	@Override
-	public Map<String, AttributeMessage> getAttributes() {
-		try {
-			return attributes.get();
-		} catch (ConcurrentException e) {
-			throw new HdfException(
-					"Failed to load attributes for group '" + getPath() + "' at address '" + getAddress() + "'", e);
-		}
 	}
 
 	@Override

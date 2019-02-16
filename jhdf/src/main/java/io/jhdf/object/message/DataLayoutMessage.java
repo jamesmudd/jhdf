@@ -92,13 +92,13 @@ public abstract class DataLayoutMessage extends Message {
 
 		private final long address;
 		private final long size;
+		private long[] dimSizes;
 
 		private ChunkedDataLayoutMessageV3(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
-			// Not sure why this needs -1 but seems to be the way its done
-			int chunkDimensionality = Utils.readBytesAsUnsignedInt(bb, 1) - 1;
+			final int chunkDimensionality = bb.get() - 1;
 			address = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
-			long[] dimSizes = new long[chunkDimensionality];
+			dimSizes = new long[chunkDimensionality];
 			for (int i = 0; i < dimSizes.length; i++) {
 				dimSizes[i] = Utils.readBytesAsUnsignedLong(bb, 4);
 			}
@@ -110,34 +110,82 @@ public abstract class DataLayoutMessage extends Message {
 			return DataLayout.CHUNKED;
 		}
 
-		public long getAddress() {
+		public long getBTreeAddress() {
 			return address;
 		}
 
 		public long getSize() {
 			return size;
 		}
+
+		public long[] getDimSizes() {
+			return dimSizes;
+		}
 	}
 
 	public static class ChunkedDataLayoutMessageV4 extends DataLayoutMessage {
 
+		private static final int DONT_FILTER_PARTIAL_BOUND_CHUNKS = 0;
+		private static final int SINGLE_INDEX_WITH_FILTER = 1;
+
 		private final long address;
-		private final int indexingType;
+		private final byte indexingType;
+
+		private byte pageBits;
+		private byte maxBits;
+		private byte indexElements;
+		private byte minPointers;
+		private byte minElements;
+		private int nodeSize;
+		private byte splitPercent;
+		private byte mergePercent;
+		private long[] dimSizes;
 
 		private ChunkedDataLayoutMessageV4(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
 
 			final BitSet chunkedFlags = BitSet.valueOf(new byte[] { bb.get() });
-			// Not sure why this needs -1 but seems to be the way its done
-			final int chunkDimensionality = Utils.readBytesAsUnsignedInt(bb, 1) - 1;
-			final int dimSizeBytes = Utils.readBytesAsUnsignedInt(bb, 1);
+			final int chunkDimensionality = bb.get();
+			final int dimSizeBytes = bb.get();
 
-			long[] dimSizes = new long[chunkDimensionality];
+			dimSizes = new long[chunkDimensionality];
 			for (int i = 0; i < dimSizes.length; i++) {
 				dimSizes[i] = Utils.readBytesAsUnsignedLong(bb, dimSizeBytes);
 			}
 
-			indexingType = Utils.readBytesAsUnsignedInt(bb, 1);
+			indexingType = bb.get();
+
+			switch (indexingType) {
+			case 1: // Single Chunk
+				if (flags.get(DONT_FILTER_PARTIAL_BOUND_CHUNKS)) {
+					throw new UnsupportedHdfException("Filtered single chunk not supported");
+				}
+				break;
+
+			case 2: // Implicit
+				break; // There is nothing for this case
+
+			case 3: // Fixed Array
+				pageBits = bb.get();
+				break;
+
+			case 4: // Extensible Array
+				maxBits = bb.get();
+				indexElements = bb.get();
+				minPointers = bb.get();
+				minElements = bb.get();
+				pageBits = bb.get(); // This is wrong in the spec says 2 bytes its actually 1
+				break;
+
+			case 5: // B tree v2
+				nodeSize = bb.getInt();
+				splitPercent = bb.get();
+				mergePercent = bb.get();
+				break;
+
+			default:
+				throw new UnsupportedHdfException("Unreconized chunk indexing type. type=" + indexingType);
+			}
 
 			address = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 		}
@@ -149,6 +197,78 @@ public abstract class DataLayoutMessage extends Message {
 
 		public long getAddress() {
 			return address;
+		}
+
+		public byte getPageBits() {
+			return pageBits;
+		}
+
+		public void setPageBits(byte pageBits) {
+			this.pageBits = pageBits;
+		}
+
+		public byte getMaxBits() {
+			return maxBits;
+		}
+
+		public void setMaxBits(byte maxBits) {
+			this.maxBits = maxBits;
+		}
+
+		public byte getIndexElements() {
+			return indexElements;
+		}
+
+		public void setIndexElements(byte indexElements) {
+			this.indexElements = indexElements;
+		}
+
+		public byte getMinPointers() {
+			return minPointers;
+		}
+
+		public void setMinPointers(byte minPointers) {
+			this.minPointers = minPointers;
+		}
+
+		public byte getMinElements() {
+			return minElements;
+		}
+
+		public void setMinElements(byte minElements) {
+			this.minElements = minElements;
+		}
+
+		public int getNodeSize() {
+			return nodeSize;
+		}
+
+		public void setNodeSize(int nodeSize) {
+			this.nodeSize = nodeSize;
+		}
+
+		public byte getSplitPercent() {
+			return splitPercent;
+		}
+
+		public void setSplitPercent(byte splitPercent) {
+			this.splitPercent = splitPercent;
+		}
+
+		public byte getMergePercent() {
+			return mergePercent;
+		}
+
+		public void setMergePercent(byte mergePercent) {
+			this.mergePercent = mergePercent;
+		}
+
+		public byte getIndexingType() {
+			return indexingType;
+		}
+
+		public long[] getDimSizes() {
+			return dimSizes;
 		}
 
 	}
