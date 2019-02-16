@@ -81,6 +81,10 @@ public class FilterPipelineMessage extends Message {
 
 	}
 
+	public List<Filter> getFilters() {
+		return filters;
+	}
+
 	public class Filter {
 
 		private final int id;
@@ -89,7 +93,6 @@ public class FilterPipelineMessage extends Message {
 		private final int[] data;
 
 		public Filter(int id, String name, BitSet flags, int[] data) {
-			super();
 			this.id = id;
 			this.name = name;
 			this.flags = flags;
