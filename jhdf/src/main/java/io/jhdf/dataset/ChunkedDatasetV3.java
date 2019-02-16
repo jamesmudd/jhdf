@@ -19,8 +19,8 @@ import io.jhdf.ObjectHeader;
 import io.jhdf.Superblock;
 import io.jhdf.api.Group;
 import io.jhdf.btree.BTreeV1;
-import io.jhdf.btree.BTreeV1.BTreeV1Data;
-import io.jhdf.btree.BTreeV1.BTreeV1Data.Chunk;
+import io.jhdf.btree.BTreeV1Data;
+import io.jhdf.btree.BTreeV1Data.Chunk;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
 

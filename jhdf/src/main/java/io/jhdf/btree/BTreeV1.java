@@ -1,14 +1,12 @@
 package io.jhdf.btree;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
-import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -34,7 +32,7 @@ public abstract class BTreeV1 {
 	private long leftSiblingAddress;
 	private long rightSiblingAddress;
 
-	public static BTreeV1 createBTree(FileChannel fc, Superblock sb, long address) {
+	public static BTreeV1 createGroupBTree(FileChannel fc, Superblock sb, long address) {
 		// B Tree Node Header
 		int headerSize = 6;
 		ByteBuffer header = ByteBuffer.allocate(headerSize);
@@ -97,16 +95,16 @@ public abstract class BTreeV1 {
 			throw new HdfException("Not a data B Tree");
 		case 1: // Raw data chunk nodes
 			if (nodeLevel > 0) {
-				return new BTreeV1DataNonLeafNode(fc, sb, address, dataDimensions);
+				return new BTreeV1Data.BTreeV1DataNonLeafNode(fc, sb, address, dataDimensions);
 			} else {
-				return new BTreeV1DataLeafNode(fc, sb, address, dataDimensions);
+				return new BTreeV1Data.BTreeV1DataLeafNode(fc, sb, address, dataDimensions);
 			}
 		default:
 			throw new HdfException("Unreconized BTreeV1 node type: " + nodeType);
 		}
 	}
 
-	private BTreeV1(FileChannel fc, Superblock sb, long address) {
+	/* package */ BTreeV1(FileChannel fc, Superblock sb, long address) {
 		this.address = address;
 
 		int headerSize = 8 * sb.getSizeOfOffsets();
@@ -221,7 +219,7 @@ public abstract class BTreeV1 {
 			for (int i = 0; i < entriesUsed; i++) {
 				keysAndPointersBuffer.position(keysAndPointersBuffer.position() + sb.getSizeOfOffsets());
 				long childAddress = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfOffsets());
-				childNodes.add(createBTree(fc, sb, childAddress));
+				childNodes.add(createGroupBTree(fc, sb, childAddress));
 			}
 
 		}
@@ -234,159 +232,6 @@ public abstract class BTreeV1 {
 			}
 			return childAddresses;
 		}
-	}
-
-	public abstract static class BTreeV1Data extends BTreeV1 {
-
-		public BTreeV1Data(FileChannel fc, Superblock sb, long address, int dataDimensions) {
-			super(fc, sb, address);
-		}
-
-		public abstract List<Chunk> getChunks();
-
-		public class Chunk {
-			private final int size;
-			private final BitSet filterMask;
-			private final long[] chunkOffset;
-			private final long address;
-
-			private Chunk(int size, BitSet filterMask, long[] chunkOffset, long address) {
-				super();
-				this.size = size;
-				this.filterMask = filterMask;
-				this.chunkOffset = chunkOffset;
-				this.address = address;
-			}
-
-			public int getSize() {
-				return size;
-			}
-
-			public BitSet getFilterMask() {
-				return filterMask;
-			}
-
-			public long[] getChunkOffset() {
-				return chunkOffset;
-			}
-
-			public long getAddress() {
-				return address;
-			}
-
-			@Override
-			public String toString() {
-				return "Chunk [chunkOffset=" + Arrays.toString(chunkOffset) + ", size=" + size + ", address=" + address
-						+ "]";
-			}
-		}
-	}
-
-	private static class BTreeV1DataLeafNode extends BTreeV1Data {
-
-		private final ArrayList<Chunk> chunks;
-
-		private BTreeV1DataLeafNode(FileChannel fc, Superblock sb, long address, int dataDimensions) {
-			super(fc, sb, address, dataDimensions);
-
-			int keySize = 4 + 4 + (dataDimensions + 1) * 8;
-			int keyBytes = (entriesUsed + 1) * keySize;
-			int childPointerBytes = entriesUsed * sb.getSizeOfOffsets();
-			final int keysAndPointersBytes = keyBytes + childPointerBytes;
-
-			ByteBuffer bb = ByteBuffer.allocate(keysAndPointersBytes);
-			try {
-				fc.read(bb, address + 8 + 2 * sb.getSizeOfOffsets());
-			} catch (IOException e) {
-				throw new HdfException("Error reading BTreeV1LeafNode at address: " + address);
-			}
-			bb.order(LITTLE_ENDIAN);
-			bb.rewind();
-
-			chunks = new ArrayList<>(entriesUsed);
-			for (int i = 0; i < entriesUsed; i++) {
-				Chunk chunk = readKeyAsChunk(sb, dataDimensions, bb);
-				chunks.add(chunk);
-			}
-
-			bb.position(bb.position() + keySize);
-		}
-
-		private Chunk readKeyAsChunk(Superblock sb, int dataDimensions, ByteBuffer bb) {
-			int chunkSize = Utils.readBytesAsUnsignedInt(bb, 4);
-			BitSet filterMask = BitSet.valueOf(new byte[] { bb.get(), bb.get(), bb.get(), bb.get() });
-			long[] chunkOffset = new long[dataDimensions];
-			for (int j = 0; j < dataDimensions; j++) {
-				chunkOffset[j] = Utils.readBytesAsUnsignedLong(bb, 8);
-			}
-			long zero = Utils.readBytesAsUnsignedLong(bb, 8);
-			if (zero != 0) {
-				throw new HdfException("Invalid B tree chunk detected");
-			}
-
-			long chunkAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
-			return new Chunk(chunkSize, filterMask, chunkOffset, chunkAddress);
-		}
-
-		@Override
-		public List<Long> getChildAddresses() {
-			return chunks.stream().map(Chunk::getAddress).collect(toList());
-		}
-
-		@Override
-		public List<Chunk> getChunks() {
-			return chunks;
-		}
-	}
-
-	private static class BTreeV1DataNonLeafNode extends BTreeV1Data {
-
-		private final List<BTreeV1Data> childNodes;
-
-		public BTreeV1DataNonLeafNode(FileChannel fc, Superblock sb, long address, int dataDimensions) {
-			super(fc, sb, address, dataDimensions);
-
-			int keySize = 4 + 4 + (dataDimensions + 1) * 8;
-			int keyBytes = (entriesUsed + 1) * keySize;
-			int childPointerBytes = entriesUsed * sb.getSizeOfOffsets();
-			final int keysAndPointersBytes = keyBytes + childPointerBytes;
-
-			ByteBuffer keysAndPointersBuffer = ByteBuffer.allocate(keysAndPointersBytes);
-			try {
-				fc.read(keysAndPointersBuffer, address + 8 + 2 * sb.getSizeOfOffsets());
-			} catch (IOException e) {
-				throw new HdfException("Error reading BTreeV1NonLeafNode at address: " + address);
-			}
-			keysAndPointersBuffer.order(LITTLE_ENDIAN);
-			keysAndPointersBuffer.rewind();
-
-			childNodes = new ArrayList<>(entriesUsed);
-
-			for (int i = 0; i < entriesUsed; i++) {
-				keysAndPointersBuffer.position(keysAndPointersBuffer.position() + keySize);
-				long childAddress = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfOffsets());
-				childNodes.add(createDataBTree(fc, sb, childAddress, dataDimensions));
-			}
-		}
-
-		@Override
-		public List<Long> getChildAddresses() {
-			List<Long> childAddresses = new ArrayList<>();
-			for (BTreeV1 child : childNodes) {
-				childAddresses.addAll(child.getChildAddresses());
-			}
-			return childAddresses;
-		}
-
-		@Override
-		public List<Chunk> getChunks() {
-			List<Chunk> childAddresses = new ArrayList<>();
-			for (BTreeV1Data child : childNodes) {
-				childAddresses.addAll(child.getChunks());
-			}
-			return childAddresses;
-		}
-
 	}
 
 }

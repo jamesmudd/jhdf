@@ -106,7 +106,7 @@ public class GroupImpl extends AbstractNode implements Group {
 		private Map<String, Node> createOldStyleGroup(final ObjectHeader oh) {
 			logger.debug("Loading 'old' style group");
 			final SymbolTableMessage stm = oh.getMessageOfType(SymbolTableMessage.class);
-			final BTreeV1 rootbTreeNode = BTreeV1.createBTree(fc, sb, stm.getbTreeAddress());
+			final BTreeV1 rootbTreeNode = BTreeV1.createGroupBTree(fc, sb, stm.getbTreeAddress());
 			final LocalHeap rootNameHeap = new LocalHeap(fc, stm.getLocalHeapAddress(), sb);
 			final ByteBuffer nameBuffer = rootNameHeap.getDataBuffer();
 
