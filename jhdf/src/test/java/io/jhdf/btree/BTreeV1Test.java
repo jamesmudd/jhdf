@@ -39,7 +39,7 @@ public class BTreeV1Test {
 
 	@Test
 	public void testBTreeNode() throws IOException {
-		BTreeV1 bTree = BTreeV1.createBTree(fc, sb, 136);
+		BTreeV1 bTree = BTreeV1.createGroupBTree(fc, sb, 136);
 
 		assertThat(bTree.getNodeType(), is(equalTo((short) 0)));
 		assertThat(bTree.getNodeLevel(), is(equalTo((short) 0)));
