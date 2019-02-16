@@ -88,7 +88,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		return dataType.getJavaType();
 	}
 
-	private DataType getDataType() {
+	protected DataType getDataType() {
 		return getHeaderMessage(DataTypeMessage.class).getDataType();
 	}
 

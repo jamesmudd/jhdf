@@ -274,6 +274,11 @@ public abstract class BTreeV1 {
 				return address;
 			}
 
+			@Override
+			public String toString() {
+				return "Chunk [chunkOffset=" + Arrays.toString(chunkOffset) + ", size=" + size + ", address=" + address
+						+ "]";
+			}
 		}
 	}
 
