@@ -23,7 +23,7 @@ import io.jhdf.api.Dataset;
 
 public class ChunkedDatasetTest {
 
-	private static final String HDF5_TEST_FILE_NAME = "test_chunked_datasets_earliest.hdf5";
+	private static final String HDF5_TEST_FILE_NAME = "../test_chunked_datasets_earliest.hdf5";
 
 	private static HdfFile hdfFile;
 
@@ -34,7 +34,7 @@ public class ChunkedDatasetTest {
 	}
 
 	@TestFactory
-	Collection<DynamicNode> chinkedDatasetReadTests() {
+	Collection<DynamicNode> chunkedDatasetReadTests() {
 		// List of all the datasetPaths
 		return Arrays.asList(
 				dynamicTest("float32", createTest("/float/float32")),
