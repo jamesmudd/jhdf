@@ -17,7 +17,7 @@ import io.jhdf.exceptions.HdfException;
 
 public abstract class BTreeV1Data extends BTreeV1 {
 
-	public BTreeV1Data(FileChannel fc, Superblock sb, long address, int dataDimensions) {
+	private BTreeV1Data(FileChannel fc, Superblock sb, long address) {
 		super(fc, sb, address);
 	}
 
@@ -65,7 +65,7 @@ public abstract class BTreeV1Data extends BTreeV1 {
 		private final ArrayList<Chunk> chunks;
 
 		BTreeV1DataLeafNode(FileChannel fc, Superblock sb, long address, int dataDimensions) {
-			super(fc, sb, address, dataDimensions);
+			super(fc, sb, address);
 
 			int keySize = 4 + 4 + (dataDimensions + 1) * 8;
 			int keyBytes = (entriesUsed + 1) * keySize;
@@ -122,7 +122,7 @@ public abstract class BTreeV1Data extends BTreeV1 {
 		private final List<BTreeV1Data> childNodes;
 
 		public BTreeV1DataNonLeafNode(FileChannel fc, Superblock sb, long address, int dataDimensions) {
-			super(fc, sb, address, dataDimensions);
+			super(fc, sb, address);
 
 			int keySize = 4 + 4 + (dataDimensions + 1) * 8;
 			int keyBytes = (entriesUsed + 1) * keySize;
