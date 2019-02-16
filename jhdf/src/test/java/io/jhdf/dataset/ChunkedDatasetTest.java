@@ -1,4 +1,4 @@
-package io.jhdf;
+package io.jhdf.dataset;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -18,6 +18,7 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
+import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
 
 public class ChunkedDatasetTest {
