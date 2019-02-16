@@ -21,7 +21,7 @@ import io.jhdf.btree.BTreeV1;
 import io.jhdf.btree.BTreeV2;
 import io.jhdf.btree.record.BTreeRecord;
 import io.jhdf.btree.record.LinkNameForIndexedGroupRecord;
-import io.jhdf.dataset.DatasetImpl;
+import io.jhdf.dataset.DatasetLoader;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
 import io.jhdf.links.ExternalLink;
@@ -121,7 +121,7 @@ public class GroupImpl extends AbstractNode implements Group {
 					if (ste.getCacheType() == 1) { // Its a group
 						node = createGroup(fc, sb, ste.getObjectHeaderAddress(), childName, parent);
 					} else { // Dataset
-						node = new DatasetImpl(fc, sb, ste.getObjectHeaderAddress(), childName, parent);
+						node = DatasetLoader.createDataset(fc, sb, ste.getObjectHeaderAddress(), childName, parent);
 					}
 					lazyChildren.put(childName, node);
 				}
@@ -134,7 +134,7 @@ public class GroupImpl extends AbstractNode implements Group {
 			final Node node;
 			if (linkHeader.hasMessageOfType(DataSpaceMessage.class)) {
 				// Its a a Dataset
-				node = new DatasetImpl(fc, sb, address, name, parent);
+				node = DatasetLoader.createDataset(fc, sb, address, name, parent);
 			} else {
 				// Its a group
 				node = createGroup(fc, sb, address, name, parent);
