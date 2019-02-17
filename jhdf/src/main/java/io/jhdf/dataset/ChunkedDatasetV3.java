@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.LongStream;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
@@ -76,8 +75,8 @@ public class ChunkedDatasetV3 extends DatasetBase {
 		int elementSize = getDataType().getSize();
 		byte[] elementBuffer = new byte[elementSize];
 
-		for (int i = 0; i < dataArray.length; i += elementSize) {
-			int[] dimensionedIndex = linearIndexToDimensionIndex(i / elementSize, getDimensions());
+		for (int i = 0; i < getSize(); i++) {
+			int[] dimensionedIndex = linearIndexToDimensionIndex(i, getDimensions());
 			long[] chunkOffset = getChunkOffset(dimensionedIndex);
 
 			// Now figure out which element inside the chunk
@@ -92,7 +91,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
 			bb.get(elementBuffer);
 
 			// Copy that data into the overall buffer
-			System.arraycopy(elementBuffer, 0, dataArray, i, elementSize);
+			System.arraycopy(elementBuffer, 0, dataArray, i * elementSize, elementSize);
 		}
 
 		return ByteBuffer.wrap(dataArray);
@@ -210,7 +209,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
 
 		private ChunkOffsetKey(long[] chunkOffset) {
 			this.chunkOffset = chunkOffset;
-			hashcode = ArrayUtils.hashCode(chunkOffset);
+			hashcode = Arrays.hashCode(chunkOffset);
 		}
 
 		@Override
@@ -228,6 +227,8 @@ public class ChunkedDatasetV3 extends DatasetBase {
 				return false;
 			ChunkOffsetKey other = (ChunkOffsetKey) obj;
 			if (!getEnclosingInstance().equals(other.getEnclosingInstance()))
+				return false;
+			if (!Arrays.equals(chunkOffset, other.chunkOffset))
 				return false;
 			return hashcode == other.hashcode;
 		}
