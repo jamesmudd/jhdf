@@ -85,7 +85,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
 			for (int j = 0; j < chunkOffset.length; j++) {
 				insideChunk[j] = (int) (dimensionedIndex[j] - chunkOffset[j]);
 			}
-			int insideChunkLinearOffset = dimensionIndexToLinearIndex(insideChunk, layoutMessage.getDimSizes());
+			int insideChunkLinearOffset = dimensionIndexToLinearIndex(insideChunk, layoutMessage.getChunkDimensions());
 
 			ByteBuffer bb = getDecodedChunk(new ChunkOffsetKey(chunkOffset));
 			bb.position(insideChunkLinearOffset * elementSize);
@@ -143,7 +143,8 @@ public class ChunkedDatasetV3 extends DatasetBase {
 
 	private int getChunkSizeInBytes() {
 		return Math.toIntExact(
-				LongStream.of(layoutMessage.getDimSizes()).reduce(1, Math::multiplyExact) * layoutMessage.getSize());
+				LongStream.of(layoutMessage.getChunkDimensions()).reduce(1, Math::multiplyExact)
+						* layoutMessage.getSize());
 	}
 
 	private ByteBuffer getDataBuffer(Chunk chunk) {
@@ -180,7 +181,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
 	private long[] getChunkOffset(int[] dimensionedIndex) {
 		long[] chunkOffset = new long[dimensionedIndex.length];
 		for (int i = 0; i < chunkOffset.length; i++) {
-			long temp = toIntExact(layoutMessage.getDimSizes()[i]);
+			long temp = toIntExact(layoutMessage.getChunkDimensions()[i]);
 			chunkOffset[i] = (dimensionedIndex[i] / temp) * temp;
 		}
 		return chunkOffset;
