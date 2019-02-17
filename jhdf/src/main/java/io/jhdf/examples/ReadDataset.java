@@ -2,6 +2,8 @@ package io.jhdf.examples;
 
 import java.io.File;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
 
@@ -18,6 +20,7 @@ public class ReadDataset {
 			Dataset dataset = hdfFile.getDatasetByPath(args[1]);
 			// data will be a java array of the dimensions of the HDF5 dataset
 			Object data = dataset.getData();
+			System.out.println(ArrayUtils.toString(data));
 		}
 	}
 }

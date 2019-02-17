@@ -8,18 +8,31 @@ import java.util.List;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.UnsupportedHdfException;
 
-public class FilterpipelineMessage extends Message {
+/**
+ * <p>
+ * The Data Storage - Filter Pipeline Message
+ * </p>
+ * 
+ * <p>
+ * <a href=
+ * "https://support.hdfgroup.org/HDF5/doc/H5.format.html#FilterMessage">Format
+ * Spec</a>
+ * </p>
+ * 
+ * @author James Mudd
+ */
+public class FilterPipelineMessage extends Message {
 
 	private final byte version;
 	private final List<Filter> filters;
 
-	public FilterpipelineMessage(ByteBuffer bb, BitSet messageFlags) {
+	public FilterPipelineMessage(ByteBuffer bb, BitSet messageFlags) {
 		super(messageFlags);
 
 		version = bb.get();
 
 		if (version != 1 && version != 2) {
-			throw new UnsupportedHdfException("Only filer pipeline version 1 is supported");
+			throw new UnsupportedHdfException("Only filer pipeline version 1 or 2 are supported");
 		}
 
 		final byte numberOfFilters = bb.get();
@@ -63,6 +76,43 @@ public class FilterpipelineMessage extends Message {
 				bb.position(bb.position() + 4);
 			}
 
+			filters.add(new Filter(filterId, "", flags, data));
+		}
+
+	}
+
+	public List<Filter> getFilters() {
+		return filters;
+	}
+
+	public class Filter {
+
+		private final int id;
+		private final String name;
+		private final BitSet flags;
+		private final int[] data;
+
+		public Filter(int id, String name, BitSet flags, int[] data) {
+			this.id = id;
+			this.name = name;
+			this.flags = flags;
+			this.data = data;
+		}
+
+		public int getId() {
+			return id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public BitSet getFlags() {
+			return flags;
+		}
+
+		public int[] getData() {
+			return data;
 		}
 
 	}

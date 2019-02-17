@@ -2,7 +2,9 @@ package io.jhdf.dataset;
 
 import static java.lang.Math.toIntExact;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
@@ -10,8 +12,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.stream.LongStream;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,12 +28,16 @@ import io.jhdf.btree.BTreeV1;
 import io.jhdf.btree.BTreeV1Data;
 import io.jhdf.btree.BTreeV1Data.Chunk;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.filter.FilterManager;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
+import io.jhdf.object.message.FilterPipelineMessage;
 
 public class ChunkedDatasetV3 extends DatasetBase {
 	private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetV3.class);
 
 	private Map<ChunkOffsetKey, Chunk> chunkLookup;
+	private final ConcurrentMap<ChunkOffsetKey, ByteBuffer> decodedChunkLookup = new ConcurrentHashMap<>();
+	private final int chunkSizeInBytes;
 
 	private final ChunkedDataLayoutMessageV3 layoutMessage;
 
@@ -35,6 +45,8 @@ public class ChunkedDatasetV3 extends DatasetBase {
 		super(fc, sb, address, name, parent, oh);
 
 		layoutMessage = getHeaderMessage(ChunkedDataLayoutMessageV3.class);
+		chunkSizeInBytes = getChunkSizeInBytes();
+
 		createChunkLookup();
 	}
 
@@ -66,7 +78,6 @@ public class ChunkedDatasetV3 extends DatasetBase {
 		for (int i = 0; i < dataArray.length; i += elementSize) {
 			int[] dimensionedIndex = linearIndexToDimensionIndex(i / elementSize, getDimensions());
 			long[] chunkOffset = getChunkOffset(dimensionedIndex);
-			Chunk chunk = chunkLookup.get(new ChunkOffsetKey(chunkOffset));
 
 			// Now figure out which element inside the chunk
 			int[] insideChunk = new int[chunkOffset.length];
@@ -75,7 +86,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
 			}
 			int insideChunkLinearOffset = dimensionIndexToLinearIndex(insideChunk, layoutMessage.getDimSizes());
 
-			ByteBuffer bb = getDataBuffer(chunk);
+			ByteBuffer bb = getDecodedChunk(new ChunkOffsetKey(chunkOffset));
 			bb.position(insideChunkLinearOffset * elementSize);
 			bb.get(elementBuffer);
 
@@ -84,6 +95,40 @@ public class ChunkedDatasetV3 extends DatasetBase {
 		}
 
 		return ByteBuffer.wrap(dataArray);
+	}
+
+	private ByteBuffer getDecodedChunk(ChunkOffsetKey chunkKey) {
+		return decodedChunkLookup.computeIfAbsent(chunkKey, key -> {
+			Chunk chunk = chunkLookup.get(key);
+			// Get the encoded (i.e. compressed buffer)
+			ByteBuffer encodedBuffer = getDataBuffer(chunk);
+
+			try {
+				if (header.get().hasMessageOfType(FilterPipelineMessage.class)) {
+					byte[] encodedBytes = new byte[encodedBuffer.remaining()];
+					encodedBuffer.get(encodedBytes);
+					ByteArrayInputStream bais = new ByteArrayInputStream(encodedBytes);
+					InputStream inputStream = FilterManager
+							.getPipeline(header.get().getMessageOfType(FilterPipelineMessage.class), bais);
+
+					byte[] decodedBytes = new byte[chunkSizeInBytes];
+					int bytesRead = inputStream.read(decodedBytes);
+					return ByteBuffer.wrap(decodedBytes);
+				} else {
+					// No filters
+					return encodedBuffer;
+				}
+			} catch (ConcurrentException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+		});
+	}
+
+	private int getChunkSizeInBytes() {
+		return Math.toIntExact(
+				LongStream.of(layoutMessage.getDimSizes()).reduce(1, Math::multiplyExact) * layoutMessage.getSize());
 	}
 
 	private ByteBuffer getDataBuffer(Chunk chunk) {
