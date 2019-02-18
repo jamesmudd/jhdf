@@ -99,9 +99,9 @@ public class ChunkedDatasetV3 extends DatasetBase {
 
 	private ByteBuffer getDecodedChunk(ChunkOffsetKey chunkKey) {
 		return decodedChunkLookup.computeIfAbsent(chunkKey, key -> {
-			Chunk chunk = getChunk(key);
+			final Chunk chunk = getChunk(key);
 			// Get the encoded (i.e. compressed buffer)
-			ByteBuffer encodedBuffer = getDataBuffer(chunk);
+			final ByteBuffer encodedBuffer = getDataBuffer(chunk);
 
 			if (filterPipelineMessage == null) {
 				// No filters
@@ -116,16 +116,22 @@ public class ChunkedDatasetV3 extends DatasetBase {
 						.getPipeline(filterPipelineMessage, bais);
 
 				byte[] decodedBytes = new byte[chunkSizeInBytes];
+				int bytesRead = 0;
 				try {
-					int bytesRead = inputStream.read(decodedBytes);
+					while (bytesRead < chunkSizeInBytes) {
+						bytesRead += inputStream.read(decodedBytes, bytesRead, decodedBytes.length - bytesRead);
+						logger.trace("Read {} bytes of chunk {}", bytesRead, chunk);
+					}
 					inputStream.close();
 					if (bytesRead != chunkSizeInBytes) {
-						logger.warn("Might not have read the data correctly. bytesRead=" + bytesRead + " chunkSize="
+						throw new HdfException("Data not read correctly for chunk " + chunk + ". bytesRead=" + bytesRead
+								+ " chunkSize="
 								+ chunkSizeInBytes);
 					}
 				} catch (IOException e) {
 					throw new HdfException("Failed to decode chunk '" + chunk + " of dataset '" + getPath() + "'");
 				}
+				logger.debug("Decoded {}", chunk);
 				return ByteBuffer.wrap(decodedBytes);
 			}
 
