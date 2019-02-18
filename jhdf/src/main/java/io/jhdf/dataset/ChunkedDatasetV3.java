@@ -209,6 +209,10 @@ public class ChunkedDatasetV3 extends DatasetBase {
 		}
 	}
 
+	/**
+	 * Custom key object for indexing chunks. It is optimised for fast hashcode and
+	 * equals when looking up chunks.
+	 */
 	private class ChunkOffsetKey {
 		final int hashcode;
 		final long[] chunkOffset;
@@ -229,18 +233,10 @@ public class ChunkedDatasetV3 extends DatasetBase {
 				return true;
 			if (obj == null)
 				return false;
-			if (getClass() != obj.getClass())
+			if (ChunkOffsetKey.class != obj.getClass())
 				return false;
 			ChunkOffsetKey other = (ChunkOffsetKey) obj;
-			if (!getEnclosingInstance().equals(other.getEnclosingInstance()))
-				return false;
-			if (!Arrays.equals(chunkOffset, other.chunkOffset))
-				return false;
-			return hashcode == other.hashcode;
-		}
-
-		private ChunkedDatasetV3 getEnclosingInstance() {
-			return ChunkedDatasetV3.this;
+			return Arrays.equals(chunkOffset, other.chunkOffset);
 		}
 
 		@Override
