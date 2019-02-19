@@ -98,44 +98,46 @@ public class ChunkedDatasetV3 extends DatasetBase {
 	}
 
 	private ByteBuffer getDecodedChunk(ChunkOffsetKey chunkKey) {
-		return decodedChunkLookup.computeIfAbsent(chunkKey, key -> {
-			final Chunk chunk = getChunk(key);
-			// Get the encoded (i.e. compressed buffer)
-			final ByteBuffer encodedBuffer = getDataBuffer(chunk);
+		return decodedChunkLookup.computeIfAbsent(chunkKey, this::decodeChunk);
+	}
 
-			if (filterPipelineMessage == null) {
-				// No filters
-				return encodedBuffer;
-			} else {
-				logger.debug("Decoding chunk '{}'", chunk);
-				// Need to setup the filter pipeline
-				byte[] encodedBytes = new byte[encodedBuffer.remaining()];
-				encodedBuffer.get(encodedBytes);
-				ByteArrayInputStream bais = new ByteArrayInputStream(encodedBytes);
-				InputStream inputStream = FilterManager
-						.getPipeline(filterPipelineMessage, bais);
+	private ByteBuffer decodeChunk(ChunkOffsetKey key) {
+		logger.debug("Decoding chunk '{}'", key);
+		final Chunk chunk = getChunk(key);
+		// Get the encoded (i.e. compressed buffer)
+		final ByteBuffer encodedBuffer = getDataBuffer(chunk);
 
-				byte[] decodedBytes = new byte[chunkSizeInBytes];
-				int bytesRead = 0;
-				try {
-					while (bytesRead < chunkSizeInBytes) {
-						bytesRead += inputStream.read(decodedBytes, bytesRead, decodedBytes.length - bytesRead);
-						logger.trace("Read {} bytes of chunk {}", bytesRead, chunk);
-					}
-					inputStream.close();
-					if (bytesRead != chunkSizeInBytes) {
-						throw new HdfException("Data not read correctly for chunk " + chunk + ". bytesRead=" + bytesRead
-								+ " chunkSize="
-								+ chunkSizeInBytes);
-					}
-				} catch (IOException e) {
-					throw new HdfException("Failed to decode chunk '" + chunk + " of dataset '" + getPath() + "'");
-				}
-				logger.debug("Decoded {}", chunk);
-				return ByteBuffer.wrap(decodedBytes);
+		if (filterPipelineMessage == null) {
+			// No filters
+			logger.debug("No filters returning decoded chunk '{}'", chunk);
+			return encodedBuffer;
+		}
+
+		// Need to setup the filter pipeline
+		byte[] encodedBytes = new byte[encodedBuffer.remaining()];
+		encodedBuffer.get(encodedBytes);
+		ByteArrayInputStream bais = new ByteArrayInputStream(encodedBytes);
+		InputStream inputStream = FilterManager
+				.getPipeline(filterPipelineMessage, bais);
+
+		byte[] decodedBytes = new byte[chunkSizeInBytes];
+		int bytesRead = 0;
+		try {
+			while (bytesRead < chunkSizeInBytes) {
+				bytesRead += inputStream.read(decodedBytes, bytesRead, decodedBytes.length - bytesRead);
+				logger.trace("Read {} bytes of chunk {}", bytesRead, chunk);
 			}
-
-		});
+			inputStream.close();
+			if (bytesRead != chunkSizeInBytes) {
+				throw new HdfException("Data not read correctly for chunk " + chunk + ". bytesRead=" + bytesRead
+						+ " chunkSize="
+						+ chunkSizeInBytes);
+			}
+		} catch (IOException e) {
+			throw new HdfException("Failed to decode chunk '" + chunk + " of dataset '" + getPath() + "'");
+		}
+		logger.debug("Decoded {}", chunk);
+		return ByteBuffer.wrap(decodedBytes);
 	}
 
 	private Chunk getChunk(ChunkOffsetKey key) {
