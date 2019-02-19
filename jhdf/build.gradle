@@ -11,7 +11,7 @@ plugins {
     id 'signing' // For GPG signing artifacts
     // Community plugins (need versions)
     id 'com.jfrog.bintray' version '1.8.4' // For publishing to Bintray
-    id 'org.sonarqube' version '2.6.2' // Code quality
+    id 'org.sonarqube' version '2.7' // Code quality
 }
 
 // Varibles
