@@ -29,11 +29,17 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	protected final Superblock sb;
 	protected final ObjectHeader oh;
 
+	private final DataType dataType;
+	private final DataSpace dataSpace;
+
 	public DatasetBase(FileChannel fc, Superblock sb, long address, String name, Group parent, ObjectHeader oh) {
 		super(fc, sb, address, name, parent);
 		this.fc = fc;
 		this.sb = sb;
 		this.oh = oh;
+
+		dataType = getHeaderMessage(DataTypeMessage.class).getDataType();
+		dataSpace = getHeaderMessage(DataSpaceMessage.class).getDataSpace();
 	}
 
 	@Override
@@ -42,7 +48,6 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	}
 
 	protected void convertToCorrectEndiness(ByteBuffer bb) {
-		final DataType dataType = getHeaderMessage(DataTypeMessage.class).getDataType();
 		if (dataType instanceof OrderedDataType) {
 			final ByteOrder order = (((OrderedDataType) dataType).getByteOrder());
 			bb.order(order);
@@ -52,24 +57,21 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 	@Override
 	public long getSize() {
-		DataSpace dataSpace = getHeaderMessage(DataSpaceMessage.class).getDataSpace();
 		return dataSpace.getTotalLentgh();
 	}
 
 	@Override
 	public long getDiskSize() {
-		final DataType dataType = getHeaderMessage(DataTypeMessage.class).getDataType();
 		return getSize() * dataType.getSize();
 	}
 
 	@Override
 	public int[] getDimensions() {
-		return getHeaderMessage(DataSpaceMessage.class).getDataSpace().getDimensions();
+		return dataSpace.getDimensions();
 	}
 
 	@Override
 	public Optional<int[]> getMaxSize() {
-		DataSpace dataSpace = getHeaderMessage(DataSpaceMessage.class).getDataSpace();
 		if (dataSpace.isMaxSizesPresent()) {
 			return Optional.of(dataSpace.getMaxSizes());
 		} else {
@@ -84,12 +86,11 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 	@Override
 	public Class<?> getJavaType() {
-		DataType dataType = getDataType();
 		return dataType.getJavaType();
 	}
 
 	protected DataType getDataType() {
-		return getHeaderMessage(DataTypeMessage.class).getDataType();
+		return dataType;
 	}
 
 	@Override

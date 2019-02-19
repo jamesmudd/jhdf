@@ -3,9 +3,10 @@
 
 This is a hobby project for me to see if I can write a loader for HDF5 files. The file format specification is available from the HDF Group [here](https://support.hdfgroup.org/HDF5/doc/H5.format.html).
 
-The intension is to make a clean Java API to access HDF5 data. Currently the project is targeting HDF5 1.8 read-only compatibility.
+The intension is to make a clean Java API to access HDF5 data. Currently the project is targeting HDF5 1.8 read-only compatibility. For progress see the [change log](CHANGES.md)
 
-Here is an example of reading a dataset with jHDF
+Here is an example of reading a dataset with jHDF (see [ReadDataset.java](jhdf/src/main/java/io/jhdf/examples/ReadDataset.java))
+
 ```java
 File file = new File("/path/to/file.hdf5");
 try (HdfFile hdfFile = new HdfFile(file)) {
@@ -14,3 +15,5 @@ try (HdfFile hdfFile = new HdfFile(file)) {
 	Object data = dataset.getData();
 }
 ```
+
+For an example of traversing the tree inside a HDF5 file see [PrintTree.java](jhdf/src/main/java/io/jhdf/examples/PrintTree.java)

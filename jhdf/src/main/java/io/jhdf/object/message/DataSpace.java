@@ -15,6 +15,7 @@ public class DataSpace {
 	private final int[] dimensions;
 	private final int[] maxSizes;
 	private final byte type;
+	private final long totalLentgh;
 
 	private DataSpace(ByteBuffer bb, Superblock sb) {
 
@@ -55,6 +56,11 @@ public class DataSpace {
 			maxSizes = new int[0];
 		}
 
+		// Calculate the total lentgh by multiplying all dimensions
+		totalLentgh = IntStream.of(dimensions)
+				.mapToLong(Long::valueOf) // Convert to long to avoid int overflow
+				.reduce(1, Math::multiplyExact);
+
 		// Permutation indices - Note never implemented in HDF library!
 	}
 
@@ -66,10 +72,9 @@ public class DataSpace {
 	 * Gets the total number of elements in this dataspace.
 	 * 
 	 * @return the total number of elements in this dataspace
-	 * @throws ArithmeticException if an integer overflow occurs
 	 */
 	public long getTotalLentgh() {
-		return IntStream.of(dimensions).reduce(1, Math::multiplyExact);
+		return totalLentgh;
 	}
 
 	public int getType() {

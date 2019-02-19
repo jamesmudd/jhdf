@@ -16,8 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.LongStream;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,37 +32,37 @@ import io.jhdf.filter.FilterManager;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
 import io.jhdf.object.message.FilterPipelineMessage;
 
+/**
+ * This represents chunked datasets using a b-tree for indexing raw data chunks.
+ * It supports filters for use when reading the dataset for example to
+ * decompress.
+ * 
+ * @author James Mudd
+ */
 public class ChunkedDatasetV3 extends DatasetBase {
 	private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetV3.class);
 
-	private Map<ChunkOffsetKey, Chunk> chunkLookup;
+	private final LazyInitializer<Map<ChunkOffsetKey, Chunk>> chunkLookup;
 	private final ConcurrentMap<ChunkOffsetKey, ByteBuffer> decodedChunkLookup = new ConcurrentHashMap<>();
 	private final int chunkSizeInBytes;
 
 	private final ChunkedDataLayoutMessageV3 layoutMessage;
+	private final FilterPipelineMessage filterPipelineMessage;
 
 	public ChunkedDatasetV3(FileChannel fc, Superblock sb, long address, String name, Group parent, ObjectHeader oh) {
 		super(fc, sb, address, name, parent, oh);
 
-		layoutMessage = getHeaderMessage(ChunkedDataLayoutMessageV3.class);
+		layoutMessage = oh.getMessageOfType(ChunkedDataLayoutMessageV3.class);
 		chunkSizeInBytes = getChunkSizeInBytes();
 
-		createChunkLookup();
-	}
-
-	private void createChunkLookup() {
-		// TODO convert to thread safe lazy
-		if (chunkLookup == null) {
-			BTreeV1Data bTree = BTreeV1.createDataBTree(fc, sb, layoutMessage.getBTreeAddress(),
-					getDimensions().length);
-
-			List<Chunk> chunks = bTree.getChunks();
-			chunkLookup = new HashMap<>(chunks.size());
-			for (Chunk chunk : chunks) {
-				chunkLookup.put(new ChunkOffsetKey(chunk.getChunkOffset()), chunk);
-			}
-			logger.debug("Created chunk lookup for '{}'", getPath());
+		// If the dataset has filters get the message
+		if (oh.hasMessageOfType(FilterPipelineMessage.class)) {
+			filterPipelineMessage = oh.getMessageOfType(FilterPipelineMessage.class);
+		} else {
+			filterPipelineMessage = null;
 		}
+
+		chunkLookup = new ChunkLookupLazyInitializer();
 	}
 
 	@Override
@@ -75,8 +75,8 @@ public class ChunkedDatasetV3 extends DatasetBase {
 		int elementSize = getDataType().getSize();
 		byte[] elementBuffer = new byte[elementSize];
 
-		for (int i = 0; i < dataArray.length; i += elementSize) {
-			int[] dimensionedIndex = linearIndexToDimensionIndex(i / elementSize, getDimensions());
+		for (int i = 0; i < getSize(); i++) {
+			int[] dimensionedIndex = linearIndexToDimensionIndex(i, getDimensions());
 			long[] chunkOffset = getChunkOffset(dimensionedIndex);
 
 			// Now figure out which element inside the chunk
@@ -84,51 +84,74 @@ public class ChunkedDatasetV3 extends DatasetBase {
 			for (int j = 0; j < chunkOffset.length; j++) {
 				insideChunk[j] = (int) (dimensionedIndex[j] - chunkOffset[j]);
 			}
-			int insideChunkLinearOffset = dimensionIndexToLinearIndex(insideChunk, layoutMessage.getDimSizes());
+			int insideChunkLinearOffset = dimensionIndexToLinearIndex(insideChunk, layoutMessage.getChunkDimensions());
 
 			ByteBuffer bb = getDecodedChunk(new ChunkOffsetKey(chunkOffset));
 			bb.position(insideChunkLinearOffset * elementSize);
 			bb.get(elementBuffer);
 
 			// Copy that data into the overall buffer
-			System.arraycopy(elementBuffer, 0, dataArray, i, elementSize);
+			System.arraycopy(elementBuffer, 0, dataArray, i * elementSize, elementSize);
 		}
 
 		return ByteBuffer.wrap(dataArray);
 	}
 
 	private ByteBuffer getDecodedChunk(ChunkOffsetKey chunkKey) {
-		return decodedChunkLookup.computeIfAbsent(chunkKey, key -> {
-			Chunk chunk = chunkLookup.get(key);
-			// Get the encoded (i.e. compressed buffer)
-			ByteBuffer encodedBuffer = getDataBuffer(chunk);
+		return decodedChunkLookup.computeIfAbsent(chunkKey, this::decodeChunk);
+	}
 
-			try {
-				if (header.get().hasMessageOfType(FilterPipelineMessage.class)) {
-					byte[] encodedBytes = new byte[encodedBuffer.remaining()];
-					encodedBuffer.get(encodedBytes);
-					ByteArrayInputStream bais = new ByteArrayInputStream(encodedBytes);
-					InputStream inputStream = FilterManager
-							.getPipeline(header.get().getMessageOfType(FilterPipelineMessage.class), bais);
+	private ByteBuffer decodeChunk(ChunkOffsetKey key) {
+		logger.debug("Decoding chunk '{}'", key);
+		final Chunk chunk = getChunk(key);
+		// Get the encoded (i.e. compressed buffer)
+		final ByteBuffer encodedBuffer = getDataBuffer(chunk);
 
-					byte[] decodedBytes = new byte[chunkSizeInBytes];
-					int bytesRead = inputStream.read(decodedBytes);
-					return ByteBuffer.wrap(decodedBytes);
-				} else {
-					// No filters
-					return encodedBuffer;
-				}
-			} catch (ConcurrentException | IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return null;
+		if (filterPipelineMessage == null) {
+			// No filters
+			logger.debug("No filters returning decoded chunk '{}'", chunk);
+			return encodedBuffer;
+		}
+
+		// Need to setup the filter pipeline
+		byte[] encodedBytes = new byte[encodedBuffer.remaining()];
+		encodedBuffer.get(encodedBytes);
+		ByteArrayInputStream bais = new ByteArrayInputStream(encodedBytes);
+		InputStream inputStream = FilterManager
+				.getPipeline(filterPipelineMessage, bais);
+
+		byte[] decodedBytes = new byte[chunkSizeInBytes];
+		int bytesRead = 0;
+		try {
+			while (bytesRead < chunkSizeInBytes) {
+				bytesRead += inputStream.read(decodedBytes, bytesRead, decodedBytes.length - bytesRead);
+				logger.trace("Read {} bytes of chunk {}", bytesRead, chunk);
 			}
-		});
+			inputStream.close();
+			if (bytesRead != chunkSizeInBytes) {
+				throw new HdfException("Data not read correctly for chunk " + chunk + ". bytesRead=" + bytesRead
+						+ " chunkSize="
+						+ chunkSizeInBytes);
+			}
+		} catch (IOException e) {
+			throw new HdfException("Failed to decode chunk '" + chunk + " of dataset '" + getPath() + "'");
+		}
+		logger.debug("Decoded {}", chunk);
+		return ByteBuffer.wrap(decodedBytes);
+	}
+
+	private Chunk getChunk(ChunkOffsetKey key) {
+		try {
+			return chunkLookup.get().get(key);
+		} catch (ConcurrentException e) {
+			throw new HdfException("Failed to create chunk lookup for '" + getPath() + "'");
+		}
 	}
 
 	private int getChunkSizeInBytes() {
 		return Math.toIntExact(
-				LongStream.of(layoutMessage.getDimSizes()).reduce(1, Math::multiplyExact) * layoutMessage.getSize());
+				LongStream.of(layoutMessage.getChunkDimensions()).reduce(1, Math::multiplyExact)
+						* layoutMessage.getSize());
 	}
 
 	private ByteBuffer getDataBuffer(Chunk chunk) {
@@ -165,19 +188,40 @@ public class ChunkedDatasetV3 extends DatasetBase {
 	private long[] getChunkOffset(int[] dimensionedIndex) {
 		long[] chunkOffset = new long[dimensionedIndex.length];
 		for (int i = 0; i < chunkOffset.length; i++) {
-			long temp = toIntExact(layoutMessage.getDimSizes()[i]);
+			long temp = toIntExact(layoutMessage.getChunkDimensions()[i]);
 			chunkOffset[i] = (dimensionedIndex[i] / temp) * temp;
 		}
 		return chunkOffset;
 	}
 
+	private final class ChunkLookupLazyInitializer extends LazyInitializer<Map<ChunkOffsetKey, Chunk>> {
+		@Override
+		protected Map<ChunkOffsetKey, Chunk> initialize() throws ConcurrentException {
+			logger.debug("Lazy initalizing chunk lookup for '{}'", getPath());
+			BTreeV1Data bTree = BTreeV1.createDataBTree(fc, sb, layoutMessage.getBTreeAddress(),
+					getDimensions().length);
+
+			List<Chunk> chunks = bTree.getChunks();
+			Map<ChunkOffsetKey, Chunk> chunkLookupMap = new HashMap<>(chunks.size());
+			for (Chunk chunk : chunks) {
+				chunkLookupMap.put(new ChunkOffsetKey(chunk.getChunkOffset()), chunk);
+			}
+			logger.debug("Created chunk lookup for '{}'", getPath());
+			return chunkLookupMap;
+		}
+	}
+
+	/**
+	 * Custom key object for indexing chunks. It is optimised for fast hashcode and
+	 * equals when looking up chunks.
+	 */
 	private class ChunkOffsetKey {
 		final int hashcode;
 		final long[] chunkOffset;
 
 		private ChunkOffsetKey(long[] chunkOffset) {
 			this.chunkOffset = chunkOffset;
-			hashcode = ArrayUtils.hashCode(chunkOffset);
+			hashcode = Arrays.hashCode(chunkOffset);
 		}
 
 		@Override
@@ -191,16 +235,10 @@ public class ChunkedDatasetV3 extends DatasetBase {
 				return true;
 			if (obj == null)
 				return false;
-			if (getClass() != obj.getClass())
+			if (ChunkOffsetKey.class != obj.getClass())
 				return false;
 			ChunkOffsetKey other = (ChunkOffsetKey) obj;
-			if (!getEnclosingInstance().equals(other.getEnclosingInstance()))
-				return false;
-			return hashcode == other.hashcode;
-		}
-
-		private ChunkedDatasetV3 getEnclosingInstance() {
-			return ChunkedDatasetV3.this;
+			return Arrays.equals(chunkOffset, other.chunkOffset);
 		}
 
 		@Override

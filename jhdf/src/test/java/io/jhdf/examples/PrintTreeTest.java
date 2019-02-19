@@ -4,16 +4,16 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
-public class ApiTestTest {
+public class PrintTreeTest {
 
 	@Test
 	public void testOpeningV1File() throws IOException {
-		ApiTest.main(new String[] { "src/test/resources/io/jhdf/test_file.hdf5" });
+		PrintTree.main(new String[] { "src/test/resources/io/jhdf/test_file.hdf5" });
 	}
 
 	@Test
 	public void testOpeningV2File() throws IOException {
-		ApiTest.main(new String[] { "src/test/resources/io/jhdf/test_file2.hdf5" });
+		PrintTree.main(new String[] { "src/test/resources/io/jhdf/test_file2.hdf5" });
 	}
 
 }
