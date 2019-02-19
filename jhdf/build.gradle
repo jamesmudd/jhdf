@@ -29,20 +29,20 @@ repositories {
 
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta2' // Need 1.8 for modules
-	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta2' // Need 1.8 for modules
+	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
 
-    runtime group: 'org.slf4j', name: 'slf4j-simple', version: '1.8.0-beta2'
+    runtimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.8.0-beta2'
     
     // Use JUnit 5 test framework
-    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.+'
-	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.3.+'
-	testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.3.+'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.+'
+	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.3.+'
+	testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.3.+'
     
     // Mocking
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.23.+'
 	// Matchers
-	testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+	testImplementation group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
 }
 
 test {
