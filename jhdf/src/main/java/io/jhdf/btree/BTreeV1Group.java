@@ -23,7 +23,7 @@ public abstract class BTreeV1Group extends BTreeV1 {
 		super(fc, sb, address);
 	}
 
-	/* package */ static class BTreeV1GroupLeafNode extends BTreeV1 {
+	/* package */ static class BTreeV1GroupLeafNode extends BTreeV1Group {
 
 		private final List<Long> childAddresses;
 
@@ -58,7 +58,7 @@ public abstract class BTreeV1Group extends BTreeV1 {
 
 	}
 
-	/* package */ static class BTreeV1GroupNonLeafNode extends BTreeV1 {
+	/* package */ static class BTreeV1GroupNonLeafNode extends BTreeV1Group {
 
 		private final List<BTreeV1> childNodes;
 

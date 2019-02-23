@@ -38,7 +38,7 @@ public abstract class BTreeV1 {
 	private final long leftSiblingAddress;
 	private final long rightSiblingAddress;
 
-	public static BTreeV1 createGroupBTree(FileChannel fc, Superblock sb, long address) {
+	public static BTreeV1Group createGroupBTree(FileChannel fc, Superblock sb, long address) {
 		ByteBuffer header = readHeaderAndValidateSignature(fc, address);
 
 		final byte nodeType = header.get();
