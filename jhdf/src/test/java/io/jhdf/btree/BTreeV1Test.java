@@ -38,16 +38,13 @@ public class BTreeV1Test {
 	}
 
 	@Test
-	public void testBTreeNode() throws IOException {
+	public void testBTreeNode() {
 		BTreeV1 bTree = BTreeV1.createGroupBTree(fc, sb, 136);
 
-		assertThat(bTree.getNodeType(), is(equalTo((short) 0)));
-		assertThat(bTree.getNodeLevel(), is(equalTo((short) 0)));
 		assertThat(bTree.getEntriesUsed(), is(equalTo(1)));
 		assertThat(bTree.getLeftSiblingAddress(), is(equalTo(UNDEFINED_ADDRESS)));
 		assertThat(bTree.getRightSiblingAddress(), is(equalTo(UNDEFINED_ADDRESS)));
 		assertThat(bTree.getChildAddresses(), contains(1504L));
-		assertThat(bTree.toString(), is(equalTo("BTreeV1 [address=136, nodeType=0, nodeLevel=0]")));
 	}
 
 }

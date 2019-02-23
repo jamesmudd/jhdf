@@ -15,12 +15,20 @@ import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 
+/**
+ * V1 B-trees where the node type is 1 i.e. points to raw data chunk nodes
+ * 
+ * @author James Mudd
+ */
 public abstract class BTreeV1Data extends BTreeV1 {
 
 	private BTreeV1Data(FileChannel fc, Superblock sb, long address) {
 		super(fc, sb, address);
 	}
 
+	/**
+	 * @return the raw data chunks address from this b-tree
+	 */
 	public abstract List<Chunk> getChunks();
 
 	public class Chunk {
@@ -29,7 +37,7 @@ public abstract class BTreeV1Data extends BTreeV1 {
 		private final long[] chunkOffset;
 		private final long address;
 
-		Chunk(int size, BitSet filterMask, long[] chunkOffset, long address) {
+		private Chunk(int size, BitSet filterMask, long[] chunkOffset, long address) {
 			super();
 			this.size = size;
 			this.filterMask = filterMask;
@@ -60,11 +68,11 @@ public abstract class BTreeV1Data extends BTreeV1 {
 		}
 	}
 
-	static class BTreeV1DataLeafNode extends BTreeV1Data {
+	/* package */ static class BTreeV1DataLeafNode extends BTreeV1Data {
 
 		private final ArrayList<Chunk> chunks;
 
-		BTreeV1DataLeafNode(FileChannel fc, Superblock sb, long address, int dataDimensions) {
+		/* package */ BTreeV1DataLeafNode(FileChannel fc, Superblock sb, long address, int dataDimensions) {
 			super(fc, sb, address);
 
 			int keySize = 4 + 4 + (dataDimensions + 1) * 8;
@@ -117,11 +125,17 @@ public abstract class BTreeV1Data extends BTreeV1 {
 		}
 	}
 
-	static class BTreeV1DataNonLeafNode extends BTreeV1Data {
+	/* package */ static class BTreeV1DataNonLeafNode extends BTreeV1Data {
 
 		private final List<BTreeV1Data> childNodes;
 
-		public BTreeV1DataNonLeafNode(FileChannel fc, Superblock sb, long address, int dataDimensions) {
+		/* package */ /**
+						 * @param fc
+						 * @param sb
+						 * @param address
+						 * @param dataDimensions
+						 */
+		BTreeV1DataNonLeafNode(FileChannel fc, Superblock sb, long address, int dataDimensions) {
 			super(fc, sb, address);
 
 			int keySize = 4 + 4 + (dataDimensions + 1) * 8;
@@ -148,15 +162,6 @@ public abstract class BTreeV1Data extends BTreeV1 {
 		}
 
 		@Override
-		public List<Long> getChildAddresses() {
-			List<Long> childAddresses = new ArrayList<>();
-			for (BTreeV1 child : childNodes) {
-				childAddresses.addAll(child.getChildAddresses());
-			}
-			return childAddresses;
-		}
-
-		@Override
 		public List<Chunk> getChunks() {
 			List<Chunk> childAddresses = new ArrayList<>();
 			for (BTreeV1Data child : childNodes) {
@@ -165,5 +170,13 @@ public abstract class BTreeV1Data extends BTreeV1 {
 			return childAddresses;
 		}
 
+		@Override
+		public List<Long> getChildAddresses() {
+			List<Long> childAddresses = new ArrayList<>();
+			for (BTreeV1 child : childNodes) {
+				childAddresses.addAll(child.getChildAddresses());
+			}
+			return childAddresses;
+		}
 	}
 }
