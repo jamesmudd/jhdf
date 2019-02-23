@@ -1,7 +1,6 @@
 package io.jhdf.api;
 
 import java.nio.ByteBuffer;
-import java.util.Optional;
 
 import io.jhdf.object.message.DataLayout;
 
@@ -43,12 +42,12 @@ public interface Dataset extends Node {
 	int[] getDimensions();
 
 	/**
-	 * Gets the max size of this dataset if present or an empty {@link Optional} if
-	 * not present.
+	 * Gets the max size of this dataset. If not specified this will be equal to
+	 * {@link #getDimensions()}
 	 * 
-	 * @return the max size of this dataset if present.
+	 * @return the max size of this dataset
 	 */
-	Optional<int[]> getMaxSize();
+	int[] getMaxSize();
 
 	/**
 	 * Gets the data layout of this dataset.

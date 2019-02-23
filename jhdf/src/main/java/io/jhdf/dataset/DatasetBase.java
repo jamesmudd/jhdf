@@ -3,7 +3,6 @@ package io.jhdf.dataset;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,11 +70,11 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	}
 
 	@Override
-	public Optional<int[]> getMaxSize() {
+	public int[] getMaxSize() {
 		if (dataSpace.isMaxSizesPresent()) {
-			return Optional.of(dataSpace.getMaxSizes());
+			return dataSpace.getMaxSizes();
 		} else {
-			return Optional.empty();
+			return getDimensions();
 		}
 	}
 
