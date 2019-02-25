@@ -12,7 +12,7 @@ public abstract class DataType {
 	private final int version;
 	private final int dataClass;
 	private final int size; // In bytes
-	protected final byte[] classBytes;
+	protected final BitSet classBits;
 
 	public static DataType readDataType(ByteBuffer bb) {
 		// Mark buffer position
@@ -25,7 +25,8 @@ public abstract class DataType {
 
 		if (version == 0) {
 			throw new HdfException("Unreconized datatype version 0 detected");
-		} else if (version == 3) {
+		}
+		if (version == 3) {
 			throw new UnsupportedHdfException("VAX byte ordered datatype encountered");
 		}
 
@@ -50,15 +51,16 @@ public abstract class DataType {
 	protected DataType(ByteBuffer bb) {
 
 		// Class and version
-		byte classAndVersion = bb.get();
-		version = classAndVersion >>> 4;
-		dataClass = classAndVersion & 0xF;
+		BitSet classAndVersion = BitSet.valueOf(new byte[] { bb.get() });
+		version = Utils.bitsToInt(classAndVersion, 4, 4);
+		dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
 
-		classBytes = new byte[3];
+		byte[] classBytes = new byte[3];
 		bb.get(classBytes);
+		classBits = BitSet.valueOf(classBytes);
 
 		// Size
-		size = bb.getInt();
+		size = Utils.readBytesAsUnsignedInt(bb, 4);
 	}
 
 	public int getVersion() {

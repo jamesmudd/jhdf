@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 
-class VariableLentgh extends DataType {
+public class VariableLentgh extends DataType {
 
 	private final int type;
 	private final int paddingType;
@@ -17,9 +17,9 @@ class VariableLentgh extends DataType {
 	public VariableLentgh(ByteBuffer bb) {
 		super(bb);
 
-		type = classBytes[0] >>> 4;
-		paddingType = classBytes[0] & 0xF;
-		int characterEncoding = classBytes[1] >>> 4;
+		type = Utils.bitsToInt(classBits, 0, 4);
+		paddingType = Utils.bitsToInt(classBits, 4, 4);
+		int characterEncoding = Utils.bitsToInt(classBits, 8, 4);
 		switch (characterEncoding) {
 		case 0:
 			encoding = StandardCharsets.US_ASCII;
@@ -31,7 +31,6 @@ class VariableLentgh extends DataType {
 			throw new HdfException("Unreconised character encoding = " + characterEncoding);
 		}
 
-		Utils.seekBufferToNextMultipleOfEight(bb);
 		parent = DataType.readDataType(bb);
 	}
 
@@ -53,8 +52,11 @@ class VariableLentgh extends DataType {
 
 	@Override
 	public Class<?> getJavaType() {
-		// TODO Auto-generated method stub
-		return null;
+		if (type == 1) {
+			return String.class;
+		} else {
+			return parent.getJavaType();
+		}
 	}
 
 }

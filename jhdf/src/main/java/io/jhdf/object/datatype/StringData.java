@@ -3,7 +3,6 @@ package io.jhdf.object.datatype;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.BitSet;
 
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
@@ -19,12 +18,11 @@ public class StringData extends DataType {
 	public StringData(ByteBuffer bb) {
 		super(bb);
 
-		BitSet bits = BitSet.valueOf(classBytes);
-		nullTerminated = bits.get(0);
-		nullPad = bits.get(1);
-		spacePad = bits.get(2);
+		nullTerminated = classBits.get(0);
+		nullPad = classBits.get(1);
+		spacePad = classBits.get(2);
 
-		final int charsetIndex = Utils.bitsToInt(bits, 4, 4);
+		final int charsetIndex = Utils.bitsToInt(classBits, 4, 4);
 		switch (charsetIndex) {
 		case 0:
 			charset = StandardCharsets.US_ASCII;

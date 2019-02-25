@@ -3,7 +3,6 @@ package io.jhdf.object.datatype;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.BitSet;
 
 import io.jhdf.exceptions.HdfTypeException;
 
@@ -18,16 +17,15 @@ public class FixedPoint extends DataType implements OrderedDataType {
 	public FixedPoint(ByteBuffer bb) {
 		super(bb);
 
-		BitSet bits = BitSet.valueOf(classBytes);
-		if (bits.get(0)) {
+		if (classBits.get(0)) {
 			order = ByteOrder.BIG_ENDIAN;
 		} else {
 			order = ByteOrder.LITTLE_ENDIAN;
 		}
 
-		lowPadding = bits.get(1);
-		highPadding = bits.get(2);
-		signed = bits.get(3);
+		lowPadding = classBits.get(1);
+		highPadding = classBits.get(2);
+		signed = classBits.get(3);
 
 		bitOffset = bb.getShort();
 		bitPrecision = bb.getShort();
