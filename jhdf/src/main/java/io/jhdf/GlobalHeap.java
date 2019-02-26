@@ -15,14 +15,12 @@ public class GlobalHeap {
 	private static final byte[] GLOBAL_HEAP_SIGNATURE = "GCOL".getBytes();
 
 	private final long address;
-	private final FileChannel fc;
 	private final Superblock sb;
 
 	private final Map<Integer, GlobalHeapObject> objects = new HashMap<>();
 
-	public GlobalHeap(long address, FileChannel fc, Superblock sb) {
+	public GlobalHeap(FileChannel fc, Superblock sb, long address) {
 		this.address = address;
-		this.fc = fc;
 		this.sb = sb;
 
 		try {
@@ -72,6 +70,11 @@ public class GlobalHeap {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "GlobalHeap [address=" + address + ", objects=" + objects.size() + "]";
+	}
+
 	private class GlobalHeapObject {
 
 		final int index;
@@ -89,9 +92,34 @@ public class GlobalHeap {
 		}
 	}
 
+	/**
+	 * Gets the data buffer for an object in this global heap.
+	 * 
+	 * @param index the requested object
+	 * @return the object data buffer
+	 * @throws IllegalArgumentException if the requested index is not in the heap
+	 */
 	public ByteBuffer getObjectData(int index) {
-		return objects.get(index).data;
+		if (!objects.containsKey(index)) {
+			throw new IllegalArgumentException("Global heap doesn't contain object with index: " + index);
+		}
 
+		return objects.get(index).data;
+	}
+
+	/**
+	 * Gets the number of references to an object in this global heap.
+	 * 
+	 * @param index of the object
+	 * @return the number of references to the object
+	 * @throws IllegalArgumentException if the requested index is not in the heap
+	 */
+	public int getObjectReferenceCount(int index) {
+		if (!objects.containsKey(index)) {
+			throw new IllegalArgumentException("Global heap doesn't contain object with index: " + index);
+		}
+
+		return objects.get(index).referenceCount;
 	}
 
 }

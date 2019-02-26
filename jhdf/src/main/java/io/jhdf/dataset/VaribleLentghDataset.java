@@ -111,7 +111,7 @@ public class VaribleLentghDataset implements Dataset {
 	}
 
 	private GlobalHeap createGlobalHeap(long address) {
-		return new GlobalHeap(address, fc, sb);
+		return new GlobalHeap(fc, sb, address);
 	}
 
 	// Delegate all methods to the underlying dataset
