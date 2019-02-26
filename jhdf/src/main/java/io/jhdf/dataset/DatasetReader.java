@@ -9,12 +9,16 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.FixedPoint;
 import io.jhdf.object.datatype.FloatingPoint;
+import io.jhdf.object.datatype.StringData;
+import io.jhdf.object.datatype.VariableLentgh;
 
 /**
  * <p>
@@ -100,6 +104,15 @@ public class DatasetReader {
 				throw new HdfTypeException(
 						"Unsupported floating point type size " + floatingPoint.getSize() + " bytes");
 			}
+		} else if (type instanceof StringData) {
+			StringData stringData = (StringData) type;
+			int stringLength = stringData.getSize();
+			fillFixedLentghStringData(data, dimensions, buffer, stringLength);
+		} else if (type instanceof VariableLentgh) {
+			VariableLentgh variableLentgh = (VariableLentgh) type;
+			Charset encoding = variableLentgh.getEncoding();
+			int stringLength = variableLentgh.getSize();
+			fillVariableLentghStringData(data, dimensions, buffer, stringLength, encoding);
 		}
 
 		return data;
@@ -111,7 +124,7 @@ public class DatasetReader {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillData(newArray, Arrays.copyOfRange(dims, 1, dims.length), buffer);
+				fillData(newArray, stripLeadingIndex(dims), buffer);
 			}
 		} else {
 			buffer.get((byte[]) data);
@@ -122,7 +135,7 @@ public class DatasetReader {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillData(newArray, Arrays.copyOfRange(dims, 1, dims.length), buffer);
+				fillData(newArray, stripLeadingIndex(dims), buffer);
 			}
 		} else {
 			buffer.get((short[]) data);
@@ -133,7 +146,7 @@ public class DatasetReader {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillData(newArray, Arrays.copyOfRange(dims, 1, dims.length), buffer);
+				fillData(newArray, stripLeadingIndex(dims), buffer);
 			}
 		} else {
 			buffer.get((int[]) data);
@@ -144,7 +157,7 @@ public class DatasetReader {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillData(newArray, Arrays.copyOfRange(dims, 1, dims.length), buffer);
+				fillData(newArray, stripLeadingIndex(dims), buffer);
 			}
 		} else {
 			buffer.get((long[]) data);
@@ -157,7 +170,7 @@ public class DatasetReader {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillDataUnsigned(newArray, Arrays.copyOfRange(dims, 1, dims.length), buffer);
+				fillDataUnsigned(newArray, stripLeadingIndex(dims), buffer);
 			}
 		} else {
 			final byte[] tempBuffer = new byte[dims[dims.length - 1]];
@@ -174,7 +187,7 @@ public class DatasetReader {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillDataUnsigned(newArray, Arrays.copyOfRange(dims, 1, dims.length), buffer);
+				fillDataUnsigned(newArray, stripLeadingIndex(dims), buffer);
 			}
 		} else {
 			final short[] tempBuffer = new short[dims[dims.length - 1]];
@@ -191,7 +204,7 @@ public class DatasetReader {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillDataUnsigned(newArray, Arrays.copyOfRange(dims, 1, dims.length), buffer);
+				fillDataUnsigned(newArray, stripLeadingIndex(dims), buffer);
 			}
 		} else {
 			final int[] tempBuffer = new int[dims[dims.length - 1]];
@@ -208,7 +221,7 @@ public class DatasetReader {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillDataUnsigned(newArray, Arrays.copyOfRange(dims, 1, dims.length), buffer);
+				fillDataUnsigned(newArray, stripLeadingIndex(dims), buffer);
 			}
 		} else {
 			final long[] tempBuffer = new long[dims[dims.length - 1]];
@@ -228,7 +241,7 @@ public class DatasetReader {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillData(newArray, Arrays.copyOfRange(dims, 1, dims.length), buffer);
+				fillData(newArray, stripLeadingIndex(dims), buffer);
 			}
 		} else {
 			buffer.get((float[]) data);
@@ -239,11 +252,50 @@ public class DatasetReader {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillData(newArray, Arrays.copyOfRange(dims, 1, dims.length), buffer);
+				fillData(newArray, stripLeadingIndex(dims), buffer);
 			}
 		} else {
 			buffer.get((double[]) data);
 		}
+	}
+
+	// String Data
+
+	private static void fillFixedLentghStringData(Object data, int[] dims, ByteBuffer buffer, int stringLength) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				fillData(newArray, stripLeadingIndex(dims), buffer);
+			}
+		} else {
+			for (int i = 0; i < dims[0]; i++) {
+				buffer.position(i * stringLength);
+				Array.set(data, i, Utils.readUntilNull(buffer));
+			}
+		}
+	}
+
+	private static void fillVariableLentghStringData(Object data, int[] dims, ByteBuffer buffer, int stringLength,
+			Charset charset) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				fillData(newArray, stripLeadingIndex(dims), buffer);
+			}
+		} else {
+			byte[] elementBuffer = new byte[stringLength];
+			for (int i = 0; i < dims[0]; i++) {
+				buffer.position(i * stringLength);
+				buffer.get(elementBuffer);
+				Array.set(data, i, charset.decode(ByteBuffer.wrap(elementBuffer)).toString());
+			}
+		}
+	}
+
+	// Utils
+
+	private static int[] stripLeadingIndex(int[] dims) {
+		return Arrays.copyOfRange(dims, 1, dims.length);
 	}
 
 }
