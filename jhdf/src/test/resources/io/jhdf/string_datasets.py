@@ -12,6 +12,12 @@ def write_string_datasets(f):
     for i in range(10):
         fixed_ds[i] = ('string number ' + str(i)).encode('ascii')
     
+    # Fixed length (15) ASCII dataset the exact lentgh of 'string number 0'
+    fixed_length = 'S15'
+    fixed_ds = f.create_dataset('fixed_lentgh_ascii_1_char', (10,), dtype=fixed_length)
+    for i in range(10):
+        fixed_ds[i] = ('string number ' + str(i)).encode('ascii')
+
     # Variable length ASCII dataset
     ascii = h5py.special_dtype(vlen=bytes)
     varaible_ascii_ds = f.create_dataset('variable_lentgh_ascii', (10,), dtype=ascii)
