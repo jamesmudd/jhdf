@@ -2,6 +2,8 @@
 
 Please note this project is still in pre-release development.
 
+- Add support for String datasets
+- Remove Dataset.getDataBuffer - Not all datasets can reasonably support accessing the backing buffer
 - Dataset.getMaxSize now always returns a result previously returned Optional if no max size was in the file now it returns the dataset size if no max size is present.
 - Remove dependency on org.slf4j.slf4j-simple, now just depends on slf4j-api
 - Update SLF4J to 1.8.0-beta4
