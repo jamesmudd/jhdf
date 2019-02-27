@@ -13,7 +13,6 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -38,7 +37,7 @@ public class HdfFileTest {
 	private String testFile2Url;
 
 	@BeforeEach
-	public void setup() throws FileNotFoundException {
+	public void setup() {
 		testFileUrl = this.getClass().getResource(HDF5_TEST_FILE_NAME).getFile();
 		testFile2Url = this.getClass().getResource(HDF5_TEST_FILE_TWO_NAME).getFile();
 		nonHdfFile = this.getClass().getResource(NON_HDF5_TEST_FILE_NAME).getFile();
@@ -58,13 +57,13 @@ public class HdfFileTest {
 	}
 
 	@Test
-	public void testOpeningInvalidFile() throws IOException {
+	public void testOpeningInvalidFile() {
 		HdfException ex = assertThrows(HdfException.class, () -> new HdfFile(new File(nonHdfFile)));
 		assertThat(ex.getMessage(), is(equalTo("No valid HDF5 signature found")));
 	}
 
 	@Test
-	public void testOpeningMissingFile() throws IOException {
+	public void testOpeningMissingFile() {
 		HdfException ex = assertThrows(HdfException.class,
 				() -> new HdfFile(new File("madeUpFileNameThatDoesntExist.hello")));
 		assertThat(ex.getMessage(), is(equalTo("Failed to open file. Is it a HDF5 file?")));
@@ -72,7 +71,7 @@ public class HdfFileTest {
 	}
 
 	@Test
-	public void testRootGroup() throws Exception {
+	public void testRootGroup() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.getName(), is(equalTo(HDF5_TEST_FILE_NAME)));
 			assertThat(hdfFile.getType(), is(equalTo(NodeType.FILE)));
@@ -80,7 +79,7 @@ public class HdfFileTest {
 	}
 
 	@Test
-	public void testNodesUnderTheRootGroupHaveTheRightPath() throws Exception {
+	public void testNodesUnderTheRootGroupHaveTheRightPath() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			Group firstGroup = (Group) hdfFile.getChildren().values().iterator().next();
 			String firstGroupName = firstGroup.getName();
@@ -98,7 +97,7 @@ public class HdfFileTest {
 	}
 
 	@Test
-	public void testIteratingFile() throws Exception {
+	public void testIteratingFile() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			final Iterator<Node> iterator = hdfFile.iterator();
 			assertThat(iterator.hasNext(), is(true));
@@ -106,7 +105,7 @@ public class HdfFileTest {
 	}
 
 	@Test
-	void testGettingTheFileBackFromAGroup() throws Exception {
+	void testGettingTheFileBackFromAGroup() {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
 			for (Node node : hdfFile) {
@@ -116,7 +115,7 @@ public class HdfFileTest {
 	}
 
 	@Test // This is to ensure no exceptions are thrown when inspecting the whole file
-	void recurseThroughTheFileCallingBasicMethodsOnAllNodes() throws Exception {
+	void recurseThroughTheFileCallingBasicMethodsOnAllNodes() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			recurseGroup(hdfFile);
 		}
@@ -145,7 +144,7 @@ public class HdfFileTest {
 	}
 
 	@Test
-	void testGettingChildByName() throws Exception {
+	void testGettingChildByName() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.getChild("datasets_group"), is(notNullValue()));
 			assertThat(hdfFile.getChild("non_existent_child"), is(nullValue()));
@@ -153,35 +152,35 @@ public class HdfFileTest {
 	}
 
 	@Test
-	void testHdfFileHasNoParent() throws Exception {
+	void testHdfFileHasNoParent() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.getParent(), is(nullValue()));
 		}
 	}
 
 	@Test
-	void testHdfFileIsGroup() throws Exception {
+	void testHdfFileIsGroup() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.isGroup(), is(true));
 		}
 	}
 
 	@Test
-	void testFormatOfToString() throws Exception {
+	void testFormatOfToString() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.toString(), is(equalTo("HdfFile [file=test_file.hdf5]")));
 		}
 	}
 
 	@Test
-	void testGettingHdfFileAttributes() throws Exception {
+	void testGettingHdfFileAttributes() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.getAttributes(), is(notNullValue()));
 		}
 	}
 
 	@Test
-	void testGettingByPath() throws Exception {
+	void testGettingByPath() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			String path = "datasets_group/float/float32";
 			Node node = hdfFile.getByPath(path);
@@ -192,7 +191,7 @@ public class HdfFileTest {
 	}
 
 	@Test
-	void testGettingByPathWithLeadingSlash() throws Exception {
+	void testGettingByPathWithLeadingSlash() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			String path = "/datasets_group/float/float32";
 			Node node = hdfFile.getByPath(path);
@@ -202,7 +201,7 @@ public class HdfFileTest {
 	}
 
 	@Test
-	void testGettingByInvalidPathWithLeadingSlashThrows() throws Exception {
+	void testGettingByInvalidPathWithLeadingSlashThrows() {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
 			String path = "/datasets_group/float/float32/invalid_name";

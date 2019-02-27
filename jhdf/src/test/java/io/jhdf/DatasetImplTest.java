@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
@@ -24,6 +23,11 @@ import io.jhdf.object.message.DataLayout;
 
 public class DatasetImplTest {
 
+	private static final String INT8_PATH = "/datasets_group/int/int8";
+	private static final String INT16_PATH = "/datasets_group/int/int16";
+	private static final String INT32_PATH = "/datasets_group/int/int32";
+	private static final String FLOAT64_PATH = "/datasets_group/float/float64";
+	private static final String FLOAT32_PATH = "/datasets_group/float/float32";
 	private static final String HDF5_TEST_FILE_NAME = "test_file.hdf5";
 	private static final String TEST_FILE_URL = DatasetImplTest.class.getResource(HDF5_TEST_FILE_NAME).getFile();
 
@@ -52,13 +56,13 @@ public class DatasetImplTest {
 	}
 
 	@AfterAll
-	static void afterAll() throws IOException {
+	static void afterAll() {
 		hdfFile.close();
 	}
 
 	@Test
-	void testByteDatasetBuffer() throws Exception {
-		DatasetBase dataset = (DatasetBase) hdfFile.getByPath("/datasets_group/int/int8");
+	void testByteDatasetBuffer() {
+		DatasetBase dataset = (DatasetBase) hdfFile.getByPath(INT8_PATH);
 		// We know this is a float dataset so get the float buffer
 		ByteBuffer buffer = dataset.getDataBuffer();
 		assertThat(buffer, is(notNullValue()));
@@ -73,8 +77,8 @@ public class DatasetImplTest {
 	}
 
 	@Test
-	void testShortDatasetBuffer() throws Exception {
-		DatasetBase dataset = (DatasetBase) hdfFile.getByPath("/datasets_group/int/int16");
+	void testShortDatasetBuffer() {
+		DatasetBase dataset = (DatasetBase) hdfFile.getByPath(INT16_PATH);
 		// We know this is a short dataset so get the short buffer
 		ShortBuffer buffer = dataset.getDataBuffer().asShortBuffer();
 		assertThat(buffer, is(notNullValue()));
@@ -89,8 +93,8 @@ public class DatasetImplTest {
 	}
 
 	@Test
-	void testIntDatasetBuffer() throws Exception {
-		DatasetBase dataset = (DatasetBase) hdfFile.getByPath("/datasets_group/int/int32");
+	void testIntDatasetBuffer() {
+		DatasetBase dataset = (DatasetBase) hdfFile.getByPath(INT32_PATH);
 		// We know this is a int dataset so get the int buffer
 		IntBuffer buffer = dataset.getDataBuffer().asIntBuffer();
 		assertThat(buffer, is(notNullValue()));
@@ -105,8 +109,8 @@ public class DatasetImplTest {
 	}
 
 	@Test
-	void testFloatDatasetBuffer() throws Exception {
-		DatasetBase dataset = (DatasetBase) hdfFile.getByPath("/datasets_group/float/float32");
+	void testFloatDatasetBuffer() {
+		DatasetBase dataset = (DatasetBase) hdfFile.getByPath(FLOAT32_PATH);
 		// We know this is a float dataset so get the float buffer
 		FloatBuffer buffer = dataset.getDataBuffer().asFloatBuffer();
 		assertThat(buffer, is(notNullValue()));
@@ -121,8 +125,8 @@ public class DatasetImplTest {
 	}
 
 	@Test
-	void testDoubleDatasetBuffer() throws Exception {
-		DatasetBase dataset = (DatasetBase) hdfFile.getByPath("/datasets_group/float/float64");
+	void testDoubleDatasetBuffer() {
+		DatasetBase dataset = (DatasetBase) hdfFile.getByPath(FLOAT64_PATH);
 		// We know this is a double dataset so get the double buffer
 		DoubleBuffer buffer = dataset.getDataBuffer().asDoubleBuffer();
 		assertThat(buffer, is(notNullValue()));
@@ -137,86 +141,86 @@ public class DatasetImplTest {
 	}
 
 	@Test
-	void testByteDatasetSize() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int8");
+	void testByteDatasetSize() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(INT8_PATH);
 		assertThat(dataset.getSize(), is(equalTo(21L)));
 	}
 
 	@Test
-	void testByteDatasetDiskSize() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int8");
+	void testByteDatasetDiskSize() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(INT8_PATH);
 		assertThat(dataset.getDiskSize(), is(equalTo(21L)));
 	}
 
 	@Test
-	void testShortDatasetSize() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int16");
+	void testShortDatasetSize() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(INT16_PATH);
 		assertThat(dataset.getSize(), is(equalTo(21L)));
 	}
 
 	@Test
-	void testShortDatasetDiskSize() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int16");
+	void testShortDatasetDiskSize() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(INT16_PATH);
 		assertThat(dataset.getDiskSize(), is(equalTo(42L)));
 	}
 
 	@Test
-	void testInt32DatasetSize() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+	void testInt32DatasetSize() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
 		assertThat(dataset.getSize(), is(equalTo(21L)));
 	}
 
 	@Test
-	void testInt32DatasetDiskSize() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+	void testInt32DatasetDiskSize() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
 		assertThat(dataset.getDiskSize(), is(equalTo(84L)));
 	}
 
 	@Test
-	void testInt32DatasetDimensions() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+	void testInt32DatasetDimensions() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
 		assertArrayEquals(dataset.getDimensions(), new int[] { 21 });
 	}
 
 	@Test
-	void testInt32DatasetMaxSizes() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+	void testInt32DatasetMaxSizes() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
 		assertArrayEquals(dataset.getMaxSize(), new int[] { 21 });
 	}
 
 	@Test
-	void testInt32DatasetDataLayout() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+	void testInt32DatasetDataLayout() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
 		assertThat(dataset.getDataLayout(), is(DataLayout.CONTIGUOUS));
 	}
 
 	@Test
-	void testInt32DatasetJavaType() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+	void testInt32DatasetJavaType() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
 		assertThat(dataset.getJavaType(), is(equalTo(int.class)));
 	}
 
 	@Test
-	void testInt32GetData() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+	void testInt32GetData() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
 		assertArrayEquals((int[]) dataset.getData(), REFERENCE_INT_DATA);
 	}
 
 	@Test
-	void testFloat32DatasetJavaType() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/float/float32");
+	void testFloat32DatasetJavaType() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(FLOAT32_PATH);
 		assertThat(dataset.getJavaType(), is(equalTo(float.class)));
 	}
 
 	@Test
-	void testFloat32DatasetGetData() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/float/float32");
+	void testFloat32DatasetGetData() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(FLOAT32_PATH);
 		assertArrayEquals((float[]) dataset.getData(), REFERENCE_FLOAT_DATA);
 	}
 
 	@Test
-	void testFloat64DatasetGetData() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/float/float64");
+	void testFloat64DatasetGetData() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(FLOAT64_PATH);
 		assertArrayEquals((double[]) dataset.getData(), REFERENCE_DOUBLE_DATA);
 	}
 

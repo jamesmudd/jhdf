@@ -8,7 +8,9 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -42,7 +44,7 @@ public class TestAllFiles {
 	private static final PathMatcher hdf5 = FileSystems.getDefault().getPathMatcher("glob:**.hdf5");
 
 	@TestFactory
-	public Stream<DynamicNode> allHdf5TestFiles() throws Exception {
+	public Stream<DynamicNode> allHdf5TestFiles() throws IOException, URISyntaxException {
 
 		// Auto discover the test files assuming they exist in under the directory
 		// containing test_file.hdf5
@@ -60,7 +62,6 @@ public class TestAllFiles {
 
 	private DynamicNode createTest(Path path) {
 		return dynamicTest(path.getFileName().toString(), () -> {
-			System.out.println(path);
 			try (HdfFile hdfFile = new HdfFile(path.toFile())) {
 				recurseGroup(hdfFile);
 			}

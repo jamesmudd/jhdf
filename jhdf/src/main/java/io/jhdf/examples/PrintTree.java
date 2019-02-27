@@ -10,6 +10,12 @@ import io.jhdf.HdfFile;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 
+/**
+ * An example of recursively parsing a HDF5 file tree and printing it to the
+ * console.
+ * 
+ * @author James Mudd
+ */
 public class PrintTree {
 
 	public static void main(String[] args) throws IOException {
