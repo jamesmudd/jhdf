@@ -1,7 +1,5 @@
 package io.jhdf.api;
 
-import java.nio.ByteBuffer;
-
 import io.jhdf.object.message.DataLayout;
 
 /**
@@ -10,14 +8,6 @@ import io.jhdf.object.message.DataLayout;
  * @author James Mudd
  */
 public interface Dataset extends Node {
-
-	/**
-	 * Gets the buffer that holds this datasets data. The returned buffer will be of
-	 * the correct order (endiness).
-	 * 
-	 * @return the data buffer that holds this dataset
-	 */
-	ByteBuffer getDataBuffer();
 
 	/**
 	 * Gets the total number of elements in this dataset.
@@ -56,8 +46,20 @@ public interface Dataset extends Node {
 	 */
 	DataLayout getDataLayout();
 
+	/**
+	 * Gets the data from the HDF5 dataset and converts it into a Java array of
+	 * dimensions of the dataset as returned by {@link #getDimensions()}. The type
+	 * of the array will be the return value of {@link #getJavaType()}.
+	 * 
+	 * @return the data in the dataset as a Java array
+	 */
 	Object getData();
 
+	/**
+	 * Gets the Java type that will be used to represent this data.
+	 * 
+	 * @return the Java type used to represent this dataset
+	 */
 	public Class<?> getJavaType();
 
 }

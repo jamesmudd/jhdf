@@ -2,7 +2,6 @@ package io.jhdf.object.datatype;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.BitSet;
 
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
@@ -15,7 +14,7 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 	private final boolean highPadding;
 	private final boolean internalPadding;
 	private final int mantissaNormalization;
-	private final byte signLocation;
+	private final int signLocation;
 
 	// Properties
 	private final short bitOffset;
@@ -29,24 +28,23 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 	public FloatingPoint(ByteBuffer bb) {
 		super(bb);
 
-		BitSet bits = BitSet.valueOf(classBytes);
-		if (bits.get(6)) {
+		if (classBits.get(6)) {
 			throw new UnsupportedHdfException("VAX endian is not supported");
 		}
-		if (bits.get(0)) {
+		if (classBits.get(0)) {
 			order = ByteOrder.BIG_ENDIAN;
 		} else {
 			order = ByteOrder.LITTLE_ENDIAN;
 		}
 
-		lowPadding = bits.get(1);
-		highPadding = bits.get(2);
-		internalPadding = bits.get(3);
+		lowPadding = classBits.get(1);
+		highPadding = classBits.get(2);
+		internalPadding = classBits.get(3);
 
 		// Mask the 4+5 bits and shift to the end
-		mantissaNormalization = Utils.bitsToInt(bits, 4, 2);
+		mantissaNormalization = Utils.bitsToInt(classBits, 4, 2);
 
-		signLocation = classBytes[1];
+		signLocation = Utils.bitsToInt(classBits, 8, 8);
 
 		// Properties
 		bitOffset = bb.getShort();
@@ -79,7 +77,7 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		return mantissaNormalization;
 	}
 
-	public byte getSignLocation() {
+	public int getSignLocation() {
 		return signLocation;
 	}
 

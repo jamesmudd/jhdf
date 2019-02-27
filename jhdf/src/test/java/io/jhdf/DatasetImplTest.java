@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import io.jhdf.api.Dataset;
+import io.jhdf.dataset.DatasetBase;
 import io.jhdf.object.message.DataLayout;
 
 public class DatasetImplTest {
@@ -57,7 +58,7 @@ public class DatasetImplTest {
 
 	@Test
 	void testByteDatasetBuffer() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int8");
+		DatasetBase dataset = (DatasetBase) hdfFile.getByPath("/datasets_group/int/int8");
 		// We know this is a float dataset so get the float buffer
 		ByteBuffer buffer = dataset.getDataBuffer();
 		assertThat(buffer, is(notNullValue()));
@@ -73,7 +74,7 @@ public class DatasetImplTest {
 
 	@Test
 	void testShortDatasetBuffer() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int16");
+		DatasetBase dataset = (DatasetBase) hdfFile.getByPath("/datasets_group/int/int16");
 		// We know this is a short dataset so get the short buffer
 		ShortBuffer buffer = dataset.getDataBuffer().asShortBuffer();
 		assertThat(buffer, is(notNullValue()));
@@ -89,7 +90,7 @@ public class DatasetImplTest {
 
 	@Test
 	void testIntDatasetBuffer() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/int/int32");
+		DatasetBase dataset = (DatasetBase) hdfFile.getByPath("/datasets_group/int/int32");
 		// We know this is a int dataset so get the int buffer
 		IntBuffer buffer = dataset.getDataBuffer().asIntBuffer();
 		assertThat(buffer, is(notNullValue()));
@@ -105,7 +106,7 @@ public class DatasetImplTest {
 
 	@Test
 	void testFloatDatasetBuffer() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/float/float32");
+		DatasetBase dataset = (DatasetBase) hdfFile.getByPath("/datasets_group/float/float32");
 		// We know this is a float dataset so get the float buffer
 		FloatBuffer buffer = dataset.getDataBuffer().asFloatBuffer();
 		assertThat(buffer, is(notNullValue()));
@@ -121,7 +122,7 @@ public class DatasetImplTest {
 
 	@Test
 	void testDoubleDatasetBuffer() throws Exception {
-		Dataset dataset = (Dataset) hdfFile.getByPath("/datasets_group/float/float64");
+		DatasetBase dataset = (DatasetBase) hdfFile.getByPath("/datasets_group/float/float64");
 		// We know this is a double dataset so get the double buffer
 		DoubleBuffer buffer = dataset.getDataBuffer().asDoubleBuffer();
 		assertThat(buffer, is(notNullValue()));
