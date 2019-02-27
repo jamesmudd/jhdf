@@ -7,14 +7,14 @@ import java.nio.charset.StandardCharsets;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 
-public class VariableLentgh extends DataType {
+public class VariableLength extends DataType {
 
 	private final int type;
 	private final int paddingType;
 	private final Charset encoding;
 	private final DataType parent;
 
-	public VariableLentgh(ByteBuffer bb) {
+	public VariableLength(ByteBuffer bb) {
 		super(bb);
 
 		type = Utils.bitsToInt(classBits, 0, 4);

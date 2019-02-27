@@ -22,7 +22,7 @@ import io.jhdf.Utils;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
-import io.jhdf.object.datatype.VariableLentgh;
+import io.jhdf.object.datatype.VariableLength;
 import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataLayout;
 import io.jhdf.object.message.DataTypeMessage;
@@ -33,14 +33,14 @@ public class VaribleLentghDataset implements Dataset {
 	private final ObjectHeader oh;
 	private final FileChannel fc;
 	private final Superblock sb;
-	private VariableLentgh type;
+	private VariableLength type;
 
 	public VaribleLentghDataset(DatasetBase dataset, FileChannel fc, Superblock sb, ObjectHeader oh) {
 		this.wrappedDataset = dataset;
 		this.oh = oh;
 		this.fc = fc;
 		this.sb = sb;
-		this.type = (VariableLentgh) oh.getMessageOfType(DataTypeMessage.class).getDataType();
+		this.type = (VariableLength) oh.getMessageOfType(DataTypeMessage.class).getDataType();
 	}
 
 	private List<GlobalHeapId> getGlobalHeapIds() {

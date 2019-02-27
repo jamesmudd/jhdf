@@ -18,7 +18,7 @@ import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.FixedPoint;
 import io.jhdf.object.datatype.FloatingPoint;
 import io.jhdf.object.datatype.StringData;
-import io.jhdf.object.datatype.VariableLentgh;
+import io.jhdf.object.datatype.VariableLength;
 
 /**
  * <p>
@@ -108,8 +108,8 @@ public class DatasetReader {
 			StringData stringData = (StringData) type;
 			int stringLength = stringData.getSize();
 			fillFixedLentghStringData(data, dimensions, buffer, stringLength);
-		} else if (type instanceof VariableLentgh) {
-			VariableLentgh variableLentgh = (VariableLentgh) type;
+		} else if (type instanceof VariableLength) {
+			VariableLength variableLentgh = (VariableLength) type;
 			Charset encoding = variableLentgh.getEncoding();
 			int stringLength = variableLentgh.getSize();
 			fillVariableLentghStringData(data, dimensions, buffer, stringLength, encoding);

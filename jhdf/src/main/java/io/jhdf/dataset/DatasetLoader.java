@@ -9,7 +9,7 @@ import io.jhdf.api.Group;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.datatype.DataType;
-import io.jhdf.object.datatype.VariableLentgh;
+import io.jhdf.object.datatype.VariableLength;
 import io.jhdf.object.message.DataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV4;
@@ -52,7 +52,7 @@ public final class DatasetLoader {
 			// heap
 			DataType type = oh.getMessageOfType(DataTypeMessage.class).getDataType();
 
-			if (type instanceof VariableLentgh) {
+			if (type instanceof VariableLength) {
 				// If its a variable length data type wrap the dataset
 				return new VaribleLentghDataset(dataset, fc, sb, oh);
 			} else {

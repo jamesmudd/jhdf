@@ -41,7 +41,7 @@ public abstract class DataType {
 		case 3:
 			return new StringData(bb);
 		case 9: // Variable length
-			return new VariableLentgh(bb);
+			return new VariableLength(bb);
 		default:
 			throw new HdfException("Unreconised data class = " + dataClass);
 		}
