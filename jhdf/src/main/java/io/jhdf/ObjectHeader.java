@@ -273,7 +273,7 @@ public abstract class ObjectHeader {
 		}
 
 		private ByteBuffer readMessages(FileChannel fc, Superblock sb, ByteBuffer bb) throws IOException {
-			while (bb.remaining() > 4) {
+			while (bb.remaining() >= 8) {
 				Message m = Message.readObjectHeaderV2Message(bb, sb);
 				messages.add(m);
 

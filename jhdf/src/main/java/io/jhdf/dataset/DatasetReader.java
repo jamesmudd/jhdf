@@ -1,5 +1,7 @@
 package io.jhdf.dataset;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
+
 import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -9,7 +11,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import io.jhdf.Utils;
@@ -18,7 +19,6 @@ import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.FixedPoint;
 import io.jhdf.object.datatype.FloatingPoint;
 import io.jhdf.object.datatype.StringData;
-import io.jhdf.object.datatype.VariableLength;
 
 /**
  * <p>
@@ -108,11 +108,6 @@ public class DatasetReader {
 			StringData stringData = (StringData) type;
 			int stringLength = stringData.getSize();
 			fillFixedLentghStringData(data, dimensions, buffer, stringLength);
-		} else if (type instanceof VariableLength) {
-			VariableLength variableLentgh = (VariableLength) type;
-			Charset encoding = variableLentgh.getEncoding();
-			int stringLength = variableLentgh.getSize();
-			fillVariableLentghStringData(data, dimensions, buffer, stringLength, encoding);
 		}
 
 		return data;
@@ -270,24 +265,8 @@ public class DatasetReader {
 		} else {
 			for (int i = 0; i < dims[0]; i++) {
 				buffer.position(i * stringLength);
-				Array.set(data, i, Utils.readUntilNull(buffer));
-			}
-		}
-	}
-
-	private static void fillVariableLentghStringData(Object data, int[] dims, ByteBuffer buffer, int stringLength,
-			Charset charset) {
-		if (dims.length > 1) {
-			for (int i = 0; i < dims[0]; i++) {
-				Object newArray = Array.get(data, i);
-				fillData(newArray, stripLeadingIndex(dims), buffer);
-			}
-		} else {
-			byte[] elementBuffer = new byte[stringLength];
-			for (int i = 0; i < dims[0]; i++) {
-				buffer.position(i * stringLength);
-				buffer.get(elementBuffer);
-				Array.set(data, i, charset.decode(ByteBuffer.wrap(elementBuffer)).toString());
+				ByteBuffer elementBuffer = Utils.createSubBuffer(buffer, stringLength);
+				Array.set(data, i, US_ASCII.decode(elementBuffer).toString().trim());
 			}
 		}
 	}
