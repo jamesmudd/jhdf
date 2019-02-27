@@ -21,31 +21,25 @@ import io.jhdf.api.Node;
 public class LargeGroupTest {
 
 	@TestFactory
-	Collection<DynamicNode> datasetReadTests() throws Exception {
+	Collection<DynamicNode> datasetReadTests() {
 		return Arrays.asList(dynamicTest("earliest", createTest("test_large_group_earliest.hdf5")),
 				dynamicTest("latest", createTest("test_large_group_latest.hdf5")));
 	}
 
 	private Executable createTest(String file) {
+		return () -> {
+			try (HdfFile hdfFile = new HdfFile(new File(this.getClass().getResource(file).getFile()))) {
+				Group largeGroup = (Group) hdfFile.getByPath("large_group");
+				assertThat(largeGroup.getChildren().size(), is(equalTo(1000)));
 
-		return new Executable() {
-			@Override
-			public void execute() throws Throwable {
-
-				try (HdfFile hdfFile = new HdfFile(new File(this.getClass().getResource(file).getFile()))) {
-					Group largeGroup = (Group) hdfFile.getByPath("large_group");
-					assertThat(largeGroup.getChildren().size(), is(equalTo(1000)));
-
-					for (int i = 0; i < 1000; i++) {
-						Node node = largeGroup.getChild("data" + i);
-						assertThat(node.getName(), is(equalTo("data" + i)));
-						assertThat(node, instanceOf(Dataset.class));
-						Dataset dataset = (Dataset) node;
-						int[] data = (int[]) dataset.getData();
-						assertThat(data, is(equalTo(new int[] { i })));
-					}
+				for (int i = 0; i < 1000; i++) {
+					Node node = largeGroup.getChild("data" + i);
+					assertThat(node.getName(), is(equalTo("data" + i)));
+					assertThat(node, instanceOf(Dataset.class));
+					Dataset dataset = (Dataset) node;
+					int[] data = (int[]) dataset.getData();
+					assertThat(data, is(equalTo(new int[] { i })));
 				}
-
 			}
 		};
 	}

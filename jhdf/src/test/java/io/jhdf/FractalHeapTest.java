@@ -7,7 +7,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -18,20 +18,18 @@ import org.junit.jupiter.api.Test;
 import io.jhdf.exceptions.HdfException;
 
 public class FractalHeapTest {
-	private FileChannel fc;
-	private RandomAccessFile raf;
-	private Superblock sb;
 
 	private FractalHeap fractalHeap;
 
 	@BeforeEach
-	void setup() throws FileNotFoundException {
+	void setup() throws IOException {
 		String testFile = this.getClass().getResource("test_large_group_latest.hdf5").getFile();
-		raf = new RandomAccessFile(new File(testFile), "r");
-		fc = raf.getChannel();
-		sb = Superblock.readSuperblock(fc, 0);
+		try (RandomAccessFile raf = new RandomAccessFile(new File(testFile), "r")) {
+			FileChannel fc = raf.getChannel();
+			Superblock sb = Superblock.readSuperblock(fc, 0);
 
-		fractalHeap = new FractalHeap(fc, sb, 1870);
+			fractalHeap = new FractalHeap(fc, sb, 1870);
+		}
 	}
 
 	@Test
@@ -55,7 +53,7 @@ public class FractalHeapTest {
 	}
 
 	@Test
-	void testGetters() throws Exception {
+	void testGetters() {
 		assertThat(fractalHeap.getAddress(), is(equalTo(1870L)));
 		assertThat(fractalHeap.getAddressOfManagedBlocksFreeSpaceManager(), is(equalTo(5270L)));
 		assertThat(fractalHeap.getAmountOfAllocatedManagedSpaceInHeap(), is(equalTo(20480L)));
@@ -77,7 +75,7 @@ public class FractalHeapTest {
 	}
 
 	@Test
-	void testToString() throws Exception {
+	void testToString() {
 		assertThat(fractalHeap.toString(), is(equalTo(
 				"FractalHeap [address=1870, idLength=7, numberOfTinyObjectsInHeap=0, numberOfHugeObjectsInHeap=0, numberOfManagedObjectsInHeap=1000]")));
 	}

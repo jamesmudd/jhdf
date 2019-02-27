@@ -11,25 +11,27 @@ import org.junit.jupiter.api.Test;
 
 public class ExceptionsTest {
 
+	private static final String TEST_MESSAGE = "test message";
+
 	@Test
-	public void testHdfException() throws Exception {
-		HdfException ex = new HdfException("test message");
-		assertThat(ex.getMessage(), is("test message"));
+	void testHdfException() {
+		HdfException ex = new HdfException(TEST_MESSAGE);
+		assertThat(ex.getMessage(), is(TEST_MESSAGE));
 		assertThat(ex.getCause(), is(nullValue()));
 	}
 
 	@Test
-	public void testHdfExceptionWithWrappedException() throws Exception {
+	void testHdfExceptionWithWrappedException() {
 		IOException ioException = new IOException();
-		HdfException ex = new HdfException("test message", ioException);
-		assertThat(ex.getMessage(), is("test message"));
+		HdfException ex = new HdfException(TEST_MESSAGE, ioException);
+		assertThat(ex.getMessage(), is(TEST_MESSAGE));
 		assertThat(ex.getCause(), is(sameInstance(ioException)));
 	}
 
 	@Test
-	public void testUnsupportedHdfException() throws Exception {
-		UnsupportedHdfException ex = new UnsupportedHdfException("test message");
-		assertThat(ex.getMessage(), is("test message"));
+	void testUnsupportedHdfException() {
+		UnsupportedHdfException ex = new UnsupportedHdfException(TEST_MESSAGE);
+		assertThat(ex.getMessage(), is(TEST_MESSAGE));
 		assertThat(ex.getCause(), is(nullValue()));
 	}
 

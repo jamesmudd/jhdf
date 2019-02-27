@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
-import io.jhdf.dataset.DatasetReader;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.FixedPoint;
@@ -58,16 +57,16 @@ class DatasetReaderTest {
 
 	// Float
 	private ByteBuffer floatBuffer = createFloatBuffer(new float[] { 1, 2, 3, 4, 5, 6 });
-	private DataType floatDataType = mockFloatingPoint(float.class, true, Float.BYTES);
+	private DataType floatDataType = mockFloatingPoint(float.class, Float.BYTES);
 	private float[][] floatResult = new float[][] { { 1, 2, 3 }, { 4, 5, 6 } };
 
 	// Double
 	private ByteBuffer doubleBuffer = createDoubleBuffer(new double[] { 1, 2, 3, 4, 5, 6 });
-	private DataType doubleDataType = mockFloatingPoint(double.class, true, Double.BYTES);
+	private DataType doubleDataType = mockFloatingPoint(double.class, Double.BYTES);
 	private double[][] doubleResult = new double[][] { { 1, 2, 3 }, { 4, 5, 6 } };
 
 	@TestFactory
-	Collection<DynamicNode> datasetReadTests() throws Exception {
+	Collection<DynamicNode> datasetReadTests() {
 		return Arrays.asList(dynamicTest("Signed Byte", createTest(byteBuffer, byteDataType, dims, byteResult)),
 				dynamicTest("Unsigned Byte", createTest(byteBuffer, unsignedByteDataType, dims, unsignedByteResult)),
 				dynamicTest("Signed Short", createTest(shortBuffer, shortDataType, dims, shortResult)),
@@ -82,20 +81,20 @@ class DatasetReaderTest {
 	}
 
 	@Test
-	void testUnsupportedFixedPointLentghThrows() throws Exception {
+	void testUnsupportedFixedPointLentghThrows() {
 		DataType invalidDataType = mockFixedPoint(int.class, true, 11); // 11 byte data is not supported
 		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims));
 	}
 
 	@Test
-	void testUnsupportedUnsignedFixedPointLentghThrows() throws Exception {
+	void testUnsupportedUnsignedFixedPointLentghThrows() {
 		DataType invalidDataType = mockFixedPoint(int.class, false, 11); // 11 byte data is not supported
 		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims));
 	}
 
 	@Test
-	void testUnsupportedFloatingPointLentghThrows() throws Exception {
-		DataType invalidDataType = mockFloatingPoint(double.class, true, 11); // 11 byte data is not supported
+	void testUnsupportedFloatingPointLentghThrows() {
+		DataType invalidDataType = mockFloatingPoint(double.class, 11); // 11 byte data is not supported
 		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims));
 	}
 
@@ -186,7 +185,7 @@ class DatasetReaderTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private FloatingPoint mockFloatingPoint(@SuppressWarnings("rawtypes") Class javaType, boolean signed, int size) {
+	private FloatingPoint mockFloatingPoint(@SuppressWarnings("rawtypes") Class javaType, int size) {
 		FloatingPoint floatingPoint = mock(FloatingPoint.class);
 		when(floatingPoint.getJavaType()).thenReturn(javaType);
 		when(floatingPoint.getSize()).thenReturn(size);
