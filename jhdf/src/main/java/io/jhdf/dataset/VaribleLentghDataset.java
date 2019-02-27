@@ -29,24 +29,18 @@ import io.jhdf.object.message.DataTypeMessage;
 
 public class VaribleLentghDataset implements Dataset {
 
-	private final Dataset wrappedDataset;
+	private final DatasetBase wrappedDataset;
 	private final ObjectHeader oh;
 	private final FileChannel fc;
 	private final Superblock sb;
 	private VariableLentgh type;
 
-	public VaribleLentghDataset(Dataset dataset, FileChannel fc, Superblock sb, ObjectHeader oh) {
+	public VaribleLentghDataset(DatasetBase dataset, FileChannel fc, Superblock sb, ObjectHeader oh) {
 		this.wrappedDataset = dataset;
 		this.oh = oh;
 		this.fc = fc;
 		this.sb = sb;
 		this.type = (VariableLentgh) oh.getMessageOfType(DataTypeMessage.class).getDataType();
-	}
-
-	@Override
-	public ByteBuffer getDataBuffer() {
-
-		return null;
 	}
 
 	private List<GlobalHeapId> getGlobalHeapIds() {

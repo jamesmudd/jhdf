@@ -31,7 +31,7 @@ public final class DatasetLoader {
 			final ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, address);
 			DataLayoutMessage dlm = oh.getMessageOfType(DataLayoutMessage.class);
 
-			final Dataset dataset;
+			final DatasetBase dataset;
 			if (dlm instanceof CompactDataLayoutMessage) {
 				dataset = new CompactDataset(fc, sb, address, name, parent, oh);
 
