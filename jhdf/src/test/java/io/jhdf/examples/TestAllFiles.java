@@ -99,6 +99,7 @@ public class TestAllFiles {
 		assertThat(dataset.isGroup(), is(false));
 		assertThat(dataset.isLink(), is(false));
 		assertThat(dataset.getType(), is(NodeType.DATASET));
+		assertThat(dataset.getDataLayout(), is(notNullValue()));
 	}
 
 	private int[] getDimensions(Object data) {
