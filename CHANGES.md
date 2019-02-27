@@ -2,6 +2,7 @@
 
 Please note this project is still in pre-release development.
 
+## v0.3.1
 - Add support for String datasets
 - Remove Dataset.getDataBuffer - Not all datasets can reasonably support accessing the backing buffer
 - Dataset.getMaxSize now always returns a result previously returned Optional if no max size was in the file now it returns the dataset size if no max size is present.
