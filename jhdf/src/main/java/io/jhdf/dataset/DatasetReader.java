@@ -260,7 +260,7 @@ public class DatasetReader {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillData(newArray, stripLeadingIndex(dims), buffer);
+				fillFixedLentghStringData(newArray, stripLeadingIndex(dims), buffer, stringLength);
 			}
 		} else {
 			for (int i = 0; i < dims[0]; i++) {

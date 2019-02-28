@@ -1,4 +1,4 @@
-package io.jhdf.btree.record;
+package io.jhdf.btree;
 
 import java.nio.ByteBuffer;
 
