@@ -13,7 +13,6 @@ import java.util.List;
 
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
-import io.jhdf.btree.record.BTreeRecord;
 import io.jhdf.exceptions.HdfException;
 
 public class BTreeV2 {

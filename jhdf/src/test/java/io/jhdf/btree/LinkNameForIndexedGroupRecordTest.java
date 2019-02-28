@@ -1,4 +1,4 @@
-package io.jhdf.btree.record;
+package io.jhdf.btree;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 
 import org.junit.jupiter.api.Test;
 
+import io.jhdf.btree.LinkNameForIndexedGroupRecord;
 import io.jhdf.exceptions.HdfException;
 
 class LinkNameForIndexedGroupRecordTest {
