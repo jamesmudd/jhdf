@@ -2,6 +2,12 @@
 
 Please note this project is still in pre-release development.
 
+## v0.3.2
+- Fix bug when fixed size string datasets contain strings of exactly that size.
+- Fix bug where >1D fixed size datasets could not be read
+- Add more JavaDoc
+- Minor refactoring
+
 ## v0.3.1
 - Add support for String datasets
 - Remove Dataset.getDataBuffer - Not all datasets can reasonably support accessing the backing buffer
