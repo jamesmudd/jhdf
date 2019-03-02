@@ -145,7 +145,7 @@ public class AttributeMessage extends Message {
 		return dataSpace;
 	}
 
-	public ByteBuffer getData() {
+	public ByteBuffer getDataBuffer() {
 		return data;
 	}
 

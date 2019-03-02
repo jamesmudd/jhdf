@@ -50,9 +50,9 @@ public class AttributeMessageV3Test {
 		assertThat(am.getName(), is(equalTo("string_attr")));
 		assertThat(am.getDataType().getDataClass(), is(equalTo(9)));
 		assertThat(am.getDataSpace().getTotalLentgh(), is(equalTo(1L)));
-		assertThat(am.getData().capacity(), is(equalTo(20)));
+		assertThat(am.getDataBuffer().capacity(), is(equalTo(20)));
 
-		StandardCharsets.UTF_8.newDecoder().decode(am.getData());
+		StandardCharsets.UTF_8.newDecoder().decode(am.getDataBuffer());
 	}
 
 }

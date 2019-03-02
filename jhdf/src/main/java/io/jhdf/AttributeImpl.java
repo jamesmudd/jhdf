@@ -49,7 +49,7 @@ public class AttributeImpl implements Attribute {
 	@Override
 	public Object getData() {
 		logger.debug("Getting data for attribute '{}' of '{}'...", name, node.getPath());
-		return DatasetReader.readDataset(message.getDataType(), message.getData(), getDimensions());
+		return DatasetReader.readDataset(message.getDataType(), message.getDataBuffer(), getDimensions());
 	}
 
 	@Override
