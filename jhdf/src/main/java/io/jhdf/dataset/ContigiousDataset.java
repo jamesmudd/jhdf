@@ -1,6 +1,5 @@
 package io.jhdf.dataset;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
@@ -25,7 +24,7 @@ public class ContigiousDataset extends DatasetBase {
 					contigiousDataLayoutMessage.getSize());
 			convertToCorrectEndiness(data);
 			return data;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			throw new HdfException("Failed to map data buffer for dataset '" + getPath() + "'", e);
 		}
 	}
