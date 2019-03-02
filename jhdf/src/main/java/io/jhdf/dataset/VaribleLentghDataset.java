@@ -19,11 +19,11 @@ import io.jhdf.HdfFile;
 import io.jhdf.ObjectHeader;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
+import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
 import io.jhdf.object.datatype.VariableLength;
-import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataLayout;
 import io.jhdf.object.message.DataTypeMessage;
 
@@ -136,7 +136,7 @@ public class VaribleLentghDataset implements Dataset {
 	}
 
 	@Override
-	public Map<String, AttributeMessage> getAttributes() {
+	public Map<String, Attribute> getAttributes() {
 		return wrappedDataset.getAttributes();
 	}
 

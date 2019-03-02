@@ -44,7 +44,7 @@ public class DatasetReader {
 	private DatasetReader() {
 	}
 
-	/* package */ static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions) {
+	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions) {
 		// Make the array to hold the data
 		Class<?> javaType = type.getJavaType();
 		final Object data = Array.newInstance(javaType, dimensions);

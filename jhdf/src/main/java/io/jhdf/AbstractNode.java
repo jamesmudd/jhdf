@@ -1,6 +1,5 @@
 package io.jhdf;
 
-import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.File;
@@ -12,6 +11,7 @@ import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
@@ -22,7 +22,7 @@ import io.jhdf.object.message.Message;
 public abstract class AbstractNode implements Node {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractNode.class);
 
-	protected final class AttributesLazyInitializer extends LazyInitializer<Map<String, AttributeMessage>> {
+	protected final class AttributesLazyInitializer extends LazyInitializer<Map<String, Attribute>> {
 		private final LazyInitializer<ObjectHeader> lazyOjbectHeader;
 
 		public AttributesLazyInitializer(LazyInitializer<ObjectHeader> lazyOjbectHeader) {
@@ -30,11 +30,12 @@ public abstract class AbstractNode implements Node {
 		}
 
 		@Override
-		protected Map<String, AttributeMessage> initialize() throws ConcurrentException {
+		protected Map<String, Attribute> initialize() throws ConcurrentException {
 			logger.debug("Lazy initializing attributes for '{}'", getPath());
 			final ObjectHeader oh = lazyOjbectHeader.get();
 			return oh.getMessagesOfType(AttributeMessage.class).stream()
-					.collect(toMap(AttributeMessage::getName, identity()));
+					.collect(
+							toMap(AttributeMessage::getName, message -> new AttributeImpl(AbstractNode.this, message)));
 		}
 	}
 
@@ -110,7 +111,7 @@ public abstract class AbstractNode implements Node {
 	}
 
 	@Override
-	public Map<String, AttributeMessage> getAttributes() {
+	public Map<String, Attribute> getAttributes() {
 		try {
 			return attributes.get();
 		} catch (ConcurrentException e) {

@@ -17,12 +17,12 @@ import org.slf4j.LoggerFactory;
 
 import io.jhdf.Superblock.SuperblockV0V1;
 import io.jhdf.Superblock.SuperblockV2V3;
+import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.object.message.AttributeMessage;
 
 /**
  * The HDF file class this object represents a HDF5 file on disk and provides
@@ -162,7 +162,7 @@ public class HdfFile implements Group, AutoCloseable {
 	}
 
 	@Override
-	public Map<String, AttributeMessage> getAttributes() {
+	public Map<String, Attribute> getAttributes() {
 		return rootGroup.getAttributes();
 	}
 
