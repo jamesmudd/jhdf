@@ -36,7 +36,7 @@ public final class DatasetLoader {
 				dataset = new CompactDataset(fc, sb, address, name, parent, oh);
 
 			} else if (dlm instanceof ContigiousDataLayoutMessage) {
-				dataset = new ContigiousDataset(fc, sb, address, name, parent, oh);
+				dataset = new ContiguousDataset(fc, sb, address, name, parent, oh);
 
 			} else if (dlm instanceof ChunkedDataLayoutMessageV3) {
 				dataset = new ChunkedDatasetV3(fc, sb, address, name, parent, oh);

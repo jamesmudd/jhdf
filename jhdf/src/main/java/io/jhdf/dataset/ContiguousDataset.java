@@ -10,9 +10,9 @@ import io.jhdf.api.Group;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayoutMessage.ContigiousDataLayoutMessage;
 
-public class ContigiousDataset extends DatasetBase {
+public class ContiguousDataset extends DatasetBase {
 
-	public ContigiousDataset(FileChannel fc, Superblock sb, long address, String name, Group parent, ObjectHeader oh) {
+	public ContiguousDataset(FileChannel fc, Superblock sb, long address, String name, Group parent, ObjectHeader oh) {
 		super(fc, sb, address, name, parent, oh);
 	}
 
