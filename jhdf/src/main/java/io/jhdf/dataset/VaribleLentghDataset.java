@@ -190,4 +190,9 @@ public class VaribleLentghDataset implements Dataset {
 		return wrappedDataset.isLink();
 	}
 
+	@Override
+	public boolean isScalar() {
+		return wrappedDataset.isScalar();
+	}
+
 }

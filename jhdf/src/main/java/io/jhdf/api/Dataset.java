@@ -32,6 +32,13 @@ public interface Dataset extends Node {
 	int[] getDimensions();
 
 	/**
+	 * Checks if this dataset is scalar i.e is a single element with no dimensions.
+	 * 
+	 * @return <code>true</code> if dataset if scalar <code>false</code> otherwise
+	 */
+	boolean isScalar();
+
+	/**
 	 * Gets the max size of this dataset. If not specified this will be equal to
 	 * {@link #getDimensions()}
 	 * 
@@ -60,6 +67,6 @@ public interface Dataset extends Node {
 	 * 
 	 * @return the Java type used to represent this dataset
 	 */
-	public Class<?> getJavaType();
+	Class<?> getJavaType();
 
 }

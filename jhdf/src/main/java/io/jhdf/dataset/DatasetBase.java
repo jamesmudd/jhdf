@@ -98,6 +98,11 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		return DatasetReader.readDataset(getDataType(), getDataBuffer(), getDimensions());
 	}
 
+	@Override
+	public boolean isScalar() {
+		return getDimensions().length == 0;
+	}
+
 	/**
 	 * Gets the buffer that holds this datasets data. The returned buffer will be of
 	 * the correct order (endiness).
