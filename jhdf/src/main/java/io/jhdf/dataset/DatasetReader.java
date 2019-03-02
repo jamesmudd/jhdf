@@ -47,7 +47,19 @@ public class DatasetReader {
 	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions) {
 		// Make the array to hold the data
 		Class<?> javaType = type.getJavaType();
-		final Object data = Array.newInstance(javaType, dimensions);
+
+		// If the data is scalar make a fake one element array then remove it at the end
+		final Object data;
+		final boolean isScalar;
+		if (dimensions.length == 0) {
+			// Scalar dataset
+			data = Array.newInstance(javaType, 1);
+			isScalar = true;
+			dimensions = new int[] { 1 }; // Fake the dimensions
+		} else {
+			data = Array.newInstance(javaType, dimensions);
+			isScalar = false;
+		}
 
 		if (type instanceof FixedPoint) {
 			FixedPoint fixedPoint = (FixedPoint) type;
@@ -110,7 +122,11 @@ public class DatasetReader {
 			fillFixedLentghStringData(data, dimensions, buffer, stringLength);
 		}
 
-		return data;
+		if (isScalar) {
+			return Array.get(data, 0);
+		} else {
+			return data;
+		}
 	}
 
 	// Signed Fixed Point
