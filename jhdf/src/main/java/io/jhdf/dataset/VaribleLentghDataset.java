@@ -80,6 +80,10 @@ public class VaribleLentghDataset implements Dataset {
 			objects.add(element);
 		}
 
+		if (isScalar()) {
+			return objects.get(0);
+		}
+
 		// Make the output array
 		Object data = Array.newInstance(getJavaType(), getDimensions());
 		fillData(data, getDimensions(), objects.iterator());
