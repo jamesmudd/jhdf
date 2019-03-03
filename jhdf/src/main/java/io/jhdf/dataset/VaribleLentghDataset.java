@@ -68,6 +68,10 @@ public class VaribleLentghDataset implements Dataset {
 
 	@Override
 	public Object getData() {
+		if (isEmpty()) {
+			return null;
+		}
+
 		final Map<Long, GlobalHeap> heaps = new HashMap<>();
 
 		Charset charset = type.getEncoding();
@@ -197,6 +201,11 @@ public class VaribleLentghDataset implements Dataset {
 	@Override
 	public boolean isScalar() {
 		return wrappedDataset.isScalar();
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return wrappedDataset.isEmpty();
 	}
 
 }

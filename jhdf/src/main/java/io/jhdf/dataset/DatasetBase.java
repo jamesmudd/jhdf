@@ -1,5 +1,7 @@
 package io.jhdf.dataset;
 
+import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -85,7 +87,13 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 	@Override
 	public Class<?> getJavaType() {
-		return dataType.getJavaType();
+		final Class<?> type = dataType.getJavaType();
+		// For scalar datasets the returned type will be the wrapper class because
+		// getData returns Object
+		if (isScalar() && type.isPrimitive()) {
+			return primitiveToWrapper(type);
+		}
+		return type;
 	}
 
 	protected DataType getDataType() {
@@ -95,12 +103,20 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	@Override
 	public Object getData() {
 		logger.debug("Getting data for '{}'...", getPath());
+		if (isEmpty()) {
+			return null;
+		}
 		return DatasetReader.readDataset(getDataType(), getDataBuffer(), getDimensions());
 	}
 
 	@Override
 	public boolean isScalar() {
 		return getDimensions().length == 0;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return getDataBuffer() == null;
 	}
 
 	/**

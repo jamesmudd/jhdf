@@ -1,5 +1,7 @@
 package io.jhdf.dataset;
 
+import static io.jhdf.Constants.UNDEFINED_ADDRESS;
+
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
@@ -19,6 +21,12 @@ public class ContiguousDataset extends DatasetBase {
 	@Override
 	public ByteBuffer getDataBuffer() {
 		ContigiousDataLayoutMessage contigiousDataLayoutMessage = getHeaderMessage(ContigiousDataLayoutMessage.class);
+
+		// Check for empty dataset
+		if (contigiousDataLayoutMessage.getAddress() == UNDEFINED_ADDRESS) {
+			return null;
+		}
+
 		try {
 			ByteBuffer data = fc.map(MapMode.READ_ONLY, contigiousDataLayoutMessage.getAddress(),
 					contigiousDataLayoutMessage.getSize());
