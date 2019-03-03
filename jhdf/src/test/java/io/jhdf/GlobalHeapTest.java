@@ -6,6 +6,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
@@ -25,8 +27,8 @@ public class GlobalHeapTest {
 	private HdfFileChannel hdfFc;
 
 	@BeforeEach
-	void setup() throws Exception {
-		String testFile = this.getClass().getResource("test_file.hdf5").getFile();
+	void setup() throws IOException, URISyntaxException {
+		URI testFile = this.getClass().getResource("test_file.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFile), StandardOpenOption.READ);
 		sb = Superblock.readSuperblock(fc, 0);
 		hdfFc = new HdfFileChannel(fc, sb);
@@ -46,7 +48,7 @@ public class GlobalHeapTest {
 	}
 
 	@Test
-	void testInvalidSignatureThrows() throws Exception {
+	void testInvalidSignatureThrows() {
 		// Give address of local heap
 		assertThrows(HdfException.class, () -> new GlobalHeap(hdfFc, 1384));
 	}
