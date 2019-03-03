@@ -82,12 +82,20 @@ public class HdfFileChannel {
 		return sb.getSizeOfLengths();
 	}
 
-	public final void close() throws IOException {
-		fc.close();
+	public final void close() {
+		try {
+			fc.close();
+		} catch (IOException e) {
+			throw new HdfException("Failed closing HDF5 file", e);
+		}
 	}
 
-	public long size() throws IOException {
-		return fc.size();
+	public long size() {
+		try {
+			return fc.size();
+		} catch (IOException e) {
+			throw new HdfException("Failed to get size of HDF5 file", e);
+		}
 	}
 
 }

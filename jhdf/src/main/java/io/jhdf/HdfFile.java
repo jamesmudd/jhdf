@@ -112,11 +112,7 @@ public class HdfFile implements Group, AutoCloseable {
 	 * @return the buffer containing the user block data
 	 */
 	public ByteBuffer getUserBlockBuffer() {
-		try {
-			return hdfFc.mapNoOffset(0, hdfFc.getUserBlockSize());
-		} catch (Exception e) {
-			throw new HdfException("Error accessing user block for HDF5 file '" + getFile().getAbsolutePath() + "'", e);
-		}
+		return hdfFc.mapNoOffset(0, hdfFc.getUserBlockSize());
 	}
 
 	/**
@@ -130,11 +126,7 @@ public class HdfFile implements Group, AutoCloseable {
 			logger.info("Closed external file '{}'", externalhdfFile.getFile().getAbsolutePath());
 		}
 
-		try {
-			hdfFc.close();
-		} catch (IOException e) {
-			throw new HdfException("Error closing HDF file '" + getFile().getAbsolutePath() + "'", e);
-		}
+		hdfFc.close();
 		logger.info("Closed HDF file '{}'", getFile().getAbsolutePath());
 	}
 
@@ -144,11 +136,7 @@ public class HdfFile implements Group, AutoCloseable {
 	 * @return the size of this file in bytes
 	 */
 	public long size() {
-		try {
-			return hdfFc.size();
-		} catch (IOException e) {
-			throw new HdfException("Error getting lentgh of file '" + getFile().getAbsolutePath() + "'", e);
-		}
+		return hdfFc.size();
 	}
 
 	@Override
