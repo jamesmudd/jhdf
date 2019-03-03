@@ -66,6 +66,10 @@ public class HdfFileChannel {
 		}
 	}
 
+	public long getUserBlockSize() {
+		return sb.getBaseAddressByte();
+	}
+
 	public Superblock getSuperblock() {
 		return sb;
 	}

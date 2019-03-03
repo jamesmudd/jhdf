@@ -35,8 +35,6 @@ public class HdfFile implements Group, AutoCloseable {
 	private final File file;
 	private final HdfFileChannel hdfFc;
 
-	private final long userBlockSize;
-
 	private final Superblock superblock;
 
 	private final Group rootGroup;
@@ -66,18 +64,20 @@ public class HdfFile implements Group, AutoCloseable {
 
 			// We have a valid HDF5 file so read the full superblock
 			superblock = Superblock.readSuperblock(fc, offset);
-			userBlockSize = offset;
+
+			// Validate the superblock
 			if (superblock.getBaseAddressByte() != offset) {
 				throw new HdfException("Invalid superblock base address detected");
 			}
 
 			hdfFc = new HdfFileChannel(fc, superblock);
 
-			if (superblock.getVersionOfSuperblock() == 0 || superblock.getVersionOfSuperblock() == 1) {
+			if (superblock instanceof SuperblockV0V1) {
 				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
-				SymbolTableEntry ste = new SymbolTableEntry(hdfFc, sb.getRootGroupSymbolTableAddress());
+				SymbolTableEntry ste = new SymbolTableEntry(hdfFc,
+						sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
 				rootGroup = GroupImpl.createRootGroup(hdfFc, ste.getObjectHeaderAddress(), this);
-			} else if (superblock.getVersionOfSuperblock() == 2 || superblock.getVersionOfSuperblock() == 3) {
+			} else if (superblock instanceof SuperblockV2V3) {
 				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
 				rootGroup = GroupImpl.createRootGroup(hdfFc, sb.getRootGroupObjectHeaderAddress(), this);
 			} else {
@@ -103,7 +103,7 @@ public class HdfFile implements Group, AutoCloseable {
 	 * @return the size of the user block
 	 */
 	public long getUserBlockSize() {
-		return userBlockSize;
+		return hdfFc.getUserBlockSize();
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class HdfFile implements Group, AutoCloseable {
 	 */
 	public ByteBuffer getUserBlockBuffer() {
 		try {
-			return hdfFc.mapNoOffset(0, userBlockSize);
+			return hdfFc.mapNoOffset(0, hdfFc.getUserBlockSize());
 		} catch (Exception e) {
 			throw new HdfException("Error accessing user block for HDF5 file '" + getFile().getAbsolutePath() + "'", e);
 		}
