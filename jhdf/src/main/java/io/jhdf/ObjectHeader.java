@@ -266,7 +266,7 @@ public abstract class ObjectHeader {
 								"Object header conntinuation header not matched, at address: " + ohcm.getOffset());
 					}
 
-					// Recursivly read messages
+					// Recursively read messages
 					readMessages(hdfFc, continuationBuffer);
 				}
 			}
