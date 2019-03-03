@@ -1,16 +1,11 @@
 package io.jhdf.btree;
 
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
-
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.jhdf.Superblock;
+import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
-import io.jhdf.exceptions.HdfException;
 
 /**
  * V1 B-trees where the node type is 0 i.e. points to group nodes
@@ -19,35 +14,29 @@ import io.jhdf.exceptions.HdfException;
  */
 public abstract class BTreeV1Group extends BTreeV1 {
 
-	private BTreeV1Group(FileChannel fc, Superblock sb, long address) {
-		super(fc, sb, address);
+	private BTreeV1Group(HdfFileChannel hdfFc, long address) {
+		super(hdfFc, address);
 	}
 
 	/* package */ static class BTreeV1GroupLeafNode extends BTreeV1Group {
 
 		private final List<Long> childAddresses;
 
-		/* package */ BTreeV1GroupLeafNode(FileChannel fc, Superblock sb, long address) {
-			super(fc, sb, address);
+		/* package */ BTreeV1GroupLeafNode(HdfFileChannel hdfFc, long address) {
+			super(hdfFc, address);
 
-			int keyBytes = (2 * entriesUsed + 1) * sb.getSizeOfLengths();
-			int childPointerBytes = (2 * entriesUsed) * sb.getSizeOfOffsets();
+			final int keyBytes = (2 * entriesUsed + 1) * hdfFc.getSizeOfLengths();
+			final int childPointerBytes = (2 * entriesUsed) * hdfFc.getSizeOfOffsets();
 			final int keysAndPointersBytes = keyBytes + childPointerBytes;
 
-			ByteBuffer keysAndPointersBuffer = ByteBuffer.allocate(keysAndPointersBytes);
-			try {
-				fc.read(keysAndPointersBuffer, address + 8 + 2 * sb.getSizeOfOffsets());
-			} catch (IOException e) {
-				throw new HdfException("Error reading BTreeV1NonLeafNode at address: " + address);
-			}
-			keysAndPointersBuffer.order(LITTLE_ENDIAN);
-			keysAndPointersBuffer.rewind();
+			final long keysAddress = address + 8 + 2 * hdfFc.getSizeOfOffsets();
+			final ByteBuffer keysAndPointersBuffer = hdfFc.readBufferFromAddress(keysAddress, keysAndPointersBytes);
 
 			childAddresses = new ArrayList<>(entriesUsed);
 
 			for (int i = 0; i < entriesUsed; i++) {
-				keysAndPointersBuffer.position(keysAndPointersBuffer.position() + sb.getSizeOfLengths());
-				childAddresses.add(Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfOffsets()));
+				keysAndPointersBuffer.position(keysAndPointersBuffer.position() + hdfFc.getSizeOfLengths());
+				childAddresses.add(Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, hdfFc.getSizeOfOffsets()));
 			}
 		}
 
@@ -62,28 +51,22 @@ public abstract class BTreeV1Group extends BTreeV1 {
 
 		private final List<BTreeV1> childNodes;
 
-		/* package */ BTreeV1GroupNonLeafNode(FileChannel fc, Superblock sb, long address) {
-			super(fc, sb, address);
+		/* package */ BTreeV1GroupNonLeafNode(HdfFileChannel hdfFc, long address) {
+			super(hdfFc, address);
 
-			int keyBytes = (2 * entriesUsed + 1) * sb.getSizeOfLengths();
-			int childPointerBytes = (2 * entriesUsed) * sb.getSizeOfOffsets();
+			final int keyBytes = (2 * entriesUsed + 1) * hdfFc.getSizeOfLengths();
+			final int childPointerBytes = (2 * entriesUsed) * hdfFc.getSizeOfOffsets();
 			final int keysAndPointersBytes = keyBytes + childPointerBytes;
 
-			ByteBuffer keysAndPointersBuffer = ByteBuffer.allocate(keysAndPointersBytes);
-			try {
-				fc.read(keysAndPointersBuffer, address + 8 + 2 * sb.getSizeOfOffsets());
-			} catch (IOException e) {
-				throw new HdfException("Error reading BTreeV1NonLeafNode at address: " + address);
-			}
-			keysAndPointersBuffer.order(LITTLE_ENDIAN);
-			keysAndPointersBuffer.rewind();
+			final long keysAddress = address + 8 + 2 * hdfFc.getSizeOfOffsets();
+			final ByteBuffer keysAndPointersBuffer = hdfFc.readBufferFromAddress(keysAddress, keysAndPointersBytes);
 
 			childNodes = new ArrayList<>(entriesUsed);
 
 			for (int i = 0; i < entriesUsed; i++) {
-				keysAndPointersBuffer.position(keysAndPointersBuffer.position() + sb.getSizeOfOffsets());
-				long childAddress = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfOffsets());
-				childNodes.add(createGroupBTree(fc, sb, childAddress));
+				keysAndPointersBuffer.position(keysAndPointersBuffer.position() + hdfFc.getSizeOfOffsets());
+				long childAddress = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, hdfFc.getSizeOfOffsets());
+				childNodes.add(createGroupBTree(hdfFc, childAddress));
 			}
 
 		}

@@ -5,7 +5,6 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,8 +15,8 @@ import java.util.Map;
 
 import io.jhdf.GlobalHeap;
 import io.jhdf.HdfFile;
+import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
-import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
@@ -29,17 +28,13 @@ import io.jhdf.object.message.DataTypeMessage;
 
 public class VaribleLentghDataset implements Dataset {
 
+	private final HdfFileChannel hdfFc;
 	private final DatasetBase wrappedDataset;
-	private final ObjectHeader oh;
-	private final FileChannel fc;
-	private final Superblock sb;
-	private VariableLength type;
+	private final VariableLength type;
 
-	public VaribleLentghDataset(DatasetBase dataset, FileChannel fc, Superblock sb, ObjectHeader oh) {
+	public VaribleLentghDataset(HdfFileChannel hdfFc, DatasetBase dataset, ObjectHeader oh) {
+		this.hdfFc = hdfFc;
 		this.wrappedDataset = dataset;
-		this.oh = oh;
-		this.fc = fc;
-		this.sb = sb;
 		this.type = (VariableLength) oh.getMessageOfType(DataTypeMessage.class).getDataType();
 	}
 
@@ -52,12 +47,12 @@ public class VaribleLentghDataset implements Dataset {
 
 		List<GlobalHeapId> ids = new ArrayList<>(Math.toIntExact(getSize()));
 
-		int skipBytes = lentgh - sb.getSizeOfOffsets() - 4; // id=4
+		int skipBytes = lentgh - hdfFc.getSizeOfOffsets() - 4; // id=4
 
 		while (bb.remaining() >= lentgh) {
 			// Move past the skipped bytes. TODO figure out what this is for
 			bb.position(bb.position() + skipBytes);
-			long heapAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+			long heapAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
 			int index = Utils.readBytesAsUnsignedInt(bb, 4);
 			GlobalHeapId globalHeapId = new GlobalHeapId(heapAddress, index);
 			ids.add(globalHeapId);
@@ -113,7 +108,7 @@ public class VaribleLentghDataset implements Dataset {
 	}
 
 	private GlobalHeap createGlobalHeap(long address) {
-		return new GlobalHeap(fc, sb, address);
+		return new GlobalHeap(hdfFc, address);
 	}
 
 	// Delegate all methods to the underlying dataset

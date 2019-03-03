@@ -1,16 +1,14 @@
 package io.jhdf.btree;
 
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.util.stream.Collectors.toList;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
@@ -22,8 +20,8 @@ import io.jhdf.exceptions.HdfException;
  */
 public abstract class BTreeV1Data extends BTreeV1 {
 
-	private BTreeV1Data(FileChannel fc, Superblock sb, long address) {
-		super(fc, sb, address);
+	private BTreeV1Data(HdfFileChannel hdfFc, long address) {
+		super(hdfFc, address);
 	}
 
 	/**
@@ -72,26 +70,20 @@ public abstract class BTreeV1Data extends BTreeV1 {
 
 		private final ArrayList<Chunk> chunks;
 
-		/* package */ BTreeV1DataLeafNode(FileChannel fc, Superblock sb, long address, int dataDimensions) {
-			super(fc, sb, address);
+		/* package */ BTreeV1DataLeafNode(HdfFileChannel hdfFc, long address, int dataDimensions) {
+			super(hdfFc, address);
 
-			int keySize = 4 + 4 + (dataDimensions + 1) * 8;
-			int keyBytes = (entriesUsed + 1) * keySize;
-			int childPointerBytes = entriesUsed * sb.getSizeOfOffsets();
+			final int keySize = 4 + 4 + (dataDimensions + 1) * 8;
+			final int keyBytes = (entriesUsed + 1) * keySize;
+			final int childPointerBytes = entriesUsed * hdfFc.getSizeOfOffsets();
 			final int keysAndPointersBytes = keyBytes + childPointerBytes;
 
-			ByteBuffer bb = ByteBuffer.allocate(keysAndPointersBytes);
-			try {
-				fc.read(bb, address + 8 + 2 * sb.getSizeOfOffsets());
-			} catch (IOException e) {
-				throw new HdfException("Error reading BTreeV1LeafNode at address: " + address);
-			}
-			bb.order(LITTLE_ENDIAN);
-			bb.rewind();
+			final long keysAddress = address + 8 + 2 * hdfFc.getSizeOfOffsets();
+			final ByteBuffer bb = hdfFc.readBufferFromAddress(keysAddress, keysAndPointersBytes);
 
 			chunks = new ArrayList<>(entriesUsed);
 			for (int i = 0; i < entriesUsed; i++) {
-				Chunk chunk = readKeyAsChunk(sb, dataDimensions, bb);
+				Chunk chunk = readKeyAsChunk(hdfFc.getSuperblock(), dataDimensions, bb);
 				chunks.add(chunk);
 			}
 
@@ -135,29 +127,23 @@ public abstract class BTreeV1Data extends BTreeV1 {
 						 * @param address
 						 * @param dataDimensions
 						 */
-		BTreeV1DataNonLeafNode(FileChannel fc, Superblock sb, long address, int dataDimensions) {
-			super(fc, sb, address);
+		BTreeV1DataNonLeafNode(HdfFileChannel hdfFc, long address, int dataDimensions) {
+			super(hdfFc, address);
 
-			int keySize = 4 + 4 + (dataDimensions + 1) * 8;
-			int keyBytes = (entriesUsed + 1) * keySize;
-			int childPointerBytes = entriesUsed * sb.getSizeOfOffsets();
+			final int keySize = 4 + 4 + (dataDimensions + 1) * 8;
+			final int keyBytes = (entriesUsed + 1) * keySize;
+			final int childPointerBytes = entriesUsed * hdfFc.getSizeOfOffsets();
 			final int keysAndPointersBytes = keyBytes + childPointerBytes;
 
-			ByteBuffer keysAndPointersBuffer = ByteBuffer.allocate(keysAndPointersBytes);
-			try {
-				fc.read(keysAndPointersBuffer, address + 8 + 2 * sb.getSizeOfOffsets());
-			} catch (IOException e) {
-				throw new HdfException("Error reading BTreeV1NonLeafNode at address: " + address);
-			}
-			keysAndPointersBuffer.order(LITTLE_ENDIAN);
-			keysAndPointersBuffer.rewind();
+			final long keysAddress = address + 8 + 2 * hdfFc.getSizeOfOffsets();
+			final ByteBuffer keysAndPointersBuffer = hdfFc.readBufferFromAddress(keysAddress, keysAndPointersBytes);
 
 			childNodes = new ArrayList<>(entriesUsed);
 
 			for (int i = 0; i < entriesUsed; i++) {
 				keysAndPointersBuffer.position(keysAndPointersBuffer.position() + keySize);
-				long childAddress = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, sb.getSizeOfOffsets());
-				childNodes.add(BTreeV1.createDataBTree(fc, sb, childAddress, dataDimensions));
+				long childAddress = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, hdfFc.getSizeOfOffsets());
+				childNodes.add(BTreeV1.createDataBTree(hdfFc, childAddress, dataDimensions));
 			}
 		}
 

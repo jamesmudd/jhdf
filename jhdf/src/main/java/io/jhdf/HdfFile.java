@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,7 +33,7 @@ public class HdfFile implements Group, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(HdfFile.class);
 
 	private final File file;
-	private final FileChannel fc;
+	private final HdfFileChannel hdfFc;
 
 	private final long userBlockSize;
 
@@ -48,7 +47,7 @@ public class HdfFile implements Group, AutoCloseable {
 		logger.info("Opening HDF5 file '{}'...", hdfFile.getAbsolutePath());
 		try {
 			this.file = hdfFile;
-			fc = FileChannel.open(hdfFile.toPath(), StandardOpenOption.READ);
+			FileChannel fc = FileChannel.open(hdfFile.toPath(), StandardOpenOption.READ);
 
 			// Find out if the file is a HDF5 file
 			boolean validSignature = false;
@@ -72,13 +71,15 @@ public class HdfFile implements Group, AutoCloseable {
 				throw new HdfException("Invalid superblock base address detected");
 			}
 
+			hdfFc = new HdfFileChannel(fc, superblock);
+
 			if (superblock.getVersionOfSuperblock() == 0 || superblock.getVersionOfSuperblock() == 1) {
 				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
-				SymbolTableEntry ste = new SymbolTableEntry(fc, sb.getRootGroupSymbolTableAddress(), sb);
-				rootGroup = GroupImpl.createRootGroup(fc, sb, ste.getObjectHeaderAddress(), this);
+				SymbolTableEntry ste = new SymbolTableEntry(hdfFc, sb.getRootGroupSymbolTableAddress());
+				rootGroup = GroupImpl.createRootGroup(hdfFc, ste.getObjectHeaderAddress(), this);
 			} else if (superblock.getVersionOfSuperblock() == 2 || superblock.getVersionOfSuperblock() == 3) {
 				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
-				rootGroup = GroupImpl.createRootGroup(fc, sb, sb.getRootGroupObjectHeaderAddress(), this);
+				rootGroup = GroupImpl.createRootGroup(hdfFc, sb.getRootGroupObjectHeaderAddress(), this);
 			} else {
 				throw new HdfException("Unreconized superblock version = " + superblock.getVersionOfSuperblock());
 			}
@@ -112,8 +113,8 @@ public class HdfFile implements Group, AutoCloseable {
 	 */
 	public ByteBuffer getUserBlockBuffer() {
 		try {
-			return fc.map(MapMode.READ_ONLY, 0, userBlockSize);
-		} catch (IOException e) {
+			return hdfFc.mapNoOffset(0, userBlockSize);
+		} catch (Exception e) {
 			throw new HdfException("Error accessing user block for HDF5 file '" + getFile().getAbsolutePath() + "'", e);
 		}
 	}
@@ -130,7 +131,7 @@ public class HdfFile implements Group, AutoCloseable {
 		}
 
 		try {
-			fc.close();
+			hdfFc.close();
 		} catch (IOException e) {
 			throw new HdfException("Error closing HDF file '" + getFile().getAbsolutePath() + "'", e);
 		}
@@ -138,14 +139,13 @@ public class HdfFile implements Group, AutoCloseable {
 	}
 
 	/**
-	 * Returns the length of this file.
+	 * Returns the size of this HDF5 file.
 	 * 
-	 * @return the lentgh/size of this file in bytes
-	 * @see java.io.RandomAccessFile#length()
+	 * @return the size of this file in bytes
 	 */
-	public long length() {
+	public long size() {
 		try {
-			return fc.size();
+			return hdfFc.size();
 		} catch (IOException e) {
 			throw new HdfException("Error getting lentgh of file '" + getFile().getAbsolutePath() + "'", e);
 		}

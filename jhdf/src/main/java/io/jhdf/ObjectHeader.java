@@ -1,10 +1,9 @@
 package io.jhdf;
 
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import static io.jhdf.Utils.readBytesAsUnsignedInt;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -70,14 +69,11 @@ public abstract class ObjectHeader {
 		/** Level of the node 0 = leaf */
 		private final int referenceCount;
 
-		private ObjectHeaderV1(FileChannel fc, Superblock sb, long address) {
+		private ObjectHeaderV1(HdfFileChannel hdfFc, long address) {
 			super(address);
 
 			try {
-				ByteBuffer header = ByteBuffer.allocate(12);
-				fc.read(header, address);
-				header.order(LITTLE_ENDIAN);
-				header.rewind();
+				ByteBuffer header = hdfFc.readBufferFromAddress(address, 12);
 
 				// Version
 				version = header.get();
@@ -89,21 +85,19 @@ public abstract class ObjectHeader {
 				header.position(header.position() + 1);
 
 				// Number of messages
-				final short numberOfMessages = header.getShort();
+				final int numberOfMessages = readBytesAsUnsignedInt(header, 2);
 
 				// Reference Count
-				referenceCount = header.getInt();
+				referenceCount = readBytesAsUnsignedInt(header, 4);
 
 				// Size of the messages
-				int headerSize = header.getInt();
+				int headerSize = readBytesAsUnsignedInt(header, 4);
 
-				header = ByteBuffer.allocate(headerSize);
 				// 12 up to this point + 4 missed in format spec = 16
-				fc.read(header, address + 16);
-				header.order(LITTLE_ENDIAN);
-				header.rewind();
+				address += 16;
+				header = hdfFc.readBufferFromAddress(address, headerSize);
 
-				header = readMessages(fc, sb, header, numberOfMessages);
+				readMessages(hdfFc, header, numberOfMessages);
 
 				logger.debug("Read object header from address: {}", address);
 
@@ -112,22 +106,20 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private ByteBuffer readMessages(FileChannel fc, Superblock sb, ByteBuffer bb, short numberOfMessages)
+		private void readMessages(HdfFileChannel hdfFc, ByteBuffer bb, int numberOfMessages)
 				throws IOException {
 			while (bb.remaining() > 4 && messages.size() < numberOfMessages) {
-				Message m = Message.readObjectHeaderV1Message(bb, sb);
+				Message m = Message.readObjectHeaderV1Message(bb, hdfFc.getSuperblock());
 				messages.add(m);
 
 				if (m instanceof ObjectHeaderContinuationMessage) {
 					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
-					ByteBuffer continuationBuffer = ByteBuffer.allocate(ohcm.getLentgh());
-					fc.read(continuationBuffer, ohcm.getOffset());
-					continuationBuffer.order(LITTLE_ENDIAN);
-					continuationBuffer.rewind();
-					readMessages(fc, sb, continuationBuffer, numberOfMessages);
+
+					ByteBuffer continuationBuffer = hdfFc.readBufferFromAddress(ohcm.getOffset(), ohcm.getLentgh());
+
+					readMessages(hdfFc, continuationBuffer, numberOfMessages);
 				}
 			}
-			return bb;
 		}
 
 		@Override
@@ -170,15 +162,12 @@ public abstract class ObjectHeader {
 		private final int maximumNumberOfCompactAttributes;
 		private final int maximumNumberOfDenseAttributes;
 
-		private ObjectHeaderV2(FileChannel fc, Superblock sb, long address) {
+		private ObjectHeaderV2(HdfFileChannel hdfFc, long address) {
 			super(address);
 
 			try {
-				ByteBuffer bb = ByteBuffer.allocate(6);
-				fc.read(bb, address);
+				ByteBuffer bb = hdfFc.readBufferFromAddress(address, 6);
 				address += 6;
-				bb.order(LITTLE_ENDIAN);
-				bb.rewind();
 
 				byte[] formatSignitureByte = new byte[OBJECT_HEADER_V2_SIGNATURE.length];
 				bb.get(formatSignitureByte);
@@ -216,11 +205,8 @@ public abstract class ObjectHeader {
 
 				// Timestamps
 				if (flags.get(TIMESTAMPS_PRESENT)) {
-					bb = ByteBuffer.allocate(16);
-					fc.read(bb, address);
+					bb = hdfFc.readBufferFromAddress(address, 16);
 					address += 16;
-					bb.order(LITTLE_ENDIAN);
-					bb.rewind();
 
 					accessTime = Utils.readBytesAsUnsignedLong(bb, 4);
 					modificationTime = Utils.readBytesAsUnsignedLong(bb, 4);
@@ -235,35 +221,26 @@ public abstract class ObjectHeader {
 
 				// Number of attributes
 				if (flags.get(NUMBER_OF_ATTRIBUTES_PRESENT)) {
-					bb = ByteBuffer.allocate(4);
-					fc.read(bb, address);
+					bb = hdfFc.readBufferFromAddress(address, 4);
 					address += 4;
-					bb.order(LITTLE_ENDIAN);
-					bb.rewind();
 
-					maximumNumberOfCompactAttributes = Utils.readBytesAsUnsignedInt(bb, 2);
-					maximumNumberOfDenseAttributes = Utils.readBytesAsUnsignedInt(bb, 2);
+					maximumNumberOfCompactAttributes = readBytesAsUnsignedInt(bb, 2);
+					maximumNumberOfDenseAttributes = readBytesAsUnsignedInt(bb, 2);
 				} else {
 					maximumNumberOfCompactAttributes = -1;
 					maximumNumberOfDenseAttributes = -1;
 				}
 
-				bb = ByteBuffer.allocate(sizeOfChunk0);
-				fc.read(bb, address);
+				bb = hdfFc.readBufferFromAddress(address, sizeOfChunk0);
 				address += sizeOfChunk0;
-				bb.order(LITTLE_ENDIAN);
-				bb.rewind();
 
-				int sizeOfMessages = Utils.readBytesAsUnsignedInt(bb, sizeOfChunk0);
+				int sizeOfMessages = readBytesAsUnsignedInt(bb, sizeOfChunk0);
 
-				bb = ByteBuffer.allocate(sizeOfMessages);
-				fc.read(bb, address);
-				bb.order(LITTLE_ENDIAN);
-				bb.rewind();
+				bb = hdfFc.readBufferFromAddress(address, sizeOfMessages);
 
-				// There might be a gap at the end of the header of upto 4 bytes
+				// There might be a gap at the end of the header of up to 4 bytes
 				// message type (1_byte) + message size (2 bytes) + message flags (1 byte)
-				bb = readMessages(fc, sb, bb);
+				bb = readMessages(hdfFc, bb);
 
 				logger.debug("Read object header from address: {}", address);
 
@@ -272,17 +249,14 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private ByteBuffer readMessages(FileChannel fc, Superblock sb, ByteBuffer bb) throws IOException {
+		private ByteBuffer readMessages(HdfFileChannel hdfFc, ByteBuffer bb) throws IOException {
 			while (bb.remaining() >= 8) {
-				Message m = Message.readObjectHeaderV2Message(bb, sb);
+				Message m = Message.readObjectHeaderV2Message(bb, hdfFc.getSuperblock());
 				messages.add(m);
 
 				if (m instanceof ObjectHeaderContinuationMessage) {
 					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
-					ByteBuffer continuationBuffer = ByteBuffer.allocate(ohcm.getLentgh());
-					fc.read(continuationBuffer, ohcm.getOffset());
-					continuationBuffer.order(LITTLE_ENDIAN);
-					continuationBuffer.rewind();
+					ByteBuffer continuationBuffer = hdfFc.readBufferFromAddress(ohcm.getOffset(), ohcm.getLentgh());
 
 					// Verify continuation block signature
 					byte[] continuationSignitureBytes = new byte[OBJECT_HEADER_V2_CONTINUATION_SIGNATURE.length];
@@ -293,7 +267,7 @@ public abstract class ObjectHeader {
 					}
 
 					// Recursivly read messages
-					readMessages(fc, sb, continuationBuffer);
+					readMessages(hdfFc, continuationBuffer);
 				}
 			}
 			return bb;
@@ -330,30 +304,24 @@ public abstract class ObjectHeader {
 
 	}
 
-	public static ObjectHeader readObjectHeader(FileChannel fc, Superblock sb, long address) {
-		ByteBuffer bb = ByteBuffer.allocate(1);
-		try {
-			fc.read(bb, address);
-		} catch (IOException e) {
-			throw new HdfException("Failed to read object header at address = " + address, e);
-		}
-		bb.rewind();
+	public static ObjectHeader readObjectHeader(HdfFileChannel hdfFc, long address) {
+		ByteBuffer bb = hdfFc.readBufferFromAddress(address, 1);
 		byte version = bb.get();
 		if (version == 1) {
-			return new ObjectHeaderV1(fc, sb, address);
+			return new ObjectHeaderV1(hdfFc, address);
 		} else {
-			return new ObjectHeaderV2(fc, sb, address);
+			return new ObjectHeaderV2(hdfFc, address);
 		}
 	}
 
-	public static LazyInitializer<ObjectHeader> lazyReadObjectHeader(FileChannel fc, Superblock sb, long address) {
+	public static LazyInitializer<ObjectHeader> lazyReadObjectHeader(HdfFileChannel hdfFc, long address) {
 		logger.debug("Creating lazy object header at address: {}", address);
 		return new LazyInitializer<ObjectHeader>() {
 
 			@Override
 			protected ObjectHeader initialize() throws ConcurrentException {
 				logger.debug("Lazy initalising object header at address: {}", address);
-				return readObjectHeader(fc, sb, address);
+				return readObjectHeader(hdfFc, address);
 			}
 
 		};

@@ -3,19 +3,17 @@ package io.jhdf.dataset;
 import static io.jhdf.Constants.UNDEFINED_ADDRESS;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
-import io.jhdf.Superblock;
 import io.jhdf.api.Group;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayoutMessage.ContigiousDataLayoutMessage;
 
 public class ContiguousDataset extends DatasetBase {
 
-	public ContiguousDataset(FileChannel fc, Superblock sb, long address, String name, Group parent, ObjectHeader oh) {
-		super(fc, sb, address, name, parent, oh);
+	public ContiguousDataset(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
+		super(hdfFc, address, name, parent, oh);
 	}
 
 	@Override
@@ -28,7 +26,7 @@ public class ContiguousDataset extends DatasetBase {
 		}
 
 		try {
-			ByteBuffer data = fc.map(MapMode.READ_ONLY, contigiousDataLayoutMessage.getAddress(),
+			ByteBuffer data = hdfFc.map(contigiousDataLayoutMessage.getAddress(),
 					contigiousDataLayoutMessage.getSize());
 			convertToCorrectEndiness(data);
 			return data;

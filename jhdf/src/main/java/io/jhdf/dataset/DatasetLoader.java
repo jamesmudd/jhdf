@@ -1,9 +1,7 @@
 package io.jhdf.dataset;
 
-import java.nio.channels.FileChannel;
-
+import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
-import io.jhdf.Superblock;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.exceptions.HdfException;
@@ -23,23 +21,23 @@ public final class DatasetLoader {
 		// No instances
 	}
 
-	public static Dataset createDataset(FileChannel fc, Superblock sb, long address, String name,
+	public static Dataset createDataset(HdfFileChannel hdfFc, long address, String name,
 			Group parent) {
 
 		try {
 			// Load the object header to determine the type of dataset to make
-			final ObjectHeader oh = ObjectHeader.readObjectHeader(fc, sb, address);
+			final ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, address);
 			DataLayoutMessage dlm = oh.getMessageOfType(DataLayoutMessage.class);
 
 			final DatasetBase dataset;
 			if (dlm instanceof CompactDataLayoutMessage) {
-				dataset = new CompactDataset(fc, sb, address, name, parent, oh);
+				dataset = new CompactDataset(hdfFc, address, name, parent, oh);
 
 			} else if (dlm instanceof ContigiousDataLayoutMessage) {
-				dataset = new ContiguousDataset(fc, sb, address, name, parent, oh);
+				dataset = new ContiguousDataset(hdfFc, address, name, parent, oh);
 
 			} else if (dlm instanceof ChunkedDataLayoutMessageV3) {
-				dataset = new ChunkedDatasetV3(fc, sb, address, name, parent, oh);
+				dataset = new ChunkedDatasetV3(hdfFc, address, name, parent, oh);
 
 			} else if (dlm instanceof ChunkedDataLayoutMessageV4) {
 				throw new UnsupportedHdfException("Chunked V4 dataset not supported");
@@ -54,7 +52,7 @@ public final class DatasetLoader {
 
 			if (type instanceof VariableLength) {
 				// If its a variable length data type wrap the dataset
-				return new VaribleLentghDataset(dataset, fc, sb, oh);
+				return new VaribleLentghDataset(hdfFc, dataset, oh);
 			} else {
 				return dataset; // not wrapped
 			}

@@ -3,7 +3,6 @@ package io.jhdf;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.File;
-import java.nio.channels.FileChannel;
 import java.util.Map;
 
 import org.apache.commons.lang3.concurrent.ConcurrentException;
@@ -45,13 +44,13 @@ public abstract class AbstractNode implements Node {
 	protected final LazyInitializer<ObjectHeader> header;
 	protected final AttributesLazyInitializer attributes;
 
-	public AbstractNode(FileChannel fc, Superblock sb, long address, String name, Group parent) {
+	public AbstractNode(HdfFileChannel hdfFc, long address, String name, Group parent) {
 		this.address = address;
 		this.name = name;
 		this.parent = parent;
 
 		try {
-			header = ObjectHeader.lazyReadObjectHeader(fc, sb, address);
+			header = ObjectHeader.lazyReadObjectHeader(hdfFc, address);
 
 			// Attributes
 			attributes = new AttributesLazyInitializer(header);

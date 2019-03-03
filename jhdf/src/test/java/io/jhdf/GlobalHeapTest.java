@@ -5,13 +5,12 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,17 +21,17 @@ import io.jhdf.exceptions.HdfException;
 public class GlobalHeapTest {
 
 	private GlobalHeap globalHeap;
-	private FileChannel fc;
 	private Superblock sb;
+	private HdfFileChannel hdfFc;
 
 	@BeforeEach
-	void setup() throws FileNotFoundException {
+	void setup() throws Exception {
 		String testFile = this.getClass().getResource("test_file.hdf5").getFile();
-		RandomAccessFile raf = new RandomAccessFile(new File(testFile), "r");
-		fc = raf.getChannel();
+		FileChannel fc = FileChannel.open(Paths.get(testFile), StandardOpenOption.READ);
 		sb = Superblock.readSuperblock(fc, 0);
+		hdfFc = new HdfFileChannel(fc, sb);
 
-		globalHeap = new GlobalHeap(fc, sb, 2048);
+		globalHeap = new GlobalHeap(hdfFc, 2048);
 	}
 
 	@Test
@@ -49,7 +48,7 @@ public class GlobalHeapTest {
 	@Test
 	void testInvalidSignatureThrows() throws Exception {
 		// Give address of local heap
-		assertThrows(HdfException.class, () -> new GlobalHeap(fc, sb, 1384));
+		assertThrows(HdfException.class, () -> new GlobalHeap(hdfFc, 1384));
 	}
 
 	@Test
@@ -83,6 +82,7 @@ public class GlobalHeapTest {
 			return null;
 		}).when(mockFc).read(Mockito.any(ByteBuffer.class), Mockito.anyLong());
 
-		assertThrows(HdfException.class, () -> new GlobalHeap(mockFc, sb, 0));
+		HdfFileChannel hdfFileChannel = new HdfFileChannel(mockFc, sb);
+		assertThrows(HdfException.class, () -> new GlobalHeap(hdfFileChannel, 0));
 	}
 }

@@ -7,12 +7,10 @@ import static io.jhdf.Utils.createSubBuffer;
 import static io.jhdf.Utils.readBytesAsUnsignedInt;
 import static io.jhdf.Utils.readBytesAsUnsignedLong;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
-import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -48,7 +46,7 @@ public class FractalHeap {
 	private static final BigInteger TWO = BigInteger.valueOf(2L);
 
 	private final long address;
-	private final FileChannel fc;
+	private final HdfFileChannel hdfFc;
 	private final Superblock sb;
 
 	private final int maxDirectBlockSize;
@@ -85,20 +83,16 @@ public class FractalHeap {
 	private final int bytesToStoreOffset;
 	private final int bytesToStoreLentgh;
 
-	public FractalHeap(FileChannel fc, Superblock sb, long address) {
-		this.fc = fc;
-		this.sb = sb;
+	public FractalHeap(HdfFileChannel hdfFc, long address) {
+		this.hdfFc = hdfFc;
+		this.sb = hdfFc.getSuperblock();
 		this.address = address;
 
 		try {
 			final int headerSize = 4 + 1 + 2 + 2 + 1 + 4 + 12 * sb.getSizeOfLengths() + 3 * sb.getSizeOfOffsets() + 2
 					+ 2 + 2 + 2;
 
-			ByteBuffer bb = ByteBuffer.allocate(headerSize);
-
-			fc.read(bb, address);
-			bb.rewind();
-			bb.order(LITTLE_ENDIAN);
+			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
 			byte[] formatSignitureByte = new byte[4];
 			bb.get(formatSignitureByte, 0, formatSignitureByte.length);
@@ -237,11 +231,7 @@ public class FractalHeap {
 			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset
 					+ currentRowsInRootIndirectBlock * tableWidth * getRowSize() + 4;
 
-			ByteBuffer bb = ByteBuffer.allocate(headerSize);
-
-			fc.read(bb, address);
-			bb.rewind();
-			bb.order(LITTLE_ENDIAN);
+			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
 			byte[] formatSignitureByte = new byte[4];
 			bb.get(formatSignitureByte, 0, formatSignitureByte.length);
@@ -306,10 +296,7 @@ public class FractalHeap {
 
 			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset + 4;
 
-			ByteBuffer bb = ByteBuffer.allocate(headerSize);
-			fc.read(bb, address);
-			bb.rewind();
-			bb.order(LITTLE_ENDIAN);
+			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
 			byte[] formatSignitureByte = new byte[4];
 			bb.get(formatSignitureByte, 0, formatSignitureByte.length);
@@ -336,7 +323,7 @@ public class FractalHeap {
 				// TODO Checksum for now skip over
 				bb.position(bb.position() + 4);
 			}
-			data = fc.map(READ_ONLY, address, getSizeOfDirectBlock(blockIndex));
+			data = hdfFc.map(address, getSizeOfDirectBlock(blockIndex));
 		}
 
 		private boolean checksumPresent() {
