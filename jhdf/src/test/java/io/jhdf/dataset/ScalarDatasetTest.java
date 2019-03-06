@@ -2,6 +2,7 @@ package io.jhdf.dataset;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
@@ -95,6 +96,7 @@ public class ScalarDatasetTest {
 			assertThat(dataset.getDimensions(), is(equalTo(new int[0])));
 			assertThat(dataset.isScalar(), is(true));
 			assertThat(dataset.getData(), is(equalTo(expected)));
+			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
 		};
 	}
 

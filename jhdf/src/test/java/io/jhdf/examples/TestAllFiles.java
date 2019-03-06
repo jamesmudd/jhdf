@@ -100,13 +100,19 @@ public class TestAllFiles {
 		assertThat(dataset.getDataLayout(), is(notNullValue()));
 		if (dataset.isEmpty()) {
 			assertThat(dataset.getData(), is(nullValue()));
+			// Empty so should have 0 size
+			assertThat(dataset.getDiskSize(), is(equalTo(0L)));
 		} else if (dataset.isScalar()) {
 			Object data = dataset.getData();
 			assertThat(data.getClass(), is(equalTo(dataset.getJavaType())));
+			// Should have some size
+			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
 		} else {
 			Object data = dataset.getData();
 			assertThat(getDimensions(data), is(equalTo(dims)));
 			assertThat(getType(data), is(equalTo(dataset.getJavaType())));
+			// Should have some size
+			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
 		}
 	}
 
