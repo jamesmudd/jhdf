@@ -13,6 +13,11 @@ def write_attribute_file(f):
     dataset = group.create_dataset('data', data=np.arange(5), dtype='f4')
     add_attributes(dataset)
 
+    # Add links
+    f['hard_link_data'] = group['data']
+    f['soft_link_to_data'] = h5py.SoftLink('/test_group/data')
+    
+    
     f.flush()
     f.close()
 
@@ -20,14 +25,14 @@ def write_attribute_file(f):
 def add_attributes(node):
     # Integer
     node.attrs.create('scalar_int', np.int32(123), dtype='i4')
-    node.attrs.create('1D_int', np.arange(10), dtype='i4')
-    node.attrs.create('2D_int', np.arange(10).reshape(2,5), dtype='i4')
+    node.attrs.create('1D_int', np.arange(3), dtype='i4')
+    node.attrs.create('2D_int', np.arange(6).reshape(2,3), dtype='i4')
     node.attrs.create('empty_int', h5py.Empty('i4'), dtype='i4')
     
     # Float
     node.attrs.create('scalar_float', np.float32(123.45), dtype='f4')
-    node.attrs.create('1D_float', np.arange(10), dtype='f4')
-    node.attrs.create('2D_float', np.arange(10).reshape(2,5), dtype='f4')
+    node.attrs.create('1D_float', np.arange(3), dtype='f4')
+    node.attrs.create('2D_float', np.arange(6).reshape(2,3), dtype='f4')
     node.attrs.create('empty_float', h5py.Empty('f4'), dtype='f4')
     
     # String
