@@ -81,7 +81,7 @@ public class FractalHeap {
 	private final NavigableMap<Long, DirectBlock> directBlocks = new TreeMap<>(); // Sorted map
 
 	private final int bytesToStoreOffset;
-	private final int bytesToStoreLentgh;
+	private final int bytesToStoreLength;
 
 	public FractalHeap(HdfFileChannel hdfFc, long address) {
 		this.hdfFc = hdfFc;
@@ -142,7 +142,7 @@ public class FractalHeap {
 			final int maxHeapSize = readBytesAsUnsignedInt(bb, 2);
 			// Calculate byte sizes needed later
 			bytesToStoreOffset = (int) Math.ceil(maxHeapSize / 8.0);
-			bytesToStoreLentgh = bytesNeededToHoldNumber(Math.min(maxDirectBlockSize, maxSizeOfManagedObjects));
+			bytesToStoreLength = bytesNeededToHoldNumber(Math.min(maxDirectBlockSize, maxSizeOfManagedObjects));
 
 			startingRowsInRootIndirectBlock = readBytesAsUnsignedInt(bb, 2);
 
@@ -185,7 +185,7 @@ public class FractalHeap {
 
 	public ByteBuffer getId(ByteBuffer buffer) {
 		if (buffer.capacity() != idLength) {
-			throw new HdfException("ID lentgh is incorrect accessing fractal heap at address " + address
+			throw new HdfException("ID length is incorrect accessing fractal heap at address " + address
 					+ ". IDs should be " + idLength + "bytes but was " + buffer.capacity() + "bytes.");
 		}
 
@@ -201,9 +201,9 @@ public class FractalHeap {
 		switch (type) {
 		case 0: // Managed Objects
 			int offset = readBytesAsUnsignedInt(buffer, bytesToStoreOffset);
-			int lentgh = readBytesAsUnsignedInt(buffer, bytesToStoreLentgh);
+			int length = readBytesAsUnsignedInt(buffer, bytesToStoreLength);
 
-			logger.debug("Getting ID at offset={} lentgh={}", offset, lentgh);
+			logger.debug("Getting ID at offset={} length={}", offset, length);
 
 			// Figure out which direct block holds the offset
 			Entry<Long, DirectBlock> entry = directBlocks.floorEntry((long) offset);
@@ -211,7 +211,7 @@ public class FractalHeap {
 			ByteBuffer bb = entry.getValue().getData();
 			bb.order(LITTLE_ENDIAN);
 			bb.position((int) (offset - entry.getKey()));
-			return createSubBuffer(bb, lentgh);
+			return createSubBuffer(bb, length);
 
 		case 1: // Huge objects
 			throw new UnsupportedHdfException("Huge objects are currently not supported");

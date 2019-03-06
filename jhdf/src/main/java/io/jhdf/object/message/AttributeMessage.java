@@ -51,7 +51,7 @@ public class AttributeMessage extends Message {
 			logger.trace("Dataspace: {}", dataSpace);
 			Utils.seekBufferToNextMultipleOfEight(bb);
 
-			final int dataSize = Math.toIntExact(dataSpace.getTotalLentgh() * dataType.getSize());
+			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
 			data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
 
 		} else if (version == 2) {
@@ -78,7 +78,7 @@ public class AttributeMessage extends Message {
 				logger.trace("Dataspace: {}", dataSpace);
 			}
 
-			final int dataSize = Math.toIntExact(dataSpace.getTotalLentgh() * dataType.getSize());
+			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
 			data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
 
 		} else if (version == 3) {
@@ -119,7 +119,7 @@ public class AttributeMessage extends Message {
 				logger.trace("Dataspace: {}", dataSpace);
 			}
 
-			final int dataSize = Math.toIntExact(dataSpace.getTotalLentgh() * dataType.getSize());
+			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
 			data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
 
 		} else {

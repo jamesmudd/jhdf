@@ -88,7 +88,7 @@ public class ScalarDatasetTest {
 	private Executable createTest(HdfFile file, String datasetPath, Object expected) {
 		return () -> {
 			Dataset dataset = file.getDatasetByPath(datasetPath);
-			// should have 0 lentgh dimensions
+			// should have 0 length dimensions
 			assertThat(dataset.getDimensions(), is(equalTo(new int[0])));
 			assertThat(dataset.isScalar(), is(true));
 			assertThat(dataset.getData(), is(equalTo(expected)));

@@ -81,19 +81,19 @@ class DatasetReaderTest {
 	}
 
 	@Test
-	void testUnsupportedFixedPointLentghThrows() {
+	void testUnsupportedFixedPointLengthThrows() {
 		DataType invalidDataType = mockFixedPoint(int.class, true, 11); // 11 byte data is not supported
 		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims));
 	}
 
 	@Test
-	void testUnsupportedUnsignedFixedPointLentghThrows() {
+	void testUnsupportedUnsignedFixedPointLengthThrows() {
 		DataType invalidDataType = mockFixedPoint(int.class, false, 11); // 11 byte data is not supported
 		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims));
 	}
 
 	@Test
-	void testUnsupportedFloatingPointLentghThrows() {
+	void testUnsupportedFloatingPointLengthThrows() {
 		DataType invalidDataType = mockFloatingPoint(double.class, 11); // 11 byte data is not supported
 		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims));
 	}

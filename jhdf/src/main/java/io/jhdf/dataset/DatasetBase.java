@@ -55,7 +55,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 	@Override
 	public long getSize() {
-		return dataSpace.getTotalLentgh();
+		return dataSpace.getTotalLength();
 	}
 
 	@Override

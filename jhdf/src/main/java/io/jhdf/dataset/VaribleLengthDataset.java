@@ -26,13 +26,13 @@ import io.jhdf.object.datatype.VariableLength;
 import io.jhdf.object.message.DataLayout;
 import io.jhdf.object.message.DataTypeMessage;
 
-public class VaribleLentghDataset implements Dataset {
+public class VaribleLengthDataset implements Dataset {
 
 	private final HdfFileChannel hdfFc;
 	private final DatasetBase wrappedDataset;
 	private final VariableLength type;
 
-	public VaribleLentghDataset(HdfFileChannel hdfFc, DatasetBase dataset, ObjectHeader oh) {
+	public VaribleLengthDataset(HdfFileChannel hdfFc, DatasetBase dataset, ObjectHeader oh) {
 		this.hdfFc = hdfFc;
 		this.wrappedDataset = dataset;
 		this.type = (VariableLength) oh.getMessageOfType(DataTypeMessage.class).getDataType();
@@ -43,13 +43,13 @@ public class VaribleLentghDataset implements Dataset {
 		// resolve that then build the buffer.
 
 		ByteBuffer bb = wrappedDataset.getDataBuffer().order(LITTLE_ENDIAN);
-		int lentgh = type.getSize();
+		int length = type.getSize();
 
 		List<GlobalHeapId> ids = new ArrayList<>(Math.toIntExact(getSize()));
 
-		int skipBytes = lentgh - hdfFc.getSizeOfOffsets() - 4; // id=4
+		int skipBytes = length - hdfFc.getSizeOfOffsets() - 4; // id=4
 
-		while (bb.remaining() >= lentgh) {
+		while (bb.remaining() >= length) {
 			// Move past the skipped bytes. TODO figure out what this is for
 			bb.position(bb.position() + skipBytes);
 			long heapAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());

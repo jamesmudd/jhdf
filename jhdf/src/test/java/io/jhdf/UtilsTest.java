@@ -162,7 +162,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadingUnsupportedLentghLongThrows() throws Exception {
+	public void testReadingUnsupportedLengthLongThrows() throws Exception {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThrows(IllegalArgumentException.class, () -> Utils.readBytesAsUnsignedLong(bb, 9));
@@ -234,7 +234,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadingUnsupportedLentghThrows() throws Exception {
+	public void testReadingUnsupportedLengthThrows() throws Exception {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThrows(IllegalArgumentException.class, () -> Utils.readBytesAsUnsignedInt(bb, 6));
@@ -262,7 +262,7 @@ public class UtilsTest {
 		ByteBuffer bb = ByteBuffer.wrap(ints);
 
 		ByteBuffer subBuffer = Utils.createSubBuffer(bb, 3);
-		// Check new buffer is of the righ lentgh
+		// Check new buffer is of the right length
 		assertThat(subBuffer.limit(), is(equalTo(3)));
 		// Check original buffer position is moved on
 		assertThat(bb.position(), is(equalTo(3)));
@@ -288,7 +288,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testBitsToIntThrowsWithNegativeLentgh() throws Exception {
+	public void testBitsToIntThrowsWithNegativeLength() throws Exception {
 		BitSet bits = new BitSet(8);
 		assertThrows(IllegalArgumentException.class, () -> Utils.bitsToInt(bits, 3, -1)); // Should throw
 	}

@@ -33,7 +33,7 @@ public class AttributeImpl implements Attribute {
 
 	@Override
 	public long getSize() {
-		return message.getDataSpace().getTotalLentgh();
+		return message.getDataSpace().getTotalLength();
 	}
 
 	@Override

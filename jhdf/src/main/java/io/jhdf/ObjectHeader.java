@@ -115,7 +115,7 @@ public abstract class ObjectHeader {
 				if (m instanceof ObjectHeaderContinuationMessage) {
 					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
 
-					ByteBuffer continuationBuffer = hdfFc.readBufferFromAddress(ohcm.getOffset(), ohcm.getLentgh());
+					ByteBuffer continuationBuffer = hdfFc.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
 
 					readMessages(hdfFc, continuationBuffer, numberOfMessages);
 				}
@@ -256,7 +256,7 @@ public abstract class ObjectHeader {
 
 				if (m instanceof ObjectHeaderContinuationMessage) {
 					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
-					ByteBuffer continuationBuffer = hdfFc.readBufferFromAddress(ohcm.getOffset(), ohcm.getLentgh());
+					ByteBuffer continuationBuffer = hdfFc.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
 
 					// Verify continuation block signature
 					byte[] continuationSignitureBytes = new byte[OBJECT_HEADER_V2_CONTINUATION_SIGNATURE.length];

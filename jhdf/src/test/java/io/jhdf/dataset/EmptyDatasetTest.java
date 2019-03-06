@@ -89,7 +89,7 @@ public class EmptyDatasetTest {
 	private Executable createTest(HdfFile file, String datasetPath, Class<?> expectedType) {
 		return () -> {
 			Dataset dataset = file.getDatasetByPath(datasetPath);
-			// should have 0 lentgh dimensions
+			// should have 0 length dimensions
 			assertThat(dataset.getDimensions(), is(equalTo(new int[0])));
 
 			// Should be empty

@@ -52,7 +52,7 @@ public final class DatasetLoader {
 
 			if (type instanceof VariableLength) {
 				// If its a variable length data type wrap the dataset
-				return new VaribleLentghDataset(hdfFc, dataset, oh);
+				return new VaribleLengthDataset(hdfFc, dataset, oh);
 			} else {
 				return dataset; // not wrapped
 			}

@@ -38,7 +38,7 @@ public class FractalHeapTest {
 		ByteBuffer id = ByteBuffer.allocate(7);
 		id.put(new byte[] { 0 }); // Flags none set for managed
 		id.putInt(3129); // offset
-		id.putShort((short) 18); // lentgh
+		id.putShort((short) 18); // length
 		id.rewind();
 
 		ByteBuffer data = fractalHeap.getId(id);
@@ -48,7 +48,7 @@ public class FractalHeapTest {
 	}
 
 	@Test
-	void testWrongIdLentghThrows() {
+	void testWrongIdLengthThrows() {
 		ByteBuffer bb = ByteBuffer.allocate(12); // This fractal heap needs 7 byte IDs
 		assertThrows(HdfException.class, () -> fractalHeap.getId(bb));
 	}

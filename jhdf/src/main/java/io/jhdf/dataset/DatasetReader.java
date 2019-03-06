@@ -119,7 +119,7 @@ public class DatasetReader {
 		} else if (type instanceof StringData) {
 			StringData stringData = (StringData) type;
 			int stringLength = stringData.getSize();
-			fillFixedLentghStringData(data, dimensions, buffer, stringLength);
+			fillFixedLengthStringData(data, dimensions, buffer, stringLength);
 		}
 
 		if (isScalar) {
@@ -272,11 +272,11 @@ public class DatasetReader {
 
 	// String Data
 
-	private static void fillFixedLentghStringData(Object data, int[] dims, ByteBuffer buffer, int stringLength) {
+	private static void fillFixedLengthStringData(Object data, int[] dims, ByteBuffer buffer, int stringLength) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillFixedLentghStringData(newArray, stripLeadingIndex(dims), buffer, stringLength);
+				fillFixedLengthStringData(newArray, stripLeadingIndex(dims), buffer, stringLength);
 			}
 		} else {
 			for (int i = 0; i < dims[0]; i++) {

@@ -85,15 +85,15 @@ public final class Utils {
 	 * This is used in HDF5 to read "size of lengths" and "size of offsets"
 	 * 
 	 * @param buffer to read from
-	 * @param lentgh the number of bytes to read
+	 * @param length the number of bytes to read
 	 * @return the <code>int</code> value read from the buffer
 	 * @throws ArithmeticException      if the data cannot be safely converted to an
 	 *                                  unsigned <code>int</code>
 	 * @throws IllegalArgumentException if the length requested is not supported i.e
 	 *                                  &gt; 8
 	 */
-	public static int readBytesAsUnsignedInt(ByteBuffer buffer, int lentgh) {
-		switch (lentgh) {
+	public static int readBytesAsUnsignedInt(ByteBuffer buffer, int length) {
+		switch (length) {
 		case 1:
 			return Byte.toUnsignedInt(buffer.get());
 		case 2:
@@ -113,7 +113,7 @@ public final class Utils {
 			// Throws if the long can't be converted safely
 			return Math.toIntExact(buffer.getLong());
 		default:
-			throw new IllegalArgumentException("Couldn't read " + lentgh + " bytes as int");
+			throw new IllegalArgumentException("Couldn't read " + length + " bytes as int");
 		}
 	}
 
@@ -125,14 +125,14 @@ public final class Utils {
 	 * This is used in HDF5 to read "size of lengths" and "size of offsets"
 	 * 
 	 * @param buffer to read from
-	 * @param lentgh the number of bytes to read
+	 * @param length the number of bytes to read
 	 * @return the long value read from the buffer
 	 * @throws ArithmeticException      if the data cannot be safely converted to an
 	 *                                  unsigned long
 	 * @throws IllegalArgumentException if the length requested is not supported;
 	 */
-	public static long readBytesAsUnsignedLong(ByteBuffer buffer, int lentgh) {
-		switch (lentgh) {
+	public static long readBytesAsUnsignedLong(ByteBuffer buffer, int length) {
+		switch (length) {
 		case 1:
 			return Byte.toUnsignedLong(buffer.get());
 		case 2:
@@ -149,7 +149,7 @@ public final class Utils {
 		case 7:
 			// Pad out to 8 bytes then call again
 			byte[] bytes = new byte[8];
-			buffer.get(bytes, 8 - lentgh, lentgh);
+			buffer.get(bytes, 8 - length, length);
 			return readBytesAsUnsignedLong(ByteBuffer.wrap(bytes), 8);
 		case 8:
 			long value = buffer.getLong();
@@ -158,7 +158,7 @@ public final class Utils {
 			}
 			return value;
 		default:
-			throw new IllegalArgumentException("Couldn't read " + lentgh + " bytes as int");
+			throw new IllegalArgumentException("Couldn't read " + length + " bytes as int");
 		}
 	}
 
@@ -171,16 +171,16 @@ public final class Utils {
 	 * backing data with the source buffer.
 	 * 
 	 * @param source the buffer to take the sub buffer from
-	 * @param lentgh the size of the new sub-buffer
+	 * @param length the size of the new sub-buffer
 	 * @return the new sub buffer
 	 */
-	public static ByteBuffer createSubBuffer(ByteBuffer source, int lentgh) {
+	public static ByteBuffer createSubBuffer(ByteBuffer source, int length) {
 		ByteBuffer headerData = source.slice();
-		headerData.limit(lentgh);
+		headerData.limit(length);
 		headerData.order(source.order());
 
 		// Move the buffer past this header
-		source.position(source.position() + lentgh);
+		source.position(source.position() + length);
 		return headerData;
 	}
 
@@ -192,15 +192,15 @@ public final class Utils {
 	 * 
 	 * @param bits   to inspect
 	 * @param start  the first bit
-	 * @param lentgh the number of bits to inspect
+	 * @param length the number of bits to inspect
 	 * @return the integer represented by the provided bits
 	 */
-	public static int bitsToInt(BitSet bits, int start, int lentgh) {
-		if (lentgh <= 0) {
-			throw new IllegalArgumentException("lentgh must be >0");
+	public static int bitsToInt(BitSet bits, int start, int length) {
+		if (length <= 0) {
+			throw new IllegalArgumentException("length must be >0");
 		}
 		BigInteger result = BigInteger.ZERO;
-		for (int i = 0; i < lentgh; i++) {
+		for (int i = 0; i < length; i++) {
 			if (bits.get(start + i)) {
 				result = result.add(TWO.pow(i));
 			}
