@@ -115,10 +115,23 @@ public class GroupImpl extends AbstractNode implements Group {
 				for (SymbolTableEntry ste : groupSTE.getSymbolTableEntries()) {
 					String childName = readName(nameBuffer, ste.getLinkNameOffset());
 					final Node node;
-					if (ste.getCacheType() == 1) { // Its a group
-						node = createGroup(hdfFc, ste.getObjectHeaderAddress(), childName, parent);
-					} else { // Dataset
+					switch (ste.getCacheType()) {
+					case 0: // Dataset
+						logger.trace("Creating dataset '{}'", childName);
 						node = DatasetLoader.createDataset(hdfFc, ste.getObjectHeaderAddress(), childName, parent);
+						break;
+					case 1: // Group
+						logger.trace("Creating group '{}'", childName);
+						node = createGroup(hdfFc, ste.getObjectHeaderAddress(), childName, parent);
+						break;
+					case 2: // Soft Link
+						logger.trace("Creating soft link '{}'", childName);
+						String target = readName(nameBuffer, ste.getLinkValueOffset());
+						node = new SoftLink(target, childName, parent);
+						break;
+					default:
+						throw new HdfException(
+								"Unreconised symbol table entry cache type. Type was: " + ste.getCacheType());
 					}
 					lazyChildren.put(childName, node);
 				}

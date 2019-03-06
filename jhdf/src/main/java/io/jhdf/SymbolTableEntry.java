@@ -17,7 +17,7 @@ public class SymbolTableEntry {
 	private final int cacheType;
 	private long bTreeAddress = -1;
 	private long nameHeapAddress = -1;
-	private long linkValueOffset = -1;
+	private int linkValueOffset = -1;
 
 	public SymbolTableEntry(HdfFileChannel fc, long address) {
 		this.address = address;
@@ -83,7 +83,7 @@ public class SymbolTableEntry {
 		return linkNameOffset;
 	}
 
-	public long getLinkValueOffset() {
+	public int getLinkValueOffset() {
 		return linkValueOffset;
 	}
 
