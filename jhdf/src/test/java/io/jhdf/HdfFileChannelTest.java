@@ -51,7 +51,7 @@ public class HdfFileChannelTest {
 	void testReadingBuffer() throws IOException {
 
 		Mockito.doAnswer(invocation -> {
-			ByteBuffer bb = (ByteBuffer) invocation.getArguments()[0];
+			ByteBuffer bb = invocation.getArgument(0);
 			bb.rewind();
 			bb.put("TEST".getBytes()); // Put test data in buffer
 			return null;

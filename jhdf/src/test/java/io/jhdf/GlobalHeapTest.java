@@ -77,7 +77,7 @@ public class GlobalHeapTest {
 	void testInvalidVersionThrows() throws IOException {
 		FileChannel mockFc = Mockito.mock(FileChannel.class);
 		Mockito.doAnswer(invocation -> {
-			ByteBuffer bb = (ByteBuffer) invocation.getArguments()[0];
+			ByteBuffer bb = invocation.getArgument(0);
 			bb.rewind();
 			bb.put("GCOL".getBytes()); // Match signature
 			bb.put((byte) 4); // mismatch version
