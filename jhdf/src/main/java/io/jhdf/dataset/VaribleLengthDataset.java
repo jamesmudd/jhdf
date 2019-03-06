@@ -144,6 +144,11 @@ public class VaribleLengthDataset implements Dataset {
 	}
 
 	@Override
+	public Attribute getAttribute(String name) {
+		return wrappedDataset.getAttribute(name);
+	}
+
+	@Override
 	public int[] getDimensions() {
 		return wrappedDataset.getDimensions();
 	}

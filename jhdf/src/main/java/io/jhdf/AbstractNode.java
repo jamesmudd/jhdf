@@ -118,4 +118,9 @@ public abstract class AbstractNode implements Node {
 					"Failed to load attributes for '" + getPath() + "' at address '" + getAddress() + "'", e);
 		}
 	}
+
+	@Override
+	public Attribute getAttribute(String name) {
+		return getAttributes().get(name);
+	}
 }

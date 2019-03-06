@@ -43,6 +43,15 @@ public interface Node {
 	Map<String, Attribute> getAttributes();
 
 	/**
+	 * Gets the attribute with the given name. This is equivalent to calling
+	 * {@link #getAttributes()}.get(name).
+	 * 
+	 * @param name of the requested attribute
+	 * @return the attribute of the given name or <code>null</code> if not available
+	 */
+	Attribute getAttribute(String name);
+
+	/**
 	 * Gets the type of this {@link Node}.
 	 * 
 	 * @return the type of this node

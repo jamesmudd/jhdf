@@ -44,6 +44,11 @@ public abstract class AbstractLink implements Link {
 	}
 
 	@Override
+	public Attribute getAttribute(String name) {
+		return getTarget().getAttribute(name);
+	}
+
+	@Override
 	public NodeType getType() {
 		return getTarget().getType();
 	}
