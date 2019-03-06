@@ -14,6 +14,7 @@ import java.nio.ShortBuffer;
 import java.util.Arrays;
 
 import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.FixedPoint;
@@ -120,6 +121,9 @@ public class DatasetReader {
 			StringData stringData = (StringData) type;
 			int stringLength = stringData.getSize();
 			fillFixedLengthStringData(data, dimensions, buffer, stringLength);
+		} else {
+			throw new HdfException(
+					"DatasetReader was passed a type it cant fill. Type: " + type.getClass().getCanonicalName());
 		}
 
 		if (isScalar) {
