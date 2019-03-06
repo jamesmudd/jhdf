@@ -52,7 +52,11 @@ public class AttributeMessage extends Message {
 			Utils.seekBufferToNextMultipleOfEight(bb);
 
 			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
-			data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
+			if (dataSize == 0) {
+				data = null;
+			} else {
+				data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
+			}
 
 		} else if (version == 2) {
 			final BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
@@ -79,7 +83,11 @@ public class AttributeMessage extends Message {
 			}
 
 			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
-			data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
+			if (dataSize == 0) {
+				data = null;
+			} else {
+				data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
+			}
 
 		} else if (version == 3) {
 			final BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
@@ -120,7 +128,11 @@ public class AttributeMessage extends Message {
 			}
 
 			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
-			data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
+			if (dataSize == 0) {
+				data = null;
+			} else {
+				data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
+			}
 
 		} else {
 			throw new UnsupportedHdfException("Unsupported Attribute message version. Detected version: " + version);

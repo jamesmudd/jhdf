@@ -59,4 +59,21 @@ public interface Attribute {
 	 */
 	public Class<?> getJavaType();
 
+	/**
+	 * Checks if this dataset is scalar i.e is a single element with no dimensions.
+	 * 
+	 * @return <code>true</code> if dataset if scalar <code>false</code> otherwise
+	 * @see Dataset#isScalar()
+	 */
+	boolean isScalar();
+
+	/**
+	 * Checks if this dataset is empty i.e holds no data and no storage is
+	 * allocated.
+	 * 
+	 * @return <code>true</code> if dataset if empty <code>false</code> otherwise
+	 * @see Dataset#isEmpty()
+	 */
+	boolean isEmpty();
+
 }

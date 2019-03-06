@@ -49,7 +49,20 @@ public class AttributeImpl implements Attribute {
 	@Override
 	public Object getData() {
 		logger.debug("Getting data for attribute '{}' of '{}'...", name, node.getPath());
+		if (isEmpty()) {
+			return null;
+		}
 		return DatasetReader.readDataset(message.getDataType(), message.getDataBuffer(), getDimensions());
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return message.getDataBuffer() == null;
+	}
+
+	@Override
+	public boolean isScalar() {
+		return getDimensions().length == 0;
 	}
 
 	@Override
