@@ -184,9 +184,9 @@ public class FractalHeap {
 	}
 
 	public ByteBuffer getId(ByteBuffer buffer) {
-		if (buffer.capacity() != idLength) {
+		if (buffer.remaining() != idLength) {
 			throw new HdfException("ID length is incorrect accessing fractal heap at address " + address
-					+ ". IDs should be " + idLength + "bytes but was " + buffer.capacity() + "bytes.");
+					+ ". IDs should be " + idLength + " bytes but was " + buffer.capacity() + " bytes.");
 		}
 
 		BitSet idFlags = BitSet.valueOf(new byte[] { buffer.get() });
@@ -200,17 +200,17 @@ public class FractalHeap {
 
 		switch (type) {
 		case 0: // Managed Objects
-			int offset = readBytesAsUnsignedInt(buffer, bytesToStoreOffset);
+			long offset = readBytesAsUnsignedLong(buffer, bytesToStoreOffset);
 			int length = readBytesAsUnsignedInt(buffer, bytesToStoreLength);
 
 			logger.debug("Getting ID at offset={} length={}", offset, length);
 
 			// Figure out which direct block holds the offset
-			Entry<Long, DirectBlock> entry = directBlocks.floorEntry((long) offset);
+			Entry<Long, DirectBlock> entry = directBlocks.floorEntry(offset);
 
 			ByteBuffer bb = entry.getValue().getData();
 			bb.order(LITTLE_ENDIAN);
-			bb.position((int) (offset - entry.getKey()));
+			bb.position(Math.toIntExact(offset - entry.getKey()));
 			return createSubBuffer(bb, length);
 
 		case 1: // Huge objects
