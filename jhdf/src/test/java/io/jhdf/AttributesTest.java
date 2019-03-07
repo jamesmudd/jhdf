@@ -26,7 +26,7 @@ public class AttributesTest {
 	private static final String GROUP_PATH = "/test_group";
 	private static final String DATASET_PATH = "/test_group/data";
 	private static final String HARD_LINK_PATH = "/hard_link_data";
-	private static final String SOFT_LINK_PATH = "/soft_link_data";
+	private static final String SOFT_LINK_PATH = "/soft_link_to_data";
 
 	private static final String ONE_D_FLOAT_ATTRIBUTE_NAME = "1D_float";
 	private static final float[] EXPECTED_ONE_D_FLOAT_DATA = new float[] { 0, 1, 2 };
@@ -40,7 +40,7 @@ public class AttributesTest {
 	private static final String TWO_D_INT_ATTRIBUTE_NAME = "2D_int";
 	private static final int[][] EXPECTED_TWO_D_INT_DATA = new int[][] { { 0, 1, 2 }, { 3, 4, 5 } };
 
-	private static final String TWO_D_STRING_ATTRIBUTE_NAME = "2d_String";
+	private static final String TWO_D_STRING_ATTRIBUTE_NAME = "2d_string";
 	private static final String[][] EXPECTED_TWO_D_STRING_DATA = new String[][] { { "0", "1", "2" },
 			{ "3", "4", "5" } };
 
