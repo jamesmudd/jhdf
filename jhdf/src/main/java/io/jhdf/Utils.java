@@ -1,11 +1,15 @@
 package io.jhdf;
 
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 public final class Utils {
 	private static final CharsetEncoder ASCII = StandardCharsets.US_ASCII.newEncoder();
@@ -99,22 +103,45 @@ public final class Utils {
 		case 2:
 			return Short.toUnsignedInt(buffer.getShort());
 		case 3:
-			// Pad out to 4 bytes then call again
-			byte[] fourBytes = new byte[4];
-			buffer.get(fourBytes, 4 - 3, 3);
-			return readBytesAsUnsignedInt(ByteBuffer.wrap(fourBytes), 4);
+			return readArbitaryLengthBytesAsUnsignedInt(buffer, length);
 		case 4:
 			int value = buffer.getInt();
 			if (value < 0) {
 				throw new ArithmeticException("Could not convert to unsigned");
 			}
 			return value;
+		case 5:
+		case 6:
+		case 7:
+			return readArbitaryLengthBytesAsUnsignedInt(buffer, length);
 		case 8:
 			// Throws if the long can't be converted safely
 			return Math.toIntExact(buffer.getLong());
 		default:
 			throw new IllegalArgumentException("Couldn't read " + length + " bytes as int");
 		}
+	}
+
+	/**
+	 * This method is used when the length required is awkward i.e. no support
+	 * directly from {@link ByteBuffer}
+	 * 
+	 * @param buffer to read from
+	 * @param length the number of bytes to read
+	 * @return the long value read from the buffer
+	 * @throws ArithmeticException if the data cannot be safely converted to an
+	 *                             unsigned long
+	 */
+	private static int readArbitaryLengthBytesAsUnsignedInt(ByteBuffer buffer, int length) {
+		// Here we will use BigInteger to convert a byte array
+		byte[] bytes = new byte[length];
+		buffer.get(bytes);
+		// BigInteger needs big endian so flip the order if needed
+		if (buffer.order() == LITTLE_ENDIAN) {
+			ArrayUtils.reverse(bytes);
+		}
+		// Convert to a unsigned long throws if it overflows
+		return new BigInteger(1, bytes).intValueExact();
 	}
 
 	/**
@@ -138,19 +165,13 @@ public final class Utils {
 		case 2:
 			return Short.toUnsignedLong(buffer.getShort());
 		case 3:
-			// Pad out to 4 bytes then call again
-			byte[] fourBytes = new byte[4];
-			buffer.get(fourBytes, 4 - 3, 3);
-			return readBytesAsUnsignedLong(ByteBuffer.wrap(fourBytes), 4);
+			return readArbitaryLengthBytesAsUnsignedLong(buffer, length);
 		case 4:
 			return Integer.toUnsignedLong(buffer.getInt());
 		case 5:
 		case 6:
 		case 7:
-			// Pad out to 8 bytes then call again
-			byte[] bytes = new byte[8];
-			buffer.get(bytes, 8 - length, length);
-			return readBytesAsUnsignedLong(ByteBuffer.wrap(bytes), 8);
+			return readArbitaryLengthBytesAsUnsignedLong(buffer, length);
 		case 8:
 			long value = buffer.getLong();
 			if (value < 0 && value != Constants.UNDEFINED_ADDRESS) {
@@ -160,6 +181,28 @@ public final class Utils {
 		default:
 			throw new IllegalArgumentException("Couldn't read " + length + " bytes as int");
 		}
+	}
+
+	/**
+	 * This method is used when the length required is awkward i.e. no support
+	 * directly from {@link ByteBuffer}
+	 * 
+	 * @param buffer to read from
+	 * @param length the number of bytes to read
+	 * @return the long value read from the buffer
+	 * @throws ArithmeticException if the data cannot be safely converted to an
+	 *                             unsigned long
+	 */
+	private static long readArbitaryLengthBytesAsUnsignedLong(ByteBuffer buffer, int length) {
+		// Here we will use BigInteger to convert a byte array
+		byte[] bytes = new byte[length];
+		buffer.get(bytes);
+		// BigInteger needs big endian so flip the order if needed
+		if (buffer.order() == LITTLE_ENDIAN) {
+			ArrayUtils.reverse(bytes);
+		}
+		// Convert to a unsigned long throws if it overflows
+		return new BigInteger(1, bytes).longValueExact();
 	}
 
 	/**
