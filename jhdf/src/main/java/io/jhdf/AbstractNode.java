@@ -3,6 +3,9 @@ package io.jhdf;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.File;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.concurrent.ConcurrentException;
@@ -14,7 +17,11 @@ import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
+import io.jhdf.btree.AttributeNameForIndexedAttributesRecord;
+import io.jhdf.btree.BTreeRecord;
+import io.jhdf.btree.BTreeV2;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.object.message.AttributeInfoMessage;
 import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.Message;
 
@@ -32,12 +39,40 @@ public abstract class AbstractNode implements Node {
 		protected Map<String, Attribute> initialize() throws ConcurrentException {
 			logger.debug("Lazy initializing attributes for '{}'", getPath());
 			final ObjectHeader oh = lazyOjbectHeader.get();
-			return oh.getMessagesOfType(AttributeMessage.class).stream()
+
+			List<AttributeMessage> attributeMessages = new ArrayList<>();
+
+			if (oh.hasMessageOfType(AttributeInfoMessage.class)) {
+				// Attributes stored in b-tree
+				AttributeInfoMessage attributeInfoMessage = oh.getMessageOfType(AttributeInfoMessage.class);
+
+				if (attributeInfoMessage.getFractalHeapAddress() != Constants.UNDEFINED_ADDRESS) {
+					// Create the heap and btree
+					FractalHeap fractalHeap = new FractalHeap(hdfFc, attributeInfoMessage.getFractalHeapAddress());
+					BTreeV2 btree = BTreeV2.createBTree(hdfFc, attributeInfoMessage.getAttributeNameBTreeAddress());
+
+					// Read the attribute messages from the btree+heap
+					for (BTreeRecord record : btree.getRecords()) {
+						AttributeNameForIndexedAttributesRecord attributeRecord = (AttributeNameForIndexedAttributesRecord) record;
+						ByteBuffer bb = fractalHeap.getId(attributeRecord.getHeapId());
+						AttributeMessage attributeMessage = new AttributeMessage(bb, hdfFc.getSuperblock(),
+								attributeRecord.getFlags());
+						logger.trace("Read attribute message '{}'", attributeMessage);
+						attributeMessages.add(attributeMessage);
+					}
+				}
+			}
+
+			// Add the messages stored directly in the header
+			attributeMessages.addAll(oh.getMessagesOfType(AttributeMessage.class));
+
+			return attributeMessages.stream()
 					.collect(
 							toMap(AttributeMessage::getName, message -> new AttributeImpl(AbstractNode.this, message)));
 		}
 	}
 
+	private final HdfFileChannel hdfFc;
 	protected final long address;
 	protected final String name;
 	protected final Group parent;
@@ -45,6 +80,7 @@ public abstract class AbstractNode implements Node {
 	protected final AttributesLazyInitializer attributes;
 
 	public AbstractNode(HdfFileChannel hdfFc, long address, String name, Group parent) {
+		this.hdfFc = hdfFc;
 		this.address = address;
 		this.name = name;
 		this.parent = parent;

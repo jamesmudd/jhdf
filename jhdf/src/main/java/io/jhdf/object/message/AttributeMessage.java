@@ -25,7 +25,7 @@ public class AttributeMessage extends Message {
 	private final DataSpace dataSpace;
 	private final ByteBuffer data;
 
-	/* package */ AttributeMessage(ByteBuffer bb, Superblock sb, BitSet messageFlags) {
+	public AttributeMessage(ByteBuffer bb, Superblock sb, BitSet messageFlags) {
 		super(messageFlags);
 
 		version = bb.get();
