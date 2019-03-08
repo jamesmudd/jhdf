@@ -66,7 +66,7 @@ public class HdfFileTest {
 	public void testOpeningMissingFile() {
 		HdfException ex = assertThrows(HdfException.class,
 				() -> new HdfFile(new File("madeUpFileNameThatDoesntExist.hello")));
-		assertThat(ex.getMessage(), is(equalTo("Failed to open file. Is it a HDF5 file?")));
+		assertThat(ex.getMessage(), is(startsWith("Failed to open file")));
 		assertThat(ex.getCause(), is(instanceOf(IOException.class)));
 	}
 
