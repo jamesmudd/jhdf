@@ -25,7 +25,7 @@ public class AttributeMessage extends Message {
 	private final DataSpace dataSpace;
 	private final ByteBuffer data;
 
-	/* package */ AttributeMessage(ByteBuffer bb, Superblock sb, BitSet messageFlags) {
+	public AttributeMessage(ByteBuffer bb, Superblock sb, BitSet messageFlags) {
 		super(messageFlags);
 
 		version = bb.get();
@@ -51,8 +51,12 @@ public class AttributeMessage extends Message {
 			logger.trace("Dataspace: {}", dataSpace);
 			Utils.seekBufferToNextMultipleOfEight(bb);
 
-			final int dataSize = Math.toIntExact(dataSpace.getTotalLentgh() * dataType.getSize());
-			data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
+			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
+			if (dataSize == 0) {
+				data = null;
+			} else {
+				data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
+			}
 
 		} else if (version == 2) {
 			final BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
@@ -78,8 +82,12 @@ public class AttributeMessage extends Message {
 				logger.trace("Dataspace: {}", dataSpace);
 			}
 
-			final int dataSize = Math.toIntExact(dataSpace.getTotalLentgh() * dataType.getSize());
-			data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
+			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
+			if (dataSize == 0) {
+				data = null;
+			} else {
+				data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
+			}
 
 		} else if (version == 3) {
 			final BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
@@ -119,8 +127,12 @@ public class AttributeMessage extends Message {
 				logger.trace("Dataspace: {}", dataSpace);
 			}
 
-			final int dataSize = Math.toIntExact(dataSpace.getTotalLentgh() * dataType.getSize());
-			data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
+			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
+			if (dataSize == 0) {
+				data = null;
+			} else {
+				data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
+			}
 
 		} else {
 			throw new UnsupportedHdfException("Unsupported Attribute message version. Detected version: " + version);
@@ -145,8 +157,13 @@ public class AttributeMessage extends Message {
 		return dataSpace;
 	}
 
-	public ByteBuffer getData() {
-		return data;
+	public ByteBuffer getDataBuffer() {
+		if (data == null) {
+			return null;
+		} else {
+			// Slice the buffer to allow multiple accesses
+			return data.slice().order(data.order());
+		}
 	}
 
 	@Override

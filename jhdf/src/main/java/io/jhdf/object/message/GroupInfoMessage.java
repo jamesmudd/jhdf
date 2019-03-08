@@ -27,7 +27,7 @@ public class GroupInfoMessage extends Message {
 	private final int maximumCompactLinks;
 	private final int minimumDenseLinks;
 	private final int estimatedNumberOfEntries;
-	private final int estimatedLentghOfEntryName;
+	private final int estimatedLengthOfEntryName;
 
 	/* package */ GroupInfoMessage(ByteBuffer bb, BitSet messageFlags) {
 		super(messageFlags);
@@ -49,10 +49,10 @@ public class GroupInfoMessage extends Message {
 
 		if (flags.get(ESTIMATED_ENTRY_INFOMATION_PRESENT)) {
 			estimatedNumberOfEntries = Utils.readBytesAsUnsignedInt(bb, 2);
-			estimatedLentghOfEntryName = Utils.readBytesAsUnsignedInt(bb, 2);
+			estimatedLengthOfEntryName = Utils.readBytesAsUnsignedInt(bb, 2);
 		} else {
 			estimatedNumberOfEntries = -1;
-			estimatedLentghOfEntryName = -1;
+			estimatedLengthOfEntryName = -1;
 		}
 	}
 
@@ -68,8 +68,8 @@ public class GroupInfoMessage extends Message {
 		return estimatedNumberOfEntries;
 	}
 
-	public int getEstimatedLentghOfEntryName() {
-		return estimatedLentghOfEntryName;
+	public int getEstimatedLengthOfEntryName() {
+		return estimatedLengthOfEntryName;
 	}
 
 }

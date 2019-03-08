@@ -22,20 +22,20 @@ import io.jhdf.Utils;
 public class ObjectHeaderContinuationMessage extends Message {
 
 	private final long offset;
-	private final int lentgh;
+	private final int length;
 
 	/* package */ ObjectHeaderContinuationMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
 		super(flags);
 
 		offset = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
-		lentgh = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfOffsets());
+		length = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfOffsets());
 	}
 
 	public long getOffset() {
 		return offset;
 	}
 
-	public int getLentgh() {
-		return lentgh;
+	public int getLength() {
+		return length;
 	}
 }

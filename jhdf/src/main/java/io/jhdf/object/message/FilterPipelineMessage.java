@@ -49,11 +49,11 @@ public class FilterPipelineMessage extends Message {
 			final int filterId = Utils.readBytesAsUnsignedInt(bb, 2);
 
 			// Name length
-			final int nameLentgh;
+			final int nameLength;
 			if (version == 2 && filterId < 256) {
-				nameLentgh = 0;
+				nameLength = 0;
 			} else {
-				nameLentgh = Utils.readBytesAsUnsignedInt(bb, 2);
+				nameLength = Utils.readBytesAsUnsignedInt(bb, 2);
 			}
 
 			// 2 bytes of flags
@@ -62,8 +62,8 @@ public class FilterPipelineMessage extends Message {
 
 			final int numberOfDataValues = Utils.readBytesAsUnsignedInt(bb, 2);
 
-			if (nameLentgh >= 2) {
-				final String name = Utils.readUntilNull(Utils.createSubBuffer(bb, nameLentgh));
+			if (nameLength >= 2) {
+				final String name = Utils.readUntilNull(Utils.createSubBuffer(bb, nameLength));
 			}
 
 			final int[] data = new int[numberOfDataValues];

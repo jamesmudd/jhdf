@@ -60,20 +60,20 @@ public class LinkMessage extends Message {
 		final BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
 
 		// Size of length of link name
-		final int sizeOfLentghOfLinkNameIndex = Utils.bitsToInt(flags, 0, 2);
-		final int sizeOfLentghOfLinkName;
-		switch (sizeOfLentghOfLinkNameIndex) {
+		final int sizeOfLengthOfLinkNameIndex = Utils.bitsToInt(flags, 0, 2);
+		final int sizeOfLengthOfLinkName;
+		switch (sizeOfLengthOfLinkNameIndex) {
 		case 0:
-			sizeOfLentghOfLinkName = 1;
+			sizeOfLengthOfLinkName = 1;
 			break;
 		case 1:
-			sizeOfLentghOfLinkName = 2;
+			sizeOfLengthOfLinkName = 2;
 			break;
 		case 2:
-			sizeOfLentghOfLinkName = 4;
+			sizeOfLengthOfLinkName = 4;
 			break;
 		case 3:
-			sizeOfLentghOfLinkName = 8;
+			sizeOfLengthOfLinkName = 8;
 			break;
 		default:
 			throw new HdfException("Unreconized size of link name");
@@ -108,9 +108,9 @@ public class LinkMessage extends Message {
 			linkNameCharset = US_ASCII;
 		}
 
-		final int lentghOfLinkName = Utils.readBytesAsUnsignedInt(bb, sizeOfLentghOfLinkName);
+		final int lengthOfLinkName = Utils.readBytesAsUnsignedInt(bb, sizeOfLengthOfLinkName);
 
-		ByteBuffer nameBuffer = Utils.createSubBuffer(bb, lentghOfLinkName);
+		ByteBuffer nameBuffer = Utils.createSubBuffer(bb, lengthOfLinkName);
 
 		linkName = linkNameCharset.decode(nameBuffer).toString();
 
@@ -120,13 +120,13 @@ public class LinkMessage extends Message {
 			hardLinkAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 			break;
 		case SOFT: // Soft link
-			int lentghOfSoftLink = Utils.readBytesAsUnsignedInt(bb, 2);
-			ByteBuffer linkBuffer = Utils.createSubBuffer(bb, lentghOfSoftLink);
+			int lengthOfSoftLink = Utils.readBytesAsUnsignedInt(bb, 2);
+			ByteBuffer linkBuffer = Utils.createSubBuffer(bb, lengthOfSoftLink);
 			softLink = US_ASCII.decode(linkBuffer).toString();
 			break;
 		case EXTERNAL: // External link
-			int lentghOfExternalLink = Utils.readBytesAsUnsignedInt(bb, 2);
-			ByteBuffer externalLinkBuffer = Utils.createSubBuffer(bb, lentghOfExternalLink);
+			int lengthOfExternalLink = Utils.readBytesAsUnsignedInt(bb, 2);
+			ByteBuffer externalLinkBuffer = Utils.createSubBuffer(bb, lengthOfExternalLink);
 			// Skip first byte contains version = 0 and flags = 0
 			externalLinkBuffer.position(1);
 			externalFile = Utils.readUntilNull(externalLinkBuffer);

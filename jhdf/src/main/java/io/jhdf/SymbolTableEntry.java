@@ -1,16 +1,11 @@
 package io.jhdf;
 
 import static io.jhdf.Utils.toHex;
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.jhdf.exceptions.HdfException;
 
 public class SymbolTableEntry {
 	private static final Logger logger = LoggerFactory.getLogger(SymbolTableEntry.class);
@@ -22,28 +17,21 @@ public class SymbolTableEntry {
 	private final int cacheType;
 	private long bTreeAddress = -1;
 	private long nameHeapAddress = -1;
-	private long linkValueOffset = -1;
+	private int linkValueOffset = -1;
 
-	public SymbolTableEntry(FileChannel fc, long address, Superblock sb) {
+	public SymbolTableEntry(HdfFileChannel fc, long address) {
 		this.address = address;
 
-		int size = sb.getSizeOfOffsets() * 2 + 4 + 4 + 16;
-		ByteBuffer bb = ByteBuffer.allocate(size);
+		final int size = fc.getSizeOfOffsets() * 2 + 4 + 4 + 16;
 
-		try {
-			fc.read(bb, address);
-		} catch (IOException e) {
-			throw new HdfException("Failed to read file at address: " + Utils.toHex(address), e);
-		}
-		bb.rewind();
-		bb.order(LITTLE_ENDIAN);
+		final ByteBuffer bb = fc.readBufferFromAddress(address, size);
 
 		// Link Name Offset
-		linkNameOffset = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfOffsets());
+		linkNameOffset = Utils.readBytesAsUnsignedInt(bb, fc.getSizeOfOffsets());
 		logger.trace("linkNameOffset = {}", linkNameOffset);
 
 		// Object Header Address
-		objectHeaderAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+		objectHeaderAddress = Utils.readBytesAsUnsignedLong(bb, fc.getSizeOfOffsets());
 		logger.trace("objectHeaderAddress = {}", objectHeaderAddress);
 
 		// Link Name Offset
@@ -61,11 +49,11 @@ public class SymbolTableEntry {
 		case 1:
 			// B Tree
 			// Address of B Tree
-			bTreeAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+			bTreeAddress = Utils.readBytesAsUnsignedLong(bb, fc.getSizeOfOffsets());
 			logger.trace("addressOfBTree = {}", bTreeAddress);
 
 			// Address of Name Heap
-			nameHeapAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+			nameHeapAddress = Utils.readBytesAsUnsignedLong(bb, fc.getSizeOfOffsets());
 			logger.trace("nameHeapAddress = {}", nameHeapAddress);
 			break;
 		case 2:
@@ -95,7 +83,7 @@ public class SymbolTableEntry {
 		return linkNameOffset;
 	}
 
-	public long getLinkValueOffset() {
+	public int getLinkValueOffset() {
 		return linkValueOffset;
 	}
 

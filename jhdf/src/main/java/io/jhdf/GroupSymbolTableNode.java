@@ -3,7 +3,6 @@ package io.jhdf;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.Arrays;
 
 import org.slf4j.Logger;
@@ -22,14 +21,11 @@ public class GroupSymbolTableNode {
 	private final short numberOfEntries;
 	private final SymbolTableEntry[] symbolTableEntries;
 
-	public GroupSymbolTableNode(FileChannel fc, long address, Superblock sb) {
+	public GroupSymbolTableNode(HdfFileChannel hdfFc, long address) {
 		this.address = address;
 		try {
 			int headerSize = 8;
-			ByteBuffer header = ByteBuffer.allocate(headerSize);
-
-			fc.read(header, address);
-			header.rewind();
+			ByteBuffer header = hdfFc.readBufferFromAddress(address, headerSize);
 
 			byte[] formatSignitureByte = new byte[4];
 			header.get(formatSignitureByte, 0, formatSignitureByte.length);
@@ -52,12 +48,12 @@ public class GroupSymbolTableNode {
 			numberOfEntries = ByteBuffer.wrap(twoBytes).order(LITTLE_ENDIAN).getShort();
 			logger.trace("numberOfSymbols = {}", numberOfEntries);
 
-			final int symbolTableEntryBytes = sb.getSizeOfOffsets() * 2 + 8 + 16;
+			final int symbolTableEntryBytes = hdfFc.getSizeOfOffsets() * 2 + 8 + 16;
 
 			symbolTableEntries = new SymbolTableEntry[numberOfEntries];
 			for (int i = 0; i < numberOfEntries; i++) {
 				long offset = address + headerSize + i * symbolTableEntryBytes;
-				symbolTableEntries[i] = new SymbolTableEntry(fc, offset, sb);
+				symbolTableEntries[i] = new SymbolTableEntry(hdfFc, offset);
 			}
 		} catch (Exception e) {
 			// TODO improve message

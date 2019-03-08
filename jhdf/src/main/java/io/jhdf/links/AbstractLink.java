@@ -6,11 +6,11 @@ import java.util.Map;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 
 import io.jhdf.HdfFile;
+import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
 import io.jhdf.api.Link;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
-import io.jhdf.object.message.AttributeMessage;
 
 public abstract class AbstractLink implements Link {
 
@@ -39,8 +39,13 @@ public abstract class AbstractLink implements Link {
 	}
 
 	@Override
-	public Map<String, AttributeMessage> getAttributes() {
+	public Map<String, Attribute> getAttributes() {
 		return getTarget().getAttributes();
+	}
+
+	@Override
+	public Attribute getAttribute(String name) {
+		return getTarget().getAttribute(name);
 	}
 
 	@Override

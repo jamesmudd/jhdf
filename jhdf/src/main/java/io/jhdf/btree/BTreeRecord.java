@@ -10,7 +10,8 @@ public abstract class BTreeRecord {
 		switch (type) {
 		case 5:
 			return new LinkNameForIndexedGroupRecord(buffer);
-
+		case 8:
+			return new AttributeNameForIndexedAttributesRecord(buffer);
 		default:
 			throw new HdfException("Unknown b-tree record type. Type = " + type);
 		}

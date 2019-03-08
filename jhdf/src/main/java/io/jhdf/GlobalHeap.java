@@ -1,9 +1,10 @@
 package io.jhdf;
 
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import static io.jhdf.Utils.createSubBuffer;
+import static io.jhdf.Utils.readBytesAsUnsignedInt;
+import static io.jhdf.Utils.seekBufferToNextMultipleOfEight;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,23 +15,19 @@ public class GlobalHeap {
 
 	private static final byte[] GLOBAL_HEAP_SIGNATURE = "GCOL".getBytes();
 
+	private final HdfFileChannel hdfFc;
 	private final long address;
-	private final Superblock sb;
 
 	private final Map<Integer, GlobalHeapObject> objects = new HashMap<>();
 
-	public GlobalHeap(FileChannel fc, Superblock sb, long address) {
+	public GlobalHeap(HdfFileChannel hdfFc, long address) {
+		this.hdfFc = hdfFc;
 		this.address = address;
-		this.sb = sb;
 
 		try {
-			int headerSize = 4 + 1 + 3 + sb.getSizeOfLengths();
+			int headerSize = 4 + 1 + 3 + hdfFc.getSizeOfLengths();
 
-			ByteBuffer bb = ByteBuffer.allocate(headerSize);
-
-			fc.read(bb, address);
-			bb.rewind();
-			bb.order(LITTLE_ENDIAN);
+			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
 			byte[] signitureBytes = new byte[4];
 			bb.get(signitureBytes, 0, signitureBytes.length);
@@ -48,13 +45,10 @@ public class GlobalHeap {
 
 			bb.position(8); // Skip past 3 reserved bytes
 
-			int collectionSize = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
+			int collectionSize = readBytesAsUnsignedInt(bb, hdfFc.getSizeOfLengths());
 
 			// Now start reading the heap into memory
-			bb = ByteBuffer.allocate(collectionSize);
-			fc.read(bb, address + headerSize);
-			bb.rewind();
-			bb.order(LITTLE_ENDIAN);
+			bb = hdfFc.readBufferFromAddress(address + headerSize, collectionSize);
 
 			while (bb.remaining() > 8) {
 				GlobalHeapObject object = new GlobalHeapObject(bb);
@@ -83,12 +77,12 @@ public class GlobalHeap {
 
 		private GlobalHeapObject(ByteBuffer bb) {
 
-			index = Utils.readBytesAsUnsignedInt(bb, 2);
-			referenceCount = Utils.readBytesAsUnsignedInt(bb, 2);
+			index = readBytesAsUnsignedInt(bb, 2);
+			referenceCount = readBytesAsUnsignedInt(bb, 2);
 			bb.position(bb.position() + 4); // Skip 4 reserved bytes
-			int size = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfOffsets());
-			data = Utils.createSubBuffer(bb, size);
-			Utils.seekBufferToNextMultipleOfEight(bb);
+			int size = readBytesAsUnsignedInt(bb, hdfFc.getSizeOfOffsets());
+			data = createSubBuffer(bb, size);
+			seekBufferToNextMultipleOfEight(bb);
 		}
 	}
 

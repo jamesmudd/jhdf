@@ -6,8 +6,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +19,8 @@ import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
-import io.jhdf.Superblock;
 import io.jhdf.api.Group;
 import io.jhdf.btree.BTreeV1;
 import io.jhdf.btree.BTreeV1Data;
@@ -49,8 +47,8 @@ public class ChunkedDatasetV3 extends DatasetBase {
 	private final ChunkedDataLayoutMessageV3 layoutMessage;
 	private final FilterPipelineMessage filterPipelineMessage;
 
-	public ChunkedDatasetV3(FileChannel fc, Superblock sb, long address, String name, Group parent, ObjectHeader oh) {
-		super(fc, sb, address, name, parent, oh);
+	public ChunkedDatasetV3(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
+		super(hdfFc, address, name, parent, oh);
 
 		layoutMessage = oh.getMessageOfType(ChunkedDataLayoutMessageV3.class);
 		chunkSizeInBytes = getChunkSizeInBytes();
@@ -156,8 +154,8 @@ public class ChunkedDatasetV3 extends DatasetBase {
 
 	private ByteBuffer getDataBuffer(Chunk chunk) {
 		try {
-			return fc.map(MapMode.READ_ONLY, chunk.getAddress(), chunk.getSize());
-		} catch (IOException e) {
+			return hdfFc.map(chunk.getAddress(), chunk.getSize());
+		} catch (Exception e) {
 			throw new HdfException(
 					"Failed to read chunk for dataset '" + getPath() + "' at address " + chunk.getAddress());
 		}
@@ -198,7 +196,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
 		@Override
 		protected Map<ChunkOffsetKey, Chunk> initialize() throws ConcurrentException {
 			logger.debug("Lazy initalizing chunk lookup for '{}'", getPath());
-			BTreeV1Data bTree = BTreeV1.createDataBTree(fc, sb, layoutMessage.getBTreeAddress(),
+			BTreeV1Data bTree = BTreeV1.createDataBTree(hdfFc, layoutMessage.getBTreeAddress(),
 					getDimensions().length);
 
 			List<Chunk> chunks = bTree.getChunks();

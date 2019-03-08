@@ -1,17 +1,16 @@
 package io.jhdf.dataset;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
-import io.jhdf.Superblock;
 import io.jhdf.api.Group;
 import io.jhdf.object.message.DataLayoutMessage.CompactDataLayoutMessage;
 
 public class CompactDataset extends DatasetBase {
 
-	public CompactDataset(FileChannel fc, Superblock sb, long address, String name, Group parent, ObjectHeader oh) {
-		super(fc, sb, address, name, parent, oh);
+	public CompactDataset(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
+		super(hdfFc, address, name, parent, oh);
 	}
 
 	@Override

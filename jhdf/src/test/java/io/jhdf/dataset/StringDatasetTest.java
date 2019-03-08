@@ -3,6 +3,7 @@ package io.jhdf.dataset;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import java.io.File;
@@ -42,22 +43,25 @@ public class StringDatasetTest {
 	Collection<DynamicNode> stringDataset1DTests() {
 		// List of all the datasetPaths
 		return Arrays.asList(
-				dynamicTest("earliest - fixed ASCII",
-						createTest(earliestHdfFile, "/fixed_lentgh_ascii")),
-				dynamicTest("earliest - fixed ASCII 1 char",
-						createTest(earliestHdfFile, "/fixed_lentgh_ascii_1_char")),
-				dynamicTest("earliest - variable ASCII",
-						createTest(earliestHdfFile, "/variable_lentgh_ascii")),
-				dynamicTest("earliest - variable UTF8",
-						createTest(earliestHdfFile, "/variable_lentgh_utf8")),
-				dynamicTest("latest - fixed ASCII",
-						createTest(latestHdfFile, "/fixed_lentgh_ascii")),
-				dynamicTest("latest - fixed ASCII 1 char",
-						createTest(latestHdfFile, "/fixed_lentgh_ascii_1_char")),
-				dynamicTest("latest - variable ASCII",
-						createTest(latestHdfFile, "/variable_lentgh_ascii")),
-				dynamicTest("latest - variable UTF8",
-						createTest(latestHdfFile, "/variable_lentgh_utf8")));
+				dynamicContainer("earliest", Arrays.asList(
+						dynamicTest("fixed ASCII",
+								createTest(earliestHdfFile, "/fixed_length_ascii")),
+						dynamicTest("fixed ASCII 1 char",
+								createTest(earliestHdfFile, "/fixed_length_ascii_1_char")),
+						dynamicTest("variable ASCII",
+								createTest(earliestHdfFile, "/variable_length_ascii")),
+						dynamicTest("variable UTF8",
+								createTest(earliestHdfFile, "/variable_length_utf8")))),
+
+				dynamicContainer("latest", Arrays.asList(
+						dynamicTest("fixed ASCII",
+								createTest(latestHdfFile, "/fixed_length_ascii")),
+						dynamicTest("fixed ASCII 1 char",
+								createTest(latestHdfFile, "/fixed_length_ascii_1_char")),
+						dynamicTest("variable ASCII",
+								createTest(latestHdfFile, "/variable_length_ascii")),
+						dynamicTest("variable UTF8",
+								createTest(latestHdfFile, "/variable_length_utf8")))));
 	}
 
 	private Executable createTest(HdfFile file, String datasetPath) {
@@ -76,7 +80,7 @@ public class StringDatasetTest {
 
 	@Test
 	void test2DStringDatasetEarliest() throws Exception {
-		Dataset dataset = earliestHdfFile.getDatasetByPath("variable_lentgh_2d");
+		Dataset dataset = earliestHdfFile.getDatasetByPath("variable_length_2d");
 		Object data = dataset.getData();
 		assertThat(getDimensions(data), is(equalTo(new int[] { 5, 7 })));
 		Object[] flatData = flatten((Object[]) data);
@@ -89,7 +93,7 @@ public class StringDatasetTest {
 
 	@Test
 	void test2DStringDatasetLatest() throws Exception {
-		Dataset dataset = latestHdfFile.getDatasetByPath("variable_lentgh_2d");
+		Dataset dataset = latestHdfFile.getDatasetByPath("variable_length_2d");
 		Object data = dataset.getData();
 		assertThat(getDimensions(data), is(equalTo(new int[] { 5, 7 })));
 		Object[] flatData = flatten((Object[]) data);

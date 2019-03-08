@@ -8,32 +8,32 @@ def write_string_datasets(f):
     
     # Fixed length (20) ASCII dataset
     fixed_length = 'S20'
-    fixed_ds = f.create_dataset('fixed_lentgh_ascii', (10,), dtype=fixed_length)
+    fixed_ds = f.create_dataset('fixed_length_ascii', (10,), dtype=fixed_length)
     for i in range(10):
         fixed_ds[i] = ('string number ' + str(i)).encode('ascii')
     
-    # Fixed length (15) ASCII dataset the exact lentgh of 'string number 0'
+    # Fixed length (15) ASCII dataset the exact length of 'string number 0'
     fixed_length = 'S15'
-    fixed_ds = f.create_dataset('fixed_lentgh_ascii_1_char', (10,), dtype=fixed_length)
+    fixed_ds = f.create_dataset('fixed_length_ascii_1_char', (10,), dtype=fixed_length)
     for i in range(10):
         fixed_ds[i] = ('string number ' + str(i)).encode('ascii')
 
     # Variable length ASCII dataset
     ascii = h5py.special_dtype(vlen=bytes)
-    varaible_ascii_ds = f.create_dataset('variable_lentgh_ascii', (10,), dtype=ascii)
+    varaible_ascii_ds = f.create_dataset('variable_length_ascii', (10,), dtype=ascii)
     for i in range(10):
         varaible_ascii_ds[i] = ('string number ' + str(i)).encode('ascii')
     
     # Variable length UTF8 dataset
     utf8 = h5py.special_dtype(vlen=str)
-    varaible_ascii_ds = f.create_dataset('variable_lentgh_utf8', (10,), dtype=utf8)
+    varaible_ascii_ds = f.create_dataset('variable_length_utf8', (10,), dtype=utf8)
     for i in range(10):
         varaible_ascii_ds[i] = 'string number ' + str(i)
     
     
     # 2D utf8 data
     data = np.arange(35).reshape(5,7).astype(bytes)
-    f.create_dataset('variable_lentgh_2d', data=data, dtype=utf8)
+    f.create_dataset('variable_length_2d', data=data, dtype=utf8)
 
     f.flush()
     f.close()

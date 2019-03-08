@@ -1,17 +1,13 @@
 package io.jhdf.btree;
 
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
-
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.jhdf.Superblock;
+import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 
@@ -38,8 +34,8 @@ public abstract class BTreeV1 {
 	private final long leftSiblingAddress;
 	private final long rightSiblingAddress;
 
-	public static BTreeV1Group createGroupBTree(FileChannel fc, Superblock sb, long address) {
-		ByteBuffer header = readHeaderAndValidateSignature(fc, address);
+	public static BTreeV1Group createGroupBTree(HdfFileChannel hdfFc, long address) {
+		ByteBuffer header = readHeaderAndValidateSignature(hdfFc, address);
 
 		final byte nodeType = header.get();
 		if (nodeType != 0) {
@@ -49,15 +45,15 @@ public abstract class BTreeV1 {
 		final byte nodeLevel = header.get();
 
 		if (nodeLevel > 0) {
-			return new BTreeV1Group.BTreeV1GroupNonLeafNode(fc, sb, address);
+			return new BTreeV1Group.BTreeV1GroupNonLeafNode(hdfFc, address);
 		} else {
-			return new BTreeV1Group.BTreeV1GroupLeafNode(fc, sb, address);
+			return new BTreeV1Group.BTreeV1GroupLeafNode(hdfFc, address);
 		}
 
 	}
 
-	public static BTreeV1Data createDataBTree(FileChannel fc, Superblock sb, long address, int dataDimensions) {
-		ByteBuffer header = readHeaderAndValidateSignature(fc, address);
+	public static BTreeV1Data createDataBTree(HdfFileChannel hdfFc, long address, int dataDimensions) {
+		ByteBuffer header = readHeaderAndValidateSignature(hdfFc, address);
 
 		final byte nodeType = header.get();
 		if (nodeType != 1) {
@@ -67,21 +63,14 @@ public abstract class BTreeV1 {
 		final byte nodeLevel = header.get();
 
 		if (nodeLevel > 0) {
-			return new BTreeV1Data.BTreeV1DataNonLeafNode(fc, sb, address, dataDimensions);
+			return new BTreeV1Data.BTreeV1DataNonLeafNode(hdfFc, address, dataDimensions);
 		} else {
-			return new BTreeV1Data.BTreeV1DataLeafNode(fc, sb, address, dataDimensions);
+			return new BTreeV1Data.BTreeV1DataLeafNode(hdfFc, address, dataDimensions);
 		}
 	}
 
-	public static ByteBuffer readHeaderAndValidateSignature(FileChannel fc, long address) {
-		ByteBuffer header = ByteBuffer.allocate(HEADER_BYTES);
-		try {
-			fc.read(header, address);
-		} catch (IOException e) {
-			throw new HdfException("Error reading BTreeV1 header at address: " + address);
-		}
-		header.order(LITTLE_ENDIAN);
-		header.rewind();
+	public static ByteBuffer readHeaderAndValidateSignature(HdfFileChannel fc, long address) {
+		ByteBuffer header = fc.readBufferFromAddress(address, HEADER_BYTES);
 
 		// Verify signature
 		byte[] formatSignitureByte = new byte[4];
@@ -92,26 +81,19 @@ public abstract class BTreeV1 {
 		return header;
 	}
 
-	/* package */ BTreeV1(FileChannel fc, Superblock sb, long address) {
+	/* package */ BTreeV1(HdfFileChannel hdfFc, long address) {
 		this.address = address;
 
-		int headerSize = 8 * sb.getSizeOfOffsets();
-		ByteBuffer header = ByteBuffer.allocate(headerSize);
-		try {
-			fc.read(header, address + 6);
-		} catch (IOException e) {
-			throw new HdfException("Error reading BTreeV1 header at address: " + address);
-		}
-		header.order(LITTLE_ENDIAN);
-		header.rewind();
+		int headerSize = 8 * hdfFc.getSizeOfOffsets();
+		ByteBuffer header = hdfFc.readBufferFromAddress(address + 6, headerSize);
 
 		entriesUsed = Utils.readBytesAsUnsignedInt(header, 2);
 		logger.trace("Entries = {}", entriesUsed);
 
-		leftSiblingAddress = Utils.readBytesAsUnsignedLong(header, sb.getSizeOfOffsets());
+		leftSiblingAddress = Utils.readBytesAsUnsignedLong(header, hdfFc.getSizeOfOffsets());
 		logger.trace("left address = {}", leftSiblingAddress);
 
-		rightSiblingAddress = Utils.readBytesAsUnsignedLong(header, sb.getSizeOfOffsets());
+		rightSiblingAddress = Utils.readBytesAsUnsignedLong(header, hdfFc.getSizeOfOffsets());
 		logger.trace("right address = {}", rightSiblingAddress);
 
 	}

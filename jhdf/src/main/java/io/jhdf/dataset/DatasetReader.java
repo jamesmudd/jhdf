@@ -14,6 +14,7 @@ import java.nio.ShortBuffer;
 import java.util.Arrays;
 
 import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.FixedPoint;
@@ -44,10 +45,22 @@ public class DatasetReader {
 	private DatasetReader() {
 	}
 
-	/* package */ static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions) {
+	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions) {
 		// Make the array to hold the data
 		Class<?> javaType = type.getJavaType();
-		final Object data = Array.newInstance(javaType, dimensions);
+
+		// If the data is scalar make a fake one element array then remove it at the end
+		final Object data;
+		final boolean isScalar;
+		if (dimensions.length == 0) {
+			// Scalar dataset
+			data = Array.newInstance(javaType, 1);
+			isScalar = true;
+			dimensions = new int[] { 1 }; // Fake the dimensions
+		} else {
+			data = Array.newInstance(javaType, dimensions);
+			isScalar = false;
+		}
 
 		if (type instanceof FixedPoint) {
 			FixedPoint fixedPoint = (FixedPoint) type;
@@ -107,10 +120,17 @@ public class DatasetReader {
 		} else if (type instanceof StringData) {
 			StringData stringData = (StringData) type;
 			int stringLength = stringData.getSize();
-			fillFixedLentghStringData(data, dimensions, buffer, stringLength);
+			fillFixedLengthStringData(data, dimensions, buffer, stringLength);
+		} else {
+			throw new HdfException(
+					"DatasetReader was passed a type it cant fill. Type: " + type.getClass().getCanonicalName());
 		}
 
-		return data;
+		if (isScalar) {
+			return Array.get(data, 0);
+		} else {
+			return data;
+		}
 	}
 
 	// Signed Fixed Point
@@ -256,11 +276,11 @@ public class DatasetReader {
 
 	// String Data
 
-	private static void fillFixedLentghStringData(Object data, int[] dims, ByteBuffer buffer, int stringLength) {
+	private static void fillFixedLengthStringData(Object data, int[] dims, ByteBuffer buffer, int stringLength) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillFixedLentghStringData(newArray, stripLeadingIndex(dims), buffer, stringLength);
+				fillFixedLengthStringData(newArray, stripLeadingIndex(dims), buffer, stringLength);
 			}
 		} else {
 			for (int i = 0; i < dims[0]; i++) {

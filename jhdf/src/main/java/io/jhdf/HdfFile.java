@@ -2,10 +2,9 @@ package io.jhdf;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
+import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -17,12 +16,12 @@ import org.slf4j.LoggerFactory;
 
 import io.jhdf.Superblock.SuperblockV0V1;
 import io.jhdf.Superblock.SuperblockV2V3;
+import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.object.message.AttributeMessage;
 
 /**
  * The HDF file class this object represents a HDF5 file on disk and provides
@@ -34,10 +33,7 @@ public class HdfFile implements Group, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(HdfFile.class);
 
 	private final File file;
-	private final RandomAccessFile raf;
-	private final FileChannel fc;
-
-	private final long userHeaderSize;
+	private final HdfFileChannel hdfFc;
 
 	private final Superblock superblock;
 
@@ -49,13 +45,12 @@ public class HdfFile implements Group, AutoCloseable {
 		logger.info("Opening HDF5 file '{}'...", hdfFile.getAbsolutePath());
 		try {
 			this.file = hdfFile;
-			raf = new RandomAccessFile(hdfFile, "r");
-			fc = raf.getChannel();
+			FileChannel fc = FileChannel.open(hdfFile.toPath(), StandardOpenOption.READ);
 
 			// Find out if the file is a HDF5 file
 			boolean validSignature = false;
 			long offset = 0;
-			for (offset = 0; offset < raf.length(); offset = nextOffset(offset)) {
+			for (offset = 0; offset < fc.size(); offset = nextOffset(offset)) {
 				logger.trace("Checking for signature at offset = {}", offset);
 				validSignature = Superblock.verifySignature(fc, offset);
 				if (validSignature) {
@@ -69,15 +64,22 @@ public class HdfFile implements Group, AutoCloseable {
 
 			// We have a valid HDF5 file so read the full superblock
 			superblock = Superblock.readSuperblock(fc, offset);
-			userHeaderSize = offset;
 
-			if (superblock.getVersionOfSuperblock() == 0 || superblock.getVersionOfSuperblock() == 1) {
+			// Validate the superblock
+			if (superblock.getBaseAddressByte() != offset) {
+				throw new HdfException("Invalid superblock base address detected");
+			}
+
+			hdfFc = new HdfFileChannel(fc, superblock);
+
+			if (superblock instanceof SuperblockV0V1) {
 				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
-				SymbolTableEntry ste = new SymbolTableEntry(fc, sb.getRootGroupSymbolTableAddress(), sb);
-				rootGroup = GroupImpl.createRootGroup(fc, sb, ste.getObjectHeaderAddress(), this);
-			} else if (superblock.getVersionOfSuperblock() == 2 || superblock.getVersionOfSuperblock() == 3) {
+				SymbolTableEntry ste = new SymbolTableEntry(hdfFc,
+						sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
+				rootGroup = GroupImpl.createRootGroup(hdfFc, ste.getObjectHeaderAddress(), this);
+			} else if (superblock instanceof SuperblockV2V3) {
 				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
-				rootGroup = GroupImpl.createRootGroup(fc, sb, sb.getRootGroupObjectHeaderAddress(), this);
+				rootGroup = GroupImpl.createRootGroup(hdfFc, sb.getRootGroupObjectHeaderAddress(), this);
 			} else {
 				throw new HdfException("Unreconized superblock version = " + superblock.getVersionOfSuperblock());
 			}
@@ -95,16 +97,22 @@ public class HdfFile implements Group, AutoCloseable {
 		return offset * 2;
 	}
 
-	public long getUserHeaderSize() {
-		return userHeaderSize;
+	/**
+	 * Gets the size of the user block of this file.
+	 * 
+	 * @return the size of the user block
+	 */
+	public long getUserBlockSize() {
+		return hdfFc.getUserBlockSize();
 	}
 
-	public ByteBuffer getUserHeader() {
-		try {
-			return raf.getChannel().map(MapMode.READ_ONLY, 0, userHeaderSize);
-		} catch (IOException e) {
-			throw new HdfException("Error accessing user header for HDF file '" + getFile().getAbsolutePath() + "'", e);
-		}
+	/**
+	 * Gets the buffer containing the user block data.
+	 * 
+	 * @return the buffer containing the user block data
+	 */
+	public ByteBuffer getUserBlockBuffer() {
+		return hdfFc.mapNoOffset(0, hdfFc.getUserBlockSize());
 	}
 
 	/**
@@ -118,27 +126,17 @@ public class HdfFile implements Group, AutoCloseable {
 			logger.info("Closed external file '{}'", externalhdfFile.getFile().getAbsolutePath());
 		}
 
-		try {
-			fc.close();
-			raf.close();
-		} catch (IOException e) {
-			throw new HdfException("Error closing HDF file '" + getFile().getAbsolutePath() + "'", e);
-		}
+		hdfFc.close();
 		logger.info("Closed HDF file '{}'", getFile().getAbsolutePath());
 	}
 
 	/**
-	 * Returns the length of this file.
+	 * Returns the size of this HDF5 file.
 	 * 
-	 * @return the lentgh/size of this file in bytes
-	 * @see java.io.RandomAccessFile#length()
+	 * @return the size of this file in bytes
 	 */
-	public long length() {
-		try {
-			return raf.length();
-		} catch (IOException e) {
-			throw new HdfException("Error getting lentgh of file '" + getFile().getAbsolutePath() + "'", e);
-		}
+	public long size() {
+		return hdfFc.size();
 	}
 
 	@Override
@@ -162,8 +160,13 @@ public class HdfFile implements Group, AutoCloseable {
 	}
 
 	@Override
-	public Map<String, AttributeMessage> getAttributes() {
+	public Map<String, Attribute> getAttributes() {
 		return rootGroup.getAttributes();
+	}
+
+	@Override
+	public Attribute getAttribute(String name) {
+		return rootGroup.getAttribute(name);
 	}
 
 	@Override

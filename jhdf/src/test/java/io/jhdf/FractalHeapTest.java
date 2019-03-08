@@ -27,8 +27,9 @@ public class FractalHeapTest {
 		try (RandomAccessFile raf = new RandomAccessFile(new File(testFile), "r")) {
 			FileChannel fc = raf.getChannel();
 			Superblock sb = Superblock.readSuperblock(fc, 0);
+			HdfFileChannel hdfFc = new HdfFileChannel(fc, sb);
 
-			fractalHeap = new FractalHeap(fc, sb, 1870);
+			fractalHeap = new FractalHeap(hdfFc, 1870);
 		}
 	}
 
@@ -37,7 +38,7 @@ public class FractalHeapTest {
 		ByteBuffer id = ByteBuffer.allocate(7);
 		id.put(new byte[] { 0 }); // Flags none set for managed
 		id.putInt(3129); // offset
-		id.putShort((short) 18); // lentgh
+		id.putShort((short) 18); // length
 		id.rewind();
 
 		ByteBuffer data = fractalHeap.getId(id);
@@ -47,7 +48,7 @@ public class FractalHeapTest {
 	}
 
 	@Test
-	void testWrongIdLentghThrows() {
+	void testWrongIdLengthThrows() {
 		ByteBuffer bb = ByteBuffer.allocate(12); // This fractal heap needs 7 byte IDs
 		assertThrows(HdfException.class, () -> fractalHeap.getId(bb));
 	}

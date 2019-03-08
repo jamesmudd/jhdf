@@ -47,12 +47,12 @@ public class HdfFileTest {
 	public void testOpeningValidFile() throws IOException {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
-			assertThat(hdfFile.getUserHeaderSize(), is(equalTo(0L)));
-			assertThat(hdfFile.length(), is(equalTo(file.length())));
+			assertThat(hdfFile.getUserBlockSize(), is(equalTo(0L)));
+			assertThat(hdfFile.size(), is(equalTo(file.length())));
 			assertThat(hdfFile.getAddress(), is(equalTo(96L)));
 
 			// TODO Add a test file with an actual header and read it.
-			hdfFile.getUserHeader();
+			hdfFile.getUserBlockBuffer();
 		}
 	}
 
@@ -211,6 +211,13 @@ public class HdfFileTest {
 			assertThat(e.getMessage(), is(equalTo(
 					"The path '/datasets_group/float/float32/invalid_name' cound not be found in the HDF5 file '"
 							+ file.getAbsolutePath() + "'")));
+		}
+	}
+
+	@Test
+	void testIsLinkIsFalse() {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.isLink(), is(false));
 		}
 	}
 

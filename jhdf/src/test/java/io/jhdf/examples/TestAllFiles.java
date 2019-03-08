@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -92,14 +93,27 @@ public class TestAllFiles {
 		assertThat(dataset.getParent(), is(sameInstance(group)));
 		int[] dims = dataset.getDimensions();
 		assertThat(dims, is(notNullValue()));
-		Object data = dataset.getData();
-		assertThat(getDimensions(data), is(equalTo(dims)));
-		assertThat(getType(data), is(equalTo(dataset.getJavaType())));
 		assertThat(dataset.getAttributes(), is(notNullValue()));
 		assertThat(dataset.isGroup(), is(false));
 		assertThat(dataset.isLink(), is(false));
 		assertThat(dataset.getType(), is(NodeType.DATASET));
 		assertThat(dataset.getDataLayout(), is(notNullValue()));
+		if (dataset.isEmpty()) {
+			assertThat(dataset.getData(), is(nullValue()));
+			// Empty so should have 0 size
+			assertThat(dataset.getDiskSize(), is(equalTo(0L)));
+		} else if (dataset.isScalar()) {
+			Object data = dataset.getData();
+			assertThat(data.getClass(), is(equalTo(dataset.getJavaType())));
+			// Should have some size
+			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+		} else {
+			Object data = dataset.getData();
+			assertThat(getDimensions(data), is(equalTo(dims)));
+			assertThat(getType(data), is(equalTo(dataset.getJavaType())));
+			// Should have some size
+			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+		}
 	}
 
 	private int[] getDimensions(Object data) {

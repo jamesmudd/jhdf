@@ -1,5 +1,6 @@
 package io.jhdf;
 
+import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -24,7 +25,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadUntilNull() throws Exception {
+	public void testReadUntilNull() {
 		ByteBuffer bb = ByteBuffer.allocate(4);
 		byte[] b = new byte[] { 'H', 'D', 'F', Constants.NULL };
 		bb.put(b);
@@ -33,7 +34,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadUntilNullThrowsIfNoNullIsFound() throws Exception {
+	public void testReadUntilNullThrowsIfNoNullIsFound() {
 		ByteBuffer bb = ByteBuffer.allocate(3);
 		byte[] b = new byte[] { 'H', 'D', 'F' };
 		bb.put(b);
@@ -42,7 +43,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadUntilNullThrowsIfNonAlphanumericCharacterIsSeen() throws Exception {
+	public void testReadUntilNullThrowsIfNonAlphanumericCharacterIsSeen() {
 		ByteBuffer bb = ByteBuffer.allocate(3);
 		byte[] b = new byte[] { 'H', 'D', ' ' };
 		bb.put(b);
@@ -51,27 +52,27 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testValidNameReturnsTrue() throws Exception {
+	public void testValidNameReturnsTrue() {
 		assertThat(Utils.validateName("hello"), is(true));
 	}
 
 	@Test
-	public void testNameContainingDotIsInvalid() throws Exception {
+	public void testNameContainingDotIsInvalid() {
 		assertThat(Utils.validateName("hello."), is(false));
 	}
 
 	@Test
-	public void testNameContainingSlashIsInvalid() throws Exception {
+	public void testNameContainingSlashIsInvalid() {
 		assertThat(Utils.validateName("hello/"), is(false));
 	}
 
 	@Test
-	public void testNameContainingNonAsciiIsInvalid() throws Exception {
+	public void testNameContainingNonAsciiIsInvalid() {
 		assertThat(Utils.validateName("helloμ"), is(false));
 	}
 
 	@Test
-	public void testMovingBufferAlreadyAtEightBytePositionDoesNothing() throws Exception {
+	public void testMovingBufferAlreadyAtEightBytePositionDoesNothing() {
 		ByteBuffer bb = ByteBuffer.allocate(11);
 		// Buffer position is 0
 		Utils.seekBufferToNextMultipleOfEight(bb);
@@ -84,7 +85,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testMovingBufferToNextEightBytePosition() throws Exception {
+	public void testMovingBufferToNextEightBytePosition() {
 		ByteBuffer bb = ByteBuffer.allocate(20);
 		bb.position(1);
 		// Buffer position is 1 should be moved to 8
@@ -98,7 +99,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadingOneByteToLong() throws Exception {
+	public void testReadingOneByteToLong() {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 1), is(equalTo(12L)));
@@ -106,7 +107,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadingTwoBytesToLong() throws Exception {
+	public void testReadingTwoBytesToLong() {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 2), is(equalTo(12L)));
@@ -114,15 +115,23 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadingThreeBytesToLong() throws Exception {
-		byte[] bytes = new byte[] { 1, 0, 0 };
+	public void testReadingThreeBytesToLong() {
+		byte[] bytes = new byte[] { 0, 0, 1 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 3), is(equalTo(65536L)));
 		assertThat(bb.position(), is(3));
 	}
 
 	@Test
-	public void testReadingFourBytesToLong() throws Exception {
+	public void testReadingThreeBytesToLongBigEndian() {
+		byte[] bytes = new byte[] { 1, 0, 0 };
+		ByteBuffer bb = ByteBuffer.wrap(bytes).order(BIG_ENDIAN);
+		assertThat(Utils.readBytesAsUnsignedLong(bb, 3), is(equalTo(65536L)));
+		assertThat(bb.position(), is(3));
+	}
+
+	@Test
+	public void testReadingFourBytesToLong() {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 4), is(equalTo(12L)));
@@ -130,31 +139,39 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadingFiveBytesToLong() throws Exception {
-		byte[] bytes = new byte[] { 1, 0, 0, 0, 0 };
+	public void testReadingFiveBytesToLong() {
+		byte[] bytes = new byte[] { 0, 0, 0, 0, 1 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 5), is(equalTo(4294967296L)));
 		assertThat(bb.position(), is(5));
 	}
 
 	@Test
-	public void testReadingSixBytesToLong() throws Exception {
-		byte[] bytes = new byte[] { 1, 0, 0, 0, 0, 0 };
+	public void testReadingSixBytesToLong() {
+		byte[] bytes = new byte[] { 0, 0, 0, 0, 0, 1 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 6), is(equalTo(1099511627776L)));
 		assertThat(bb.position(), is(6));
 	}
 
 	@Test
-	public void testReadingSevenBytesToLong() throws Exception {
-		byte[] bytes = new byte[] { 1, 0, 0, 0, 0, 0, 0 };
+	public void testReadingSixBytesToInt() {
+		byte[] bytes = new byte[] { 0, 0, 1, 0, 0, 0 };
+		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
+		assertThat(Utils.readBytesAsUnsignedInt(bb, 6), is(equalTo(65536)));
+		assertThat(bb.position(), is(6));
+	}
+
+	@Test
+	public void testReadingSevenBytesToLong() {
+		byte[] bytes = new byte[] { 0, 0, 0, 0, 0, 0, 1 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 7), is(equalTo(281474976710656L)));
 		assertThat(bb.position(), is(7));
 	}
 
 	@Test
-	public void testReadingEightBytesToLong() throws Exception {
+	public void testReadingEightBytesToLong() {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 8), is(equalTo(12L)));
@@ -162,14 +179,14 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadingUnsupportedLentghLongThrows() throws Exception {
+	public void testReadingUnsupportedLengthLongThrows() {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThrows(IllegalArgumentException.class, () -> Utils.readBytesAsUnsignedLong(bb, 9));
 	}
 
 	@Test
-	public void testReadingEightByteNegativeIntegerThrows() throws Exception {
+	public void testReadingEightByteNegativeIntegerThrows() {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.rewind();
 		bb.putInt(-462);
@@ -178,16 +195,16 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadingEightByteNegativeLongThrows() throws Exception {
+	public void testReadingEightByteNegativeLongThrows() {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.rewind();
-		bb.putInt(-462);
+		bb.putLong(-462);
 		bb.rewind();
 		assertThrows(ArithmeticException.class, () -> Utils.readBytesAsUnsignedLong(bb, 8));
 	}
 
 	@Test
-	public void testReadingOneByteToInt() throws Exception {
+	public void testReadingOneByteToInt() {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedInt(bb, 1), is(equalTo(12)));
@@ -195,7 +212,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadingTwoBytesToInt() throws Exception {
+	public void testReadingTwoBytesToInt() {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedInt(bb, 2), is(equalTo(12)));
@@ -203,15 +220,15 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadingThreeBytesToInt() throws Exception {
-		byte[] bytes = new byte[] { 1, 0, 0 };
+	public void testReadingThreeBytesToInt() {
+		byte[] bytes = new byte[] { 0, 0, 1 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedInt(bb, 3), is(equalTo(65536)));
 		assertThat(bb.position(), is(3));
 	}
 
 	@Test
-	public void testReadingFourBytesToInt() throws Exception {
+	public void testReadingFourBytesToInt() {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedInt(bb, 4), is(equalTo(12)));
@@ -219,14 +236,14 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadingFourBytesToIntThatCantBeUnsigned() throws Exception {
+	public void testReadingFourBytesToIntThatCantBeUnsigned() {
 		byte[] bytes = new byte[] { -127, -127, -127, -127 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThrows(ArithmeticException.class, () -> Utils.readBytesAsUnsignedInt(bb, 4));
 	}
 
 	@Test
-	public void testReadingEightBytesToInt() throws Exception {
+	public void testReadingEightBytesToInt() {
 		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedInt(bb, 8), is(equalTo(12)));
@@ -234,14 +251,14 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadingUnsupportedLentghThrows() throws Exception {
-		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+	public void testReadingUnsupportedLengthThrows() {
+		byte[] bytes = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 0 };
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
-		assertThrows(IllegalArgumentException.class, () -> Utils.readBytesAsUnsignedInt(bb, 6));
+		assertThrows(IllegalArgumentException.class, () -> Utils.readBytesAsUnsignedInt(bb, 9));
 	}
 
 	@Test
-	public void testReadingLargeLongThrows() throws Exception {
+	public void testReadingLargeLongThrows() {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.putLong(Long.MAX_VALUE);
 		bb.rewind();
@@ -249,7 +266,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testReadingUndefinedAddressSpecialCaseWorks() throws Exception {
+	public void testReadingUndefinedAddressSpecialCaseWorks() {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.putLong(Constants.UNDEFINED_ADDRESS);
 		bb.rewind();
@@ -257,19 +274,19 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testCreatingSubbuffer() throws Exception {
+	public void testCreatingSubbuffer() {
 		byte[] ints = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 		ByteBuffer bb = ByteBuffer.wrap(ints);
 
 		ByteBuffer subBuffer = Utils.createSubBuffer(bb, 3);
-		// Check new buffer is of the righ lentgh
+		// Check new buffer is of the right length
 		assertThat(subBuffer.limit(), is(equalTo(3)));
 		// Check original buffer position is moved on
 		assertThat(bb.position(), is(equalTo(3)));
 	}
 
 	@Test
-	public void testBitsToInt() throws Exception {
+	public void testBitsToInt() {
 		BitSet bits = new BitSet();
 		assertThat(Utils.bitsToInt(bits, 0, 8), is(equalTo(0)));
 		bits.set(0, true);
@@ -288,13 +305,13 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testBitsToIntThrowsWithNegativeLentgh() throws Exception {
+	public void testBitsToIntThrowsWithNegativeLength() {
 		BitSet bits = new BitSet(8);
 		assertThrows(IllegalArgumentException.class, () -> Utils.bitsToInt(bits, 3, -1)); // Should throw
 	}
 
 	@Test
-	public void testbytesNeededToHoldNumber() throws Exception {
+	public void testbytesNeededToHoldNumber() {
 		// Edge case 0
 		assertThat(Utils.bytesNeededToHoldNumber(0), is(equalTo(1)));
 
@@ -310,7 +327,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testbytesNeededToHoldNumberThrowsWithNegative() throws Exception {
+	public void testbytesNeededToHoldNumberThrowsWithNegative() {
 		assertThrows(IllegalArgumentException.class, () -> Utils.bytesNeededToHoldNumber(-123));
 	}
 

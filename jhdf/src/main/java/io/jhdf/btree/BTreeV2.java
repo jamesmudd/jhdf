@@ -1,17 +1,14 @@
 package io.jhdf.btree;
 
 import static io.jhdf.Utils.readBytesAsUnsignedInt;
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import io.jhdf.Superblock;
+import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 
@@ -34,19 +31,16 @@ public class BTreeV2 {
 		return records;
 	}
 
-	public static BTreeV2 createBTree(FileChannel fc, Superblock sb, long address) {
-		return new BTreeV2(fc, sb, address);
+	public static BTreeV2 createBTree(HdfFileChannel hdfFc, long address) {
+		return new BTreeV2(hdfFc, address);
 	}
 
-	private BTreeV2(FileChannel fc, Superblock sb, long address) {
+	private BTreeV2(HdfFileChannel hdfFc, long address) {
 		this.address = address;
 		try {
 			// B Tree V2 Header
-			int headerSize = 16 + sb.getSizeOfOffsets() + 2 + sb.getSizeOfLengths() + 4;
-			ByteBuffer bb = ByteBuffer.allocate(headerSize);
-			fc.read(bb, address); // Skip signature already checked
-			bb.order(LITTLE_ENDIAN);
-			bb.rewind();
+			int headerSize = 16 + hdfFc.getSizeOfOffsets() + 2 + hdfFc.getSizeOfLengths() + 4;
+			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
 			// Verify signature
 			byte[] formatSignitureByte = new byte[4];
@@ -68,35 +62,28 @@ public class BTreeV2 {
 			final int splitPercent = Utils.readBytesAsUnsignedInt(bb, 1);
 			final int mergePercent = Utils.readBytesAsUnsignedInt(bb, 1);
 
-			final long rootNodeAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+			final long rootNodeAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
 
 			final int numberOfRecordsInRoot = Utils.readBytesAsUnsignedInt(bb, 2);
-			final int totalNumberOfRecordsInTree = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
+			final int totalNumberOfRecordsInTree = Utils.readBytesAsUnsignedInt(bb, hdfFc.getSizeOfLengths());
 
 			final long checksum = Utils.readBytesAsUnsignedLong(bb, 4);
 
 			records = new ArrayList<>(totalNumberOfRecordsInTree);
 
-			readRecords(fc, sb, rootNodeAddress, nodeSize, recordSize, depth, numberOfRecordsInRoot,
+			readRecords(hdfFc, rootNodeAddress, nodeSize, recordSize, depth, numberOfRecordsInRoot,
 					totalNumberOfRecordsInTree, records);
 
-		} catch (IOException e) {
+		} catch (HdfException e) {
 			throw new HdfException("Error reading B Tree node", e);
 		}
 
 	}
 
-	private void readRecords(FileChannel fc, Superblock sb, long address, int nodeSize, int recordSize, int depth,
+	private void readRecords(HdfFileChannel hdfFc, long address, int nodeSize, int recordSize, int depth,
 			int numberOfRecords, int totalRecords, List<BTreeRecord> records) {
 
-		ByteBuffer bb = ByteBuffer.allocate(nodeSize);
-		try {
-			fc.read(bb, address);
-		} catch (IOException e) {
-			throw new HdfException("Error reading B Tree record at address: " + address, e);
-		}
-		bb.order(LITTLE_ENDIAN);
-		bb.rewind();
+		ByteBuffer bb = hdfFc.readBufferFromAddress(address, nodeSize);
 
 		byte[] nodeSignitureBytes = new byte[4];
 		bb.get(nodeSignitureBytes, 0, nodeSignitureBytes.length);
@@ -123,9 +110,9 @@ public class BTreeV2 {
 
 		if (!leafNode) {
 			for (int i = 0; i < numberOfRecords + 1; i++) {
-				final long childAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+				final long childAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
 				int sizeOfNumberOfRecords = getSizeOfNumberOfRecords(nodeSize, depth, totalRecords, recordSize,
-						sb.getSizeOfOffsets());
+						hdfFc.getSizeOfOffsets());
 				final int numberOfChildRecords = readBytesAsUnsignedInt(bb, sizeOfNumberOfRecords);
 				final int totalNumberOfChildRecords;
 				if (depth > 1) {
@@ -134,7 +121,7 @@ public class BTreeV2 {
 				} else {
 					totalNumberOfChildRecords = -1;
 				}
-				readRecords(fc, sb, childAddress, nodeSize, recordSize, depth - 1, numberOfChildRecords,
+				readRecords(hdfFc, childAddress, nodeSize, recordSize, depth - 1, numberOfChildRecords,
 						totalNumberOfChildRecords, records);
 			}
 		}

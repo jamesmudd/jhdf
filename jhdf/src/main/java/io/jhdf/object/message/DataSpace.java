@@ -15,7 +15,7 @@ public class DataSpace {
 	private final int[] dimensions;
 	private final int[] maxSizes;
 	private final byte type;
-	private final long totalLentgh;
+	private final long totalLength;
 
 	private DataSpace(ByteBuffer bb, Superblock sb) {
 
@@ -56,10 +56,15 @@ public class DataSpace {
 			maxSizes = new int[0];
 		}
 
-		// Calculate the total lentgh by multiplying all dimensions
-		totalLentgh = IntStream.of(dimensions)
-				.mapToLong(Long::valueOf) // Convert to long to avoid int overflow
-				.reduce(1, Math::multiplyExact);
+		// If type == 2 then it's an empty dataset and totalLength should be 0
+		if (type == 2) {
+			totalLength = 0;
+		} else {
+			// Calculate the total length by multiplying all dimensions
+			totalLength = IntStream.of(dimensions)
+					.mapToLong(Long::valueOf) // Convert to long to avoid int overflow
+					.reduce(1, Math::multiplyExact);
+		}
 
 		// Permutation indices - Note never implemented in HDF library!
 	}
@@ -73,8 +78,8 @@ public class DataSpace {
 	 * 
 	 * @return the total number of elements in this dataspace
 	 */
-	public long getTotalLentgh() {
-		return totalLentgh;
+	public long getTotalLength() {
+		return totalLength;
 	}
 
 	public int getType() {

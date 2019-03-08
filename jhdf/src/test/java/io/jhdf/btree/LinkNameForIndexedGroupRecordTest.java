@@ -31,7 +31,7 @@ class LinkNameForIndexedGroupRecordTest {
 	}
 
 	@Test
-	void testInvalidLentghBufferThrows() throws Exception {
+	void testInvalidLengthBufferThrows() throws Exception {
 		ByteBuffer bb = ByteBuffer.allocate(4);
 		assertThrows(HdfException.class, () -> new LinkNameForIndexedGroupRecord(bb));
 	}

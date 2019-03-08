@@ -11,16 +11,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.nio.file.StandardOpenOption;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.jhdf.Superblock.SuperblockV0V1;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
@@ -28,19 +26,20 @@ import io.jhdf.exceptions.HdfInvalidPathException;
 
 public class GroupTest {
 	private static final String DATASETS_GROUP = "datasets_group";
-	private FileChannel fc;
-	private RandomAccessFile raf;
-	private SuperblockV0V1 sb;
 
+	private HdfFileChannel hdfFc;
+
+	// Mock
 	private Group rootGroup;
 
 	@BeforeEach
-	public void setUp() throws FileNotFoundException {
+	public void setUp() throws Exception {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		File file = new File(testFileUrl);
-		raf = new RandomAccessFile(file, "r");
-		fc = raf.getChannel();
-		sb = (SuperblockV0V1) Superblock.readSuperblock(fc, 0);
+		FileChannel fc = FileChannel.open(file.toPath(), StandardOpenOption.READ);
+		Superblock sb = Superblock.readSuperblock(fc, 0);
+
+		hdfFc = new HdfFileChannel(fc, sb);
 
 		rootGroup = mock(Group.class);
 		when(rootGroup.getPath()).thenReturn("/");
@@ -49,13 +48,12 @@ public class GroupTest {
 
 	@AfterEach
 	public void after() throws IOException {
-		raf.close();
-		fc.close();
+		hdfFc.close();
 	}
 
 	@Test
 	public void testGroup() {
-		Group group = GroupImpl.createGroup(fc, sb, 800, DATASETS_GROUP, rootGroup);
+		Group group = GroupImpl.createGroup(hdfFc, 800, DATASETS_GROUP, rootGroup);
 		assertThat(group.getPath(), is(equalTo("/datasets_group/")));
 		assertThat(group.toString(), is(equalTo("Group [name=datasets_group, path=/datasets_group/, address=0x320]")));
 		assertThat(group.isGroup(), is(true));
@@ -68,28 +66,28 @@ public class GroupTest {
 
 	@Test
 	void testGettingChildrenByName() {
-		Group group = GroupImpl.createGroup(fc, sb, 800, DATASETS_GROUP, rootGroup);
+		Group group = GroupImpl.createGroup(hdfFc, 800, DATASETS_GROUP, rootGroup);
 		Node child = group.getChild("int");
 		assertThat(child, is(notNullValue()));
 	}
 
 	@Test
 	void testGettingMissingChildreturnsNull() {
-		Group group = GroupImpl.createGroup(fc, sb, 800, DATASETS_GROUP, rootGroup);
+		Group group = GroupImpl.createGroup(hdfFc, 800, DATASETS_GROUP, rootGroup);
 		Node child = group.getChild("made_up_missing_child_name");
 		assertThat(child, is(nullValue()));
 	}
 
 	@Test
 	void testGetByPathWithInvalidPathReturnsNull() {
-		Group group = GroupImpl.createGroup(fc, sb, 800, DATASETS_GROUP, rootGroup);
+		Group group = GroupImpl.createGroup(hdfFc, 800, DATASETS_GROUP, rootGroup);
 		assertThat(group.getByPath("float/missing_node"), is(nullValue()));
 
 	}
 
 	@Test
 	void testGetByPathWithValidPathReturnsNode() {
-		Group group = GroupImpl.createGroup(fc, sb, 800, DATASETS_GROUP, rootGroup);
+		Group group = GroupImpl.createGroup(hdfFc, 800, DATASETS_GROUP, rootGroup);
 		String path = "float/float32";
 		Node child = group.getByPath(path);
 		assertThat(child.getPath(), is(equalTo(group.getPath() + path)));
@@ -97,7 +95,7 @@ public class GroupTest {
 
 	@Test
 	void testGetByPathThroughDatasetThrows() {
-		Group group = GroupImpl.createGroup(fc, sb, 800, DATASETS_GROUP, rootGroup);
+		Group group = GroupImpl.createGroup(hdfFc, 800, DATASETS_GROUP, rootGroup);
 		// Try to keep resolving a path through a dataset 'float32' this shold return
 		// null
 		String path = "float/float32/missing_node";
