@@ -1,21 +1,30 @@
 package io.jhdf;
 
+import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
+
+import java.nio.ByteBuffer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Node;
 import io.jhdf.dataset.DatasetReader;
+import io.jhdf.dataset.VariableLengthDatasetReader;
+import io.jhdf.object.datatype.DataType;
+import io.jhdf.object.datatype.VariableLength;
 import io.jhdf.object.message.AttributeMessage;
 
 public class AttributeImpl implements Attribute {
 	private static final Logger logger = LoggerFactory.getLogger(AttributeImpl.class);
 
+	private final HdfFileChannel hdfFc;
 	private final Node node;
 	private final String name;
 	private final AttributeMessage message;
 
-	public AttributeImpl(Node node, AttributeMessage message) {
+	public AttributeImpl(HdfFileChannel hdfFc, Node node, AttributeMessage message) {
+		this.hdfFc = hdfFc;
 		this.node = node;
 		this.name = message.getName();
 		this.message = message;
@@ -52,7 +61,14 @@ public class AttributeImpl implements Attribute {
 		if (isEmpty()) {
 			return null;
 		}
-		return DatasetReader.readDataset(message.getDataType(), message.getDataBuffer(), getDimensions());
+		DataType type = message.getDataType();
+		ByteBuffer bb = message.getDataBuffer();
+		if (type instanceof VariableLength) {
+			return VariableLengthDatasetReader.readDataset((VariableLength) type, bb,
+					getDimensions(), hdfFc);
+		} else {
+			return DatasetReader.readDataset(type, bb, getDimensions());
+		}
 	}
 
 	@Override
@@ -62,12 +78,21 @@ public class AttributeImpl implements Attribute {
 
 	@Override
 	public boolean isScalar() {
+		if (isEmpty()) {
+			return false;
+		}
 		return getDimensions().length == 0;
 	}
 
 	@Override
 	public Class<?> getJavaType() {
-		return message.getDataType().getJavaType();
+		final Class<?> type = message.getDataType().getJavaType();
+		// For scalar datasets the returned type will be the wrapper class because
+		// getData returns Object
+		if (isScalar() && type.isPrimitive()) {
+			return primitiveToWrapper(type);
+		}
+		return type;
 	}
 
 }

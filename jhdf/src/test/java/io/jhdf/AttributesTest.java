@@ -3,10 +3,12 @@ package io.jhdf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -373,8 +375,40 @@ public class AttributesTest {
 			Attribute attribute = node.getAttribute(attributeName);
 
 			assertThat(attribute.getData(), is(equalTo(expectedData)));
+			// Call getData again to ensure the is no persisted state after the first read.
+			assertThat(attribute.getData(), is(equalTo(expectedData)));
 
+			assertThat(attribute.getName(), is(equalTo(attributeName)));
+
+			if (expectedData == null) {// Empty attributes
+				assertThat(attribute.isEmpty(), is(true));
+				assertThat(attribute.isScalar(), is(false));
+				assertThat(attribute.getSize(), is(0L));
+				assertThat(attribute.getDiskSize(), is(0L));
+			} else if (expectedData.getClass().isArray()) { // Array
+				assertThat(attribute.getJavaType(), is(equalTo(getArrayType(expectedData))));
+				assertThat(attribute.isEmpty(), is(false));
+				assertThat(attribute.isScalar(), is(false));
+			} else { // Scalar
+				assertThat(attribute.getJavaType(), is(equalTo(expectedData.getClass())));
+				assertThat(attribute.isEmpty(), is(false));
+				assertThat(attribute.isScalar(), is(true));
+				assertThat(attribute.getSize(), is(1L));
+			}
+
+			if (!node.isLink()) {
+				assertThat(attribute.getNode(), is(sameInstance(node)));
+			}
 		};
+	}
+
+	Class<?> getArrayType(Object array) {
+		Object element = Array.get(array, 0);
+		if (element.getClass().isArray()) {
+			return getArrayType(element);
+		} else {
+			return array.getClass().getComponentType();
+		}
 	}
 
 }

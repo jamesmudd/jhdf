@@ -158,7 +158,12 @@ public class AttributeMessage extends Message {
 	}
 
 	public ByteBuffer getDataBuffer() {
-		return data;
+		if (data == null) {
+			return null;
+		} else {
+			// Slice the buffer to allow multiple accesses
+			return data.slice().order(data.order());
+		}
 	}
 
 	@Override

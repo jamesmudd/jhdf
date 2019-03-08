@@ -68,7 +68,8 @@ public abstract class AbstractNode implements Node {
 
 			return attributeMessages.stream()
 					.collect(
-							toMap(AttributeMessage::getName, message -> new AttributeImpl(AbstractNode.this, message)));
+							toMap(AttributeMessage::getName,
+									message -> new AttributeImpl(hdfFc, AbstractNode.this, message)));
 		}
 	}
 
