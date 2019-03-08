@@ -1,5 +1,6 @@
 package io.jhdf.dataset;
 
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 
 import java.nio.ByteBuffer;
@@ -16,6 +17,7 @@ import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.OrderedDataType;
+import io.jhdf.object.datatype.VariableLength;
 import io.jhdf.object.message.DataLayout;
 import io.jhdf.object.message.DataLayoutMessage;
 import io.jhdf.object.message.DataSpace;
@@ -50,6 +52,8 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 			final ByteOrder order = (((OrderedDataType) dataType).getByteOrder());
 			bb.order(order);
 			logger.debug("Set buffer oder of '{}' to {}", getPath(), order);
+		} else {
+			bb.order(LITTLE_ENDIAN);
 		}
 	}
 
@@ -103,7 +107,14 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		if (isEmpty()) {
 			return null;
 		}
-		return DatasetReader.readDataset(getDataType(), getDataBuffer(), getDimensions());
+		DataType type = getDataType();
+		ByteBuffer bb = getDataBuffer();
+		if (type instanceof VariableLength) {
+			return VariableLengthDatasetReader.readDataset((VariableLength) type, bb,
+					getDimensions(), hdfFc);
+		} else {
+			return DatasetReader.readDataset(type, bb, getDimensions());
+		}
 	}
 
 	@Override
