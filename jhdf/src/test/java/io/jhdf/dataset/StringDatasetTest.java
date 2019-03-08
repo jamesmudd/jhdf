@@ -79,7 +79,7 @@ public class StringDatasetTest {
 	}
 
 	@Test
-	void test2DStringDatasetEarliest() throws Exception {
+	void test2DStringDatasetEarliest() {
 		Dataset dataset = earliestHdfFile.getDatasetByPath("variable_length_2d");
 		Object data = dataset.getData();
 		assertThat(getDimensions(data), is(equalTo(new int[] { 5, 7 })));
@@ -92,7 +92,7 @@ public class StringDatasetTest {
 	}
 
 	@Test
-	void test2DStringDatasetLatest() throws Exception {
+	void test2DStringDatasetLatest() {
 		Dataset dataset = latestHdfFile.getDatasetByPath("variable_length_2d");
 		Object data = dataset.getData();
 		assertThat(getDimensions(data), is(equalTo(new int[] { 5, 7 })));

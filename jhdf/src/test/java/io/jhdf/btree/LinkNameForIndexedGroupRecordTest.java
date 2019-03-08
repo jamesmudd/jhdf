@@ -9,7 +9,6 @@ import java.nio.ByteBuffer;
 
 import org.junit.jupiter.api.Test;
 
-import io.jhdf.btree.LinkNameForIndexedGroupRecord;
 import io.jhdf.exceptions.HdfException;
 
 class LinkNameForIndexedGroupRecordTest {
@@ -31,7 +30,7 @@ class LinkNameForIndexedGroupRecordTest {
 	}
 
 	@Test
-	void testInvalidLengthBufferThrows() throws Exception {
+	void testInvalidLengthBufferThrows() {
 		ByteBuffer bb = ByteBuffer.allocate(4);
 		assertThrows(HdfException.class, () -> new LinkNameForIndexedGroupRecord(bb));
 	}

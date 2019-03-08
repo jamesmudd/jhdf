@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -26,7 +27,7 @@ public class BTreeV1Test {
 	private HdfFileChannel hdfFc;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	public void setUp() throws URISyntaxException, IOException {
 		final URI testFileUri = this.getClass().getResource("../test_chunked_datasets_earliest.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
@@ -34,7 +35,7 @@ public class BTreeV1Test {
 	}
 
 	@AfterEach
-	public void after() throws IOException {
+	public void after() {
 		hdfFc.close();
 	}
 

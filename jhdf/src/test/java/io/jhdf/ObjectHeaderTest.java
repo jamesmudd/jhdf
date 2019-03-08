@@ -9,11 +9,13 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +30,7 @@ public class ObjectHeaderTest {
 	private FileChannel fc;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	public void setUp() throws IOException, URISyntaxException {
 		final URI testFileUri = this.getClass().getResource("test_file.hdf5").toURI();
 		fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		sb = Superblock.readSuperblock(fc, 0);
@@ -36,12 +38,12 @@ public class ObjectHeaderTest {
 	}
 
 	@AfterEach
-	public void after() throws IOException {
+	public void after() {
 		hdfFc.close();
 	}
 
 	@Test
-	public void testObjectHeaderOnGroup() throws IOException {
+	public void testObjectHeaderOnGroup() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 800); // dataset_group header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
@@ -54,8 +56,8 @@ public class ObjectHeaderTest {
 	}
 
 	@Test
-	public void testObjectHeaderOnFloat16Dataset() throws IOException {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 7272); // float16 header
+	public void testObjectHeaderOnFloat32Dataset() {
+		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 7272); // float32 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(7272L)));
@@ -67,20 +69,7 @@ public class ObjectHeaderTest {
 	}
 
 	@Test
-	public void testObjectHeaderOnFloat32Dataset() throws IOException {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 7872); // float32 header
-
-		assertThat(oh.getVersion(), is(equalTo(1)));
-		assertThat(oh.getAddress(), is(equalTo(7872L)));
-		assertThat(oh.getMessages().size(), is(equalTo(7)));
-
-		// V1 specific methods
-		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
-		assertThat(ohV1.getReferenceCount(), is(equalTo(1)));
-	}
-
-	@Test
-	public void testObjectHeaderOnFloat64Dataset() throws IOException {
+	public void testObjectHeaderOnFloat64Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 7872); // float64 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
@@ -93,7 +82,7 @@ public class ObjectHeaderTest {
 	}
 
 	@Test
-	public void testObjectHeaderOnInt8Dataset() throws IOException {
+	public void testObjectHeaderOnInt8Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 10904); // int8 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
@@ -107,7 +96,7 @@ public class ObjectHeaderTest {
 	}
 
 	@Test
-	public void testLazyObjectHeader() throws Exception {
+	public void testLazyObjectHeader() throws ConcurrentException, IOException {
 		FileChannel spyFc = Mockito.spy(fc);
 		HdfFileChannel hdfFileChannel = new HdfFileChannel(spyFc, sb);
 		LazyInitializer<ObjectHeader> lazyObjectHeader = ObjectHeader.lazyReadObjectHeader(hdfFileChannel, 10904); // int8

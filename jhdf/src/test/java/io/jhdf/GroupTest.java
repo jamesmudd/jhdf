@@ -33,7 +33,7 @@ public class GroupTest {
 	private Group rootGroup;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	public void setUp() throws IOException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		File file = new File(testFileUrl);
 		FileChannel fc = FileChannel.open(file.toPath(), StandardOpenOption.READ);
@@ -47,7 +47,7 @@ public class GroupTest {
 	}
 
 	@AfterEach
-	public void after() throws IOException {
+	public void after() {
 		hdfFc.close();
 	}
 
