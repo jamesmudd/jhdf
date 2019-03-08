@@ -58,17 +58,17 @@ public class SuperblockTest {
 	}
 
 	@Test
-	public void testVerifySuperblock() throws Exception {
+	public void testVerifySuperblock() {
 		assertThat(Superblock.verifySignature(fc, 0), is(true));
 	}
 
 	@Test
-	public void testVerifySuperblockReturnsFalseWhenNotCorrect() throws Exception {
+	public void testVerifySuperblockReturnsFalseWhenNotCorrect() {
 		assertThat(Superblock.verifySignature(fc, 3), is(false));
 	}
 
 	@Test
-	public void testReadSuperblockThrowsWhenGivenInvalidOffset() throws Exception {
+	public void testReadSuperblockThrowsWhenGivenInvalidOffset() {
 		assertThrows(HdfException.class, () -> Superblock.readSuperblock(fc, 5));
 	}
 }

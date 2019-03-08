@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.CharacterCodingException;
 import java.util.BitSet;
 
 import org.junit.jupiter.api.AfterEach;
@@ -43,7 +42,7 @@ public class AttributeMessageV1Test {
 	}
 
 	@Test
-	public void test() throws CharacterCodingException {
+	public void test() {
 		AttributeMessage am = new AttributeMessage(bb, sb, BitSet.valueOf(new byte[1]));
 		assertThat(am.getName(), is(equalTo("string_attr")));
 		assertThat(am.getDataType().getDataClass(), is(equalTo(9)));

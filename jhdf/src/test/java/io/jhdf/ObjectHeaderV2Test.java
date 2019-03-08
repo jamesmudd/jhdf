@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -24,7 +25,7 @@ public class ObjectHeaderV2Test {
 	private HdfFileChannel hdfFc;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	public void setUp() throws IOException, URISyntaxException {
 		final URI testFileUri = this.getClass().getResource("test_file2.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
@@ -32,12 +33,12 @@ public class ObjectHeaderV2Test {
 	}
 
 	@AfterEach
-	public void after() throws IOException {
+	public void after() {
 		hdfFc.close();
 	}
 
 	@Test
-	public void testRootGroupObjectHeaderV2() throws IOException {
+	public void testRootGroupObjectHeaderV2() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 48); // Root group header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -55,7 +56,7 @@ public class ObjectHeaderV2Test {
 	}
 
 	@Test
-	public void testDatasetsGroupObjectHeaderV2() throws IOException {
+	public void testDatasetsGroupObjectHeaderV2() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 195); // Root group header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -73,7 +74,7 @@ public class ObjectHeaderV2Test {
 	}
 
 	@Test
-	public void testObjectHeaderOnFloat16Dataset() throws IOException {
+	public void testObjectHeaderOnFloat16Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 608); // float16 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -91,7 +92,7 @@ public class ObjectHeaderV2Test {
 	}
 
 	@Test
-	public void testObjectHeaderOnFloat32Dataset() throws IOException {
+	public void testObjectHeaderOnFloat32Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 892); // float32 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -109,7 +110,7 @@ public class ObjectHeaderV2Test {
 	}
 
 	@Test
-	public void testObjectHeaderOnFloat64Dataset() throws IOException {
+	public void testObjectHeaderOnFloat64Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 1176); // float64 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -127,7 +128,7 @@ public class ObjectHeaderV2Test {
 	}
 
 	@Test
-	public void testObjectHeaderOnInt8Dataset() throws IOException {
+	public void testObjectHeaderOnInt8Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 1655); // int8 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));

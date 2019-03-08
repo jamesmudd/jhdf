@@ -14,13 +14,13 @@ import io.jhdf.Constants;
 
 class ObjectCommentMessageTest {
 
-	private final String comment = "Test object comment";
+	private static final String COMMENT = "Test object comment";
 	private ByteBuffer buffer;
 	private BitSet flags = BitSet.valueOf(new byte[1]); // Empty flags
 
 	@BeforeEach
 	private void createBuffer() {
-		byte[] bytes = comment.getBytes();
+		byte[] bytes = COMMENT.getBytes();
 		buffer = ByteBuffer.allocate(bytes.length + 1);
 		buffer.rewind();
 		buffer.put(bytes);
@@ -31,7 +31,7 @@ class ObjectCommentMessageTest {
 	@Test
 	void testObjectModificationTimeMessage() {
 		ObjectCommentMessage message = new ObjectCommentMessage(buffer, flags);
-		assertThat(message.getComment(), is(equalTo(comment)));
+		assertThat(message.getComment(), is(equalTo(COMMENT)));
 	}
 
 }

@@ -43,9 +43,12 @@ public class HdfFile implements Group, AutoCloseable {
 
 	public HdfFile(File hdfFile) {
 		logger.info("Opening HDF5 file '{}'...", hdfFile.getAbsolutePath());
+		this.file = hdfFile;
+
 		try {
-			this.file = hdfFile;
-			FileChannel fc = FileChannel.open(hdfFile.toPath(), StandardOpenOption.READ);
+			// Sonar would like this closed but we are implementing a file object which
+			// needs this channel for operation it is closed when this HdfFile is closed
+			FileChannel fc = FileChannel.open(hdfFile.toPath(), StandardOpenOption.READ); // NOSONAR
 
 			// Find out if the file is a HDF5 file
 			boolean validSignature = false;
@@ -85,7 +88,7 @@ public class HdfFile implements Group, AutoCloseable {
 			}
 
 		} catch (IOException e) {
-			throw new HdfException("Failed to open file. Is it a HDF5 file?", e);
+			throw new HdfException("Failed to open file '" + file.getAbsolutePath() + "' . Is it a HDF5 file?", e);
 		}
 		logger.info("Opened HDF5 file '{}'", hdfFile.getAbsolutePath());
 	}

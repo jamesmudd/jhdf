@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -18,7 +19,7 @@ public class SymbolTableEntryTest {
 	private HdfFileChannel hdfFc;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	public void setUp() throws URISyntaxException, IOException {
 		final URI testFileUri = this.getClass().getResource("test_file.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
@@ -26,7 +27,7 @@ public class SymbolTableEntryTest {
 	}
 
 	@AfterEach
-	public void after() throws IOException {
+	public void after() {
 		hdfFc.close();
 	}
 
