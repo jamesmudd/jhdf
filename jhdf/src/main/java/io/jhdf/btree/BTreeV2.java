@@ -10,9 +10,10 @@ import java.util.List;
 
 import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
+import io.jhdf.btree.record.BTreeRecord;
 import io.jhdf.exceptions.HdfException;
 
-public class BTreeV2 {
+public class BTreeV2<T extends BTreeRecord> {
 
 	private static final int NODE_OVERHEAD_BYTES = 10;
 
@@ -25,17 +26,13 @@ public class BTreeV2 {
 	/** Type of node. */
 	private final short nodeType;
 
-	private final List<BTreeRecord> records;
+	private final List<T> records;
 
-	public List<BTreeRecord> getRecords() {
+	public List<T> getRecords() {
 		return records;
 	}
 
-	public static BTreeV2 createBTree(HdfFileChannel hdfFc, long address) {
-		return new BTreeV2(hdfFc, address);
-	}
-
-	private BTreeV2(HdfFileChannel hdfFc, long address) {
+	public BTreeV2(HdfFileChannel hdfFc, long address) {
 		this.address = address;
 		try {
 			// B Tree V2 Header
@@ -81,7 +78,7 @@ public class BTreeV2 {
 	}
 
 	private void readRecords(HdfFileChannel hdfFc, long address, int nodeSize, int recordSize, int depth,
-			int numberOfRecords, int totalRecords, List<BTreeRecord> records) {
+			int numberOfRecords, int totalRecords, List<T> records) {
 
 		ByteBuffer bb = hdfFc.readBufferFromAddress(address, nodeSize);
 

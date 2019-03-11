@@ -16,10 +16,9 @@ import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
-import io.jhdf.btree.BTreeRecord;
 import io.jhdf.btree.BTreeV1;
 import io.jhdf.btree.BTreeV2;
-import io.jhdf.btree.LinkNameForIndexedGroupRecord;
+import io.jhdf.btree.record.LinkNameForIndexedGroupRecord;
 import io.jhdf.dataset.DatasetLoader;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
@@ -64,12 +63,13 @@ public class GroupImpl extends AbstractNode implements Group {
 				logger.debug("Loaded group links from object header");
 			} else {
 				// Links are not stored compactly i.e in the fractal heap
-				final BTreeV2 bTreeNode = BTreeV2.createBTree(hdfFc, linkInfoMessage.getbTreeNameIndexAddress());
+				final BTreeV2<LinkNameForIndexedGroupRecord> bTreeNode = new BTreeV2<>(hdfFc,
+						linkInfoMessage.getbTreeNameIndexAddress());
 				final FractalHeap fractalHeap = new FractalHeap(hdfFc, linkInfoMessage.getFractalHeapAddress());
 
-				links = new ArrayList<>(); // TODO would be good to get the size here from the b-tree
-				for (BTreeRecord record : bTreeNode.getRecords()) {
-					LinkNameForIndexedGroupRecord linkName = (LinkNameForIndexedGroupRecord) record;
+				List<LinkNameForIndexedGroupRecord> records = bTreeNode.getRecords();
+				links = new ArrayList<>(records.size());
+				for (LinkNameForIndexedGroupRecord linkName : records) {
 					ByteBuffer id = linkName.getId();
 					// Get the name data from the fractal heap
 					ByteBuffer bb = fractalHeap.getId(id);

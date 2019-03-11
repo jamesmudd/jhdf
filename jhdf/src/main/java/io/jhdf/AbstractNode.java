@@ -17,9 +17,8 @@ import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
-import io.jhdf.btree.AttributeNameForIndexedAttributesRecord;
-import io.jhdf.btree.BTreeRecord;
 import io.jhdf.btree.BTreeV2;
+import io.jhdf.btree.record.AttributeNameForIndexedAttributesRecord;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.AttributeInfoMessage;
 import io.jhdf.object.message.AttributeMessage;
@@ -49,11 +48,11 @@ public abstract class AbstractNode implements Node {
 				if (attributeInfoMessage.getFractalHeapAddress() != Constants.UNDEFINED_ADDRESS) {
 					// Create the heap and btree
 					FractalHeap fractalHeap = new FractalHeap(hdfFc, attributeInfoMessage.getFractalHeapAddress());
-					BTreeV2 btree = BTreeV2.createBTree(hdfFc, attributeInfoMessage.getAttributeNameBTreeAddress());
+					BTreeV2<AttributeNameForIndexedAttributesRecord> btree = new BTreeV2<>(hdfFc,
+							attributeInfoMessage.getAttributeNameBTreeAddress());
 
 					// Read the attribute messages from the btree+heap
-					for (BTreeRecord record : btree.getRecords()) {
-						AttributeNameForIndexedAttributesRecord attributeRecord = (AttributeNameForIndexedAttributesRecord) record;
+					for (AttributeNameForIndexedAttributesRecord attributeRecord : btree.getRecords()) {
 						ByteBuffer bb = fractalHeap.getId(attributeRecord.getHeapId());
 						AttributeMessage attributeMessage = new AttributeMessage(bb, hdfFc.getSuperblock(),
 								attributeRecord.getFlags());
