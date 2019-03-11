@@ -6,12 +6,13 @@ import io.jhdf.exceptions.HdfException;
 
 public abstract class BTreeRecord {
 
-	public static BTreeRecord readRecord(byte type, ByteBuffer buffer) {
+	@SuppressWarnings("unchecked") // Requires that the b-tree is of the correct type for the record
+	public static <T extends BTreeRecord> T readRecord(byte type, ByteBuffer buffer) {
 		switch (type) {
 		case 5:
-			return new LinkNameForIndexedGroupRecord(buffer);
+			return (T) new LinkNameForIndexedGroupRecord(buffer);
 		case 8:
-			return new AttributeNameForIndexedAttributesRecord(buffer);
+			return (T) new AttributeNameForIndexedAttributesRecord(buffer);
 		default:
 			throw new HdfException("Unknown b-tree record type. Type = " + type);
 		}
