@@ -1,5 +1,11 @@
 package io.jhdf.api;
 
+/**
+ * Interface for HDF5 attributes. Attributes can be attached to {@link Group}s
+ * or {@link Dataset}s. They contain metadata about that object.
+ * 
+ * @author James Mudd
+ */
 public interface Attribute {
 
 	/**
