@@ -1,5 +1,29 @@
+/*******************************************************************************
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ * 
+ * http://jhdf.io
+ * 
+ * Copyright 2019 James Mudd
+ * 
+ * MIT License see 'LICENSE' file
+ ******************************************************************************/
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ * 
+ * http://jhdf.io
+ * 
+ * Copyright 2019 James Mudd
+ * 
+ * MIT License see LICENSE file
+ */
 package io.jhdf.api;
 
+/**
+ * Interface for HDF5 attributes. Attributes can be attached to {@link Group}s
+ * or {@link Dataset}s. They contain metadata about that object.
+ * 
+ * @author James Mudd
+ */
 public interface Attribute {
 
 	/**
