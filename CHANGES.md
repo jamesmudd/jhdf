@@ -2,6 +2,16 @@
 
 Please note this project is still in pre-release development.
 
+## v0.4.0
+- Add support for accessing attributes (see [Attribute.java](jhdf/src/main/java/io/jhdf/api/Attribute.java))
+- Add support for scalar datasets
+- Add support for empty datasets
+- Add support for files with user blocks
+- Fix bug where "old" style groups containing soft links could not be opened
+- Fix bug reading unsigned numbers from "awkward" buffer sizes
+- Lots of minor code cleanup and refactoring
+- Improvements to tests and coverage
+
 ## v0.3.2
 - Fix bug when fixed size string datasets contain strings of exactly that size.
 - Fix bug where >1D fixed size datasets could not be read
