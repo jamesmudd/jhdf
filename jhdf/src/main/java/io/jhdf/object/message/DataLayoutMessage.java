@@ -100,18 +100,18 @@ public abstract class DataLayoutMessage extends Message {
 	public static class ChunkedDataLayoutMessageV3 extends DataLayoutMessage {
 
 		private final long address;
-		private final long size;
-		private long[] chunkDimensions;
+		private final int size;
+		private int[] chunkDimensions;
 
 		private ChunkedDataLayoutMessageV3(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
 			final int chunkDimensionality = bb.get() - 1;
 			address = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
-			chunkDimensions = new long[chunkDimensionality];
+			chunkDimensions = new int[chunkDimensionality];
 			for (int i = 0; i < chunkDimensions.length; i++) {
-				chunkDimensions[i] = Utils.readBytesAsUnsignedLong(bb, 4);
+				chunkDimensions[i] = Utils.readBytesAsUnsignedInt(bb, 4);
 			}
-			size = Utils.readBytesAsUnsignedLong(bb, 4);
+			size = Utils.readBytesAsUnsignedInt(bb, 4);
 		}
 
 		@Override
@@ -123,11 +123,11 @@ public abstract class DataLayoutMessage extends Message {
 			return address;
 		}
 
-		public long getSize() {
+		public int getSize() {
 			return size;
 		}
 
-		public long[] getChunkDimensions() {
+		public int[] getChunkDimensions() {
 			return chunkDimensions;
 		}
 	}
