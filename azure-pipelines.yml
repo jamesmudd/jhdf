@@ -25,7 +25,14 @@ jobs:
       testResultsFiles: 'jhdf/build/test-results/test/TEST-*.xml'
       testRunTitle: $(osName) $(Agent.JobName)
       jdkVersionOption: $(java.version)
-  
+
+  # Publish JaCoCo code coverage results
+  - task: PublishCodeCoverageResults@1
+    inputs:
+      codeCoverageTool: 'jaCoCo' # Options: cobertura, jaCoCo
+      summaryFileLocation: jhdf/build/reports/jacoco/test/*.xml
+      reportDirectory: jhdf/build/reports/jacoco/test/html
+
   # Source + JavaDoc
   - task: Gradle@2
     displayName: Build Sources + JavaDoc Jars
