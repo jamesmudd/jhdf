@@ -55,6 +55,21 @@ jobs:
     # Only run for Java 1.8 and not for PR
     condition: and(eq(variables['java.version'], '1.8'), ne(variables['Build.Reason'], 'PullRequest'))
 
+  # SonarQube for Pull requests
+  - script: 'cd jhdf;
+    ./gradlew sonarqube
+    -Dsonar.projectKey=jamesmudd_jhdf
+    -Dsonar.organization=jamesmudd-github
+    -Dsonar.host.url=https://sonarcloud.io
+    -Dsonar.login=$(sonar.login)
+    -Dsonar.pullrequest.branch=$(Build.SourceBranch)
+    -Dsonar.pullrequest.key=$(System.PullRequest.PullRequestNumber)
+    -Dsonar.pullrequest.base=$(System.PullRequest.TargetBranch)
+    -Dsonar.pullrequest.github.repository=$(Build.Repository.Uri)'
+    displayName: SonarQube PR
+    # Only run for Java 1.8 and PR
+    condition: and(eq(variables['java.version'], '1.8'), eq(variables['Build.Reason'], 'PullRequest'))
+
 - job: Windows
   pool:
     vmImage: 'vs2017-win2016'
