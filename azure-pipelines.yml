@@ -16,7 +16,7 @@ jobs:
   
   # Build using a Gradle wrapper script
   - task: Gradle@2
-    displayName: Build/Test
+    displayName: Build + Test
     inputs:
       gradleWrapperFile: 'jhdf/gradlew'
       workingDirectory: jhdf
@@ -28,6 +28,7 @@ jobs:
 
   # Publish JaCoCo code coverage results
   - task: PublishCodeCoverageResults@1
+    displayName: Publish Code Coverage
     inputs:
       codeCoverageTool: 'jaCoCo' # Options: cobertura, jaCoCo
       summaryFileLocation: jhdf/build/reports/jacoco/test/*.xml
