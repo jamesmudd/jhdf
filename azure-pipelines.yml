@@ -104,3 +104,38 @@ jobs:
       tasks: 'sourcesJar javadocJar'
       jdkVersionOption: $(java.version)
       publishJUnitResults: false
+
+- job: Mac
+  pool:
+    vmImage: 'macOS-10.13'
+  variables:
+   osName: Mac
+  strategy:
+    matrix:
+      Java 8:
+        java.version: '1.8'
+      Java 11:
+        java.version: '1.11'
+  steps:
+  
+  # Build using a Gradle wrapper script
+  - task: Gradle@2
+    displayName: Build/Test
+    inputs:
+      gradleWrapperFile: 'jhdf/gradlew'
+      workingDirectory: jhdf
+      tasks: 'build' 
+      publishJUnitResults: true
+      testResultsFiles: 'jhdf/build/test-results/test/TEST-*.xml'
+      testRunTitle: $(osName) $(Agent.JobName)
+      jdkVersionOption: $(java.version)
+
+  # Source + JavaDoc
+  - task: Gradle@2
+    displayName: Build Sources + JavaDoc Jars
+    inputs:
+      gradleWrapperFile: 'jhdf/gradlew'
+      workingDirectory: jhdf
+      tasks: 'sourcesJar javadocJar'
+      jdkVersionOption: $(java.version)
+      publishJUnitResults: false
