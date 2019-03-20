@@ -68,6 +68,13 @@ jar {
     }
 }
 
+jacocoTestReport {
+    reports {
+        // Enable XML for Azure pipelines
+        xml.enabled true
+    }
+}
+
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
     classifier = 'sources'
