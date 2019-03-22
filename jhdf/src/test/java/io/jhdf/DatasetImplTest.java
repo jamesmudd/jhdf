@@ -82,7 +82,7 @@ public class DatasetImplTest {
 		// read the data into the array
 		buffer.get(data);
 		// check the data is correct
-		assertArrayEquals(REFERENCE_BYTE_DATA, data);
+		assertThat(data, is(equalTo(REFERENCE_BYTE_DATA)));
 	}
 
 	@Test
@@ -188,13 +188,13 @@ public class DatasetImplTest {
 	@Test
 	void testInt32DatasetDimensions() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
-		assertArrayEquals(dataset.getDimensions(), new int[] { 21 });
+		assertThat(dataset.getDimensions(), is(equalTo(new int[] { 21 })));
 	}
 
 	@Test
 	void testInt32DatasetMaxSizes() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
-		assertArrayEquals(dataset.getMaxSize(), new int[] { 21 });
+		assertThat(dataset.getMaxSize(), is(equalTo(new int[] { 21 })));
 	}
 
 	@Test
@@ -212,7 +212,7 @@ public class DatasetImplTest {
 	@Test
 	void testInt32GetData() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
-		assertArrayEquals((int[]) dataset.getData(), REFERENCE_INT_DATA);
+		assertThat((int[]) dataset.getData(), is(equalTo(REFERENCE_INT_DATA)));
 	}
 
 	@Test
@@ -224,13 +224,13 @@ public class DatasetImplTest {
 	@Test
 	void testFloat32DatasetGetData() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(FLOAT32_PATH);
-		assertArrayEquals((float[]) dataset.getData(), REFERENCE_FLOAT_DATA);
+		assertThat((float[]) dataset.getData(), is(equalTo(REFERENCE_FLOAT_DATA)));
 	}
 
 	@Test
 	void testFloat64DatasetGetData() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(FLOAT64_PATH);
-		assertArrayEquals((double[]) dataset.getData(), REFERENCE_DOUBLE_DATA);
+		assertThat((double[]) dataset.getData(), is(equalTo(REFERENCE_DOUBLE_DATA)));
 	}
 
 }
