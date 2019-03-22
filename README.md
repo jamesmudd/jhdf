@@ -1,5 +1,5 @@
 # jHDF - Pure Java HDF5 library
-[![Build Status](https://dev.azure.com/jamesmudd/jhdf/_apis/build/status/jhdf-CI)](https://dev.azure.com/jamesmudd/jhdf/_build/latest?definitionId=3) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jamesmudd_jhdf&metric=alert_status)](https://sonarcloud.io/dashboard?id=jamesmudd_jhdf) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jamesmudd_jhdf&metric=coverage)](https://sonarcloud.io/dashboard?id=jamesmudd_jhdf) [ ![Download](https://api.bintray.com/packages/jamesmudd/jhdf/jhdf/images/download.svg) ](https://bintray.com/jamesmudd/jhdf/jhdf/_latestVersion) [![Maven Central](https://img.shields.io/maven-central/v/io.jhdf/jhdf.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.jhdf%22%20AND%20a:%22jhdf%22) [![Javadocs](http://javadoc.io/badge/io.jhdf/jhdf.svg)](http://javadoc.io/doc/io.jhdf/jhdf)
+[![Build Status](https://dev.azure.com/jamesmudd/jhdf/_apis/build/status/jhdf-CI?branchName=master)](https://dev.azure.com/jamesmudd/jhdf/_build/latest?definitionId=3&branchName=master) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jamesmudd_jhdf&metric=alert_status)](https://sonarcloud.io/dashboard?id=jamesmudd_jhdf) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jamesmudd_jhdf&metric=coverage)](https://sonarcloud.io/dashboard?id=jamesmudd_jhdf) [ ![Download](https://api.bintray.com/packages/jamesmudd/jhdf/jhdf/images/download.svg) ](https://bintray.com/jamesmudd/jhdf/jhdf/_latestVersion) [![Maven Central](https://img.shields.io/maven-central/v/io.jhdf/jhdf.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.jhdf%22%20AND%20a:%22jhdf%22) [![Javadocs](http://javadoc.io/badge/io.jhdf/jhdf.svg)](http://javadoc.io/doc/io.jhdf/jhdf)
 
 This is a hobby project for me to see if I can write a loader for HDF5 files. The file format specification is available from the HDF Group [here](https://support.hdfgroup.org/HDF5/doc/H5.format.html). More information on the format is available on [Wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format)
 
@@ -17,3 +17,11 @@ try (HdfFile hdfFile = new HdfFile(file)) {
 ```
 
 For an example of traversing the tree inside a HDF5 file see [PrintTree.java](jhdf/src/main/java/io/jhdf/examples/PrintTree.java)
+
+## Developing jHDF
+- Clone this repository.
+- Inside the `jhdf` directory run `./gradlew build` (`./gradlew.bat build` on Windows) this will run the build and tests fetching dependencies. 
+- To prepare the project for an IDE run `./gradlew eclipse` for Eclipse, or `./gradlew idea` for IntelliJ. This should create the necessary project files for the project to be imported and setup in the IDE.
+- Once you have made any changes please open a pull request.
+
+To see other available Gradle tasks run `./gradlew tasks` 
