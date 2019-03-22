@@ -20,7 +20,13 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Link;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
+import io.jhdf.exceptions.HdfException;
 
+/**
+ * Base class for {@link Link} implementations.
+ * 
+ * @author James Mudd
+ */
 public abstract class AbstractLink implements Link {
 
 	protected final String name;
@@ -85,6 +91,16 @@ public abstract class AbstractLink implements Link {
 	@Override
 	public long getAddress() {
 		return getTarget().getAddress();
+	}
+
+	@Override
+	public boolean isBrokenLink() {
+		try {
+			getTarget(); // Attempt to resolve the link
+			return false; // Didn't throw so link isn't broken
+		} catch (HdfException e) {
+			return true; // Resolving the link failed so its broken
+		}
 	}
 
 }

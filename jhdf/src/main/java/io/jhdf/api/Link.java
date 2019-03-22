@@ -9,12 +9,22 @@
  ******************************************************************************/
 package io.jhdf.api;
 
+import io.jhdf.exceptions.HdfBrokenLinkException;
+
+/**
+ * HDF5 links interface. Used for soft (symbolic) links and external links
+ * 
+ * @author James Mudd
+ */
 public interface Link extends Node {
 
 	/**
-	 * Resolves the link and returns the {@link Node} the link points to.
+	 * Resolves the link and returns the {@link Node} the link points to. If
+	 * {@link #isBrokenLink()} returns <code>true</code> calling this method will
+	 * throw.
 	 * 
 	 * @return the {@link Node} this link points to
+	 * @throws HdfBrokenLinkException if the link is broken
 	 */
 	Node getTarget();
 
@@ -25,5 +35,12 @@ public interface Link extends Node {
 	 * @return the path this link points to
 	 */
 	String getTargetPath();
+
+	/**
+	 * Checks if the link is valid i.e can be resolved.
+	 * 
+	 * @return <code>true</code> if the link is broken (i.e. cannot be resolved)
+	 */
+	boolean isBrokenLink();
 
 }

@@ -267,8 +267,8 @@ public class GroupImpl extends AbstractNode implements Group {
 		// to pass down.
 		final String[] pathElements = path.split(Constants.PATH_SEPERATOR, 2);
 		final Node child = getChild(pathElements[0]);
-		if (pathElements.length == 1) {
-			// There is no remaing path to resolve so we have the result
+		if (pathElements.length == 1 && child != null) {
+			// There is no remaining path to resolve so we have the result
 			return child;
 		} else if (child instanceof Group) {
 			// The next level is also a group so try to keep resolving the remaining path
@@ -287,7 +287,6 @@ public class GroupImpl extends AbstractNode implements Group {
 			return (Dataset) node;
 		} else {
 			throw new HdfInvalidPathException(getPath() + path, getFile());
-
 		}
 	}
 
