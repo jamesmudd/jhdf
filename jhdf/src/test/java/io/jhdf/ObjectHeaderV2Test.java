@@ -29,7 +29,7 @@ import io.jhdf.ObjectHeader.ObjectHeaderV2;
 public class ObjectHeaderV2Test {
 
 	/** This will need to be updated each time the test files are regenerated */
-	private static final long TIMESTAMP = 1548609278L;
+	private static final long TIMESTAMP = 1553279213L;
 
 	private HdfFileChannel hdfFc;
 

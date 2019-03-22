@@ -33,8 +33,11 @@ def write_to_file(f, data):
     links_group = f.create_group('links_group')
     links_group['hard_link_to_int8'] = int_group['int8']
     links_group['soft_link_to_int8'] = h5py.SoftLink('/datasets_group/int/int8')
+    links_group['broken_soft_link'] = h5py.SoftLink('/datasets_group/int/missing_dataset')
+    links_group['soft_link_to_group'] = h5py.SoftLink('/datasets_group/int')
     # Define the external link path relative to this file, to ease testing
     links_group['external_link'] = h5py.ExternalLink('test_file_ext.hdf5', '/external_dataset')
+    links_group['external_link_to_missing_file'] = h5py.ExternalLink('missing_file.hdf5', '/external_dataset')
     
     multiDimensionDatasets = f.create_group('nD_Datasets');
     multiDimensionDatasets.create_dataset('3D_float32', data=data_3d, dtype='f4')
