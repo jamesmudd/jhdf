@@ -12,7 +12,6 @@ package io.jhdf.object.message;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
-import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 
@@ -28,7 +27,7 @@ public class FillValueMessage extends Message {
 	private final boolean fillValueDefined;
 	private final ByteBuffer fillValue;
 
-	/* package */ FillValueMessage(ByteBuffer bb, Superblock sb, BitSet messageFlags) {
+	/* package */ FillValueMessage(ByteBuffer bb, BitSet messageFlags) {
 		super(messageFlags);
 
 		version = bb.get();

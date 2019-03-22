@@ -49,8 +49,9 @@ import io.jhdf.object.datatype.StringData;
  * 
  * @author James Mudd
  */
-public class DatasetReader {
+public final class DatasetReader {
 
+	/** No instances */
 	private DatasetReader() {
 	}
 

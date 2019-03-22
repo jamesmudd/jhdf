@@ -62,7 +62,6 @@ public class HdfFileTest {
 			assertThat(hdfFile.size(), is(equalTo(file.length())));
 			assertThat(hdfFile.getAddress(), is(equalTo(96L)));
 
-			// TODO Add a test file with an actual header and read it.
 			hdfFile.getUserBlockBuffer();
 		}
 	}

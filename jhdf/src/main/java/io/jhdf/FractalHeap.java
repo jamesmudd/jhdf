@@ -17,7 +17,6 @@ import static io.jhdf.Utils.readBytesAsUnsignedInt;
 import static io.jhdf.Utils.readBytesAsUnsignedLong;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -236,7 +235,7 @@ public class FractalHeap {
 		private final List<Long> childBlockAddresses;
 		private final long blockOffset;
 
-		private IndirectBlock(long address) throws IOException {
+		private IndirectBlock(long address) {
 			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset
 					+ currentRowsInRootIndirectBlock * tableWidth * getRowSize() + 4;
 
@@ -300,7 +299,7 @@ public class FractalHeap {
 		private final ByteBuffer data;
 		private final long blockOffset;
 
-		private DirectBlock(long address) throws IOException {
+		private DirectBlock(long address) {
 			this.address = address;
 
 			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset + 4;
