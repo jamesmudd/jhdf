@@ -93,7 +93,7 @@ public class Message {
 		case 4: // 0x0004
 			return new FillValueOldMessage(bb, flags);
 		case 5: // 0x0005
-			return new FillValueMessage(bb, sb, flags);
+			return new FillValueMessage(bb, flags);
 		case 6: // 0x0006
 			return new LinkMessage(bb, sb, flags);
 		case 8: // 0x0008

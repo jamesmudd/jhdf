@@ -34,8 +34,12 @@ public class BTreeV2<T extends BTreeRecord> {
 	private final long address;
 	/** Type of node. */
 	private final short nodeType;
-
+	/** The actial records in this b-tree */
 	private final List<T> records;
+	/** bytes in each node */
+	private final int nodeSize;
+	/** bytes in each record */
+	private final int recordSize;
 
 	public List<T> getRecords() {
 		return records;
@@ -61,8 +65,8 @@ public class BTreeV2<T extends BTreeRecord> {
 			}
 
 			nodeType = bb.get();
-			final int nodeSize = Utils.readBytesAsUnsignedInt(bb, 4);
-			final int recordSize = Utils.readBytesAsUnsignedInt(bb, 2);
+			nodeSize = Utils.readBytesAsUnsignedInt(bb, 4);
+			recordSize = Utils.readBytesAsUnsignedInt(bb, 2);
 			final int depth = Utils.readBytesAsUnsignedInt(bb, 2);
 
 			final int splitPercent = Utils.readBytesAsUnsignedInt(bb, 1);
@@ -77,8 +81,7 @@ public class BTreeV2<T extends BTreeRecord> {
 
 			records = new ArrayList<>(totalNumberOfRecordsInTree);
 
-			readRecords(hdfFc, rootNodeAddress, nodeSize, recordSize, depth, numberOfRecordsInRoot,
-					totalNumberOfRecordsInTree, records);
+			readRecords(hdfFc, rootNodeAddress, depth, numberOfRecordsInRoot, totalNumberOfRecordsInTree);
 
 		} catch (HdfException e) {
 			throw new HdfException("Error reading B Tree node", e);
@@ -86,8 +89,7 @@ public class BTreeV2<T extends BTreeRecord> {
 
 	}
 
-	private void readRecords(HdfFileChannel hdfFc, long address, int nodeSize, int recordSize, int depth,
-			int numberOfRecords, int totalRecords, List<T> records) {
+	private void readRecords(HdfFileChannel hdfFc, long address, int depth, int numberOfRecords, int totalRecords) {
 
 		ByteBuffer bb = hdfFc.readBufferFromAddress(address, nodeSize);
 
@@ -127,8 +129,7 @@ public class BTreeV2<T extends BTreeRecord> {
 				} else {
 					totalNumberOfChildRecords = -1;
 				}
-				readRecords(hdfFc, childAddress, nodeSize, recordSize, depth - 1, numberOfChildRecords,
-						totalNumberOfChildRecords, records);
+				readRecords(hdfFc, childAddress, depth - 1, numberOfChildRecords, totalNumberOfChildRecords);
 			}
 		}
 		// TODO Checksum
