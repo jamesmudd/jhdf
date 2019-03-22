@@ -15,8 +15,14 @@ import org.apache.commons.lang3.concurrent.LazyInitializer;
 import io.jhdf.api.Group;
 import io.jhdf.api.Link;
 import io.jhdf.api.Node;
+import io.jhdf.exceptions.HdfBrokenLinkException;
 import io.jhdf.exceptions.HdfException;
 
+/**
+ * Soft (symbolic) link to another {@link Node} in the HDF5 file.
+ * 
+ * @author James Mudd
+ */
 public class SoftLink extends AbstractLink implements Link {
 
 	private final String target;
@@ -40,7 +46,8 @@ public class SoftLink extends AbstractLink implements Link {
 		try {
 			return targetNode.get();
 		} catch (ConcurrentException | HdfException e) {
-			throw new HdfException("Could not resolve link target '" + target + "' from link '" + getPath() + "'", e);
+			throw new HdfBrokenLinkException(
+					"Could not resolve link target '" + target + "' from link '" + getPath() + "'", e);
 		}
 	}
 

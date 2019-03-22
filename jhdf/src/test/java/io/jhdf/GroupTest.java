@@ -90,8 +90,7 @@ public class GroupTest {
 	@Test
 	void testGetByPathWithInvalidPathReturnsNull() {
 		Group group = GroupImpl.createGroup(hdfFc, 800, DATASETS_GROUP, rootGroup);
-		assertThat(group.getByPath("float/missing_node"), is(nullValue()));
-
+		assertThrows(HdfInvalidPathException.class, () -> group.getByPath("float/missing_node"));
 	}
 
 	@Test

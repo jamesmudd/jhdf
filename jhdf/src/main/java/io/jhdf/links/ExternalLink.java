@@ -19,12 +19,19 @@ import io.jhdf.HdfFile;
 import io.jhdf.api.Group;
 import io.jhdf.api.Link;
 import io.jhdf.api.Node;
+import io.jhdf.exceptions.HdfBrokenLinkException;
 import io.jhdf.exceptions.HdfException;
 
+/**
+ * Link to a {@link Node} in an external HDF5 file. The link is made of both a
+ * target HDF5 file and a target path to a {@link Node} within the target file.
+ * 
+ * @author James Mudd
+ */
 public class ExternalLink extends AbstractLink implements Link {
 
-	final String targetFile;
-	final String targetPath;
+	private final String targetFile;
+	private final String targetPath;
 
 	public ExternalLink(String targetFile, String targetPath, String name, Group parent) {
 		super(name, parent);
@@ -61,8 +68,10 @@ public class ExternalLink extends AbstractLink implements Link {
 		try {
 			return targetNode.get();
 		} catch (ConcurrentException | HdfException e) {
-			throw new HdfException("Could not resolve link target '" + targetPath + "' in external file '" + targetFile
-					+ "' from link '" + getPath() + "'", e);
+			throw new HdfBrokenLinkException(
+					"Could not resolve link target '" + targetPath + "' in external file '" + targetFile
+							+ "' from link '" + getPath() + "'",
+					e);
 		}
 	}
 

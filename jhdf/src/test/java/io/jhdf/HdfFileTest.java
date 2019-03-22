@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
+import io.jhdf.api.Link;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
@@ -138,6 +139,16 @@ public class HdfFileTest {
 
 	private void recurseGroup(Group group) {
 		for (Node node : group) {
+			if (node instanceof Link) {
+				Link link = (Link) node;
+				// Check for broken links and skip
+				if (((Link) node).isBrokenLink()) {
+					continue;
+				} else { // Resolve the link at check that
+					node = link.getTarget();
+				}
+			}
+
 			assertThat(node.getName(), not(isEmptyString()));
 			assertThat(node.getAddress(), is(greaterThan(1L)));
 			assertThat(node.getParent(), is(notNullValue()));
