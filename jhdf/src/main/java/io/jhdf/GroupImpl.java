@@ -33,6 +33,7 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
 import io.jhdf.links.ExternalLink;
 import io.jhdf.links.SoftLink;
+import io.jhdf.object.message.DataLayoutMessage;
 import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
@@ -125,11 +126,18 @@ public class GroupImpl extends AbstractNode implements Group {
 					String childName = readName(nameBuffer, ste.getLinkNameOffset());
 					final Node node;
 					switch (ste.getCacheType()) {
-					case 0: // Dataset
-						logger.trace("Creating dataset '{}'", childName);
-						node = DatasetLoader.createDataset(hdfFc, ste.getObjectHeaderAddress(), childName, parent);
+					case 0: // No cache
+						// Not cached so need to look at header
+						ObjectHeader header = ObjectHeader.readObjectHeader(hdfFc, ste.getObjectHeaderAddress());
+						if (header.hasMessageOfType(DataLayoutMessage.class)) {
+							logger.trace("Creating dataset '{}'", childName);
+							node = DatasetLoader.createDataset(hdfFc, ste.getObjectHeaderAddress(), childName, parent);
+						} else {
+							logger.trace("Creating group '{}'", childName);
+							node = createGroup(hdfFc, ste.getObjectHeaderAddress(), childName, parent);
+						}
 						break;
-					case 1: // Group
+					case 1: // Cached group
 						logger.trace("Creating group '{}'", childName);
 						node = createGroup(hdfFc, ste.getObjectHeaderAddress(), childName, parent);
 						break;
