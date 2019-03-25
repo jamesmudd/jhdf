@@ -258,4 +258,9 @@ public class HdfFile implements Group, AutoCloseable {
 		return rootGroup.isAttributeCreationOrderTracked();
 	}
 
+	@Override
+	public boolean isLinkCreationOrderTracked() {
+		return rootGroup.isLinkCreationOrderTracked();
+	}
+
 }

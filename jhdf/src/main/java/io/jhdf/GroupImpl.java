@@ -290,4 +290,16 @@ public class GroupImpl extends AbstractNode implements Group {
 		}
 	}
 
+	@Override
+	public boolean isLinkCreationOrderTracked() {
+		ObjectHeader oh = getHeader();
+		if (oh.hasMessageOfType(LinkInfoMessage.class)) {
+			// New style, supports link creation tracking but might not be enabled
+			return oh.getMessageOfType(LinkInfoMessage.class).isLinkCreationOrderTracked();
+		} else {
+			// Old style no support for link tracking
+			return false;
+		}
+	}
+
 }

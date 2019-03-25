@@ -58,4 +58,12 @@ public interface Group extends Node, Iterable<Node> {
 	 */
 	Dataset getDatasetByPath(String path);
 
+	/**
+	 * If <code>true</code> the insertion order of links into this {@link Group} is
+	 * tracked (recorded) in the file.
+	 * 
+	 * @return <code>true</code> if link creation order is tracked,
+	 *         <code>false</code> otherwise
+	 */
+	boolean isLinkCreationOrderTracked();
 }
