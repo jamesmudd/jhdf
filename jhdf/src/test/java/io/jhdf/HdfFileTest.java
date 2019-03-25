@@ -241,4 +241,13 @@ public class HdfFileTest {
 		}
 	}
 
+	@Test
+	void testAttributes() {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.isAttributeCreationOrderTracked(), is(false));
+			assertThat(hdfFile.getAttributes().isEmpty(), is(true));
+			assertThat(hdfFile.getAttribute("missing"), is(nullValue()));
+		}
+	}
+
 }

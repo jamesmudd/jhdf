@@ -57,6 +57,7 @@ class LinksTest {
 			assertThat(softLink.getParent(), is(sameInstance(hdfFile.getByPath("/links_group"))));
 			assertThat(softLink.getAttributes(), isA(Map.class));
 			assertThat(softLink.getAttribute("missing_attribute"), is(nullValue()));
+			assertThat(softLink.isAttributeCreationOrderTracked(), is(false));
 		}
 	}
 

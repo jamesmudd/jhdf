@@ -53,6 +53,8 @@ public class ObjectHeaderV2Test {
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(48L)));
 		assertThat(oh.getMessages().size(), is(equalTo(6)));
+		assertThat(oh.isAttributeCreationOrderIndexed(), is(false));
+		assertThat(oh.isAttributeCreationOrderTracked(), is(false));
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
@@ -71,6 +73,8 @@ public class ObjectHeaderV2Test {
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(195L)));
 		assertThat(oh.getMessages().size(), is(equalTo(9)));
+		assertThat(oh.isAttributeCreationOrderIndexed(), is(false));
+		assertThat(oh.isAttributeCreationOrderTracked(), is(false));
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
@@ -89,6 +93,8 @@ public class ObjectHeaderV2Test {
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(608L)));
 		assertThat(oh.getMessages().size(), is(equalTo(5)));
+		assertThat(oh.isAttributeCreationOrderIndexed(), is(false));
+		assertThat(oh.isAttributeCreationOrderTracked(), is(false));
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
@@ -107,6 +113,8 @@ public class ObjectHeaderV2Test {
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(892L)));
 		assertThat(oh.getMessages().size(), is(equalTo(5)));
+		assertThat(oh.isAttributeCreationOrderIndexed(), is(false));
+		assertThat(oh.isAttributeCreationOrderTracked(), is(false));
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
@@ -125,6 +133,8 @@ public class ObjectHeaderV2Test {
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(1176L)));
 		assertThat(oh.getMessages().size(), is(equalTo(6)));
+		assertThat(oh.isAttributeCreationOrderIndexed(), is(false));
+		assertThat(oh.isAttributeCreationOrderTracked(), is(false));
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;
@@ -143,6 +153,8 @@ public class ObjectHeaderV2Test {
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(1655L)));
 		assertThat(oh.getMessages().size(), is(equalTo(5)));
+		assertThat(oh.isAttributeCreationOrderIndexed(), is(false));
+		assertThat(oh.isAttributeCreationOrderTracked(), is(false));
 
 		// V2 specific methods
 		ObjectHeaderV2 ohV2 = (ObjectHeaderV2) oh;

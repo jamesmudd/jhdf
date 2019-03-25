@@ -23,6 +23,7 @@ import java.util.Collection;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
@@ -420,4 +421,18 @@ public class AttributesTest {
 		}
 	}
 
+	@Test
+	void testAttributeCreationOrderTrackingEarliest() {
+		// Earliest doesn't support attribute tracking
+		assertThat(earliestHdfFile.getByPath(DATASET_PATH).isAttributeCreationOrderTracked(), is(false));
+		assertThat(earliestHdfFile.getByPath(SOFT_LINK_PATH).isAttributeCreationOrderTracked(), is(false));
+		assertThat(earliestHdfFile.isAttributeCreationOrderTracked(), is(false));
+	}
+
+	@Test
+	void testAttributeCreationOrderTrackingLatest() {
+		assertThat(latestHdfFile.getByPath(DATASET_PATH).isAttributeCreationOrderTracked(), is(false));
+		assertThat(latestHdfFile.getByPath(SOFT_LINK_PATH).isAttributeCreationOrderTracked(), is(false));
+		assertThat(latestHdfFile.isAttributeCreationOrderTracked(), is(false));
+	}
 }
