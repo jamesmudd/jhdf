@@ -42,6 +42,10 @@ public abstract class ObjectHeader {
 
 	public abstract int getVersion();
 
+	public abstract boolean isAttributeCreationOrderTracked();
+
+	public abstract boolean isAttributeCreationOrderIndexed();
+
 	public List<Message> getMessages() {
 		return messages;
 	}
@@ -140,6 +144,16 @@ public abstract class ObjectHeader {
 			return referenceCount;
 		}
 
+		@Override
+		public boolean isAttributeCreationOrderTracked() {
+			return false; // Not supported in v1 headers
+		}
+
+		@Override
+		public boolean isAttributeCreationOrderIndexed() {
+			return false; // Not supported in v1 headers
+		}
+
 	}
 
 	/**
@@ -170,6 +184,7 @@ public abstract class ObjectHeader {
 
 		private final int maximumNumberOfCompactAttributes;
 		private final int maximumNumberOfDenseAttributes;
+		private final BitSet flags;
 
 		private ObjectHeaderV2(HdfFileChannel hdfFc, long address) {
 			super(address);
@@ -194,8 +209,7 @@ public abstract class ObjectHeader {
 				}
 
 				// Flags
-				byte[] flagsBytes = new byte[] { bb.get() };
-				BitSet flags = BitSet.valueOf(flagsBytes);
+				flags = BitSet.valueOf(new byte[] { bb.get() });
 
 				// Size of chunk 0
 				if (flags.get(1)) {
@@ -309,6 +323,16 @@ public abstract class ObjectHeader {
 
 		public int getMaximumNumberOfDenseAttributes() {
 			return maximumNumberOfDenseAttributes;
+		}
+
+		@Override
+		public boolean isAttributeCreationOrderTracked() {
+			return flags.get(ATTRIBUTE_CREATION_ORDER_TRACKED);
+		}
+
+		@Override
+		public boolean isAttributeCreationOrderIndexed() {
+			return flags.get(ATTRIBUTE_CREATION_ORDER_INDEXED);
 		}
 
 	}

@@ -106,4 +106,12 @@ public interface Node {
 	 */
 	boolean isLink();
 
+	/**
+	 * If <code>true</code> the insertion order of attributes is tracked (recorded)
+	 * in the file.
+	 * 
+	 * @return <code>true</code> if attribute creation order is tracked.
+	 */
+	boolean isAttributeCreationOrderTracked();
+
 }

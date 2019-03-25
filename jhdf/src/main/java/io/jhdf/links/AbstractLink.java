@@ -103,4 +103,9 @@ public abstract class AbstractLink implements Link {
 		}
 	}
 
+	@Override
+	public boolean isAttributeCreationOrderTracked() {
+		return getTarget().isAttributeCreationOrderTracked();
+	}
+
 }

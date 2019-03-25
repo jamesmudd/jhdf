@@ -25,13 +25,13 @@ public class LinkInfoMessage extends Message {
 	private final long fractalHeapAddress;
 	private final long bTreeNameIndexAddress;
 	private final long bTreeCreationOrderIndexAddress;
+	private final BitSet flags;
 
 	/* package */ LinkInfoMessage(ByteBuffer bb, Superblock sb, BitSet messageFlags) {
 		super(messageFlags);
 
 		version = bb.get();
-		byte[] flagsBytes = new byte[] { bb.get() };
-		BitSet flags = BitSet.valueOf(flagsBytes);
+		flags = BitSet.valueOf(new byte[] { bb.get() });
 
 		if (flags.get(CREATION_ORDER_TRACKED)) {
 			maximumCreationIndex = Utils.readBytesAsUnsignedLong(bb, 8);
@@ -68,5 +68,9 @@ public class LinkInfoMessage extends Message {
 
 	public long getbTreeCreationOrderIndexAddress() {
 		return bTreeCreationOrderIndexAddress;
+	}
+
+	public boolean isLinkCreationOrderTracked() {
+		return flags.get(CREATION_ORDER_TRACKED);
 	}
 }

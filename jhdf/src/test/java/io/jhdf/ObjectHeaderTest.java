@@ -58,6 +58,8 @@ public class ObjectHeaderTest {
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(800L)));
 		assertThat(oh.getMessages().size(), is(equalTo(7)));
+		assertThat(oh.isAttributeCreationOrderIndexed(), is(false));
+		assertThat(oh.isAttributeCreationOrderTracked(), is(false));
 
 		// V1 specific methods
 		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
@@ -71,6 +73,8 @@ public class ObjectHeaderTest {
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(7272L)));
 		assertThat(oh.getMessages().size(), is(equalTo(6)));
+		assertThat(oh.isAttributeCreationOrderIndexed(), is(false));
+		assertThat(oh.isAttributeCreationOrderTracked(), is(false));
 
 		// V1 specific methods
 		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
@@ -84,6 +88,8 @@ public class ObjectHeaderTest {
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(7872L)));
 		assertThat(oh.getMessages().size(), is(equalTo(7)));
+		assertThat(oh.isAttributeCreationOrderIndexed(), is(false));
+		assertThat(oh.isAttributeCreationOrderTracked(), is(false));
 
 		// V1 specific methods
 		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
@@ -97,6 +103,8 @@ public class ObjectHeaderTest {
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(10904L)));
 		assertThat(oh.getMessages().size(), is(equalTo(6)));
+		assertThat(oh.isAttributeCreationOrderIndexed(), is(false));
+		assertThat(oh.isAttributeCreationOrderTracked(), is(false));
 
 		// V1 specific methods
 		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;

@@ -140,7 +140,7 @@ public class Message {
 		return flags.get(MESSAGE_SHOULD_NOT_BE_SHARED);
 	}
 
-	public boolean isFailOnUnknownTypeWirhWrite() {
+	public boolean isFailOnUnknownTypeWithWrite() {
 		return flags.get(FAIL_ON_UNKNOWN_MESSAGE_TYPE_WITH_WRITE);
 	}
 

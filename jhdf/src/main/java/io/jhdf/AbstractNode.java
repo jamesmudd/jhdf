@@ -146,12 +146,7 @@ public abstract class AbstractNode implements Node {
 	}
 
 	protected <T extends Message> T getHeaderMessage(Class<T> clazz) {
-		try {
-			return header.get().getMessageOfType(clazz);
-		} catch (ConcurrentException e) {
-			throw new HdfException("Failed to get header message of type '" + clazz.hashCode() + "' for '"
-					+ getPath() + "' at address '" + getAddress() + "'", e);
-		}
+		return getHeader().getMessageOfType(clazz);
 	}
 
 	@Override
@@ -167,5 +162,19 @@ public abstract class AbstractNode implements Node {
 	@Override
 	public Attribute getAttribute(String name) {
 		return getAttributes().get(name);
+	}
+
+	@Override
+	public boolean isAttributeCreationOrderTracked() {
+		return getHeader().isAttributeCreationOrderTracked();
+	}
+
+	public ObjectHeader getHeader() {
+		try {
+			return header.get();
+		} catch (ConcurrentException e) {
+			throw new HdfException("Failed reading header for '" + getPath() + "' at address '" + getAddress() + "'",
+					e);
+		}
 	}
 }
