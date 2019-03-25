@@ -129,8 +129,8 @@ public abstract class Superblock {
 				versionOfSuperblock = header.get();
 				logger.trace("Version of superblock is = {}", versionOfSuperblock);
 
-				if (versionOfSuperblock != 0) {
-					throw new HdfException("Only superblock version 0 is currently supported");
+				if (versionOfSuperblock != 0 && versionOfSuperblock != 1) {
+					throw new HdfException("Detected superblock version not 0 or 1");
 				}
 
 				// Version # of File Free-space Storage
@@ -171,7 +171,11 @@ public abstract class Superblock {
 				// File Consistency Flags (skip)
 				address += 4;
 
-				// TODO for version 1 Indexed Storage Internal Node K
+				// Version 1
+				if (versionOfSuperblock == 1) {
+					// Skip Indexed Storage Internal Node K and zeros
+					address += 4;
+				}
 
 				int nextSectionSize = 4 * sizeOfOffsets;
 				header = ByteBuffer.allocate(nextSectionSize);
