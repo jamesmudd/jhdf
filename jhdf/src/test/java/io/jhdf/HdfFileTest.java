@@ -250,4 +250,11 @@ public class HdfFileTest {
 		}
 	}
 
+	@Test
+	void testLinkCreationOrdered() throws Exception {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			assertThat(hdfFile.isLinkCreationOrderTracked(), is(false));
+		}
+	}
+
 }
