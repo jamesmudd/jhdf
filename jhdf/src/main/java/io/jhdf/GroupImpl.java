@@ -131,7 +131,7 @@ public class GroupImpl extends AbstractNode implements Group {
 						ObjectHeader header = ObjectHeader.readObjectHeader(hdfFc, ste.getObjectHeaderAddress());
 						if (header.hasMessageOfType(DataLayoutMessage.class)) {
 							logger.trace("Creating dataset '{}'", childName);
-							node = DatasetLoader.createDataset(hdfFc, ste.getObjectHeaderAddress(), childName, parent);
+							node = DatasetLoader.createDataset(hdfFc, header, childName, parent);
 						} else {
 							logger.trace("Creating group '{}'", childName);
 							node = createGroup(hdfFc, ste.getObjectHeaderAddress(), childName, parent);
@@ -157,11 +157,11 @@ public class GroupImpl extends AbstractNode implements Group {
 		}
 
 		private Node createNode(String name, long address) {
-			ObjectHeader linkHeader = ObjectHeader.readObjectHeader(hdfFc, address);
+			final ObjectHeader linkHeader = ObjectHeader.readObjectHeader(hdfFc, address);
 			final Node node;
 			if (linkHeader.hasMessageOfType(DataSpaceMessage.class)) {
 				// Its a a Dataset
-				node = DatasetLoader.createDataset(hdfFc, address, name, parent);
+				node = DatasetLoader.createDataset(hdfFc, linkHeader, name, parent);
 			} else {
 				// Its a group
 				node = createGroup(hdfFc, address, name, parent);
