@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.LongStream;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
@@ -156,9 +156,9 @@ public class ChunkedDatasetV3 extends DatasetBase {
 	}
 
 	private int getChunkSizeInBytes() {
-		return Math.toIntExact(
-				LongStream.of(layoutMessage.getChunkDimensions()).reduce(1, Math::multiplyExact)
-						* layoutMessage.getSize());
+		return IntStream.of(layoutMessage.getChunkDimensions())
+				.reduce(1, Math::multiplyExact)
+				* layoutMessage.getSize();
 	}
 
 	private ByteBuffer getDataBuffer(Chunk chunk) {
@@ -180,7 +180,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
 		return dimIndex;
 	}
 
-	private int dimensionIndexToLinearIndex(int[] index, long[] dimensions) {
+	private int dimensionIndexToLinearIndex(int[] index, int[] dimensions) {
 		int linear = 0;
 		for (int i = 0; i < dimensions.length; i++) {
 			int temp = index[i];

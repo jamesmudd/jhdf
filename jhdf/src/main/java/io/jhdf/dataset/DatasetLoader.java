@@ -27,12 +27,12 @@ public final class DatasetLoader {
 		// No instances
 	}
 
-	public static Dataset createDataset(HdfFileChannel hdfFc, long address, String name,
+	public static Dataset createDataset(HdfFileChannel hdfFc, ObjectHeader oh, String name,
 			Group parent) {
 
+		final long address = oh.getAddress();
 		try {
-			// Load the object header to determine the type of dataset to make
-			final ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, address);
+			// Determine the type of dataset to make
 			final DataLayoutMessage dlm = oh.getMessageOfType(DataLayoutMessage.class);
 
 			if (dlm instanceof CompactDataLayoutMessage) {

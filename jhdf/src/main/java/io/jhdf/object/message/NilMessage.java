@@ -12,12 +12,25 @@ package io.jhdf.object.message;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
+/**
+ * <p>
+ * Nil (Null) Message
+ * </p>
+ * 
+ * <p>
+ * <a href=
+ * "https://support.hdfgroup.org/HDF5/doc/H5.format.html#NILMessage">Format
+ * Spec</a>
+ * </p>
+ * 
+ * @author James Mudd
+ */
 public class NilMessage extends Message {
 
 	/* package */ NilMessage(ByteBuffer bb, BitSet flags) {
 		super(flags);
 		// Move buffer to the end
-		bb.position(bb.capacity());
+		bb.position(bb.limit());
 	}
 
 }
