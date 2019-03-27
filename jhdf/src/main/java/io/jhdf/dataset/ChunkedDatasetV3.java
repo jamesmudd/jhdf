@@ -150,7 +150,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
 	private Chunk getChunk(ChunkOffsetKey key) {
 		try {
 			return chunkLookup.get().get(key);
-		} catch (ConcurrentException e) {
+		} catch (Exception e) {
 			throw new HdfException("Failed to create chunk lookup for '" + getPath() + "'");
 		}
 	}
