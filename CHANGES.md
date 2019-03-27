@@ -2,6 +2,18 @@
 
 Please note this project is still in pre-release development.
 
+## v0.4.1
+- Add support for broken links
+- #70 Add support for attribute and link creation order tracking
+- Allow superblock v1 files to be loaded
+- Improve exceptions thrown when lazy loading fails
+- Fix bug to allow non-cached groups to be loaded
+- Improvement to documentation
+- Update Gradle
+- Update test dependencies
+- Code base cleanup
+- Improvements to CI builds and PR validation
+
 ## v0.4.0
 - Add support for accessing attributes (see [Attribute.java](jhdf/src/main/java/io/jhdf/api/Attribute.java))
 - Add support for scalar datasets
