@@ -20,7 +20,6 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Link;
 import io.jhdf.api.Node;
 import io.jhdf.exceptions.HdfBrokenLinkException;
-import io.jhdf.exceptions.HdfException;
 
 /**
  * Link to a {@link Node} in an external HDF5 file. The link is made of both a
@@ -67,7 +66,7 @@ public class ExternalLink extends AbstractLink implements Link {
 	public Node getTarget() {
 		try {
 			return targetNode.get();
-		} catch (ConcurrentException | HdfException e) {
+		} catch (Exception e) {
 			throw new HdfBrokenLinkException(
 					"Could not resolve link target '" + targetPath + "' in external file '" + targetFile
 							+ "' from link '" + getPath() + "'",

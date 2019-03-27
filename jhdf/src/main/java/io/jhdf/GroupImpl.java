@@ -233,9 +233,9 @@ public class GroupImpl extends AbstractNode implements Group {
 	public Map<String, Node> getChildren() {
 		try {
 			return children.get();
-		} catch (ConcurrentException e) {
+		} catch (Exception e) {
 			throw new HdfException(
-					"Failed to load chirdren for group '" + getPath() + "' at address '" + getAddress() + "'", e);
+					"Failed to load children for group '" + getPath() + "' at address '" + getAddress() + "'", e);
 		}
 	}
 
@@ -263,9 +263,9 @@ public class GroupImpl extends AbstractNode implements Group {
 	public Node getChild(String name) {
 		try {
 			return children.get().get(name);
-		} catch (ConcurrentException e) {
+		} catch (Exception e) {
 			throw new HdfException(
-					"Failed to load childen of group '" + getPath() + "' at address '" + getAddress() + "'", e);
+					"Failed to load children of group '" + getPath() + "' at address '" + getAddress() + "'", e);
 		}
 	}
 

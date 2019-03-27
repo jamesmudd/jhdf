@@ -153,7 +153,7 @@ public abstract class AbstractNode implements Node {
 	public Map<String, Attribute> getAttributes() {
 		try {
 			return attributes.get();
-		} catch (ConcurrentException e) {
+		} catch (Exception e) {
 			throw new HdfException(
 					"Failed to load attributes for '" + getPath() + "' at address '" + getAddress() + "'", e);
 		}
@@ -172,7 +172,7 @@ public abstract class AbstractNode implements Node {
 	public ObjectHeader getHeader() {
 		try {
 			return header.get();
-		} catch (ConcurrentException e) {
+		} catch (Exception e) {
 			throw new HdfException("Failed reading header for '" + getPath() + "' at address '" + getAddress() + "'",
 					e);
 		}
