@@ -33,6 +33,8 @@ import io.jhdf.exceptions.UnsupportedHdfException;
  */
 public class FilterPipelineMessage extends Message {
 
+	private static final int OPTIONAL = 0;
+
 	private final byte version;
 	private final List<Filter> filters;
 
@@ -66,9 +68,9 @@ public class FilterPipelineMessage extends Message {
 				nameLength = Utils.readBytesAsUnsignedInt(bb, 2);
 			}
 
-			// 2 bytes of flags
-			BitSet flags = BitSet.valueOf(new byte[] { bb.get(), bb.get() });
-			final boolean optional = flags.get(0);
+			// 2 bytes of optional
+			final BitSet flags = BitSet.valueOf(new byte[] { bb.get(), bb.get() });
+			final boolean optional = flags.get(OPTIONAL);
 
 			final int numberOfDataValues = Utils.readBytesAsUnsignedInt(bb, 2);
 
@@ -89,7 +91,7 @@ public class FilterPipelineMessage extends Message {
 				bb.position(bb.position() + 4);
 			}
 
-			filters.add(new Filter(filterId, name, flags, data));
+			filters.add(new Filter(filterId, name, optional, data));
 		}
 
 	}
@@ -102,13 +104,13 @@ public class FilterPipelineMessage extends Message {
 
 		private final int id;
 		private final String name;
-		private final BitSet flags;
+		private final boolean optional;
 		private final int[] data;
 
-		public Filter(int id, String name, BitSet flags, int[] data) {
+		public Filter(int id, String name, boolean optional, int[] data) {
 			this.id = id;
 			this.name = name;
-			this.flags = flags;
+			this.optional = optional;
 			this.data = data;
 		}
 
@@ -120,8 +122,8 @@ public class FilterPipelineMessage extends Message {
 			return name;
 		}
 
-		public BitSet getFlags() {
-			return flags;
+		public boolean isOptional() {
+			return optional;
 		}
 
 		public int[] getData() {
@@ -130,7 +132,8 @@ public class FilterPipelineMessage extends Message {
 
 		@Override
 		public String toString() {
-			return "Filter [id=" + id + ", name=" + name + ", flags=" + flags + ", data=" + Arrays.toString(data) + "]";
+			return "Filter [id=" + id + ", name=" + name + ", optional=" + optional + ", data=" + Arrays.toString(data)
+					+ "]";
 		}
 	}
 }
