@@ -11,6 +11,7 @@ package io.jhdf.object.message;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
@@ -71,8 +72,11 @@ public class FilterPipelineMessage extends Message {
 
 			final int numberOfDataValues = Utils.readBytesAsUnsignedInt(bb, 2);
 
+			final String name;
 			if (nameLength >= 2) {
-				final String name = Utils.readUntilNull(Utils.createSubBuffer(bb, nameLength));
+				name = Utils.readUntilNull(Utils.createSubBuffer(bb, nameLength));
+			} else {
+				name = "undefined";
 			}
 
 			final int[] data = new int[numberOfDataValues];
@@ -85,7 +89,7 @@ public class FilterPipelineMessage extends Message {
 				bb.position(bb.position() + 4);
 			}
 
-			filters.add(new Filter(filterId, "", flags, data));
+			filters.add(new Filter(filterId, name, flags, data));
 		}
 
 	}
@@ -124,5 +128,9 @@ public class FilterPipelineMessage extends Message {
 			return data;
 		}
 
+		@Override
+		public String toString() {
+			return "Filter [id=" + id + ", name=" + name + ", flags=" + flags + ", data=" + Arrays.toString(data) + "]";
+		}
 	}
 }
