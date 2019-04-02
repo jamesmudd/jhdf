@@ -77,7 +77,7 @@ public class FilterPipelineMessage extends Message {
 
 			final int[] data = new int[numberOfDataValues];
 			for (int j = 0; j < numberOfDataValues; j++) {
-				data[i] = bb.getInt();
+				data[j] = bb.getInt();
 			}
 			// If there are a odd number of values then there are 4 bytes of padding
 			if (version == 1 && numberOfDataValues % 2 != 0) {
