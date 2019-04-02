@@ -39,6 +39,9 @@ public final class FilterManager {
 		List<Filter> filters = filterPipelineMessage.getFilters();
 		for (Filter filter : filters) {
 			PipelineFilter pipelineFilter = idToFilter.get(filter.getId());
+			if (pipelineFilter == null) {
+				throw new HdfException("No filter registered for: " + filter);
+			}
 			try {
 				inputStream = pipelineFilter.getPipelineFilter(inputStream);
 			} catch (IOException e) {
