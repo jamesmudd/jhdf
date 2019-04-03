@@ -9,11 +9,24 @@
  ******************************************************************************/
 package io.jhdf.filter;
 
-import java.io.IOException;
-import java.io.InputStream;
+import io.jhdf.exceptions.HdfFilterException;
 
 public interface PipelineFilter {
 
-	InputStream getPipelineFilter(InputStream inputStream) throws IOException;
+	/**
+	 * Gets the name of this filter e.g. 'deflate', 'shuffle'
+	 * 
+	 * @return the name of this filter
+	 */
+	String getName();
+
+	/**
+	 * Applies this filter to decode data
+	 * 
+	 * @param encodedData the data to be decoded
+	 * @return the decoded data
+	 * @throws HdfFilterException if the decode operation fails
+	 */
+	byte[] decode(byte[] encodedData) throws HdfFilterException;
 
 }
