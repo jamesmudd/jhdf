@@ -22,8 +22,9 @@ public class DeflatePipelineFilter implements PipelineFilter {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeflatePipelineFilter.class);
 
-	public DeflatePipelineFilter(int[] data) {
-		// No-op - the compression level is passed in but not needed to decompress
+	@Override
+	public int getId() {
+		return 1;
 	}
 
 	@Override
@@ -32,26 +33,35 @@ public class DeflatePipelineFilter implements PipelineFilter {
 	}
 
 	@Override
-	public byte[] decode(byte[] compressedData) {
+	public byte[] decode(byte[] compressedData, int[] filterData) {
 		try {
+			// Setup the inflater
 			final Inflater inflater = new Inflater();
 			inflater.setInput(compressedData);
 
-			final byte[] buffer = new byte[4096];
-			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			// Make a guess that the decompressed data is 3 times larger than compressed.
+			// This is a performance optimisation to avoid resizing of the stream byte
+			// array.
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream(compressedData.length * 3);
 
+			final byte[] buffer = new byte[4096];
+
+			// Do the decompression
 			while (!inflater.finished()) {
 				int read = inflater.inflate(buffer);
 				baos.write(buffer, 0, read);
 			}
 
-			final byte[] decompressedData = baos.toByteArray();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Decompressed chunk. Compressed size = {} bytes, Decompressed size = {}",
+						inflater.getBytesRead(),
+						inflater.getBytesWritten());
+			}
 
-			logger.info("Decompressed chunk. Compressed size = {} bytes, Decompressed size = {}",
-					inflater.getBytesRead(),
-					inflater.getBytesWritten());
+			// Close the inflater
+			inflater.end();
 
-			return decompressedData;
+			return baos.toByteArray();
 
 		} catch (DataFormatException e) {
 			throw new HdfFilterException("Inflating failed", e);

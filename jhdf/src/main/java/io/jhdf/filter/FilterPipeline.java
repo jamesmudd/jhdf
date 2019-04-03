@@ -1,5 +1,6 @@
 package io.jhdf.filter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.jhdf.exceptions.HdfFilterException;
@@ -11,10 +12,25 @@ import io.jhdf.exceptions.HdfFilterException;
  */
 public class FilterPipeline {
 
-	private final List<PipelineFilter> filters;
+	private class PipelineFilterWithData {
 
-	/* package */ FilterPipeline(List<PipelineFilter> filters) {
-		this.filters = filters;
+		final PipelineFilter filter;
+		final int[] filterData;
+
+		public PipelineFilterWithData(PipelineFilter filter, int[] filterData) {
+			this.filter = filter;
+			this.filterData = filterData;
+		}
+
+		byte[] decode(byte[] data) {
+			return filter.decode(data, filterData);
+		}
+	}
+
+	private final List<PipelineFilterWithData> filters = new ArrayList<>();
+
+	/* package */ void addFilter(PipelineFilter filter, int[] data) {
+		filters.add(new PipelineFilterWithData(filter, data));
 	}
 
 	/**
@@ -27,7 +43,8 @@ public class FilterPipeline {
 	public byte[] decode(byte[] encodedData) {
 
 		byte[] data = encodedData;
-		for (PipelineFilter b : filters) {
+
+		for (PipelineFilterWithData b : filters) {
 			data = b.decode(data);
 		}
 

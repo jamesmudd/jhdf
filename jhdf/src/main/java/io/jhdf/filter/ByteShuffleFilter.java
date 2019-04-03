@@ -2,11 +2,9 @@ package io.jhdf.filter;
 
 public class ByteShuffleFilter implements PipelineFilter {
 
-	/** Bytes in each element e.g float32 = 4 bytes */
-	private final int dataSize;
-
-	public ByteShuffleFilter(int[] data) {
-		dataSize = data[0];
+	@Override
+	public int getId() {
+		return 2;
 	}
 
 	@Override
@@ -15,7 +13,10 @@ public class ByteShuffleFilter implements PipelineFilter {
 	}
 
 	@Override
-	public byte[] decode(byte[] data) {
+	public byte[] decode(byte[] data, int[] filterData) {
+
+		// Bytes in each element e.g float32 = 4 bytes
+		final int dataSize = filterData[0];
 
 		// A quick shortcut if no shuffling is needed
 		if (dataSize == 1) {
