@@ -141,7 +141,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
 						+ chunkSizeInBytes);
 			}
 		} catch (IOException e) {
-			throw new HdfException("Failed to decode chunk '" + chunk + " of dataset '" + getPath() + "'");
+			throw new HdfException("Failed to decode chunk '" + chunk + " of dataset '" + getPath() + "'", e);
 		}
 		logger.debug("Decoded {}", chunk);
 		return ByteBuffer.wrap(decodedBytes);
