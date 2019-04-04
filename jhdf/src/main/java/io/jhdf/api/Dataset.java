@@ -95,4 +95,12 @@ public interface Dataset extends Node {
 	 */
 	Class<?> getJavaType();
 
+	/**
+	 * Gets the fill value for this dataset or <code>null</code> if not defined. If
+	 * it is defined the type will be that returned by {@link #getJavaType()}.
+	 * 
+	 * @return the fill value of the dataset or <code>null</code> if not defined
+	 */
+	Object getFillValue();
+
 }

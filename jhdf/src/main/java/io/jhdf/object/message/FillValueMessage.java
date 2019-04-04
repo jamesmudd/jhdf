@@ -34,13 +34,20 @@ public class FillValueMessage extends Message {
 		if (version == 1 || version == 2) {
 			spaceAllocationTime = bb.get();
 			fillValueWriteTime = bb.get();
-			fillValueDefined = bb.get() == 1;
+			boolean fillValueMaybeDefined = bb.get() == 1;
 
-			if (version == 2 && fillValueDefined) {
+			if (version == 2 && fillValueMaybeDefined) {
 				int size = Utils.readBytesAsUnsignedInt(bb, 4);
-				fillValue = Utils.createSubBuffer(bb, size);
+				if (size > 0) {
+					fillValue = Utils.createSubBuffer(bb, size);
+					fillValueDefined = true;
+				} else {
+					fillValue = null;
+					fillValueDefined = false;
+				}
 			} else {
 				fillValue = null; // No fill value defined
+				fillValueDefined = false;
 			}
 		} else if (version == 3) {
 			byte flags = bb.get();
