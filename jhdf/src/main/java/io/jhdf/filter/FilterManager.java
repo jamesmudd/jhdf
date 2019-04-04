@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,12 @@ public enum FilterManager {
 		// Load the built in filters
 		addFilter(new DeflatePipelineFilter());
 		addFilter(new ByteShuffleFilter());
+
+		// Add dynamically loaded filters
+		ServiceLoader<PipelineFilter> serviceLoader = ServiceLoader.load(PipelineFilter.class);
+		for (PipelineFilter pipelineFilter : serviceLoader) {
+			addFilter(pipelineFilter);
+		}
 
 		logger.info("Initalized HDF5 filters");
 	}
