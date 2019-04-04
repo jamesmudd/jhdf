@@ -11,9 +11,6 @@ package io.jhdf.dataset;
 
 import static java.lang.Math.toIntExact;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
@@ -36,6 +32,7 @@ import io.jhdf.btree.BTreeV1Data;
 import io.jhdf.btree.BTreeV1Data.Chunk;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.filter.FilterManager;
+import io.jhdf.filter.FilterPipeline;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
 import io.jhdf.object.message.FilterPipelineMessage;
 
@@ -51,22 +48,22 @@ public class ChunkedDatasetV3 extends DatasetBase {
 
 	private final LazyInitializer<Map<ChunkOffsetKey, Chunk>> chunkLookup;
 	private final ConcurrentMap<ChunkOffsetKey, ByteBuffer> decodedChunkLookup = new ConcurrentHashMap<>();
-	private final int chunkSizeInBytes;
 
 	private final ChunkedDataLayoutMessageV3 layoutMessage;
-	private final FilterPipelineMessage filterPipelineMessage;
+
+	private final FilterPipeline pipeline;
 
 	public ChunkedDatasetV3(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
 		super(hdfFc, address, name, parent, oh);
 
 		layoutMessage = oh.getMessageOfType(ChunkedDataLayoutMessageV3.class);
-		chunkSizeInBytes = getChunkSizeInBytes();
 
 		// If the dataset has filters get the message
 		if (oh.hasMessageOfType(FilterPipelineMessage.class)) {
-			filterPipelineMessage = oh.getMessageOfType(FilterPipelineMessage.class);
+			FilterPipelineMessage filterPipelineMessage = oh.getMessageOfType(FilterPipelineMessage.class);
+			pipeline = FilterManager.getPipeline(filterPipelineMessage);
 		} else {
-			filterPipelineMessage = null;
+			pipeline = null;
 		}
 
 		chunkLookup = new ChunkLookupLazyInitializer();
@@ -114,7 +111,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
 		// Get the encoded (i.e. compressed buffer)
 		final ByteBuffer encodedBuffer = getDataBuffer(chunk);
 
-		if (filterPipelineMessage == null) {
+		if (pipeline == null) {
 			// No filters
 			logger.debug("No filters returning decoded chunk '{}'", chunk);
 			return encodedBuffer;
@@ -123,27 +120,11 @@ public class ChunkedDatasetV3 extends DatasetBase {
 		// Need to setup the filter pipeline
 		byte[] encodedBytes = new byte[encodedBuffer.remaining()];
 		encodedBuffer.get(encodedBytes);
-		ByteArrayInputStream bais = new ByteArrayInputStream(encodedBytes);
-		InputStream inputStream = FilterManager
-				.getPipeline(filterPipelineMessage, bais);
 
-		byte[] decodedBytes = new byte[chunkSizeInBytes];
-		int bytesRead = 0;
-		try {
-			while (bytesRead < chunkSizeInBytes) {
-				bytesRead += inputStream.read(decodedBytes, bytesRead, decodedBytes.length - bytesRead);
-				logger.trace("Read {} bytes of chunk {}", bytesRead, chunk);
-			}
-			inputStream.close();
-			if (bytesRead != chunkSizeInBytes) {
-				throw new HdfException("Data not read correctly for chunk " + chunk + ". bytesRead=" + bytesRead
-						+ " chunkSize="
-						+ chunkSizeInBytes);
-			}
-		} catch (IOException e) {
-			throw new HdfException("Failed to decode chunk '" + chunk + " of dataset '" + getPath() + "'");
-		}
+		// Decode
+		byte[] decodedBytes = pipeline.decode(encodedBytes);
 		logger.debug("Decoded {}", chunk);
+
 		return ByteBuffer.wrap(decodedBytes);
 	}
 
@@ -153,12 +134,6 @@ public class ChunkedDatasetV3 extends DatasetBase {
 		} catch (Exception e) {
 			throw new HdfException("Failed to create chunk lookup for '" + getPath() + "'");
 		}
-	}
-
-	private int getChunkSizeInBytes() {
-		return IntStream.of(layoutMessage.getChunkDimensions())
-				.reduce(1, Math::multiplyExact)
-				* layoutMessage.getSize();
 	}
 
 	private ByteBuffer getDataBuffer(Chunk chunk) {

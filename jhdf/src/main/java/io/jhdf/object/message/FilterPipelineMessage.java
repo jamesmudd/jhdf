@@ -11,6 +11,7 @@ package io.jhdf.object.message;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
@@ -19,7 +20,7 @@ import io.jhdf.exceptions.UnsupportedHdfException;
 
 /**
  * <p>
- * The Data Storage - Filter Pipeline Message
+ * The Data Storage - FilterInfo Pipeline Message
  * </p>
  * 
  * <p>
@@ -32,8 +33,10 @@ import io.jhdf.exceptions.UnsupportedHdfException;
  */
 public class FilterPipelineMessage extends Message {
 
+	private static final int OPTIONAL = 0;
+
 	private final byte version;
-	private final List<Filter> filters;
+	private final List<FilterInfo> filters;
 
 	public FilterPipelineMessage(ByteBuffer bb, BitSet messageFlags) {
 		super(messageFlags);
@@ -54,7 +57,7 @@ public class FilterPipelineMessage extends Message {
 
 		// Read filters
 		for (int i = 0; i < numberOfFilters; i++) {
-			// Filter ID
+			// FilterInfo ID
 			final int filterId = Utils.readBytesAsUnsignedInt(bb, 2);
 
 			// Name length
@@ -65,19 +68,22 @@ public class FilterPipelineMessage extends Message {
 				nameLength = Utils.readBytesAsUnsignedInt(bb, 2);
 			}
 
-			// 2 bytes of flags
-			BitSet flags = BitSet.valueOf(new byte[] { bb.get(), bb.get() });
-			final boolean optional = flags.get(0);
+			// 2 bytes of optional
+			final BitSet flags = BitSet.valueOf(new byte[] { bb.get(), bb.get() });
+			final boolean optional = flags.get(OPTIONAL);
 
 			final int numberOfDataValues = Utils.readBytesAsUnsignedInt(bb, 2);
 
+			final String name;
 			if (nameLength >= 2) {
-				final String name = Utils.readUntilNull(Utils.createSubBuffer(bb, nameLength));
+				name = Utils.readUntilNull(Utils.createSubBuffer(bb, nameLength));
+			} else {
+				name = "undefined";
 			}
 
 			final int[] data = new int[numberOfDataValues];
 			for (int j = 0; j < numberOfDataValues; j++) {
-				data[i] = bb.getInt();
+				data[j] = bb.getInt();
 			}
 			// If there are a odd number of values then there are 4 bytes of padding
 			if (version == 1 && numberOfDataValues % 2 != 0) {
@@ -85,26 +91,26 @@ public class FilterPipelineMessage extends Message {
 				bb.position(bb.position() + 4);
 			}
 
-			filters.add(new Filter(filterId, "", flags, data));
+			filters.add(new FilterInfo(filterId, name, optional, data));
 		}
 
 	}
 
-	public List<Filter> getFilters() {
+	public List<FilterInfo> getFilters() {
 		return filters;
 	}
 
-	public class Filter {
+	public class FilterInfo {
 
 		private final int id;
 		private final String name;
-		private final BitSet flags;
+		private final boolean optional;
 		private final int[] data;
 
-		public Filter(int id, String name, BitSet flags, int[] data) {
+		public FilterInfo(int id, String name, boolean optional, int[] data) {
 			this.id = id;
 			this.name = name;
-			this.flags = flags;
+			this.optional = optional;
 			this.data = data;
 		}
 
@@ -116,13 +122,18 @@ public class FilterPipelineMessage extends Message {
 			return name;
 		}
 
-		public BitSet getFlags() {
-			return flags;
+		public boolean isOptional() {
+			return optional;
 		}
 
 		public int[] getData() {
 			return data;
 		}
 
+		@Override
+		public String toString() {
+			return "FilterInfo [id=" + id + ", name=" + name + ", optional=" + optional + ", data=" + Arrays.toString(data)
+					+ "]";
+		}
 	}
 }
