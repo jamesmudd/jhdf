@@ -1,6 +1,6 @@
 package io.jhdf.filter;
 
-public class ByteShuffleFilter implements PipelineFilter {
+public class ByteShuffleFilter implements Filter {
 
 	@Override
 	public int getId() {

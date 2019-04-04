@@ -16,7 +16,7 @@ import io.jhdf.exceptions.HdfFilterException;
  * 
  * @author James Mudd
  */
-public interface PipelineFilter {
+public interface Filter {
 
 	/**
 	 * Gets the ID of this filter, this must match the ID in the dataset header.

@@ -20,7 +20,7 @@ import io.jhdf.exceptions.UnsupportedHdfException;
 
 /**
  * <p>
- * The Data Storage - Filter Pipeline Message
+ * The Data Storage - FilterInfo Pipeline Message
  * </p>
  * 
  * <p>
@@ -36,7 +36,7 @@ public class FilterPipelineMessage extends Message {
 	private static final int OPTIONAL = 0;
 
 	private final byte version;
-	private final List<Filter> filters;
+	private final List<FilterInfo> filters;
 
 	public FilterPipelineMessage(ByteBuffer bb, BitSet messageFlags) {
 		super(messageFlags);
@@ -57,7 +57,7 @@ public class FilterPipelineMessage extends Message {
 
 		// Read filters
 		for (int i = 0; i < numberOfFilters; i++) {
-			// Filter ID
+			// FilterInfo ID
 			final int filterId = Utils.readBytesAsUnsignedInt(bb, 2);
 
 			// Name length
@@ -91,23 +91,23 @@ public class FilterPipelineMessage extends Message {
 				bb.position(bb.position() + 4);
 			}
 
-			filters.add(new Filter(filterId, name, optional, data));
+			filters.add(new FilterInfo(filterId, name, optional, data));
 		}
 
 	}
 
-	public List<Filter> getFilters() {
+	public List<FilterInfo> getFilters() {
 		return filters;
 	}
 
-	public class Filter {
+	public class FilterInfo {
 
 		private final int id;
 		private final String name;
 		private final boolean optional;
 		private final int[] data;
 
-		public Filter(int id, String name, boolean optional, int[] data) {
+		public FilterInfo(int id, String name, boolean optional, int[] data) {
 			this.id = id;
 			this.name = name;
 			this.optional = optional;
@@ -132,7 +132,7 @@ public class FilterPipelineMessage extends Message {
 
 		@Override
 		public String toString() {
-			return "Filter [id=" + id + ", name=" + name + ", optional=" + optional + ", data=" + Arrays.toString(data)
+			return "FilterInfo [id=" + id + ", name=" + name + ", optional=" + optional + ", data=" + Arrays.toString(data)
 					+ "]";
 		}
 	}

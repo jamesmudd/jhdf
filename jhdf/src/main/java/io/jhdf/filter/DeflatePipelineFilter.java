@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import io.jhdf.exceptions.HdfFilterException;
 
-public class DeflatePipelineFilter implements PipelineFilter {
+public class DeflatePipelineFilter implements Filter {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeflatePipelineFilter.class);
 

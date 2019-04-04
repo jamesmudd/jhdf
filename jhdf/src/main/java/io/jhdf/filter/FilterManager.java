@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import io.jhdf.exceptions.HdfFilterException;
 import io.jhdf.object.message.FilterPipelineMessage;
-import io.jhdf.object.message.FilterPipelineMessage.Filter;
+import io.jhdf.object.message.FilterPipelineMessage.FilterInfo;
 
 /**
  * This is a singleton for managing the loaded HDF5 filters.
@@ -32,7 +32,7 @@ public enum FilterManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(FilterManager.class);
 
-	private static final Map<Integer, PipelineFilter> idToFilter = new HashMap<>();
+	private static final Map<Integer, Filter> idToFilter = new HashMap<>();
 
 	static {
 		logger.info("Initalising HDF5 filters...");
@@ -42,8 +42,8 @@ public enum FilterManager {
 		addFilter(new ByteShuffleFilter());
 
 		// Add dynamically loaded filters
-		ServiceLoader<PipelineFilter> serviceLoader = ServiceLoader.load(PipelineFilter.class);
-		for (PipelineFilter pipelineFilter : serviceLoader) {
+		ServiceLoader<Filter> serviceLoader = ServiceLoader.load(Filter.class);
+		for (Filter pipelineFilter : serviceLoader) {
 			addFilter(pipelineFilter);
 		}
 
@@ -53,12 +53,12 @@ public enum FilterManager {
 	/**
 	 * Adds a filter. This can be used to add dynamically loaded filters. Validates
 	 * the passed in filter to ensure in meets the specification, see
-	 * {@link PipelineFilter}.
+	 * {@link Filter}.
 	 * 
 	 * @param filter the filter class to add
 	 * @throws HdfFilterException if the filter is not valid
 	 */
-	public static void addFilter(PipelineFilter filter) {
+	public static void addFilter(Filter filter) {
 		// Add the filter
 		idToFilter.put(filter.getId(), filter);
 
@@ -74,7 +74,7 @@ public enum FilterManager {
 	 * @return the new pipeline
 	 */
 	public static FilterPipeline getPipeline(FilterPipelineMessage filterPipelineMessage) {
-		List<Filter> filters = filterPipelineMessage.getFilters();
+		List<FilterInfo> filters = filterPipelineMessage.getFilters();
 
 		// Decoding so reverse order
 		Collections.reverse(filters);

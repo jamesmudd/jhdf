@@ -14,10 +14,10 @@ public class FilterPipeline {
 
 	private class PipelineFilterWithData {
 
-		final PipelineFilter filter;
+		final Filter filter;
 		final int[] filterData;
 
-		public PipelineFilterWithData(PipelineFilter filter, int[] filterData) {
+		public PipelineFilterWithData(Filter filter, int[] filterData) {
 			this.filter = filter;
 			this.filterData = filterData;
 		}
@@ -29,7 +29,7 @@ public class FilterPipeline {
 
 	private final List<PipelineFilterWithData> filters = new ArrayList<>();
 
-	/* package */ void addFilter(PipelineFilter filter, int[] data) {
+	/* package */ void addFilter(Filter filter, int[] data) {
 		filters.add(new PipelineFilterWithData(filter, data));
 	}
 
