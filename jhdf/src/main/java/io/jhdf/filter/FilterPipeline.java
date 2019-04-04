@@ -12,6 +12,7 @@ import io.jhdf.exceptions.HdfFilterException;
  */
 public class FilterPipeline {
 
+	/* package */
 	private class PipelineFilterWithData {
 
 		final Filter filter;
@@ -29,12 +30,15 @@ public class FilterPipeline {
 
 	private final List<PipelineFilterWithData> filters = new ArrayList<>();
 
+	/* package */ FilterPipeline() {
+	}
+
 	/* package */ void addFilter(Filter filter, int[] data) {
 		filters.add(new PipelineFilterWithData(filter, data));
 	}
 
 	/**
-	 * Applies this filter pipeline to decode data
+	 * Applies all the filters in this pipeline to decode the data.
 	 * 
 	 * @param encodedData the data to be decoded
 	 * @return the decoded data
@@ -42,13 +46,12 @@ public class FilterPipeline {
 	 */
 	public byte[] decode(byte[] encodedData) {
 
-		byte[] data = encodedData;
-
+		// Apply the filters
 		for (PipelineFilterWithData b : filters) {
-			data = b.decode(data);
+			encodedData = b.decode(encodedData);
 		}
 
-		return data;
+		return encodedData;
 	}
 
 }
