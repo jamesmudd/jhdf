@@ -15,11 +15,22 @@ import java.util.BitSet;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 
+/**
+ * <p>
+ * Fill Value Message. Used to specify a fill value for datasets.
+ * </p>
+ * 
+ * <p>
+ * <a href=
+ * "https://support.hdfgroup.org/HDF5/doc/H5.format.html#FillValueMessage">Format
+ * Spec</a>
+ * </p>
+ * 
+ * @author James Mudd
+ */
 public class FillValueMessage extends Message {
 
-	private static final int SPACE_ALLOCATION_TIME_MASK = 0b1100_0000;
-	private static final int FILL_VALUE_TIME_MASK = 0b0011_0000;
-	private static final int FILL_VALUE_UNDEFINED_MASK = 0b0000_1000;
+	private static final int FILL_VALUE_DEFINED_BIT = 5;
 
 	private final byte version;
 	private final int spaceAllocationTime;
@@ -34,19 +45,26 @@ public class FillValueMessage extends Message {
 		if (version == 1 || version == 2) {
 			spaceAllocationTime = bb.get();
 			fillValueWriteTime = bb.get();
-			fillValueDefined = bb.get() == 1;
+			boolean fillValueMaybeDefined = bb.get() == 1;
 
-			if (version == 2 && fillValueDefined) {
+			if (version == 2 && fillValueMaybeDefined) {
 				int size = Utils.readBytesAsUnsignedInt(bb, 4);
-				fillValue = Utils.createSubBuffer(bb, size);
+				if (size > 0) {
+					fillValue = Utils.createSubBuffer(bb, size);
+					fillValueDefined = true;
+				} else {
+					fillValue = null;
+					fillValueDefined = false;
+				}
 			} else {
 				fillValue = null; // No fill value defined
+				fillValueDefined = false;
 			}
 		} else if (version == 3) {
-			byte flags = bb.get();
-			spaceAllocationTime = flags & 0xff & SPACE_ALLOCATION_TIME_MASK >>> 6;
-			fillValueWriteTime = flags & 0xff & FILL_VALUE_TIME_MASK >>> 4;
-			fillValueDefined = (flags & 0xff & FILL_VALUE_UNDEFINED_MASK >>> 5) == 1;
+			BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
+			spaceAllocationTime = Utils.bitsToInt(flags, 0, 2); // 0-1
+			fillValueWriteTime = Utils.bitsToInt(flags, 2, 2); // 2-3
+			fillValueDefined = flags.get(FILL_VALUE_DEFINED_BIT);
 
 			if (fillValueDefined) {
 				int size = Utils.readBytesAsUnsignedInt(bb, 4);

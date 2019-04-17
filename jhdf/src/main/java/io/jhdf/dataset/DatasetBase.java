@@ -32,6 +32,7 @@ import io.jhdf.object.message.DataLayoutMessage;
 import io.jhdf.object.message.DataSpace;
 import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.DataTypeMessage;
+import io.jhdf.object.message.FillValueMessage;
 
 public abstract class DatasetBase extends AbstractNode implements Dataset {
 	private static final Logger logger = LoggerFactory.getLogger(DatasetBase.class);
@@ -143,6 +144,18 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	 * @return the data buffer that holds this dataset
 	 */
 	public abstract ByteBuffer getDataBuffer();
+
+	@Override
+	public Object getFillValue() {
+		FillValueMessage fillValueMessage = getHeaderMessage(FillValueMessage.class);
+		if (fillValueMessage.isFillValueDefined()) {
+			ByteBuffer bb = fillValueMessage.getFillValue();
+			// Convert to data pass zero length dims for scalar
+			return DatasetReader.readDataset(getDataType(), bb, new int[0]);
+		} else {
+			return null;
+		}
+	}
 
 	@Override
 	public String toString() {
