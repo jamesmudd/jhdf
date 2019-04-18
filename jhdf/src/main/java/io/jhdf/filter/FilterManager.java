@@ -32,7 +32,7 @@ public enum FilterManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(FilterManager.class);
 
-	private static final Map<Integer, Filter> idToFilter = new HashMap<>();
+	private static final Map<Integer, Filter> ID_TO_FILTER = new HashMap<>();
 
 	static {
 		logger.info("Initalising HDF5 filters...");
@@ -60,7 +60,7 @@ public enum FilterManager {
 	 */
 	public static void addFilter(Filter filter) {
 		// Add the filter
-		idToFilter.put(filter.getId(), filter);
+		ID_TO_FILTER.put(filter.getId(), filter);
 
 		logger.info("Added HDF5 filter '{}' with ID '{}'", filter.getName(), filter.getId());
 	}
@@ -82,7 +82,7 @@ public enum FilterManager {
 		// Make the new pipeline
 		FilterPipeline pipeline = new FilterPipeline();
 		// Add each filter
-		filters.forEach(filter -> pipeline.addFilter(idToFilter.get(filter.getId()), filter.getData()));
+		filters.forEach(filter -> pipeline.addFilter(ID_TO_FILTER.get(filter.getId()), filter.getData()));
 
 		return pipeline;
 	}
