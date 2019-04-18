@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf.examples;
@@ -18,7 +18,7 @@ import io.jhdf.api.Dataset;
 
 /**
  * Example application for reading a dataset from HDF5
- * 
+ *
  * @author James Mudd
  */
 public class ReadDataset {

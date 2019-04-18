@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf.exceptions;
@@ -14,7 +14,7 @@ import java.io.File;
 /**
  * Thrown when a path inside a HDF5 file is invalid. It may contain invalid
  * characters or not be found in the file.
- * 
+ *
  * @author James Mudd
  */
 public class HdfInvalidPathException extends HdfException {

@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf.object.message;
@@ -18,13 +18,13 @@ import io.jhdf.Utils;
  * <p>
  * Fill Value (Old) Message
  * </p>
- * 
+ *
  * <p>
  * <a href=
  * "https://support.hdfgroup.org/HDF5/doc/H5.format.html#OldFillValueMessage">Format
  * Spec</a>
  * </p>
- * 
+ *
  * @author James Mudd
  */
 public class FillValueOldMessage extends Message {
@@ -41,7 +41,7 @@ public class FillValueOldMessage extends Message {
 	/**
 	 * The fill value. The bytes of the fill value are interpreted using the same
 	 * datatype as for the dataset.
-	 * 
+	 *
 	 * @return a buffer containing the fill value
 	 */
 	public ByteBuffer getFillValue() {

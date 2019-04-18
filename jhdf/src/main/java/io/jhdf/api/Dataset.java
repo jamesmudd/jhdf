@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf.api;
@@ -13,14 +13,14 @@ import io.jhdf.object.message.DataLayout;
 
 /**
  * HDF5 dataset. Datasets contain the real data within a HDF5 file.
- * 
+ *
  * @author James Mudd
  */
 public interface Dataset extends Node {
 
 	/**
 	 * Gets the total number of elements in this dataset.
-	 * 
+	 *
 	 * @return the total number of elements in this dataset
 	 */
 	long getSize();
@@ -28,21 +28,21 @@ public interface Dataset extends Node {
 	/**
 	 * Gets the disk size used by this dataset. <blockquote>i.e. number of elements
 	 * * size of each element</blockquote>
-	 * 
+	 *
 	 * @return the total number of bytes the dataset is using
 	 */
 	long getDiskSize();
 
 	/**
 	 * Gets the dimensions of this dataset
-	 * 
+	 *
 	 * @return the dimensions of this dataset
 	 */
 	int[] getDimensions();
 
 	/**
 	 * Checks if this dataset is scalar i.e is a single element with no dimensions.
-	 * 
+	 *
 	 * @return <code>true</code> if dataset if scalar <code>false</code> otherwise
 	 */
 	boolean isScalar();
@@ -50,7 +50,7 @@ public interface Dataset extends Node {
 	/**
 	 * Checks if this dataset is empty i.e holds no data and no storage is
 	 * allocated.
-	 * 
+	 *
 	 * @return <code>true</code> if dataset if empty <code>false</code> otherwise
 	 */
 	boolean isEmpty();
@@ -58,14 +58,14 @@ public interface Dataset extends Node {
 	/**
 	 * Gets the max size of this dataset. If not specified this will be equal to
 	 * {@link #getDimensions()}
-	 * 
+	 *
 	 * @return the max size of this dataset
 	 */
 	int[] getMaxSize();
 
 	/**
 	 * Gets the data layout of this dataset.
-	 * 
+	 *
 	 * @return the data layout of this dataset
 	 */
 	DataLayout getDataLayout();
@@ -82,7 +82,7 @@ public interface Dataset extends Node {
 	 * {@link #getJavaType()}.</li>
 	 * <li><code>null</code> if the dataset if empty ({@link #isEmpty()}).</li>
 	 * </ul>
-	 * 
+	 *
 	 * @return the data in the dataset as a Java object or <code>null</code> if the
 	 *         dataset is empty.
 	 */
@@ -90,7 +90,7 @@ public interface Dataset extends Node {
 
 	/**
 	 * Gets the Java type that will be used to represent this data.
-	 * 
+	 *
 	 * @return the Java type used to represent this dataset
 	 */
 	Class<?> getJavaType();
@@ -98,7 +98,7 @@ public interface Dataset extends Node {
 	/**
 	 * Gets the fill value for this dataset or <code>null</code> if not defined. If
 	 * it is defined the type will be that returned by {@link #getJavaType()}.
-	 * 
+	 *
 	 * @return the fill value of the dataset or <code>null</code> if not defined
 	 */
 	Object getFillValue();

@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf;
@@ -190,7 +190,7 @@ public class GroupImpl extends AbstractNode implements Group {
 
 	/**
 	 * This is a special case constructor for the root group.
-	 * 
+	 *
 	 * @param fc                  The file channel for reading the file
 	 * @param sb                  The HDF superblock for this file
 	 * @param objectHeaderAddress The offset into the file of the object header for
@@ -210,7 +210,7 @@ public class GroupImpl extends AbstractNode implements Group {
 	/**
 	 * Creates a group for the specified object header with the given name by
 	 * reading from the file channel.
-	 * 
+	 *
 	 * @param hdfFc               The file channel for reading the file
 	 * @param sb                  The HDF superblock for this file
 	 * @param objectHeaderAddress The offset into the file of the object header for

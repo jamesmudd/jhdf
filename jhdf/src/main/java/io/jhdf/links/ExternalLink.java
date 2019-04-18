@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf.links;
@@ -24,7 +24,7 @@ import io.jhdf.exceptions.HdfBrokenLinkException;
 /**
  * Link to a {@link Node} in an external HDF5 file. The link is made of both a
  * target HDF5 file and a target path to a {@link Node} within the target file.
- * 
+ *
  * @author James Mudd
  */
 public class ExternalLink extends AbstractLink implements Link {

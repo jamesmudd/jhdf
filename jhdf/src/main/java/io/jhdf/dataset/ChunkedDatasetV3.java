@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf.dataset;
@@ -40,7 +40,7 @@ import io.jhdf.object.message.FilterPipelineMessage;
  * This represents chunked datasets using a b-tree for indexing raw data chunks.
  * It supports filters for use when reading the dataset for example to
  * decompress.
- * 
+ *
  * @author James Mudd
  */
 public class ChunkedDatasetV3 extends DatasetBase {

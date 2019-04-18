@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf;
@@ -97,7 +97,7 @@ public class GlobalHeap {
 
 	/**
 	 * Gets the data buffer for an object in this global heap.
-	 * 
+	 *
 	 * @param index the requested object
 	 * @return the object data buffer
 	 * @throws IllegalArgumentException if the requested index is not in the heap
@@ -112,7 +112,7 @@ public class GlobalHeap {
 
 	/**
 	 * Gets the number of references to an object in this global heap.
-	 * 
+	 *
 	 * @param index of the object
 	 * @return the number of references to the object
 	 * @throws IllegalArgumentException if the requested index is not in the heap

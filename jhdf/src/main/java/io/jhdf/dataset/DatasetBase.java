@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf.dataset;
@@ -140,7 +140,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	/**
 	 * Gets the buffer that holds this datasets data. The returned buffer will be of
 	 * the correct order (endiness).
-	 * 
+	 *
 	 * @return the data buffer that holds this dataset
 	 */
 	public abstract ByteBuffer getDataBuffer();

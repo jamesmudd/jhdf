@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf;
@@ -25,6 +25,7 @@ import java.nio.file.StandardOpenOption;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import io.jhdf.exceptions.HdfException;
@@ -91,7 +92,7 @@ public class GlobalHeapTest {
 			bb.put("GCOL".getBytes()); // Match signature
 			bb.put((byte) 4); // mismatch version
 			return null;
-		}).when(mockFc).read(Mockito.any(ByteBuffer.class), Mockito.anyLong());
+		}).when(mockFc).read(ArgumentMatchers.any(ByteBuffer.class), ArgumentMatchers.anyLong());
 
 		HdfFileChannel hdfFileChannel = new HdfFileChannel(mockFc, sb);
 		assertThrows(HdfException.class, () -> new GlobalHeap(hdfFileChannel, 0));

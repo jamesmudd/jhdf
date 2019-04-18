@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf;
@@ -42,7 +42,7 @@ public abstract class Superblock {
 	/**
 	 * Checks if the file provided contains the HDF5 file signature at the given
 	 * offset.
-	 * 
+	 *
 	 * @param fc     The file to test
 	 * @param offset The offset into the file where the superblock starts
 	 * @return <code>true</code> if signature is matched <code>false</code>

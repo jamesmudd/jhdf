@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf.object.message;
@@ -84,7 +84,7 @@ public class DataSpace {
 
 	/**
 	 * Gets the total number of elements in this dataspace.
-	 * 
+	 *
 	 * @return the total number of elements in this dataspace
 	 */
 	public long getTotalLength() {

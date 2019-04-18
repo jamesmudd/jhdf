@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf.links;
@@ -19,7 +19,7 @@ import io.jhdf.exceptions.HdfBrokenLinkException;
 
 /**
  * Soft (symbolic) link to another {@link Node} in the HDF5 file.
- * 
+ *
  * @author James Mudd
  */
 public class SoftLink extends AbstractLink implements Link {
