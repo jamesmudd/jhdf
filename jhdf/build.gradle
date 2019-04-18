@@ -9,6 +9,8 @@ plugins {
     id 'idea' // To create InteliJ project
     id 'maven-publish' // For the artifact collections to publish
     id 'signing' // For GPG signing artifacts
+    id 'checkstyle' // Code style checks
+    
     // Community plugins (need versions)
     id 'com.jfrog.bintray' version '1.8.4' // For publishing to Bintray
     id 'org.sonarqube' version '2.7' // Code quality
