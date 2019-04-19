@@ -28,7 +28,7 @@ plugins {
 
 // Varibles
 group = 'io.jhdf'
-version = '0.4.1'
+version = '0.4.2'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -42,7 +42,7 @@ repositories {
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4' // Need 1.8 for modules
-	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
+	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
 
     
     // Use JUnit 5 test framework
@@ -52,7 +52,7 @@ dependencies {
     testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.8.0-beta4'
     
     // Mocking
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.25.+'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.27.+'
 	// Matchers
 	testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
 }
