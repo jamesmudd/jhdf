@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf;
@@ -23,7 +23,7 @@ import io.jhdf.exceptions.HdfException;
  * This wraps a {@link FileChannel} and combines it with the HDF5
  * {@link Superblock}. It allows a single object to be passed around inside a
  * {@link HdfFile} and provides convenience methods for common operations.
- * 
+ *
  * @author James Mudd
  */
 public class HdfFileChannel {
@@ -41,7 +41,7 @@ public class HdfFileChannel {
 	 * 'base address' so the offset for user block is handled. It also converts the
 	 * buffer to {@link ByteOrder#LITTLE_ENDIAN} and rewinds the buffer ready for
 	 * use.
-	 * 
+	 *
 	 * @param address the address to read from
 	 * @param length  the length of the buffer to read
 	 * @return the buffer

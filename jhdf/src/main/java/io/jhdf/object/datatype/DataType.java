@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf.object.datatype;
@@ -82,7 +82,7 @@ public abstract class DataType {
 
 	/**
 	 * Gets the number of bytes used to represent each element
-	 * 
+	 *
 	 * @return the size of each element in bytes
 	 */
 	public int getSize() {

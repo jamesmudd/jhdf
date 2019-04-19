@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright 2019 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ ******************************************************************************/
+
 /*
  * Gradle build file for jHDF
  */
@@ -9,6 +19,8 @@ plugins {
     id 'idea' // To create InteliJ project
     id 'maven-publish' // For the artifact collections to publish
     id 'signing' // For GPG signing artifacts
+    id 'checkstyle' // Code style checks
+    
     // Community plugins (need versions)
     id 'com.jfrog.bintray' version '1.8.4' // For publishing to Bintray
     id 'org.sonarqube' version '2.7' // Code quality

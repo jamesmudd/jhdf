@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf.object.message;
@@ -22,13 +22,13 @@ import io.jhdf.exceptions.UnsupportedHdfException;
  * <p>
  * The Data Storage - FilterInfo Pipeline Message
  * </p>
- * 
+ *
  * <p>
  * <a href=
  * "https://support.hdfgroup.org/HDF5/doc/H5.format.html#FilterMessage">Format
  * Spec</a>
  * </p>
- * 
+ *
  * @author James Mudd
  */
 public class FilterPipelineMessage extends Message {
@@ -132,7 +132,8 @@ public class FilterPipelineMessage extends Message {
 
 		@Override
 		public String toString() {
-			return "FilterInfo [id=" + id + ", name=" + name + ", optional=" + optional + ", data=" + Arrays.toString(data)
+			return "FilterInfo [id=" + id + ", name=" + name + ", optional=" + optional + ", data="
+					+ Arrays.toString(data)
 					+ "]";
 		}
 	}

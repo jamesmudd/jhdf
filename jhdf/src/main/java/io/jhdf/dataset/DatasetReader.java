@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf.dataset;
@@ -46,7 +46,7 @@ import io.jhdf.object.datatype.StringData;
  * "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html">Java
  * primitive types</a></li>
  * </ul>
- * 
+ *
  * @author James Mudd
  */
 public final class DatasetReader {

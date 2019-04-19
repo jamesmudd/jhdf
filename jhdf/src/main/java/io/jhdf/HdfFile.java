@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf;
@@ -35,7 +35,7 @@ import io.jhdf.exceptions.HdfException;
 /**
  * The HDF file class this object represents a HDF5 file on disk and provides
  * methods to access it.
- * 
+ *
  * @author James Mudd
  */
 public class HdfFile implements Group, AutoCloseable {
@@ -111,7 +111,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	/**
 	 * Gets the size of the user block of this file.
-	 * 
+	 *
 	 * @return the size of the user block
 	 */
 	public long getUserBlockSize() {
@@ -120,7 +120,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	/**
 	 * Gets the buffer containing the user block data.
-	 * 
+	 *
 	 * @return the buffer containing the user block data
 	 */
 	public ByteBuffer getUserBlockBuffer() {
@@ -144,7 +144,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	/**
 	 * Returns the size of this HDF5 file.
-	 * 
+	 *
 	 * @return the size of this file in bytes
 	 */
 	public long size() {
@@ -241,7 +241,7 @@ public class HdfFile implements Group, AutoCloseable {
 	/**
 	 * Add an external file to this HDF file. it needed so that external files open
 	 * via links from this file can also be closed when this file is closed.
-	 * 
+	 *
 	 * @param hdfFile an open external file linked from this file
 	 */
 	public void addExternalFile(HdfFile hdfFile) {

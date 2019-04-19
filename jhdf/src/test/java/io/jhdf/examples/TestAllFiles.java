@@ -1,10 +1,10 @@
 /*******************************************************************************
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
- * 
+ *
  * http://jhdf.io
- * 
+ *
  * Copyright 2019 James Mudd
- * 
+ *
  * MIT License see 'LICENSE' file
  ******************************************************************************/
 package io.jhdf.examples;
@@ -46,12 +46,12 @@ import io.jhdf.api.NodeType;
  * This is a "catch all" test designed to look at all the test HDF5 files and
  * fully explore the tree in all of them. In doing so it exercises most of the
  * jHDF code and validates the behaviour of groups and datasets.
- * 
+ *
  * @author James Mudd
  */
 public class TestAllFiles {
 
-	private static final PathMatcher hdf5 = FileSystems.getDefault().getPathMatcher("glob:**.hdf5");
+	private static final PathMatcher HDF5 = FileSystems.getDefault().getPathMatcher("glob:**.hdf5");
 
 	@TestFactory
 	public Stream<DynamicNode> allHdf5TestFiles() throws IOException, URISyntaxException {
@@ -60,7 +60,7 @@ public class TestAllFiles {
 		// containing test_file.hdf5
 		URL resource = this.getClass().getResource("../test_file.hdf5");
 		Path path = Paths.get(resource.toURI()).getParent();
-		List<Path> files = Files.walk(path).filter(hdf5::matches).collect(Collectors.toList());
+		List<Path> files = Files.walk(path).filter(HDF5::matches).collect(Collectors.toList());
 
 		// Check at least some files have been discovered
 		assertThat("Less than 3 HDF5 test files discovered searched paths below: " + path.toAbsolutePath(),
@@ -92,7 +92,7 @@ public class TestAllFiles {
 
 	/**
 	 * Verifies things that should be true about all datasets
-	 * 
+	 *
 	 * @param dataset the dataset to be exercised
 	 * @param group   its parent group
 	 */
@@ -146,7 +146,7 @@ public class TestAllFiles {
 
 	/**
 	 * Verifies things that should be true about all groups
-	 * 
+	 *
 	 * @param group to exercise
 	 */
 	private void verifyGroup(Group group) {
