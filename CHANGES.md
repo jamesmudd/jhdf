@@ -2,6 +2,15 @@
 
 Please note this project is still in pre-release development.
 
+## v0.4.2
+- Add support for byte shuffle filter
+- Many filter management improvements including support for dynamically loaded filters
+- #74 Add support for reading dataset fill values
+- Checkstyle added to improve code consistency - not full code formatting yet...
+- Update Gradle to 5.4
+- Update commons-lang3 to 3.9 (Java 8)
+- Update mockito-core to 2.27.+
+
 ## v0.4.1
 - Add support for broken links
 - #70 Add support for attribute and link creation order tracking
