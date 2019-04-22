@@ -47,7 +47,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
 	private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetV3.class);
 
 	private final LazyInitializer<Map<ChunkOffsetKey, Chunk>> chunkLookup;
-	private final ConcurrentMap<ChunkOffsetKey, ByteBuffer> decodedChunkLookup = new ConcurrentHashMap<>();
+	private final ConcurrentMap<ChunkOffsetKey, byte[]> decodedChunkLookup = new ConcurrentHashMap<>();
 
 	private final ChunkedDataLayoutMessageV3 layoutMessage;
 
@@ -77,8 +77,6 @@ public class ChunkedDatasetV3 extends DatasetBase {
 		logger.trace("Created data buffer for '{}' of size {} bytes", getPath(), dataArray.length);
 
 		int elementSize = getDataType().getSize();
-		byte[] elementBuffer = new byte[elementSize];
-
 		for (int i = 0; i < getSize(); i++) {
 			int[] dimensionedIndex = linearIndexToDimensionIndex(i, getDimensions());
 			long[] chunkOffset = getChunkOffset(dimensionedIndex);
@@ -90,42 +88,40 @@ public class ChunkedDatasetV3 extends DatasetBase {
 			}
 			int insideChunkLinearOffset = dimensionIndexToLinearIndex(insideChunk, layoutMessage.getChunkDimensions());
 
-			ByteBuffer bb = getDecodedChunk(new ChunkOffsetKey(chunkOffset));
-			bb.position(insideChunkLinearOffset * elementSize);
-			bb.get(elementBuffer);
+			final byte[] chunkData = getDecodedChunk(new ChunkOffsetKey(chunkOffset));
 
 			// Copy that data into the overall buffer
-			System.arraycopy(elementBuffer, 0, dataArray, i * elementSize, elementSize);
+			System.arraycopy(chunkData, insideChunkLinearOffset * elementSize, dataArray, i * elementSize, elementSize);
 		}
 
 		return ByteBuffer.wrap(dataArray);
 	}
 
-	private ByteBuffer getDecodedChunk(ChunkOffsetKey chunkKey) {
+	private byte[] getDecodedChunk(ChunkOffsetKey chunkKey) {
 		return decodedChunkLookup.computeIfAbsent(chunkKey, this::decodeChunk);
 	}
 
-	private ByteBuffer decodeChunk(ChunkOffsetKey key) {
+	private byte[] decodeChunk(ChunkOffsetKey key) {
 		logger.debug("Decoding chunk '{}'", key);
 		final Chunk chunk = getChunk(key);
 		// Get the encoded (i.e. compressed buffer)
 		final ByteBuffer encodedBuffer = getDataBuffer(chunk);
 
+		// Get the encoded data from buffer
+		final byte[] encodedBytes = new byte[encodedBuffer.remaining()];
+		encodedBuffer.get(encodedBytes);
+
 		if (pipeline == null) {
 			// No filters
 			logger.debug("No filters returning decoded chunk '{}'", chunk);
-			return encodedBuffer;
+			return encodedBytes;
 		}
 
-		// Need to setup the filter pipeline
-		byte[] encodedBytes = new byte[encodedBuffer.remaining()];
-		encodedBuffer.get(encodedBytes);
-
-		// Decode
-		byte[] decodedBytes = pipeline.decode(encodedBytes);
+		// Decode using the pipeline applying the filters
+		final byte[] decodedBytes = pipeline.decode(encodedBytes);
 		logger.debug("Decoded {}", chunk);
 
-		return ByteBuffer.wrap(decodedBytes);
+		return decodedBytes;
 	}
 
 	private Chunk getChunk(ChunkOffsetKey key) {
