@@ -122,7 +122,6 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 	public Class<?> getJavaType() {
 		switch (bitPrecision) {
 		case 16:
-			return float.class;
 		case 32:
 			return float.class;
 		case 64:

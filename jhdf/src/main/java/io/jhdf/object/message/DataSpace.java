@@ -29,7 +29,7 @@ public class DataSpace {
 	private DataSpace(ByteBuffer bb, Superblock sb) {
 
 		version = bb.get();
-		int numberOfdimensions = bb.get();
+		int numberOfDimensions = bb.get();
 		byte[] flagBits = new byte[1];
 		bb.get(flagBits);
 		BitSet flags = BitSet.valueOf(flagBits);
@@ -42,13 +42,13 @@ public class DataSpace {
 		} else if (version == 2) {
 			type = bb.get();
 		} else {
-			throw new HdfException("Unreconized version = " + version);
+			throw new HdfException("Unrecognized version = " + version);
 		}
 
 		// Dimensions sizes
-		if (numberOfdimensions != 0) {
-			dimensions = new int[numberOfdimensions];
-			for (int i = 0; i < numberOfdimensions; i++) {
+		if (numberOfDimensions != 0) {
+			dimensions = new int[numberOfDimensions];
+			for (int i = 0; i < numberOfDimensions; i++) {
 				dimensions[i] = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
 			}
 		} else {
@@ -57,8 +57,8 @@ public class DataSpace {
 
 		// Max dimension sizes
 		if (maxSizesPresent) {
-			maxSizes = new int[numberOfdimensions];
-			for (int i = 0; i < numberOfdimensions; i++) {
+			maxSizes = new int[numberOfDimensions];
+			for (int i = 0; i < numberOfDimensions; i++) {
 				maxSizes[i] = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
 			}
 		} else {

@@ -283,7 +283,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testCreatingSubbuffer() {
+	public void testCreatingSubBuffer() {
 		byte[] ints = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 		ByteBuffer bb = ByteBuffer.wrap(ints);
 
@@ -320,7 +320,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testbytesNeededToHoldNumber() {
+	public void testBytesNeededToHoldNumber() {
 		// Edge case 0
 		assertThat(Utils.bytesNeededToHoldNumber(0), is(equalTo(1)));
 
@@ -330,13 +330,13 @@ public class UtilsTest {
 		// On the 1 byte boundary
 		assertThat(Utils.bytesNeededToHoldNumber(255), is(equalTo(1)));
 		assertThat(Utils.bytesNeededToHoldNumber(256), is(equalTo(2)));
-		// On the 2 byte boundry
+		// On the 2 byte boundary
 		assertThat(Utils.bytesNeededToHoldNumber(65535), is(equalTo(2)));
 		assertThat(Utils.bytesNeededToHoldNumber(65536), is(equalTo(3)));
 	}
 
 	@Test
-	public void testbytesNeededToHoldNumberThrowsWithNegative() {
+	public void testBytesNeededToHoldNumberThrowsWithNegative() {
 		assertThrows(IllegalArgumentException.class, () -> Utils.bytesNeededToHoldNumber(-123));
 	}
 

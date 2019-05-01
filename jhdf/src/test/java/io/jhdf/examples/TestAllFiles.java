@@ -133,7 +133,7 @@ public class TestAllFiles {
 			data = Array.get(data, 0);
 			dims.add(Array.getLength(data));
 		}
-		return ArrayUtils.toPrimitive(dims.toArray(new Integer[dims.size()]));
+		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
 	}
 
 	private Class<?> getType(Object data) {

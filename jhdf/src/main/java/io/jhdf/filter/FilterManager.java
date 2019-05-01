@@ -35,7 +35,7 @@ public enum FilterManager {
 	private static final Map<Integer, Filter> ID_TO_FILTER = new HashMap<>();
 
 	static {
-		logger.info("Initalising HDF5 filters...");
+		logger.info("Initializing HDF5 filters...");
 
 		// Load the built in filters
 		addFilter(new DeflatePipelineFilter());
@@ -47,7 +47,7 @@ public enum FilterManager {
 			addFilter(pipelineFilter);
 		}
 
-		logger.info("Initalized HDF5 filters");
+		logger.info("Initialized HDF5 filters");
 	}
 
 	/**

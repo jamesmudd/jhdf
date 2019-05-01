@@ -33,7 +33,7 @@ public abstract class DataType {
 		int dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
 
 		if (version == 0) {
-			throw new HdfException("Unreconized datatype version 0 detected");
+			throw new HdfException("Unrecognized datatype version 0 detected");
 		}
 		if (version == 3) {
 			throw new UnsupportedHdfException("VAX byte ordered datatype encountered");
@@ -52,7 +52,7 @@ public abstract class DataType {
 		case 9: // Variable length
 			return new VariableLength(bb);
 		default:
-			throw new HdfException("Unreconised data class = " + dataClass);
+			throw new HdfException("Unrecognized data class = " + dataClass);
 		}
 
 	}

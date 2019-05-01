@@ -17,7 +17,7 @@ import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.object.message.DataLayoutMessage.ContigiousDataLayoutMessage;
+import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
 
 public class ContiguousDataset extends DatasetBase {
 
@@ -27,16 +27,16 @@ public class ContiguousDataset extends DatasetBase {
 
 	@Override
 	public ByteBuffer getDataBuffer() {
-		ContigiousDataLayoutMessage contigiousDataLayoutMessage = getHeaderMessage(ContigiousDataLayoutMessage.class);
+		ContiguousDataLayoutMessage contiguousDataLayoutMessage = getHeaderMessage(ContiguousDataLayoutMessage.class);
 
 		// Check for empty dataset
-		if (contigiousDataLayoutMessage.getAddress() == UNDEFINED_ADDRESS) {
+		if (contiguousDataLayoutMessage.getAddress() == UNDEFINED_ADDRESS) {
 			return null;
 		}
 
 		try {
-			ByteBuffer data = hdfFc.map(contigiousDataLayoutMessage.getAddress(),
-					contigiousDataLayoutMessage.getSize());
+			ByteBuffer data = hdfFc.map(contiguousDataLayoutMessage.getAddress(),
+					contiguousDataLayoutMessage.getSize());
 			convertToCorrectEndiness(data);
 			return data;
 		} catch (Exception e) {

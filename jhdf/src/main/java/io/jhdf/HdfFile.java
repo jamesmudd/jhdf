@@ -61,7 +61,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 			// Find out if the file is a HDF5 file
 			boolean validSignature = false;
-			long offset = 0;
+			long offset;
 			for (offset = 0; offset < fc.size(); offset = nextOffset(offset)) {
 				logger.trace("Checking for signature at offset = {}", offset);
 				validSignature = Superblock.verifySignature(fc, offset);
@@ -93,7 +93,7 @@ public class HdfFile implements Group, AutoCloseable {
 				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
 				rootGroup = GroupImpl.createRootGroup(hdfFc, sb.getRootGroupObjectHeaderAddress(), this);
 			} else {
-				throw new HdfException("Unreconized superblock version = " + superblock.getVersionOfSuperblock());
+				throw new HdfException("Unrecognized superblock version = " + superblock.getVersionOfSuperblock());
 			}
 
 		} catch (IOException e) {
@@ -133,9 +133,9 @@ public class HdfFile implements Group, AutoCloseable {
 	 */
 	@Override
 	public void close() {
-		for (HdfFile externalhdfFile : openExternalFiles) {
-			externalhdfFile.close();
-			logger.info("Closed external file '{}'", externalhdfFile.getFile().getAbsolutePath());
+		for (HdfFile externalHdfFile : openExternalFiles) {
+			externalHdfFile.close();
+			logger.info("Closed external file '{}'", externalHdfFile.getFile().getAbsolutePath());
 		}
 
 		hdfFc.close();
@@ -221,7 +221,7 @@ public class HdfFile implements Group, AutoCloseable {
 	public Node getByPath(String path) {
 		// As its the file its ok to have a leading slash but strip it here to be
 		// consistent with other groups
-		path = StringUtils.stripStart(path, Constants.PATH_SEPERATOR);
+		path = StringUtils.stripStart(path, Constants.PATH_SEPARATOR);
 		return rootGroup.getByPath(path);
 	}
 
@@ -229,7 +229,7 @@ public class HdfFile implements Group, AutoCloseable {
 	public Dataset getDatasetByPath(String path) {
 		// As its the file its ok to have a leading slash but strip it here to be
 		// consistent with other groups
-		path = StringUtils.stripStart(path, Constants.PATH_SEPERATOR);
+		path = StringUtils.stripStart(path, Constants.PATH_SEPARATOR);
 		return rootGroup.getDatasetByPath(path);
 	}
 

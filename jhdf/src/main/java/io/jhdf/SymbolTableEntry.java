@@ -68,10 +68,10 @@ public class SymbolTableEntry {
 		case 2:
 			// Link
 			linkValueOffset = Utils.readBytesAsUnsignedInt(bb, 4);
-			logger.trace("linkValueoffset = {}", linkValueOffset);
+			logger.trace("linkValueOffset = {}", linkValueOffset);
 			break;
 		default:
-			throw new IllegalStateException("SymbolTableEntry: Unreconized cache type = " + cacheType);
+			throw new IllegalStateException("SymbolTableEntry: Unrecognized cache type = " + cacheType);
 		}
 
 	}

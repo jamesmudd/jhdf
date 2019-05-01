@@ -82,8 +82,7 @@ public class FixedPoint extends DataType implements OrderedDataType {
 			}
 		} else { // Unsigned need promotion for Java
 			switch (bitPrecision) {
-			case 8:
-				return int.class; // Just go to int could go to short by java short support is poor
+			case 8: // Just go to int could go to short by java short support is poor
 			case 16:
 				return int.class;
 			case 32:

@@ -73,7 +73,7 @@ public class FillValueMessage extends Message {
 				fillValue = null; // No fill value defined
 			}
 		} else {
-			throw new HdfException("Unreconized version = " + version);
+			throw new HdfException("Unrecognized version = " + version);
 		}
 	}
 

@@ -81,7 +81,7 @@ public class GroupTest {
 	}
 
 	@Test
-	void testGettingMissingChildreturnsNull() {
+	void testGettingMissingChildReturnsNull() {
 		Group group = GroupImpl.createGroup(hdfFc, 800, DATASETS_GROUP, rootGroup);
 		Node child = group.getChild("made_up_missing_child_name");
 		assertThat(child, is(nullValue()));
@@ -104,7 +104,7 @@ public class GroupTest {
 	@Test
 	void testGetByPathThroughDatasetThrows() {
 		Group group = GroupImpl.createGroup(hdfFc, 800, DATASETS_GROUP, rootGroup);
-		// Try to keep resolving a path through a dataset 'float32' this shold return
+		// Try to keep resolving a path through a dataset 'float32' this should return
 		// null
 		String path = "float/float32/missing_node";
 		HdfInvalidPathException e = assertThrows(HdfInvalidPathException.class, () -> group.getByPath(path));

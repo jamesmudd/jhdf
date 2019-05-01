@@ -36,11 +36,11 @@ public class GroupSymbolTableNode {
 			int headerSize = 8;
 			ByteBuffer header = hdfFc.readBufferFromAddress(address, headerSize);
 
-			byte[] formatSignitureByte = new byte[4];
-			header.get(formatSignitureByte, 0, formatSignitureByte.length);
+			byte[] formatSignatureBytes = new byte[4];
+			header.get(formatSignatureBytes, 0, formatSignatureBytes.length);
 
 			// Verify signature
-			if (!Arrays.equals(NODE_SIGNATURE, formatSignitureByte)) {
+			if (!Arrays.equals(NODE_SIGNATURE, formatSignatureBytes)) {
 				throw new HdfException("Group symbol table Node signature not matched");
 			}
 

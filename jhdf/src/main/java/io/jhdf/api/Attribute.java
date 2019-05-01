@@ -81,7 +81,7 @@ public interface Attribute {
 	 * @return the Java type used to represent this attributes dataset
 	 * @see Dataset#getJavaType()
 	 */
-	public Class<?> getJavaType();
+	Class<?> getJavaType();
 
 	/**
 	 * Checks if this dataset is scalar i.e is a single element with no dimensions.

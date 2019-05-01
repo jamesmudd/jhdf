@@ -12,7 +12,6 @@ package io.jhdf.links;
 import java.io.File;
 import java.nio.file.Paths;
 
-import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 
 import io.jhdf.HdfFile;
@@ -42,7 +41,7 @@ public class ExternalLink extends AbstractLink implements Link {
 
 	private class ExternalLinkTargetLazyInitializer extends LazyInitializer<Node> {
 		@Override
-		protected Node initialize() throws ConcurrentException {
+		protected Node initialize()  {
 			// Open the external file
 			final HdfFile externalFile = new HdfFile(getTargetFile());
 			// Tell this file about it to keep track of open external files

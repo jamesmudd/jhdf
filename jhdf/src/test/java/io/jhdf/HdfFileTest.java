@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyString;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -55,7 +55,7 @@ public class HdfFileTest {
 	}
 
 	@Test
-	public void testOpeningValidFile() throws IOException {
+	public void testOpeningValidFile() {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.getUserBlockSize(), is(equalTo(0L)));
@@ -148,7 +148,7 @@ public class HdfFileTest {
 				}
 			}
 
-			assertThat(node.getName(), not(isEmptyString()));
+			assertThat(node.getName(), is(not(emptyString())));
 			assertThat(node.getAddress(), is(greaterThan(1L)));
 			assertThat(node.getParent(), is(notNullValue()));
 			if (node instanceof Dataset) {
@@ -229,7 +229,7 @@ public class HdfFileTest {
 			assertThat(e.getPath(), is(equalTo(path)));
 			assertThat(e.getFile(), is(sameInstance(file)));
 			assertThat(e.getMessage(), is(equalTo(
-					"The path '/datasets_group/float/float32/invalid_name' cound not be found in the HDF5 file '"
+					"The path '/datasets_group/float/float32/invalid_name' could not be found in the HDF5 file '"
 							+ file.getAbsolutePath() + "'")));
 		}
 	}
@@ -251,7 +251,7 @@ public class HdfFileTest {
 	}
 
 	@Test
-	void testLinkCreationOrdered() throws Exception {
+	void testLinkCreationOrdered() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.isLinkCreationOrderTracked(), is(false));
 		}

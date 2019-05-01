@@ -130,13 +130,7 @@ public abstract class BTreeV1Data extends BTreeV1 {
 
 		private final List<BTreeV1Data> childNodes;
 
-		/* package */ /**
-						 * @param fc
-						 * @param sb
-						 * @param address
-						 * @param dataDimensions
-						 */
-		BTreeV1DataNonLeafNode(HdfFileChannel hdfFc, long address, int dataDimensions) {
+		/* package */ BTreeV1DataNonLeafNode(HdfFileChannel hdfFc, long address, int dataDimensions) {
 			super(hdfFc, address);
 
 			final int keySize = 4 + 4 + (dataDimensions + 1) * 8;

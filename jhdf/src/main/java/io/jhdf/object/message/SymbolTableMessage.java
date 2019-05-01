@@ -40,7 +40,7 @@ public class SymbolTableMessage extends Message {
 		localHeapAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 	}
 
-	public long getbTreeAddress() {
+	public long getBTreeAddress() {
 		return bTreeAddress;
 	}
 
