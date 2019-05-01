@@ -38,7 +38,7 @@ public class UserBlockTest {
 	}
 
 	@Test
-	void testEarliest() throws Exception {
+	void testEarliest() {
 		assertThat(earliestHdfFile.getUserBlockSize(), is(equalTo(512L)));
 
 		ByteBuffer userBlockBuffer = earliestHdfFile.getUserBlockBuffer();
@@ -50,7 +50,7 @@ public class UserBlockTest {
 	}
 
 	@Test
-	void testLatest() throws Exception {
+	void testLatest() {
 		assertThat(latestHdfFile.getUserBlockSize(), is(equalTo(1024L)));
 
 		ByteBuffer userBlockBuffer = earliestHdfFile.getUserBlockBuffer();

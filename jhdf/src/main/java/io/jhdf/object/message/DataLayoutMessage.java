@@ -101,7 +101,7 @@ public abstract class DataLayoutMessage extends Message {
 
 		private final long address;
 		private final int size;
-		private int[] chunkDimensions;
+		private final int[] chunkDimensions;
 
 		private ChunkedDataLayoutMessageV3(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
@@ -148,7 +148,7 @@ public abstract class DataLayoutMessage extends Message {
 		private int nodeSize;
 		private byte splitPercent;
 		private byte mergePercent;
-		private long[] dimSizes;
+		private final long[] dimSizes;
 
 		private ChunkedDataLayoutMessageV4(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);

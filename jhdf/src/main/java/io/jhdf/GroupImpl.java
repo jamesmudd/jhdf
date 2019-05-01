@@ -191,8 +191,7 @@ public class GroupImpl extends AbstractNode implements Group {
 	/**
 	 * This is a special case constructor for the root group.
 	 *
-	 * @param fc                  The file channel for reading the file
-	 * @param sb                  The HDF superblock for this file
+	 * @param hdfFc               The file channel for reading the file
 	 * @param objectHeaderAddress The offset into the file of the object header for
 	 *                            this group
 	 * @param parent              For the root group the parent is the file itself.
@@ -212,7 +211,6 @@ public class GroupImpl extends AbstractNode implements Group {
 	 * reading from the file channel.
 	 *
 	 * @param hdfFc               The file channel for reading the file
-	 * @param sb                  The HDF superblock for this file
 	 * @param objectHeaderAddress The offset into the file of the object header for
 	 *                            this group
 	 * @param name                The name of this group

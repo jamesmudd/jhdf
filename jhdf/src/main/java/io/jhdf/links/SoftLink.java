@@ -9,7 +9,6 @@
  ******************************************************************************/
 package io.jhdf.links;
 
-import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 
 import io.jhdf.api.Group;
@@ -35,7 +34,7 @@ public class SoftLink extends AbstractLink implements Link {
 
 	private class LinkTargetLazyInitializer extends LazyInitializer<Node> {
 		@Override
-		protected Node initialize() throws ConcurrentException {
+		protected Node initialize() {
 			return parent.getHdfFile().getByPath(target);
 		}
 	}

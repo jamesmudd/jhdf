@@ -12,7 +12,6 @@ package io.jhdf.examples;
 import static java.util.stream.Collectors.joining;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 
 import io.jhdf.HdfFile;
@@ -27,7 +26,7 @@ import io.jhdf.api.Node;
  */
 public class PrintTree {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		File file = new File(args[0]);
 		System.out.println(file.getName());
 

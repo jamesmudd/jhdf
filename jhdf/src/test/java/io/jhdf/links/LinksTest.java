@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,7 @@ class LinksTest {
 	final String testFileUrl = this.getClass().getResource("../test_file.hdf5").getFile();
 
 	@Test
-	void testSoftLink() throws IOException {
+	void testSoftLink() {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
 			Node softLinkNode = hdfFile.getByPath("/links_group/soft_link_to_int8");
@@ -62,7 +61,7 @@ class LinksTest {
 	}
 
 	@Test
-	void testSoftLinkWithInvalidPath() throws IOException {
+	void testSoftLinkWithInvalidPath() {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
 			Link softLink = new SoftLink("/non/exisitant/path", "broken_link", hdfFile);
@@ -74,7 +73,7 @@ class LinksTest {
 	}
 
 	@Test
-	void testExternalLink() throws IOException {
+	void testExternalLink() {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
 			Node softLinkNode = hdfFile.getByPath("/links_group/external_link");
@@ -98,7 +97,7 @@ class LinksTest {
 	}
 
 	@Test
-	void testExternalLinkWithInvalidPath() throws IOException {
+	void testExternalLinkWithInvalidPath() {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
 			Link externalLink = new ExternalLink("test_file_ext.hdf5", "/non/exisitant/path", "broken_link", hdfFile);
@@ -110,7 +109,7 @@ class LinksTest {
 	}
 
 	@Test
-	void testExternalLinkWithInvalidFile() throws IOException {
+	void testExternalLinkWithInvalidFile() {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
 			Link externalLink = new ExternalLink("/missing_file.hdf5", "/non/exisitant/path", "broken_link", hdfFile);

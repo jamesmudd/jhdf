@@ -62,9 +62,9 @@ public class AttributesTest {
 	private static final Object EXPECTED_EMPTY_DATA = null;
 
 	private static final String SCALAR_FLOAT_ATTRIBUTE_NAME = "scalar_float";
-	private static final Float EXPECTED_SCALAR_FLOAT_DATA = Float.valueOf(123.45f);
+	private static final Float EXPECTED_SCALAR_FLOAT_DATA = 123.45f;
 	private static final String SCALAR_INT_ATTRIBUTE_NAME = "scalar_int";
-	private static final Integer EXPECTED_SCALAR_INT_DATA = Integer.valueOf(123);
+	private static final Integer EXPECTED_SCALAR_INT_DATA = 123;
 	private static final String SCALAR_STRING_ATTRIBUTE_NAME = "scalar_string";
 	private static final String EXPECTED_SCALAR_STRING_DATA = "hello";
 

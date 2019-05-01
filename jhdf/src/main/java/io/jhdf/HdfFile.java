@@ -61,7 +61,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 			// Find out if the file is a HDF5 file
 			boolean validSignature = false;
-			long offset = 0;
+			long offset;
 			for (offset = 0; offset < fc.size(); offset = nextOffset(offset)) {
 				logger.trace("Checking for signature at offset = {}", offset);
 				validSignature = Superblock.verifySignature(fc, offset);

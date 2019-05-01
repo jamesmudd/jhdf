@@ -11,7 +11,6 @@ package io.jhdf;
 
 import static io.jhdf.Utils.readBytesAsUnsignedInt;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +18,6 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,8 +117,7 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private void readMessages(HdfFileChannel hdfFc, ByteBuffer bb, int numberOfMessages)
-				throws IOException {
+		private void readMessages(HdfFileChannel hdfFc, ByteBuffer bb, int numberOfMessages) {
 			while (bb.remaining() > 4 && messages.size() < numberOfMessages) {
 				Message m = Message.readObjectHeaderV1Message(bb, hdfFc.getSuperblock());
 				messages.add(m);
@@ -263,7 +260,7 @@ public abstract class ObjectHeader {
 
 				// There might be a gap at the end of the header of up to 4 bytes
 				// message type (1_byte) + message size (2 bytes) + message flags (1 byte)
-				bb = readMessages(hdfFc, bb);
+				readMessages(hdfFc, bb);
 
 				logger.debug("Read object header from address: {}", address);
 
@@ -272,7 +269,7 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private ByteBuffer readMessages(HdfFileChannel hdfFc, ByteBuffer bb) throws IOException {
+		private ByteBuffer readMessages(HdfFileChannel hdfFc, ByteBuffer bb) {
 			while (bb.remaining() >= 8) {
 				Message m = Message.readObjectHeaderV2Message(bb, hdfFc.getSuperblock());
 				messages.add(m);
@@ -352,7 +349,7 @@ public abstract class ObjectHeader {
 		return new LazyInitializer<ObjectHeader>() {
 
 			@Override
-			protected ObjectHeader initialize() throws ConcurrentException {
+			protected ObjectHeader initialize() {
 				logger.debug("Lazy initalising object header at address: {}", address);
 				return readObjectHeader(hdfFc, address);
 			}

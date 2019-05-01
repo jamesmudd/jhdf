@@ -24,8 +24,8 @@ import io.jhdf.Constants;
 class ObjectCommentMessageTest {
 
 	private static final String COMMENT = "Test object comment";
+	private final BitSet flags = BitSet.valueOf(new byte[1]); // Empty flags
 	private ByteBuffer buffer;
-	private BitSet flags = BitSet.valueOf(new byte[1]); // Empty flags
 
 	@BeforeEach
 	private void createBuffer() {

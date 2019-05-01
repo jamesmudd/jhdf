@@ -29,7 +29,7 @@ class ObjectModificationTimeMessageTest {
 	private LocalDateTime currentTime;
 	private long currentTimeEpocSeconds;
 	private ByteBuffer buffer;
-	private BitSet flags = BitSet.valueOf(new byte[1]); // Empty flags
+	private final BitSet flags = BitSet.valueOf(new byte[1]); // Empty flags
 
 	@BeforeEach
 	private void createBuffer() {

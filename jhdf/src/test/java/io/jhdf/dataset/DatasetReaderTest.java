@@ -34,45 +34,45 @@ import io.jhdf.object.datatype.FloatingPoint;
 
 class DatasetReaderTest {
 
-	private int[] dims = new int[] { 2, 3 };
+	private final int[] dims = new int[] { 2, 3 };
 
 	// Byte
-	private ByteBuffer byteBuffer = createByteBuffer(new byte[] { 1, -2, 3, -4, 5, -6 });
-	private DataType byteDataType = mockFixedPoint(byte.class, true, Byte.BYTES);
-	private DataType unsignedByteDataType = mockFixedPoint(int.class, false, Byte.BYTES);
-	private byte[][] byteResult = new byte[][] { { 1, -2, 3 }, { -4, 5, -6 } };
-	private int[][] unsignedByteResult = new int[][] { { 1, 254, 3 }, { 252, 5, 250 } };
+	private final ByteBuffer byteBuffer = createByteBuffer(new byte[] { 1, -2, 3, -4, 5, -6 });
+	private final DataType byteDataType = mockFixedPoint(byte.class, true, Byte.BYTES);
+	private final DataType unsignedByteDataType = mockFixedPoint(int.class, false, Byte.BYTES);
+	private final byte[][] byteResult = new byte[][] { { 1, -2, 3 }, { -4, 5, -6 } };
+	private final int[][] unsignedByteResult = new int[][] { { 1, 254, 3 }, { 252, 5, 250 } };
 
 	// Short
-	private ByteBuffer shortBuffer = createShortBuffer(new short[] { 1, -2, 3, -4, 5, -6 });
-	private DataType shortDataType = mockFixedPoint(short.class, true, Short.BYTES);
-	private DataType unsignedShortDataType = mockFixedPoint(int.class, false, Short.BYTES);
-	private short[][] shortResult = new short[][] { { 1, -2, 3 }, { -4, 5, -6 } };
-	private int[][] unsignedShortResult = new int[][] { { 1, 65534, 3 }, { 65532, 5, 65530 } };
+	private final ByteBuffer shortBuffer = createShortBuffer(new short[] { 1, -2, 3, -4, 5, -6 });
+	private final DataType shortDataType = mockFixedPoint(short.class, true, Short.BYTES);
+	private final DataType unsignedShortDataType = mockFixedPoint(int.class, false, Short.BYTES);
+	private final short[][] shortResult = new short[][] { { 1, -2, 3 }, { -4, 5, -6 } };
+	private final int[][] unsignedShortResult = new int[][] { { 1, 65534, 3 }, { 65532, 5, 65530 } };
 
 	// Int
-	private ByteBuffer intBuffer = createIntBuffer(new int[] { 1, -2, 3, -4, 5, -6 });
-	private DataType intDataType = mockFixedPoint(int.class, true, Integer.BYTES);
-	private DataType unsignedIntDataType = mockFixedPoint(long.class, false, Integer.BYTES);
-	private int[][] intResult = new int[][] { { 1, -2, 3 }, { -4, 5, -6 } };
-	private long[][] unsignedIntResult = new long[][] { { 1L, 4294967294L, 3L }, { 4294967292L, 5L, 4294967290L } };
+	private final ByteBuffer intBuffer = createIntBuffer(new int[] { 1, -2, 3, -4, 5, -6 });
+	private final DataType intDataType = mockFixedPoint(int.class, true, Integer.BYTES);
+	private final DataType unsignedIntDataType = mockFixedPoint(long.class, false, Integer.BYTES);
+	private final int[][] intResult = new int[][] { { 1, -2, 3 }, { -4, 5, -6 } };
+	private final long[][] unsignedIntResult = new long[][] { { 1L, 4294967294L, 3L }, { 4294967292L, 5L, 4294967290L } };
 
 	// Long
-	private ByteBuffer longBuffer = createLongBuffer(new long[] { 1L, 2L, 3L, 4L, 5L, 6L });
-	private DataType longDataType = mockFixedPoint(long.class, true, Long.BYTES);
-	private DataType unsignedLongDataType = mockFixedPoint(BigInteger.class, false, Long.BYTES);
-	private long[][] longResult = new long[][] { { 1L, 2L, 3L }, { 4L, 5L, 6L } };
-	private BigInteger[][] unsignedLongResult = createUnsignedLongResult();
+	private final ByteBuffer longBuffer = createLongBuffer(new long[] { 1L, 2L, 3L, 4L, 5L, 6L });
+	private final DataType longDataType = mockFixedPoint(long.class, true, Long.BYTES);
+	private final DataType unsignedLongDataType = mockFixedPoint(BigInteger.class, false, Long.BYTES);
+	private final long[][] longResult = new long[][] { { 1L, 2L, 3L }, { 4L, 5L, 6L } };
+	private final BigInteger[][] unsignedLongResult = createUnsignedLongResult();
 
 	// Float
-	private ByteBuffer floatBuffer = createFloatBuffer(new float[] { 1, 2, 3, 4, 5, 6 });
-	private DataType floatDataType = mockFloatingPoint(float.class, Float.BYTES);
-	private float[][] floatResult = new float[][] { { 1, 2, 3 }, { 4, 5, 6 } };
+	private final ByteBuffer floatBuffer = createFloatBuffer(new float[] { 1, 2, 3, 4, 5, 6 });
+	private final DataType floatDataType = mockFloatingPoint(float.class, Float.BYTES);
+	private final float[][] floatResult = new float[][] { { 1, 2, 3 }, { 4, 5, 6 } };
 
 	// Double
-	private ByteBuffer doubleBuffer = createDoubleBuffer(new double[] { 1, 2, 3, 4, 5, 6 });
-	private DataType doubleDataType = mockFloatingPoint(double.class, Double.BYTES);
-	private double[][] doubleResult = new double[][] { { 1, 2, 3 }, { 4, 5, 6 } };
+	private final ByteBuffer doubleBuffer = createDoubleBuffer(new double[] { 1, 2, 3, 4, 5, 6 });
+	private final DataType doubleDataType = mockFloatingPoint(double.class, Double.BYTES);
+	private final double[][] doubleResult = new double[][] { { 1, 2, 3 }, { 4, 5, 6 } };
 
 	@TestFactory
 	Collection<DynamicNode> datasetReadTests() {
@@ -113,13 +113,10 @@ class DatasetReaderTest {
 	}
 
 	private Executable createTest(ByteBuffer buffer, DataType dataType, int[] dims, Object expected) {
-		return new Executable() {
-			@Override
-			public void execute() throws Throwable {
-				buffer.rewind(); // For shared buffers
-				Object actual = DatasetReader.readDataset(dataType, buffer, dims);
-				verifyArray(actual, expected);
-			}
+		return () -> {
+			buffer.rewind(); // For shared buffers
+			Object actual = DatasetReader.readDataset(dataType, buffer, dims);
+			verifyArray(actual, expected);
 		};
 	}
 

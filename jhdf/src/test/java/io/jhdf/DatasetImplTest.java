@@ -212,7 +212,7 @@ public class DatasetImplTest {
 	@Test
 	void testInt32GetData() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
-		assertThat((int[]) dataset.getData(), is(equalTo(REFERENCE_INT_DATA)));
+		assertThat(dataset.getData(), is(equalTo(REFERENCE_INT_DATA)));
 	}
 
 	@Test
@@ -224,13 +224,13 @@ public class DatasetImplTest {
 	@Test
 	void testFloat32DatasetGetData() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(FLOAT32_PATH);
-		assertThat((float[]) dataset.getData(), is(equalTo(REFERENCE_FLOAT_DATA)));
+		assertThat(dataset.getData(), is(equalTo(REFERENCE_FLOAT_DATA)));
 	}
 
 	@Test
 	void testFloat64DatasetGetData() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(FLOAT64_PATH);
-		assertThat((double[]) dataset.getData(), is(equalTo(REFERENCE_DOUBLE_DATA)));
+		assertThat(dataset.getData(), is(equalTo(REFERENCE_DOUBLE_DATA)));
 	}
 
 }

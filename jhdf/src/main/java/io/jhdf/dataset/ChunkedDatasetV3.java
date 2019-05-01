@@ -174,8 +174,8 @@ public class ChunkedDatasetV3 extends DatasetBase {
 
 	private final class ChunkLookupLazyInitializer extends LazyInitializer<Map<ChunkOffsetKey, Chunk>> {
 		@Override
-		protected Map<ChunkOffsetKey, Chunk> initialize() throws ConcurrentException {
-			logger.debug("Lazy initalizing chunk lookup for '{}'", getPath());
+		protected Map<ChunkOffsetKey, Chunk> initialize() {
+			logger.debug("Lazy initializing chunk lookup for '{}'", getPath());
 			BTreeV1Data bTree = BTreeV1.createDataBTree(hdfFc, layoutMessage.getBTreeAddress(),
 					getDimensions().length);
 
