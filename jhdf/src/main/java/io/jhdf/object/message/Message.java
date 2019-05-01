@@ -46,7 +46,7 @@ public class Message {
 		int dataSize = Utils.readBytesAsUnsignedInt(bb, 2);
 		BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
 
-		// Skip 3 reserved zerobytes
+		// Skip 3 reserved zero bytes
 		bb.position(bb.position() + 3);
 
 		// Create a new buffer holding this header data
@@ -124,7 +124,7 @@ public class Message {
 			return new ObjectReferenceCountMessage(bb, flags);
 
 		default:
-			throw new HdfException("Unreconized message type = " + messageType);
+			throw new HdfException("Unrecognized message type = " + messageType);
 		}
 	}
 
@@ -148,7 +148,7 @@ public class Message {
 		return flags.get(SET_FLAG_ON_MODIFICATION_WITH_UNKNOWN_MESSAGE);
 	}
 
-	public boolean isObjectModifiedWIthoutUnderstandingOfThisMessage() {
+	public boolean isObjectModifiedWithoutUnderstandingOfThisMessage() {
 		return flags.get(OBJECT_MODIFIED_WITHOUT_UNDERSTANDING_MESSAGE);
 	}
 

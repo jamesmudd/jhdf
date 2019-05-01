@@ -38,7 +38,7 @@ public class BTreeKValuesMessage extends Message {
 
 		final byte version = bb.get();
 		if (version != 0) {
-			throw new HdfException("Unreconised version " + version);
+			throw new HdfException("Unrecognized version " + version);
 		}
 
 		indexedStorageInternalNodeK = bb.getShort();

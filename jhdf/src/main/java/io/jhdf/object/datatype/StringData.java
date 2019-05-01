@@ -40,7 +40,7 @@ public class StringData extends DataType {
 			charset = StandardCharsets.UTF_8;
 			break;
 		default:
-			throw new HdfException("Unreconized Charset. Index is: " + charsetIndex);
+			throw new HdfException("Unrecognized Charset. Index is: " + charsetIndex);
 		}
 	}
 

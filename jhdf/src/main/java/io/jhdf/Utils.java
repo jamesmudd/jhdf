@@ -65,7 +65,7 @@ public final class Utils {
 	/**
 	 * Check the provided name to see if it is valid for a HDF5 identifier. Checks
 	 * name only contains ASCII characters and does not contain '/' or '.' which are
-	 * reserver characters.
+	 * reserved characters.
 	 *
 	 * @param name To check if valid
 	 * @return <code>true</code> if this is a valid HDF5 name, <code>false</code>
@@ -112,7 +112,7 @@ public final class Utils {
 		case 2:
 			return Short.toUnsignedInt(buffer.getShort());
 		case 3:
-			return readArbitaryLengthBytesAsUnsignedInt(buffer, length);
+			return readArbitraryLengthBytesAsUnsignedInt(buffer, length);
 		case 4:
 			int value = buffer.getInt();
 			if (value < 0) {
@@ -122,7 +122,7 @@ public final class Utils {
 		case 5:
 		case 6:
 		case 7:
-			return readArbitaryLengthBytesAsUnsignedInt(buffer, length);
+			return readArbitraryLengthBytesAsUnsignedInt(buffer, length);
 		case 8:
 			// Throws if the long can't be converted safely
 			return Math.toIntExact(buffer.getLong());
@@ -141,7 +141,7 @@ public final class Utils {
 	 * @throws ArithmeticException if the data cannot be safely converted to an
 	 *                             unsigned long
 	 */
-	private static int readArbitaryLengthBytesAsUnsignedInt(ByteBuffer buffer, int length) {
+	private static int readArbitraryLengthBytesAsUnsignedInt(ByteBuffer buffer, int length) {
 		// Here we will use BigInteger to convert a byte array
 		byte[] bytes = new byte[length];
 		buffer.get(bytes);
@@ -174,13 +174,13 @@ public final class Utils {
 		case 2:
 			return Short.toUnsignedLong(buffer.getShort());
 		case 3:
-			return readArbitaryLengthBytesAsUnsignedLong(buffer, length);
+			return readArbitraryLengthBytesAsUnsignedLong(buffer, length);
 		case 4:
 			return Integer.toUnsignedLong(buffer.getInt());
 		case 5:
 		case 6:
 		case 7:
-			return readArbitaryLengthBytesAsUnsignedLong(buffer, length);
+			return readArbitraryLengthBytesAsUnsignedLong(buffer, length);
 		case 8:
 			long value = buffer.getLong();
 			if (value < 0 && value != Constants.UNDEFINED_ADDRESS) {
@@ -202,7 +202,7 @@ public final class Utils {
 	 * @throws ArithmeticException if the data cannot be safely converted to an
 	 *                             unsigned long
 	 */
-	private static long readArbitaryLengthBytesAsUnsignedLong(ByteBuffer buffer, int length) {
+	private static long readArbitraryLengthBytesAsUnsignedLong(ByteBuffer buffer, int length) {
 		// Here we will use BigInteger to convert a byte array
 		byte[] bytes = new byte[length];
 		buffer.get(bytes);

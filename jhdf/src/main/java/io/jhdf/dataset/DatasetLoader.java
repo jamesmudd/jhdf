@@ -19,7 +19,7 @@ import io.jhdf.object.message.DataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV4;
 import io.jhdf.object.message.DataLayoutMessage.CompactDataLayoutMessage;
-import io.jhdf.object.message.DataLayoutMessage.ContigiousDataLayoutMessage;
+import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
 
 public final class DatasetLoader {
 
@@ -38,7 +38,7 @@ public final class DatasetLoader {
 			if (dlm instanceof CompactDataLayoutMessage) {
 				return new CompactDataset(hdfFc, address, name, parent, oh);
 
-			} else if (dlm instanceof ContigiousDataLayoutMessage) {
+			} else if (dlm instanceof ContiguousDataLayoutMessage) {
 				return new ContiguousDataset(hdfFc, address, name, parent, oh);
 
 			} else if (dlm instanceof ChunkedDataLayoutMessageV3) {
@@ -48,7 +48,7 @@ public final class DatasetLoader {
 				throw new UnsupportedHdfException("Chunked V4 dataset not supported");
 
 			} else {
-				throw new HdfException("Unreconised Dataset layout type: " + dlm.getClass().getCanonicalName());
+				throw new HdfException("Unrecognized Dataset layout type: " + dlm.getClass().getCanonicalName());
 			}
 
 		} catch (Exception e) {

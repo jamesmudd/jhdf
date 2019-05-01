@@ -34,7 +34,7 @@ public class BTreeV2<T extends BTreeRecord> {
 	private final long address;
 	/** Type of node. */
 	private final short nodeType;
-	/** The actial records in this b-tree */
+	/** The records in this b-tree */
 	private final List<T> records;
 	/** bytes in each node */
 	private final int nodeSize;
@@ -53,9 +53,9 @@ public class BTreeV2<T extends BTreeRecord> {
 			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
 			// Verify signature
-			byte[] formatSignitureByte = new byte[4];
-			bb.get(formatSignitureByte, 0, formatSignitureByte.length);
-			if (!Arrays.equals(BTREE_NODE_V2_SIGNATURE, formatSignitureByte)) {
+			byte[] formatSignatureBytes = new byte[4];
+			bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
+			if (!Arrays.equals(BTREE_NODE_V2_SIGNATURE, formatSignatureBytes)) {
 				throw new HdfException("B tree V1 node signature not matched");
 			}
 
@@ -93,13 +93,13 @@ public class BTreeV2<T extends BTreeRecord> {
 
 		ByteBuffer bb = hdfFc.readBufferFromAddress(address, nodeSize);
 
-		byte[] nodeSignitureBytes = new byte[4];
-		bb.get(nodeSignitureBytes, 0, nodeSignitureBytes.length);
+		byte[] nodeSignatureBytes = new byte[4];
+		bb.get(nodeSignatureBytes, 0, nodeSignatureBytes.length);
 
 		final boolean leafNode;
-		if (Arrays.equals(BTREE_INTERNAL_NODE_SIGNATURE, nodeSignitureBytes)) {
+		if (Arrays.equals(BTREE_INTERNAL_NODE_SIGNATURE, nodeSignatureBytes)) {
 			leafNode = false;
-		} else if (Arrays.equals(BTREE_LEAF_NODE_SIGNATURE, nodeSignitureBytes)) {
+		} else if (Arrays.equals(BTREE_LEAF_NODE_SIGNATURE, nodeSignatureBytes)) {
 			leafNode = true;
 		} else {
 			throw new HdfException("B tree internal node signature not matched");

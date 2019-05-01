@@ -37,11 +37,11 @@ public class LocalHeap {
 			int headerSize = 8 + hdfFc.getSizeOfLengths() + hdfFc.getSizeOfLengths() + hdfFc.getSizeOfOffsets();
 			ByteBuffer header = hdfFc.readBufferFromAddress(address, headerSize);
 
-			byte[] formatSignitureByte = new byte[4];
-			header.get(formatSignitureByte, 0, formatSignitureByte.length);
+			byte[] formatSignatureBytes = new byte[4];
+			header.get(formatSignatureBytes, 0, formatSignatureBytes.length);
 
 			// Verify signature
-			if (!Arrays.equals(HEAP_SIGNATURE, formatSignitureByte)) {
+			if (!Arrays.equals(HEAP_SIGNATURE, formatSignatureBytes)) {
 				throw new HdfException("Heap signature not matched");
 			}
 

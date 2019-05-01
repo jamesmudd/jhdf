@@ -37,7 +37,7 @@ public class VariableLength extends DataType {
 			encoding = StandardCharsets.UTF_8;
 			break;
 		default:
-			throw new HdfException("Unreconised character encoding = " + characterEncoding);
+			throw new HdfException("Unrecognized character encoding = " + characterEncoding);
 		}
 
 		parent = DataType.readDataType(bb);

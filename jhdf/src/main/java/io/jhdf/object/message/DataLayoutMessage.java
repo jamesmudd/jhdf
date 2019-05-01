@@ -38,7 +38,7 @@ public abstract class DataLayoutMessage extends Message {
 		case 0: // Compact Storage
 			return new CompactDataLayoutMessage(bb, flags);
 		case 1: // Contiguous Storage
-			return new ContigiousDataLayoutMessage(bb, sb, flags);
+			return new ContiguousDataLayoutMessage(bb, sb, flags);
 		case 2: // Chunked Storage
 			if (version == 3) {
 				return new ChunkedDataLayoutMessageV3(bb, sb, flags);
@@ -72,12 +72,12 @@ public abstract class DataLayoutMessage extends Message {
 		}
 	}
 
-	public static class ContigiousDataLayoutMessage extends DataLayoutMessage {
+	public static class ContiguousDataLayoutMessage extends DataLayoutMessage {
 
 		private final long address;
 		private final long size;
 
-		private ContigiousDataLayoutMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
+		private ContiguousDataLayoutMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
 			address = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 			size = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
@@ -193,7 +193,7 @@ public abstract class DataLayoutMessage extends Message {
 				break;
 
 			default:
-				throw new UnsupportedHdfException("Unreconized chunk indexing type. type=" + indexingType);
+				throw new UnsupportedHdfException("Unrecognized chunk indexing type. type=" + indexingType);
 			}
 
 			address = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());

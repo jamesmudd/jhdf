@@ -23,7 +23,7 @@ public class ObjectReferenceCountMessage extends Message {
 
 		byte version = bb.get();
 		if (version != 0) {
-			throw new HdfException("Unreconized version = " + version);
+			throw new HdfException("Unrecognized version = " + version);
 		}
 
 		referenceCount = bb.getInt();

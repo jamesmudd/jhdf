@@ -39,7 +39,7 @@ public class ObjectModificationTimeMessage extends Message {
 
 		final byte version = bb.get();
 		if (version != 1) {
-			throw new HdfException("Unreconised version " + version);
+			throw new HdfException("Unrecognized version " + version);
 		}
 
 		// Skip 3 unused bytes

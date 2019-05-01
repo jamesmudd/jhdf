@@ -62,11 +62,11 @@ public class LinkInfoMessage extends Message {
 		return fractalHeapAddress;
 	}
 
-	public long getbTreeNameIndexAddress() {
+	public long getBTreeNameIndexAddress() {
 		return bTreeNameIndexAddress;
 	}
 
-	public long getbTreeCreationOrderIndexAddress() {
+	public long getBTreeCreationOrderIndexAddress() {
 		return bTreeCreationOrderIndexAddress;
 	}
 

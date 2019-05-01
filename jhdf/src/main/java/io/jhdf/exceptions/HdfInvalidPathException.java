@@ -25,7 +25,7 @@ public class HdfInvalidPathException extends HdfException {
 	private final File file;
 
 	public HdfInvalidPathException(String path, File file) {
-		super("The path '" + path + "' cound not be found in the HDF5 file '" + file.getAbsolutePath() + "'");
+		super("The path '" + path + "' could not be found in the HDF5 file '" + file.getAbsolutePath() + "'");
 		this.path = path;
 		this.file = file;
 	}

@@ -67,14 +67,14 @@ public class GroupImpl extends AbstractNode implements Group {
 			final List<LinkMessage> links;
 
 			final LinkInfoMessage linkInfoMessage = oh.getMessageOfType(LinkInfoMessage.class);
-			if (linkInfoMessage.getbTreeNameIndexAddress() == Constants.UNDEFINED_ADDRESS) {
+			if (linkInfoMessage.getBTreeNameIndexAddress() == Constants.UNDEFINED_ADDRESS) {
 				// Links stored compactly i.e in the object header, so get directly
 				links = oh.getMessagesOfType(LinkMessage.class);
 				logger.debug("Loaded group links from object header");
 			} else {
 				// Links are not stored compactly i.e in the fractal heap
 				final BTreeV2<LinkNameForIndexedGroupRecord> bTreeNode = new BTreeV2<>(hdfFc,
-						linkInfoMessage.getbTreeNameIndexAddress());
+						linkInfoMessage.getBTreeNameIndexAddress());
 				final FractalHeap fractalHeap = new FractalHeap(hdfFc, linkInfoMessage.getFractalHeapAddress());
 
 				List<LinkNameForIndexedGroupRecord> records = bTreeNode.getRecords();
@@ -113,11 +113,11 @@ public class GroupImpl extends AbstractNode implements Group {
 		private Map<String, Node> createOldStyleGroup(final ObjectHeader oh) {
 			logger.debug("Loading 'old' style group");
 			final SymbolTableMessage stm = oh.getMessageOfType(SymbolTableMessage.class);
-			final BTreeV1 rootbTreeNode = BTreeV1.createGroupBTree(hdfFc, stm.getbTreeAddress());
+			final BTreeV1 rootBTreeNode = BTreeV1.createGroupBTree(hdfFc, stm.getBTreeAddress());
 			final LocalHeap rootNameHeap = new LocalHeap(hdfFc, stm.getLocalHeapAddress());
 			final ByteBuffer nameBuffer = rootNameHeap.getDataBuffer();
 
-			final List<Long> childAddresses = rootbTreeNode.getChildAddresses();
+			final List<Long> childAddresses = rootBTreeNode.getChildAddresses();
 			final Map<String, Node> lazyChildren = new LinkedHashMap<>(childAddresses.size());
 
 			for (long child : childAddresses) {
@@ -148,7 +148,7 @@ public class GroupImpl extends AbstractNode implements Group {
 						break;
 					default:
 						throw new HdfException(
-								"Unreconised symbol table entry cache type. Type was: " + ste.getCacheType());
+								"Unrecognized symbol table entry cache type. Type was: " + ste.getCacheType());
 					}
 					lazyChildren.put(childName, node);
 				}
@@ -271,7 +271,7 @@ public class GroupImpl extends AbstractNode implements Group {
 	public Node getByPath(String path) {
 		// Try splitting into 2 sections the child of this group and the remaining path
 		// to pass down.
-		final String[] pathElements = path.split(Constants.PATH_SEPERATOR, 2);
+		final String[] pathElements = path.split(Constants.PATH_SEPARATOR, 2);
 		final Node child = getChild(pathElements[0]);
 		if (pathElements.length == 1 && child != null) {
 			// There is no remaining path to resolve so we have the result

@@ -68,7 +68,7 @@ public class FractalHeapTest {
 		assertThat(fractalHeap.getAddressOfManagedBlocksFreeSpaceManager(), is(equalTo(5270L)));
 		assertThat(fractalHeap.getAmountOfAllocatedManagedSpaceInHeap(), is(equalTo(20480L)));
 		assertThat(fractalHeap.getAmountOfManagedSpaceInHeap(), is(equalTo(262144L)));
-		assertThat(fractalHeap.getbTreeAddressOfHugeObjects(), is(equalTo(UNDEFINED_ADDRESS)));
+		assertThat(fractalHeap.getBTreeAddressOfHugeObjects(), is(equalTo(UNDEFINED_ADDRESS)));
 		assertThat(fractalHeap.getFreeSpaceInManagedBlocks(), is(equalTo(243582L)));
 		assertThat(fractalHeap.getIdLength(), is(equalTo(7)));
 		assertThat(fractalHeap.getIoFiltersLength(), is(equalTo(0)));

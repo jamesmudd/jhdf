@@ -229,7 +229,7 @@ public class HdfFileTest {
 			assertThat(e.getPath(), is(equalTo(path)));
 			assertThat(e.getFile(), is(sameInstance(file)));
 			assertThat(e.getMessage(), is(equalTo(
-					"The path '/datasets_group/float/float32/invalid_name' cound not be found in the HDF5 file '"
+					"The path '/datasets_group/float/float32/invalid_name' could not be found in the HDF5 file '"
 							+ file.getAbsolutePath() + "'")));
 		}
 	}

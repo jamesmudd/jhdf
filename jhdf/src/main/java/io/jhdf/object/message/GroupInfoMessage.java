@@ -31,7 +31,7 @@ import io.jhdf.exceptions.HdfException;
 public class GroupInfoMessage extends Message {
 
 	private static final int LINK_PHASE_CHANGE_PRESENT = 0;
-	private static final int ESTIMATED_ENTRY_INFOMATION_PRESENT = 0;
+	private static final int ESTIMATED_ENTRY_INFORMATION_PRESENT = 0;
 
 	private final int maximumCompactLinks;
 	private final int minimumDenseLinks;
@@ -43,7 +43,7 @@ public class GroupInfoMessage extends Message {
 
 		final byte version = bb.get();
 		if (version != 0) {
-			throw new HdfException("Unreconised version " + version);
+			throw new HdfException("Unrecognized version " + version);
 		}
 
 		BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
@@ -56,7 +56,7 @@ public class GroupInfoMessage extends Message {
 			minimumDenseLinks = -1;
 		}
 
-		if (flags.get(ESTIMATED_ENTRY_INFOMATION_PRESENT)) {
+		if (flags.get(ESTIMATED_ENTRY_INFORMATION_PRESENT)) {
 			estimatedNumberOfEntries = Utils.readBytesAsUnsignedInt(bb, 2);
 			estimatedLengthOfEntryName = Utils.readBytesAsUnsignedInt(bb, 2);
 		} else {

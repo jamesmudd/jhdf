@@ -34,7 +34,7 @@ public class LinkMessage extends Message {
 			case 64:
 				return EXTERNAL;
 			default:
-				throw new HdfException("Unreconized link type: " + typeInt);
+				throw new HdfException("Unrecognized link type: " + typeInt);
 			}
 		}
 	}
@@ -62,7 +62,7 @@ public class LinkMessage extends Message {
 		// Version
 		version = bb.get();
 		if (version != 1) {
-			throw new HdfException("Unreconized version = " + version);
+			throw new HdfException("Unrecognized version = " + version);
 		}
 
 		// Flags
@@ -85,7 +85,7 @@ public class LinkMessage extends Message {
 			sizeOfLengthOfLinkName = 8;
 			break;
 		default:
-			throw new HdfException("Unreconized size of link name");
+			throw new HdfException("Unrecognized size of link name");
 		}
 
 		if (flags.get(LINK_TYPE_PRESENT)) {
@@ -142,7 +142,7 @@ public class LinkMessage extends Message {
 			externalPath = Utils.readUntilNull(externalLinkBuffer);
 			break;
 		default:
-			throw new HdfException("Unreconized link type = " + linkType);
+			throw new HdfException("Unrecognized link type = " + linkType);
 		}
 	}
 

@@ -190,11 +190,11 @@ public abstract class ObjectHeader {
 				ByteBuffer bb = hdfFc.readBufferFromAddress(address, 6);
 				address += 6;
 
-				byte[] formatSignitureByte = new byte[OBJECT_HEADER_V2_SIGNATURE.length];
-				bb.get(formatSignitureByte);
+				byte[] formatSignatureBytes = new byte[OBJECT_HEADER_V2_SIGNATURE.length];
+				bb.get(formatSignatureBytes);
 
 				// Verify signature
-				if (!Arrays.equals(OBJECT_HEADER_V2_SIGNATURE, formatSignitureByte)) {
+				if (!Arrays.equals(OBJECT_HEADER_V2_SIGNATURE, formatSignatureBytes)) {
 					throw new HdfException("Object header v2 signature not matched");
 				}
 
@@ -279,11 +279,11 @@ public abstract class ObjectHeader {
 					ByteBuffer continuationBuffer = hdfFc.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
 
 					// Verify continuation block signature
-					byte[] continuationSignitureBytes = new byte[OBJECT_HEADER_V2_CONTINUATION_SIGNATURE.length];
-					continuationBuffer.get(continuationSignitureBytes);
-					if (!Arrays.equals(OBJECT_HEADER_V2_CONTINUATION_SIGNATURE, continuationSignitureBytes)) {
+					byte[] continuationSignatureBytes = new byte[OBJECT_HEADER_V2_CONTINUATION_SIGNATURE.length];
+					continuationBuffer.get(continuationSignatureBytes);
+					if (!Arrays.equals(OBJECT_HEADER_V2_CONTINUATION_SIGNATURE, continuationSignatureBytes)) {
 						throw new HdfException(
-								"Object header conntinuation header not matched, at address: " + ohcm.getOffset());
+								"Object header continuation header not matched, at address: " + ohcm.getOffset());
 					}
 
 					// Recursively read messages
@@ -350,7 +350,7 @@ public abstract class ObjectHeader {
 
 			@Override
 			protected ObjectHeader initialize() {
-				logger.debug("Lazy initalising object header at address: {}", address);
+				logger.debug("Lazy initializing object header at address: {}", address);
 				return readObjectHeader(hdfFc, address);
 			}
 

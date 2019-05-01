@@ -64,11 +64,11 @@ class LinksTest {
 	void testSoftLinkWithInvalidPath() {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
-			Link softLink = new SoftLink("/non/exisitant/path", "broken_link", hdfFile);
+			Link softLink = new SoftLink("/non/existent/path", "broken_link", hdfFile);
 			assertThat(softLink.isBrokenLink(), is(true));
 			HdfException e = assertThrows(HdfBrokenLinkException.class, softLink::getTarget);
 			assertThat(e.getMessage(),
-					is(equalTo("Could not resolve link target '/non/exisitant/path' from link '/broken_link'")));
+					is(equalTo("Could not resolve link target '/non/existent/path' from link '/broken_link'")));
 		}
 	}
 
@@ -100,11 +100,11 @@ class LinksTest {
 	void testExternalLinkWithInvalidPath() {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
-			Link externalLink = new ExternalLink("test_file_ext.hdf5", "/non/exisitant/path", "broken_link", hdfFile);
+			Link externalLink = new ExternalLink("test_file_ext.hdf5", "/non/existent/path", "broken_link", hdfFile);
 			assertThat(externalLink.isBrokenLink(), is(true));
 			HdfException e = assertThrows(HdfBrokenLinkException.class, externalLink::getTarget);
 			assertThat(e.getMessage(), is(equalTo(
-					"Could not resolve link target '/non/exisitant/path' in external file 'test_file_ext.hdf5' from link '/broken_link'")));
+					"Could not resolve link target '/non/existent/path' in external file 'test_file_ext.hdf5' from link '/broken_link'")));
 		}
 	}
 
@@ -112,11 +112,11 @@ class LinksTest {
 	void testExternalLinkWithInvalidFile() {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
-			Link externalLink = new ExternalLink("/missing_file.hdf5", "/non/exisitant/path", "broken_link", hdfFile);
+			Link externalLink = new ExternalLink("/missing_file.hdf5", "/non/existent/path", "broken_link", hdfFile);
 			assertThat(externalLink.isBrokenLink(), is(true));
 			HdfException e = assertThrows(HdfBrokenLinkException.class, externalLink::getTarget);
 			assertThat(e.getMessage(), is(equalTo(
-					"Could not resolve link target '/non/exisitant/path' in external file '/missing_file.hdf5' from link '/broken_link'")));
+					"Could not resolve link target '/non/existent/path' in external file '/missing_file.hdf5' from link '/broken_link'")));
 		}
 	}
 

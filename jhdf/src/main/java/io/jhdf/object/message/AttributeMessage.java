@@ -105,9 +105,9 @@ public class AttributeMessage extends Message {
 			final int dataTypeSize = Utils.readBytesAsUnsignedInt(bb, 2);
 			final int dataSpaceSize = Utils.readBytesAsUnsignedInt(bb, 2);
 
-			final byte charaterEncoding = bb.get();
+			final byte characterEncoding = bb.get();
 			final Charset charset;
-			switch (charaterEncoding) {
+			switch (characterEncoding) {
 			case 0:
 				charset = StandardCharsets.US_ASCII;
 				break;
@@ -115,7 +115,7 @@ public class AttributeMessage extends Message {
 				charset = StandardCharsets.UTF_8;
 				break;
 			default:
-				throw new UnsupportedHdfException("Unreconized character set detected: " + charaterEncoding);
+				throw new UnsupportedHdfException("Unrecognized character set detected: " + characterEncoding);
 			}
 
 			ByteBuffer nameBuffer = Utils.createSubBuffer(bb, nameSize);

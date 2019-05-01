@@ -38,11 +38,11 @@ public class GlobalHeap {
 
 			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
-			byte[] signitureBytes = new byte[4];
-			bb.get(signitureBytes, 0, signitureBytes.length);
+			byte[] signatureBytes = new byte[4];
+			bb.get(signatureBytes, 0, signatureBytes.length);
 
 			// Verify signature
-			if (!Arrays.equals(GLOBAL_HEAP_SIGNATURE, signitureBytes)) {
+			if (!Arrays.equals(GLOBAL_HEAP_SIGNATURE, signatureBytes)) {
 				throw new HdfException("Global heap signature 'GCOL' not matched, at address " + address);
 			}
 

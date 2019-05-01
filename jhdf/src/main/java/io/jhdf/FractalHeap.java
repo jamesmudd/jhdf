@@ -102,11 +102,11 @@ public class FractalHeap {
 
 			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
-			byte[] formatSignitureByte = new byte[4];
-			bb.get(formatSignitureByte, 0, formatSignitureByte.length);
+			byte[] formatSignatureBytes = new byte[4];
+			bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
 
 			// Verify signature
-			if (!Arrays.equals(FRACTAL_HEAP_SIGNATURE, formatSignitureByte)) {
+			if (!Arrays.equals(FRACTAL_HEAP_SIGNATURE, formatSignatureBytes)) {
 				throw new HdfException("Fractal heap signature 'FRHP' not matched, at address " + address);
 			}
 
@@ -171,10 +171,10 @@ public class FractalHeap {
 				} else {
 					// Read indirect block
 					IndirectBlock indirectBlock = new IndirectBlock(addressOfRootBlock);
-					for (long directBlockAddres : indirectBlock.childBlockAddresses) {
+					for (long directBlockAddress : indirectBlock.childBlockAddresses) {
 						int blockSize = getSizeOfDirectBlock(blockIndex++);
 						if (blockSize != -1) {
-							DirectBlock db = new DirectBlock(directBlockAddres);
+							DirectBlock db = new DirectBlock(directBlockAddress);
 							directBlocks.put(db.getBlockOffset(), db);
 						} else {
 							new IndirectBlock(address);
@@ -226,7 +226,7 @@ public class FractalHeap {
 		case 2: // Tiny objects
 			throw new UnsupportedHdfException("Tiny objects are currently not supported");
 		default:
-			throw new HdfException("Unreconized ID type, type=" + type);
+			throw new HdfException("Unrecognized ID type, type=" + type);
 		}
 	}
 
@@ -241,19 +241,19 @@ public class FractalHeap {
 
 			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
-			byte[] formatSignitureByte = new byte[4];
-			bb.get(formatSignitureByte, 0, formatSignitureByte.length);
+			byte[] formatSignatureBytes = new byte[4];
+			bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
 
 			// Verify signature
-			if (!Arrays.equals(INDIRECT_BLOCK_SIGNATURE, formatSignitureByte)) {
+			if (!Arrays.equals(INDIRECT_BLOCK_SIGNATURE, formatSignatureBytes)) {
 				throw new HdfException(
 						"Fractal heap indirect block signature 'FHIB' not matched, at address " + address);
 			}
 
 			// Version Number
-			byte indirectBlockversion = bb.get();
-			if (indirectBlockversion != 0) {
-				throw new HdfException("Unsupported indirect block version detected. Version: " + indirectBlockversion);
+			byte indirectBlockVersion = bb.get();
+			if (indirectBlockVersion != 0) {
+				throw new HdfException("Unsupported indirect block version detected. Version: " + indirectBlockVersion);
 			}
 
 			long heapAddress = readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
@@ -306,18 +306,18 @@ public class FractalHeap {
 
 			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
-			byte[] formatSignitureByte = new byte[4];
-			bb.get(formatSignitureByte, 0, formatSignitureByte.length);
+			byte[] formatSignatureBytes = new byte[4];
+			bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
 
 			// Verify signature
-			if (!Arrays.equals(DIRECT_BLOCK_SIGNATURE, formatSignitureByte)) {
+			if (!Arrays.equals(DIRECT_BLOCK_SIGNATURE, formatSignatureBytes)) {
 				throw new HdfException("Fractal heap direct block signature 'FHDB' not matched, at address " + address);
 			}
 
 			// Version Number
-			byte directBlockersion = bb.get();
-			if (directBlockersion != 0) {
-				throw new HdfException("Unsupported direct block version detected. Version: " + directBlockersion);
+			byte directBlockVersion = bb.get();
+			if (directBlockVersion != 0) {
+				throw new HdfException("Unsupported direct block version detected. Version: " + directBlockVersion);
 			}
 
 			long heapAddress = readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
@@ -438,7 +438,7 @@ public class FractalHeap {
 		return freeSpaceInManagedBlocks;
 	}
 
-	public long getbTreeAddressOfHugeObjects() {
+	public long getBTreeAddressOfHugeObjects() {
 		return bTreeAddressOfHugeObjects;
 	}
 

@@ -82,9 +82,9 @@ public abstract class BTreeV1 {
 		ByteBuffer header = fc.readBufferFromAddress(address, HEADER_BYTES);
 
 		// Verify signature
-		byte[] formatSignitureByte = new byte[4];
-		header.get(formatSignitureByte, 0, formatSignitureByte.length);
-		if (!Arrays.equals(BTREE_NODE_V1_SIGNATURE, formatSignitureByte)) {
+		byte[] formatSignatureByte = new byte[4];
+		header.get(formatSignatureByte, 0, formatSignatureByte.length);
+		if (!Arrays.equals(BTREE_NODE_V1_SIGNATURE, formatSignatureByte)) {
 			throw new HdfException("B tree V1 node signature not matched");
 		}
 		return header;

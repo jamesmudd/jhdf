@@ -37,16 +37,16 @@ public abstract class AbstractNode implements Node {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractNode.class);
 
 	protected final class AttributesLazyInitializer extends LazyInitializer<Map<String, Attribute>> {
-		private final LazyInitializer<ObjectHeader> lazyOjbectHeader;
+		private final LazyInitializer<ObjectHeader> lazyObjectHeader;
 
-		public AttributesLazyInitializer(LazyInitializer<ObjectHeader> lazyOjbectHeader) {
-			this.lazyOjbectHeader = lazyOjbectHeader;
+		public AttributesLazyInitializer(LazyInitializer<ObjectHeader> lazyObjectHeader) {
+			this.lazyObjectHeader = lazyObjectHeader;
 		}
 
 		@Override
 		protected Map<String, Attribute> initialize() throws ConcurrentException {
 			logger.debug("Lazy initializing attributes for '{}'", getPath());
-			final ObjectHeader oh = lazyOjbectHeader.get();
+			final ObjectHeader oh = lazyObjectHeader.get();
 
 			List<AttributeMessage> attributeMessages = new ArrayList<>();
 
