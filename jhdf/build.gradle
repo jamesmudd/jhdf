@@ -23,12 +23,12 @@ plugins {
     
     // Community plugins (need versions)
     id 'com.jfrog.bintray' version '1.8.4' // For publishing to Bintray
-    id 'org.sonarqube' version '2.7' // Code quality
+    id 'org.sonarqube' version '2.7.1' // Code quality
 }
 
-// Varibles
+// Variables
 group = 'io.jhdf'
-version = '0.4.2'
+version = '0.4.3'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -64,6 +64,15 @@ test {
 	}
 }
 
+def getGitHash = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', '--verify', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
 jar {
     manifest {
         attributes('Implementation-Title': project.name,
@@ -74,7 +83,12 @@ jar {
                    'Bundle-SymbolicName': 'io.jhdf',
                    'Bundle-Name': project.name,
                    'Bundle-Vendor': 'James Mudd',
-                   'Export-Package': 'io.jhdf.*'
+                   'Export-Package': 'io.jhdf.*',
+                   // Build data
+                   'Build-Time': new Date().toTimestamp(),
+                   'Build-JDK': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
+                   'Build-OS': System.getProperty('os.name') + ' ' + System.getProperty('os.version'),
+                   'Git-Commit': getGitHash()
                    )
         exclude('io/jhdf/examples')
     }
@@ -89,12 +103,12 @@ jacocoTestReport {
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
-    classifier = 'sources'
+    archiveClassifier = 'sources'
 }
 
 task javadocJar(type: Jar) {
     from javadoc
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
 }
 
 publishing {

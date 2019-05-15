@@ -2,6 +2,11 @@
 
 Please note this project is still in pre-release development.
 
+## v0.4.3
+- Initial work for #49 slow chunked dataset reads
+- Lots of typos cleaned up
+- Add additional build data to MANIFEST.MF
+
 ## v0.4.2
 - Add support for byte shuffle filter
 - Many filter management improvements including support for dynamically loaded filters
