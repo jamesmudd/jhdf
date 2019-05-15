@@ -26,7 +26,7 @@ plugins {
     id 'org.sonarqube' version '2.7.1' // Code quality
 }
 
-// Varibles
+// Variables
 group = 'io.jhdf'
 version = '0.4.2'
 sourceCompatibility = 1.8
@@ -103,12 +103,12 @@ jacocoTestReport {
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
-    classifier = 'sources'
+    archiveClassifier = 'sources'
 }
 
 task javadocJar(type: Jar) {
     from javadoc
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
 }
 
 publishing {
