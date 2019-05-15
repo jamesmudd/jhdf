@@ -28,7 +28,7 @@ plugins {
 
 // Variables
 group = 'io.jhdf'
-version = '0.4.2'
+version = '0.4.3'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
