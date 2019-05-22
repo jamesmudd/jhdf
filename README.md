@@ -21,7 +21,8 @@ For an example of traversing the tree inside a HDF5 file see [PrintTree.java](jh
 ## Developing jHDF
 - Clone this repository.
 - Inside the `jhdf` directory run `./gradlew build` (`./gradlew.bat build` on Windows) this will run the build and tests fetching dependencies. 
-- To prepare the project for an IDE run `./gradlew eclipse` for Eclipse, or `./gradlew idea` for IntelliJ. This should create the necessary project files for the project to be imported and setup in the IDE.
+- Import the Gradle project `jhdf` into your IDE
+- Add tests and make changes
 - Once you have made any changes please open a pull request.
 
 To see other available Gradle tasks run `./gradlew tasks` 
