@@ -15,8 +15,6 @@ plugins {
     // Core plugins
 	id 'java-library'
     id 'jacoco' // Code coverage
-    id 'eclipse' // To create eclipse project
-    id 'idea' // To create InteliJ project
     id 'maven-publish' // For the artifact collections to publish
     id 'signing' // For GPG signing artifacts
     id 'checkstyle' // Code style checks
@@ -65,12 +63,17 @@ test {
 }
 
 def getGitHash = { ->
-    def stdout = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', 'rev-parse', '--verify', 'HEAD'
-        standardOutput = stdout
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', '--verify', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    } catch (Exception e) {
+        // Can happen if git is unavailable
+        return "UNAVALIABLE"
     }
-    return stdout.toString().trim()
 }
 
 jar {

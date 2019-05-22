@@ -1,4 +1,5 @@
 /bin/
+/out/
 
 # Gradle
 /.gradle
@@ -9,3 +10,9 @@
 .classpath
 .project
 .pydevproject
+
+# IDEA
+/.idea
+*.iml
+*.ipr
+*.iws
