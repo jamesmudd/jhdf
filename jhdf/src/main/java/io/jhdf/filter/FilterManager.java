@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+import io.jhdf.exceptions.HdfException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +28,7 @@ import io.jhdf.object.message.FilterPipelineMessage.FilterInfo;
  *
  * @author James Mudd
  */
-public enum FilterManager {
-	INSTANCE; // Enum singleton pattern
+public enum FilterManager {; // Enum singleton pattern
 
 	private static final Logger logger = LoggerFactory.getLogger(FilterManager.class);
 
@@ -72,9 +72,21 @@ public enum FilterManager {
 	 * @param filterPipelineMessage message containing the datasets filter
 	 *                              specification.
 	 * @return the new pipeline
+	 * @throws HdfFilterException if a required filter is not available
 	 */
 	public static FilterPipeline getPipeline(FilterPipelineMessage filterPipelineMessage) {
 		List<FilterInfo> filters = filterPipelineMessage.getFilters();
+
+		// Check all the required filters are available
+		if(!filters.stream().allMatch(filter -> ID_TO_FILTER.containsKey(filter.getId()))) {
+			// Figure out the missing filter
+			FilterInfo missingFilterInfo = filters.stream()
+                    .filter(filter -> !ID_TO_FILTER.containsKey(filter.getId()))
+                    .findFirst() // There should be at least one, that's why were here
+                    .orElseThrow(() -> new HdfException("Failed to determine missing filter"));
+			throw new HdfFilterException("A required filter is not available: name='" + missingFilterInfo.getName()
+                    + "' id=" + missingFilterInfo.getId());
+		}
 
 		// Decoding so reverse order
 		Collections.reverse(filters);

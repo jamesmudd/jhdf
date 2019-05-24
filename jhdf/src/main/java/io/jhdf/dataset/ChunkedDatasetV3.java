@@ -51,21 +51,14 @@ public class ChunkedDatasetV3 extends DatasetBase {
 
 	private final ChunkedDataLayoutMessageV3 layoutMessage;
 
-	private final FilterPipeline pipeline;
+	private final FilterPipelineLazyInitializer lazyPipeline;
 
 	public ChunkedDatasetV3(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
 		super(hdfFc, address, name, parent, oh);
 
 		layoutMessage = oh.getMessageOfType(ChunkedDataLayoutMessageV3.class);
 
-		// If the dataset has filters get the message
-		if (oh.hasMessageOfType(FilterPipelineMessage.class)) {
-			FilterPipelineMessage filterPipelineMessage = oh.getMessageOfType(FilterPipelineMessage.class);
-			pipeline = FilterManager.getPipeline(filterPipelineMessage);
-		} else {
-			pipeline = null;
-		}
-
+		lazyPipeline = new FilterPipelineLazyInitializer();
 		chunkLookup = new ChunkLookupLazyInitializer();
 	}
 
@@ -111,17 +104,23 @@ public class ChunkedDatasetV3 extends DatasetBase {
 		final byte[] encodedBytes = new byte[encodedBuffer.remaining()];
 		encodedBuffer.get(encodedBytes);
 
-		if (pipeline == null) {
-			// No filters
-			logger.debug("No filters returning decoded chunk '{}'", chunk);
-			return encodedBytes;
+		try {
+			final FilterPipeline pipeline = this.lazyPipeline.get();
+
+			if (pipeline == null) {
+				// No filters
+				logger.debug("No filters returning decoded chunk '{}'", chunk);
+				return encodedBytes;
+			}
+
+			// Decode using the pipeline applying the filters
+			final byte[] decodedBytes = pipeline.decode(encodedBytes);
+			logger.debug("Decoded {}", chunk);
+
+			return decodedBytes;
+		} catch (ConcurrentException e) {
+			throw new HdfException("Failed to get filter pipeline", e);
 		}
-
-		// Decode using the pipeline applying the filters
-		final byte[] decodedBytes = pipeline.decode(encodedBytes);
-		logger.debug("Decoded {}", chunk);
-
-		return decodedBytes;
 	}
 
 	private Chunk getChunk(ChunkOffsetKey key) {
@@ -170,6 +169,22 @@ public class ChunkedDatasetV3 extends DatasetBase {
 			chunkOffset[i] = (dimensionedIndex[i] / temp) * temp;
 		}
 		return chunkOffset;
+	}
+
+	private final class FilterPipelineLazyInitializer extends LazyInitializer<FilterPipeline> {
+		@Override
+		protected FilterPipeline initialize() {
+			logger.debug("Lazy initializing filter pipeline for '{}'", getPath());
+
+			// If the dataset has filters get the message
+			if (oh.hasMessageOfType(FilterPipelineMessage.class)) {
+				FilterPipelineMessage filterPipelineMessage = oh.getMessageOfType(FilterPipelineMessage.class);
+				return  FilterManager.getPipeline(filterPipelineMessage);
+			} else {
+				// No filters
+				return null;
+			}
+		}
 	}
 
 	private final class ChunkLookupLazyInitializer extends LazyInitializer<Map<ChunkOffsetKey, Chunk>> {
