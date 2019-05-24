@@ -61,7 +61,9 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		if (dataType instanceof OrderedDataType) {
 			final ByteOrder order = (((OrderedDataType) dataType).getByteOrder());
 			bb.order(order);
-			logger.debug("Set buffer oder of '{}' to {}", getPath(), order);
+			if(logger.isTraceEnabled()) {
+				logger.trace("Set buffer order of '{}' to {}", getPath(), order);
+			}
 		} else {
 			bb.order(LITTLE_ENDIAN);
 		}
