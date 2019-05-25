@@ -49,12 +49,12 @@ import io.jhdf.api.NodeType;
  *
  * @author James Mudd
  */
-public class TestAllFiles {
+class TestAllFiles {
 
 	private static final PathMatcher HDF5 = FileSystems.getDefault().getPathMatcher("glob:**.hdf5");
 
 	@TestFactory
-	public Stream<DynamicNode> allHdf5TestFiles() throws IOException, URISyntaxException {
+	Stream<DynamicNode> allHdf5TestFiles() throws IOException, URISyntaxException {
 
 		// Auto discover the test files assuming they exist in under the directory
 		// containing test_file.hdf5
@@ -107,17 +107,16 @@ public class TestAllFiles {
 		assertThat(dataset.isLink(), is(false));
 		assertThat(dataset.getType(), is(NodeType.DATASET));
 		assertThat(dataset.getDataLayout(), is(notNullValue()));
+		final Object data = dataset.getData();
 		if (dataset.isEmpty()) {
-			assertThat(dataset.getData(), is(nullValue()));
+			assertThat(data, is(nullValue()));
 			// Empty so should have 0 size
 			assertThat(dataset.getDiskSize(), is(equalTo(0L)));
 		} else if (dataset.isScalar()) {
-			Object data = dataset.getData();
 			assertThat(data.getClass(), is(equalTo(dataset.getJavaType())));
 			// Should have some size
 			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
 		} else {
-			Object data = dataset.getData();
 			assertThat(getDimensions(data), is(equalTo(dims)));
 			assertThat(getType(data), is(equalTo(dataset.getJavaType())));
 			// Should have some size
