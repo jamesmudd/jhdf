@@ -28,7 +28,7 @@ public abstract class DataType {
 		bb.mark();
 
 		// Class and version
-		BitSet classAndVersion = BitSet.valueOf(new byte[] { bb.get() });
+		final BitSet classAndVersion = BitSet.valueOf(new byte[]{ bb.get() });
 		int version = Utils.bitsToInt(classAndVersion, 4, 4);
 		int dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
 
@@ -43,16 +43,30 @@ public abstract class DataType {
 		bb.reset();
 
 		switch (dataClass) {
-		case 0: // Fixed point
-			return new FixedPoint(bb);
-		case 1:
-			return new FloatingPoint(bb);
-		case 3:
-			return new StringData(bb);
-		case 9: // Variable length
-			return new VariableLength(bb);
-		default:
-			throw new HdfException("Unrecognized data class = " + dataClass);
+			case 0: // Fixed point
+				return new FixedPoint(bb);
+			case 1: // Floating point
+				return new FloatingPoint(bb);
+			case 2: // Time
+				throw new UnsupportedHdfException("Time data type is not yet supported");
+			case 3: // String
+				return new StringData(bb);
+			case 4: // Bit field
+				throw new UnsupportedHdfException("Bit field data type is not yet supported");
+			case 5: // Opaque
+				throw new UnsupportedHdfException("Opaque data type is not yet supported");
+			case 6: // Compound
+				throw new UnsupportedHdfException("Compound data type is not yet supported");
+			case 7: // Reference
+				throw new UnsupportedHdfException("Reference data type is not yet supported");
+			case 8: // Enum
+				throw new UnsupportedHdfException("Enumerated data type is not yet supported");
+			case 9: // Variable length
+				return new VariableLength(bb);
+			case 10: // Array
+				throw new UnsupportedHdfException("Array data type is not yet supported");
+			default:
+				throw new HdfException("Unrecognized data class = " + dataClass);
 		}
 
 	}
@@ -60,9 +74,9 @@ public abstract class DataType {
 	protected DataType(ByteBuffer bb) {
 
 		// Class and version
-		BitSet classAndVersion = BitSet.valueOf(new byte[] { bb.get() });
-		version = Utils.bitsToInt(classAndVersion, 4, 4);
+		final BitSet classAndVersion = BitSet.valueOf(new byte[] { bb.get() });
 		dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
+		version = Utils.bitsToInt(classAndVersion, 4, 4);
 
 		byte[] classBytes = new byte[3];
 		bb.get(classBytes);
