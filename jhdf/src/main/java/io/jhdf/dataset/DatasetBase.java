@@ -15,6 +15,7 @@ import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import io.jhdf.object.datatype.CompoundDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,6 +129,8 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		if (type instanceof VariableLength) {
 			return VariableLengthDatasetReader.readDataset((VariableLength) type, bb,
 					getDimensions(), hdfFc);
+		} else if(type instanceof CompoundDataType) {
+			return CompoundDatasetReader.readDataset((CompoundDataType) type, bb, getSize(), getDimensions());
 		} else {
 			return DatasetReader.readDataset(type, bb, getDimensions());
 		}

@@ -56,7 +56,7 @@ public abstract class DataType {
 			case 5: // Opaque
 				throw new UnsupportedHdfException("Opaque data type is not yet supported");
 			case 6: // Compound
-				throw new UnsupportedHdfException("Compound data type is not yet supported");
+				return new CompoundDataType(bb);
 			case 7: // Reference
 				throw new UnsupportedHdfException("Reference data type is not yet supported");
 			case 8: // Enum
