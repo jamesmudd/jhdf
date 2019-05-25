@@ -128,8 +128,7 @@ public final class DatasetReader {
 						"Unsupported floating point type size " + floatingPoint.getSize() + " bytes");
 			}
 		} else if (type instanceof StringData) {
-			StringData stringData = (StringData) type;
-			int stringLength = stringData.getSize();
+			int stringLength = type.getSize();
 			fillFixedLengthStringData(data, dimensions, buffer, stringLength);
 		} else {
 			throw new HdfException(

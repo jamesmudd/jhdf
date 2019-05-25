@@ -128,7 +128,14 @@ public class GroupImpl extends AbstractNode implements Group {
 					switch (ste.getCacheType()) {
 					case 0: // No cache
 						// Not cached so need to look at header
-						ObjectHeader header = ObjectHeader.readObjectHeader(hdfFc, ste.getObjectHeaderAddress());
+						final ObjectHeader header;
+						try {
+							header = ObjectHeader.readObjectHeader(hdfFc, ste.getObjectHeaderAddress());
+						} catch (HdfException e) {
+							// Add context here we know the child name that failed
+							throw new HdfException("Failed to read '" + getPath() + childName + "'", e);
+						}
+
 						if (header.hasMessageOfType(DataLayoutMessage.class)) {
 							logger.trace("Creating dataset '{}'", childName);
 							node = DatasetLoader.createDataset(hdfFc, header, childName, parent);
