@@ -2,6 +2,11 @@
 
 Please note this project is still in pre-release development.
 
+## v0.4.4
+- Fix #88 error when running on Java 8 
+- Improvements to IDE support
+- Improvements to exceptions in currently unsupported cases
+
 ## v0.4.3
 - Initial work for #49 slow chunked dataset reads
 - Lots of typos cleaned up
