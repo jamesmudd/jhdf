@@ -73,7 +73,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
 
         final int fastestChunkDim = chunkDimensions[chunkDimensions.length - 1];
 
-        for (Chunk chunk : chunks) {
+        chunks.parallelStream().forEach(chunk ->  {
             final byte[] chunkData = decompressChunk(chunk);
 
             // Now need to figure out how to put this chunks data into the output array
@@ -121,7 +121,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
 
             }
 
-        }
+        });
 
         return ByteBuffer.wrap(dataArray);
     }
