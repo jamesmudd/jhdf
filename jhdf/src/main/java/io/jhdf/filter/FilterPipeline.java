@@ -21,7 +21,6 @@ import io.jhdf.exceptions.HdfFilterException;
  */
 public class FilterPipeline {
 
-	/* package */
 	private class PipelineFilterWithData {
 
 		final Filter filter;
