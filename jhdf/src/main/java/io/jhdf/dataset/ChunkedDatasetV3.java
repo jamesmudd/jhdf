@@ -20,7 +20,6 @@ import io.jhdf.filter.FilterManager;
 import io.jhdf.filter.FilterPipeline;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
 import io.jhdf.object.message.FilterPipelineMessage;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
@@ -67,70 +66,94 @@ public class ChunkedDatasetV3 extends DatasetBase {
         final BTreeV1Data bTree = BTreeV1.createDataBTree(hdfFc, layoutMessage.getBTreeAddress(), getDimensions().length);
         final Collection<Chunk> chunks = bTree.getChunks();
 
+        // These are all the same for every chunk
         final int[] chunkDimensions = layoutMessage.getChunkDimensions();
         final int[] chunkInternalOffsets = getChunkInternalOffsets(chunkDimensions, elementSize);
         final int[] dataOffsets = getDataOffsets(chunkInternalOffsets);
-
         final int fastestChunkDim = chunkDimensions[chunkDimensions.length - 1];
 
-        chunks.parallelStream().forEach(chunk ->  {
-            final byte[] chunkData = decompressChunk(chunk);
-
-            // Now need to figure out how to put this chunks data into the output array
-            final int[] chunkOffset = chunk.getChunkOffset();
-            final int initialChunkOffset = dimensionIndexToLinearIndex(chunkOffset, getDimensions());
-
-            if (!isPartialChunk(chunk)) {
-                // Not a partial chunk so can always copy the max amount
-                final int length = fastestChunkDim * elementSize;
-                for (int i = 0; i < chunkInternalOffsets.length; i++) {
-                    System.arraycopy(
-                            chunkData, chunkInternalOffsets[i], // src
-                            dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
-                            length); // length
-                }
-            } else {
-                // Partial chunk
-                final int highestDimIndex = getDimensions().length - 1;
-
-                test:
-                for (int i = 0; i < chunkInternalOffsets.length; i++) {
-                    // Quick check first if the data starts outside then we know this part of the chunk can be skipped
-                    if (dataOffsets[i] > dataArray.length) {
-                        continue;
-                    }
-
-                    // Is this part of the chunk outside the dataset?
-                    int[] ints = linearIndexToDimensionIndex(chunkInternalOffsets[i] / elementSize, chunkDimensions);
-                    for (int j = 0; j < ints.length - 1; j++) {
-                        if (chunkOffset[j] + ints[j] >= getDimensions()[j]) {
-                            continue test; // TODO remove this label
-                        }
-                    }
-
-                    // TODO rethink this expression
-                    int length = Math.min(fastestChunkDim,
-                            fastestChunkDim - (chunkOffset[highestDimIndex] + chunkDimensions[highestDimIndex] - getDimensions()[highestDimIndex]));
-                    length *= elementSize;
-
-                    System.arraycopy(
-                            chunkData, chunkInternalOffsets[i], // src
-                            dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
-                            length); // length
-                }
-
-            }
-
-        });
+        // Parallel decoding and filling, this is where all the work is done
+        chunks.parallelStream().forEach(chunk -> fillDataFromChunk(chunk, dataArray, chunkDimensions,
+                chunkInternalOffsets, dataOffsets, fastestChunkDim, elementSize));
 
         return ByteBuffer.wrap(dataArray);
+    }
+
+    private void fillDataFromChunk(final Chunk chunk,
+                                   final byte[] dataArray,
+                                   final int[] chunkDimensions,
+                                   final int[] chunkInternalOffsets,
+                                   final int[] dataOffsets,
+                                   final int fastestChunkDim,
+                                   final int elementSize) {
+
+        logger.debug("Filling data from chunk '{}'", chunk);
+
+        // Get the un-filtered (decompressed) data in this chunk
+        final byte[] chunkData = decompressChunk(chunk);
+
+        // Now need to figure out how to put this chunks data into the output array
+        final int[] chunkOffset = chunk.getChunkOffset();
+        final int initialChunkOffset = dimensionIndexToLinearIndex(chunkOffset, getDimensions());
+
+        if (!isPartialChunk(chunk)) {
+            // Not a partial chunk so can always copy the max amount
+            final int length = fastestChunkDim * elementSize;
+            for (int i = 0; i < chunkInternalOffsets.length; i++) {
+                System.arraycopy(
+                        chunkData, chunkInternalOffsets[i], // src
+                        dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
+                        length); // length
+            }
+        } else {
+            logger.debug("Handling partial chunk '{}'", chunk);
+            // Partial chunk
+            final int highestDimIndex = getDimensions().length - 1;
+
+            for (int i = 0; i < chunkInternalOffsets.length; i++) {
+                // Quick check first if the data starts outside then we know this part of the chunk can be skipped
+                // Does not consider dimensions
+                if (dataOffsets[i] > dataArray.length) {
+                    continue;
+                }
+                // Is this part of the chunk outside the dataset including dimensions?
+                if(partOfChunkIsOutsideDataset(chunkInternalOffsets[i]/ elementSize, chunkDimensions, chunkOffset)) {
+                    continue;
+                }
+
+                // Its inside so we need to copy at least something. Now work out how much?
+                final int length = elementSize * Math.min(fastestChunkDim,
+                        fastestChunkDim - (chunkOffset[highestDimIndex] + chunkDimensions[highestDimIndex] - getDimensions()[highestDimIndex]));
+
+                System.arraycopy(
+                        chunkData, chunkInternalOffsets[i], // src
+                        dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
+                        length); // length
+            }
+
+        }
+    }
+
+    private boolean partOfChunkIsOutsideDataset(final int chunkInternalOffsetIndex,
+                                                final int[] chunkDimensions,
+                                                final int[] chunkOffset) {
+
+        int[] locationInChunk = linearIndexToDimensionIndex(chunkInternalOffsetIndex, chunkDimensions);
+        for (int j = 0; j < locationInChunk.length - 1; j++) {
+            // Check if this dimension would be outside the dataset
+            if (chunkOffset[j] + locationInChunk[j] >= getDimensions()[j]) {
+                return true;
+            }
+        }
+        // Nothing is outside
+        return false;
     }
 
     /**
      * Calculates the linear offsets into the dataset for each of the chunks internal offsets. It can be thought of as
      * only doing this do the first chunk as to calculate the offsets required for any other chunk you need to add
      * the inital linear offset of that chunk to each of these values.
-     * */
+     */
     private int[] getDataOffsets(int[] chunkInternalOffsets) {
 
         final int[] dimensionLinearOffsets = getDimensionLinearOffsets();
@@ -138,7 +161,7 @@ public class ChunkedDatasetV3 extends DatasetBase {
         final int elementSize = getDataType().getSize();
 
         final int[] dataOffsets = new int[chunkInternalOffsets.length];
-                for (int i = 0; i < chunkInternalOffsets.length; i++) {
+        for (int i = 0; i < chunkInternalOffsets.length; i++) {
             final int[] chunkDimIndex = linearIndexToDimensionIndex((chunkInternalOffsets[i] / elementSize), chunkDimensions);
 
             int dataOffset = 0;
