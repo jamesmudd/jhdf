@@ -57,7 +57,7 @@ public class ChunkedDatasetTest {
 		return () -> {
 			Dataset dataset = hdfFile.getDatasetByPath(datasetPath);
 			Object data = dataset.getData();
-			assertThat(getDimensions(data), is(equalTo(new int[] { 7, 5 })));
+			assertThat(getDimensions(data), is(equalTo(new int[] { 7, 5, 3 })));
 			Object[] flatData = flatten((Object[]) data);
 			for (int i = 0; i < flatData.length; i++) {
 				// Do element comparison as there are all different primitive numeric types
