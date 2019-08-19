@@ -95,6 +95,8 @@ jar {
                    )
         exclude('io/jhdf/examples')
     }
+    from('../CHANGES.md')
+    from('../LICENSE')
 }
 
 jacocoTestReport {
