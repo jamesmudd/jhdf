@@ -62,7 +62,7 @@ public class BTreeV1Test {
 
 	@Test
 	void testDataBTreeNode() {
-		BTreeV1Data bTree = BTreeV1.createDataBTree(hdfFc, 2104, 2);
+		BTreeV1Data bTree = BTreeV1.createDataBTree(hdfFc, 2104, 3);
 
 		assertThat(bTree.getAddress(), is(equalTo(2104L)));
 		assertThat(bTree.getEntriesUsed(), is(equalTo(20)));

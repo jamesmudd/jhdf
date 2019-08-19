@@ -9,21 +9,6 @@
  ******************************************************************************/
 package io.jhdf.dataset;
 
-import static java.lang.Math.toIntExact;
-
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
@@ -35,6 +20,16 @@ import io.jhdf.filter.FilterManager;
 import io.jhdf.filter.FilterPipeline;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
 import io.jhdf.object.message.FilterPipelineMessage;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Collection;
+
+import static java.lang.Math.toIntExact;
 
 /**
  * This represents chunked datasets using a b-tree for indexing raw data chunks.
@@ -44,201 +39,262 @@ import io.jhdf.object.message.FilterPipelineMessage;
  * @author James Mudd
  */
 public class ChunkedDatasetV3 extends DatasetBase {
-	private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetV3.class);
+    private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetV3.class);
 
-	private final LazyInitializer<Map<ChunkOffsetKey, Chunk>> chunkLookup;
-	private final ConcurrentMap<ChunkOffsetKey, byte[]> decodedChunkLookup = new ConcurrentHashMap<>();
+    private final ChunkedDataLayoutMessageV3 layoutMessage;
+    private final FilterPipelineLazyInitializer lazyPipeline;
 
-	private final ChunkedDataLayoutMessageV3 layoutMessage;
+    public ChunkedDatasetV3(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
+        super(hdfFc, address, name, parent, oh);
 
-	private final FilterPipelineLazyInitializer lazyPipeline;
+        layoutMessage = oh.getMessageOfType(ChunkedDataLayoutMessageV3.class);
 
-	public ChunkedDatasetV3(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
-		super(hdfFc, address, name, parent, oh);
+        lazyPipeline = new FilterPipelineLazyInitializer();
+    }
 
-		layoutMessage = oh.getMessageOfType(ChunkedDataLayoutMessageV3.class);
+    @Override
+    public ByteBuffer getDataBuffer() {
+        logger.trace("Getting data buffer for {}", getPath());
 
-		lazyPipeline = new FilterPipelineLazyInitializer();
-		chunkLookup = new ChunkLookupLazyInitializer();
-	}
+        // Need to load the full buffer into memory so create the array
+        final byte[] dataArray = new byte[toIntExact(getDiskSize())];
+        logger.trace("Created data buffer for '{}' of size {} bytes", getPath(), dataArray.length);
 
-	@Override
-	public ByteBuffer getDataBuffer() {
+        final int elementSize = getDataType().getSize();
 
-		// Need to load the full buffer into memory so create the array
-		byte[] dataArray = new byte[toIntExact(getDiskSize())];
-		logger.trace("Created data buffer for '{}' of size {} bytes", getPath(), dataArray.length);
+        // Get all chunks because were reading the whole dataset
+        final BTreeV1Data bTree = BTreeV1.createDataBTree(hdfFc, layoutMessage.getBTreeAddress(), getDimensions().length);
+        final Collection<Chunk> chunks = bTree.getChunks();
 
-		int elementSize = getDataType().getSize();
-		for (int i = 0; i < getSize(); i++) {
-			int[] dimensionedIndex = linearIndexToDimensionIndex(i, getDimensions());
-			long[] chunkOffset = getChunkOffset(dimensionedIndex);
+        // These are all the same for every chunk
+        final int[] chunkDimensions = layoutMessage.getChunkDimensions();
+        final int[] chunkInternalOffsets = getChunkInternalOffsets(chunkDimensions, elementSize);
+        final int[] dataOffsets = getDataOffsets(chunkInternalOffsets);
+        final int fastestChunkDim = chunkDimensions[chunkDimensions.length - 1];
 
-			// Now figure out which element inside the chunk
-			int[] insideChunk = new int[chunkOffset.length];
-			for (int j = 0; j < chunkOffset.length; j++) {
-				insideChunk[j] = (int) (dimensionedIndex[j] - chunkOffset[j]);
-			}
-			int insideChunkLinearOffset = dimensionIndexToLinearIndex(insideChunk, layoutMessage.getChunkDimensions());
+        // Parallel decoding and filling, this is where all the work is done
+        chunks.parallelStream().forEach(chunk -> fillDataFromChunk(chunk, dataArray, chunkDimensions,
+                chunkInternalOffsets, dataOffsets, fastestChunkDim, elementSize));
 
-			final byte[] chunkData = getDecodedChunk(new ChunkOffsetKey(chunkOffset));
+        return ByteBuffer.wrap(dataArray);
+    }
 
-			// Copy that data into the overall buffer
-			System.arraycopy(chunkData, insideChunkLinearOffset * elementSize, dataArray, i * elementSize, elementSize);
-		}
+    private void fillDataFromChunk(final Chunk chunk,
+                                   final byte[] dataArray,
+                                   final int[] chunkDimensions,
+                                   final int[] chunkInternalOffsets,
+                                   final int[] dataOffsets,
+                                   final int fastestChunkDim,
+                                   final int elementSize) {
 
-		return ByteBuffer.wrap(dataArray);
-	}
+        logger.debug("Filling data from chunk '{}'", chunk);
 
-	private byte[] getDecodedChunk(ChunkOffsetKey chunkKey) {
-		return decodedChunkLookup.computeIfAbsent(chunkKey, this::decodeChunk);
-	}
+        // Get the un-filtered (decompressed) data in this chunk
+        final byte[] chunkData = decompressChunk(chunk);
 
-	private byte[] decodeChunk(ChunkOffsetKey key) {
-		logger.debug("Decoding chunk '{}'", key);
-		final Chunk chunk = getChunk(key);
-		// Get the encoded (i.e. compressed buffer)
-		final ByteBuffer encodedBuffer = getDataBuffer(chunk);
+        // Now need to figure out how to put this chunks data into the output array
+        final int[] chunkOffset = chunk.getChunkOffset();
+        final int initialChunkOffset = dimensionIndexToLinearIndex(chunkOffset, getDimensions());
 
-		// Get the encoded data from buffer
-		final byte[] encodedBytes = new byte[encodedBuffer.remaining()];
-		encodedBuffer.get(encodedBytes);
+        if (!isPartialChunk(chunk)) {
+            // Not a partial chunk so can always copy the max amount
+            final int length = fastestChunkDim * elementSize;
+            for (int i = 0; i < chunkInternalOffsets.length; i++) {
+                System.arraycopy(
+                        chunkData, chunkInternalOffsets[i], // src
+                        dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
+                        length); // length
+            }
+        } else {
+            logger.debug("Handling partial chunk '{}'", chunk);
+            // Partial chunk
+            final int highestDimIndex = getDimensions().length - 1;
 
-		try {
-			final FilterPipeline pipeline = this.lazyPipeline.get();
+            for (int i = 0; i < chunkInternalOffsets.length; i++) {
+                // Quick check first if the data starts outside then we know this part of the chunk can be skipped
+                // Does not consider dimensions
+                if (dataOffsets[i] > dataArray.length) {
+                    continue;
+                }
+                // Is this part of the chunk outside the dataset including dimensions?
+                if(partOfChunkIsOutsideDataset(chunkInternalOffsets[i]/ elementSize, chunkDimensions, chunkOffset)) {
+                    continue;
+                }
 
-			if (pipeline == null) {
-				// No filters
-				logger.debug("No filters returning decoded chunk '{}'", chunk);
-				return encodedBytes;
-			}
+                // Its inside so we need to copy at least something. Now work out how much?
+                final int length = elementSize * Math.min(fastestChunkDim,
+                        fastestChunkDim - (chunkOffset[highestDimIndex] + chunkDimensions[highestDimIndex] - getDimensions()[highestDimIndex]));
 
-			// Decode using the pipeline applying the filters
-			final byte[] decodedBytes = pipeline.decode(encodedBytes);
-			logger.debug("Decoded {}", chunk);
+                System.arraycopy(
+                        chunkData, chunkInternalOffsets[i], // src
+                        dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
+                        length); // length
+            }
 
-			return decodedBytes;
-		} catch (ConcurrentException e) {
-			throw new HdfException("Failed to get filter pipeline", e);
-		}
-	}
+        }
+    }
 
-	private Chunk getChunk(ChunkOffsetKey key) {
-		try {
-			return chunkLookup.get().get(key);
-		} catch (Exception e) {
-			throw new HdfException("Failed to create chunk lookup for '" + getPath() + "'");
-		}
-	}
+    private boolean partOfChunkIsOutsideDataset(final int chunkInternalOffsetIndex,
+                                                final int[] chunkDimensions,
+                                                final int[] chunkOffset) {
 
-	private ByteBuffer getDataBuffer(Chunk chunk) {
-		try {
-			return hdfFc.map(chunk.getAddress(), chunk.getSize());
-		} catch (Exception e) {
-			throw new HdfException(
-					"Failed to read chunk for dataset '" + getPath() + "' at address " + chunk.getAddress());
-		}
-	}
+        int[] locationInChunk = linearIndexToDimensionIndex(chunkInternalOffsetIndex, chunkDimensions);
+        for (int j = 0; j < locationInChunk.length - 1; j++) {
+            // Check if this dimension would be outside the dataset
+            if (chunkOffset[j] + locationInChunk[j] >= getDimensions()[j]) {
+                return true;
+            }
+        }
+        // Nothing is outside
+        return false;
+    }
 
-	private int[] linearIndexToDimensionIndex(int index, int[] dimensions) {
-		int[] dimIndex = new int[dimensions.length];
+    /**
+     * Calculates the linear offsets into the dataset for each of the chunks internal offsets. It can be thought of as
+     * only doing this do the first chunk as to calculate the offsets required for any other chunk you need to add
+     * the inital linear offset of that chunk to each of these values.
+     */
+    private int[] getDataOffsets(int[] chunkInternalOffsets) {
 
-		for (int i = dimIndex.length - 1; i >= 0; i--) {
-			dimIndex[i] = index % dimensions[i];
-			index = index / dimensions[i];
-		}
-		return dimIndex;
-	}
+        final int[] dimensionLinearOffsets = getDimensionLinearOffsets();
+        final int[] chunkDimensions = layoutMessage.getChunkDimensions();
+        final int elementSize = getDataType().getSize();
 
-	private int dimensionIndexToLinearIndex(int[] index, int[] dimensions) {
-		int linear = 0;
-		for (int i = 0; i < dimensions.length; i++) {
-			int temp = index[i];
-			for (int j = i + 1; j < dimensions.length; j++) {
-				temp *= dimensions[j];
-			}
-			linear += temp;
-		}
-		return linear;
-	}
+        final int[] dataOffsets = new int[chunkInternalOffsets.length];
+        for (int i = 0; i < chunkInternalOffsets.length; i++) {
+            final int[] chunkDimIndex = linearIndexToDimensionIndex((chunkInternalOffsets[i] / elementSize), chunkDimensions);
 
-	private long[] getChunkOffset(int[] dimensionedIndex) {
-		long[] chunkOffset = new long[dimensionedIndex.length];
-		for (int i = 0; i < chunkOffset.length; i++) {
-			long temp = toIntExact(layoutMessage.getChunkDimensions()[i]);
-			chunkOffset[i] = (dimensionedIndex[i] / temp) * temp;
-		}
-		return chunkOffset;
-	}
+            int dataOffset = 0;
+            for (int j = 0; j < chunkDimIndex.length; j++) {
+                dataOffset += chunkDimIndex[j] * dimensionLinearOffsets[j];
+            }
+            dataOffsets[i] = dataOffset;
+        }
+        return dataOffsets;
+    }
 
-	private final class FilterPipelineLazyInitializer extends LazyInitializer<FilterPipeline> {
-		@Override
-		protected FilterPipeline initialize() {
-			logger.debug("Lazy initializing filter pipeline for '{}'", getPath());
+    /**
+     * Gets the number of linear steps to move for one step in the corresponding dimension
+     */
+    private int[] getDimensionLinearOffsets() {
+        int dimLength = getDimensions().length;
+        int[] dimensionLinearOffsets = new int[dimLength];
+        Arrays.fill(dimensionLinearOffsets, 1);
+        // dimensionLinearOffsets.length - 1 because a step in the fastest dim is always 1
+        for (int i = 0; i < dimensionLinearOffsets.length - 1; i++) {
+            for (int j = i + 1; j < dimensionLinearOffsets.length; j++) {
+                dimensionLinearOffsets[i] *= getDimensions()[j];
+            }
+        }
+        return dimensionLinearOffsets;
+    }
 
-			// If the dataset has filters get the message
-			if (oh.hasMessageOfType(FilterPipelineMessage.class)) {
-				FilterPipelineMessage filterPipelineMessage = oh.getMessageOfType(FilterPipelineMessage.class);
-				return  FilterManager.getPipeline(filterPipelineMessage);
-			} else {
-				// No filters
-				return null;
-			}
-		}
-	}
+    /**
+     * Gets the offsets inside a chunk where a contiguous run of data starts.
+     */
+    private int[] getChunkInternalOffsets(int[] chunkDimensions, int elementSize) {
+        final int fastestChunkDim = chunkDimensions[chunkDimensions.length - 1];
+        final int numOfOffsets = Arrays.stream(chunkDimensions)
+                .limit(chunkDimensions.length - 1L)
+                .reduce(1, (a, b) -> a * b);
 
-	private final class ChunkLookupLazyInitializer extends LazyInitializer<Map<ChunkOffsetKey, Chunk>> {
-		@Override
-		protected Map<ChunkOffsetKey, Chunk> initialize() {
-			logger.debug("Lazy initializing chunk lookup for '{}'", getPath());
-			BTreeV1Data bTree = BTreeV1.createDataBTree(hdfFc, layoutMessage.getBTreeAddress(),
-					getDimensions().length);
+        final int[] chunkOffsets = new int[numOfOffsets];
+        for (int i = 0; i < numOfOffsets; i++) {
+            chunkOffsets[i] = i * fastestChunkDim * elementSize;
+        }
+        return chunkOffsets;
+    }
 
-			List<Chunk> chunks = bTree.getChunks();
-			Map<ChunkOffsetKey, Chunk> chunkLookupMap = new HashMap<>(chunks.size());
-			for (Chunk chunk : chunks) {
-				chunkLookupMap.put(new ChunkOffsetKey(chunk.getChunkOffset()), chunk);
-			}
-			logger.debug("Created chunk lookup for '{}'", getPath());
-			return chunkLookupMap;
-		}
-	}
+    /**
+     * A partial chunk is one that is not completely inside the dataset. i.e. some of its contents are not part of the
+     * dataset
+     */
+    private boolean isPartialChunk(Chunk chunk) {
+        final int[] datasetDims = getDimensions();
+        final int[] chunkOffset = chunk.getChunkOffset();
+        final int[] chunkDims = layoutMessage.getChunkDimensions();
 
-	/**
-	 * Custom key object for indexing chunks. It is optimised for fast hashcode and
-	 * equals when looking up chunks.
-	 */
-	private class ChunkOffsetKey {
-		final int hashcode;
-		final long[] chunkOffset;
+        for (int i = 0; i < chunkOffset.length; i++) {
+            if (chunkOffset[i] + chunkDims[i] > datasetDims[i]) {
+                return true;
+            }
+        }
 
-		private ChunkOffsetKey(long[] chunkOffset) {
-			this.chunkOffset = chunkOffset;
-			hashcode = Arrays.hashCode(chunkOffset);
-		}
+        return false;
+    }
 
-		@Override
-		public int hashCode() {
-			return hashcode;
-		}
+    private byte[] decompressChunk(Chunk chunk) {
+        // Get the encoded (i.e. compressed buffer)
+        final ByteBuffer encodedBuffer = getDataBuffer(chunk);
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (ChunkOffsetKey.class != obj.getClass())
-				return false;
-			ChunkOffsetKey other = (ChunkOffsetKey) obj;
-			return Arrays.equals(chunkOffset, other.chunkOffset);
-		}
+        // Get the encoded data from buffer
+        final byte[] encodedBytes = new byte[encodedBuffer.remaining()];
+        encodedBuffer.get(encodedBytes);
 
-		@Override
-		public String toString() {
-			return "ChunkOffsetKey [chunkOffset=" + Arrays.toString(chunkOffset) + ", hashcode=" + hashcode + "]";
-		}
+        try {
+            final FilterPipeline pipeline = this.lazyPipeline.get();
 
-	}
+            if (pipeline == null) {
+                // No filters
+                logger.debug("No filters returning decoded chunk '{}'", chunk);
+                return encodedBytes;
+            }
+
+            // Decode using the pipeline applying the filters
+            final byte[] decodedBytes = pipeline.decode(encodedBytes);
+            logger.debug("Decoded {}", chunk);
+
+            return decodedBytes;
+        } catch (ConcurrentException e) {
+            throw new HdfException("Failed to get filter pipeline", e);
+        }
+    }
+
+    private ByteBuffer getDataBuffer(Chunk chunk) {
+        try {
+            return hdfFc.map(chunk.getAddress(), chunk.getSize());
+        } catch (Exception e) {
+            throw new HdfException(
+                    "Failed to read chunk for dataset '" + getPath() + "' at address " + chunk.getAddress());
+        }
+    }
+
+    private int[] linearIndexToDimensionIndex(int index, int[] dimensions) {
+        int[] dimIndex = new int[dimensions.length];
+
+        for (int i = dimIndex.length - 1; i >= 0; i--) {
+            dimIndex[i] = index % dimensions[i];
+            index = index / dimensions[i];
+        }
+        return dimIndex;
+    }
+
+    private int dimensionIndexToLinearIndex(int[] index, int[] dimensions) {
+        int linear = 0;
+        for (int i = 0; i < dimensions.length; i++) {
+            int temp = index[i];
+            for (int j = i + 1; j < dimensions.length; j++) {
+                temp *= dimensions[j];
+            }
+            linear += temp;
+        }
+        return linear;
+    }
+
+    private final class FilterPipelineLazyInitializer extends LazyInitializer<FilterPipeline> {
+        @Override
+        protected FilterPipeline initialize() {
+            logger.debug("Lazy initializing filter pipeline for '{}'", getPath());
+
+            // If the dataset has filters get the message
+            if (oh.hasMessageOfType(FilterPipelineMessage.class)) {
+                FilterPipelineMessage filterPipelineMessage = oh.getMessageOfType(FilterPipelineMessage.class);
+                return FilterManager.getPipeline(filterPipelineMessage);
+            } else {
+                // No filters
+                return null;
+            }
+        }
+    }
 
 }

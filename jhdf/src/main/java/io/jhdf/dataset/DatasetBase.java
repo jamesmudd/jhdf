@@ -116,11 +116,15 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	@Override
 	public Object getData() {
 		logger.debug("Getting data for '{}'...", getPath());
-		if (isEmpty()) {
+
+		final ByteBuffer bb = getDataBuffer();
+		if (bb == null) {
+			// Empty
 			return null;
 		}
-		DataType type = getDataType();
-		ByteBuffer bb = getDataBuffer();
+
+		final DataType type = getDataType();
+
 		if (type instanceof VariableLength) {
 			return VariableLengthDatasetReader.readDataset((VariableLength) type, bb,
 					getDimensions(), hdfFc);

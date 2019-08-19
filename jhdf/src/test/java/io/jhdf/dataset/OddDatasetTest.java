@@ -9,10 +9,13 @@
  ******************************************************************************/
 package io.jhdf.dataset;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import io.jhdf.HdfFile;
+import io.jhdf.api.Dataset;
+import org.apache.commons.lang3.ArrayUtils;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -21,24 +24,20 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.function.Executable;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-import io.jhdf.HdfFile;
-import io.jhdf.api.Dataset;
+public class OddDatasetTest {
 
-public class ChunkedDatasetTest {
-
-	private static final String HDF5_TEST_FILE_NAME = "../test_chunked_datasets_earliest.hdf5";
+	private static final String HDF5_TEST_FILE_NAME = "../test_odd_datasets_earliest.hdf5";
 
 	private static HdfFile hdfFile;
 
 	@BeforeAll
 	static void setup() {
-		String testFileUrl = ChunkedDatasetTest.class.getResource(HDF5_TEST_FILE_NAME).getFile();
+		String testFileUrl = OddDatasetTest.class.getResource(HDF5_TEST_FILE_NAME).getFile();
 		hdfFile = new HdfFile(new File(testFileUrl));
 	}
 
@@ -46,18 +45,14 @@ public class ChunkedDatasetTest {
 	Collection<DynamicNode> chunkedDatasetReadTests() {
 		// List of all the datasetPaths
 		return Arrays.asList(
-				dynamicTest("float32", createTest("/float/float32")),
-				dynamicTest("float64", createTest("/float/float64")),
-				dynamicTest("int8", createTest("/int/int8")),
-				dynamicTest("int16", createTest("/int/int16")),
-				dynamicTest("int32", createTest("/int/int32")));
+				dynamicTest("8D_int16", createTest("/8D_int16")),
+				dynamicTest("1D_int16", createTest("/1D_int16")));
 	}
 
 	private Executable createTest(String datasetPath) {
 		return () -> {
 			Dataset dataset = hdfFile.getDatasetByPath(datasetPath);
 			Object data = dataset.getData();
-			assertThat(getDimensions(data), is(equalTo(new int[] { 7, 5, 3 })));
 			Object[] flatData = flatten((Object[]) data);
 			for (int i = 0; i < flatData.length; i++) {
 				// Do element comparison as there are all different primitive numeric types
@@ -85,14 +80,4 @@ public class ChunkedDatasetTest {
 		}
 	}
 
-	private int[] getDimensions(Object data) {
-		List<Integer> dims = new ArrayList<>();
-		dims.add(Array.getLength(data));
-
-		while (Array.get(data, 0).getClass().isArray()) {
-			data = Array.get(data, 0);
-			dims.add(Array.getLength(data));
-		}
-		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
-	}
 }
