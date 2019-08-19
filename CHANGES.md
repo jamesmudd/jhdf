@@ -2,6 +2,11 @@
 
 Please note this project is still in pre-release development.
 
+## v0.4.5
+- Fix #49 - Big (>10x) performance improvement for chunked dataset reads. Chunks are now decompressed in parallel and the resulting data copies are a large as possible.
+- Update Gradle to 5.5
+- Update test dependencies
+
 ## v0.4.4
 - Fix #88 error when running on Java 8 
 - Improvements to IDE support
