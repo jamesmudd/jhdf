@@ -140,7 +140,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 	@Override
 	public boolean isEmpty() {
-		return getDataBuffer() == null;
+		return getDiskSize() == 0;
 	}
 
 	/**
