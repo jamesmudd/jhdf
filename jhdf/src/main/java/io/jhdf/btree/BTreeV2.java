@@ -56,7 +56,7 @@ public class BTreeV2<T extends BTreeRecord> {
 			byte[] formatSignatureBytes = new byte[4];
 			bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
 			if (!Arrays.equals(BTREE_NODE_V2_SIGNATURE, formatSignatureBytes)) {
-				throw new HdfException("B tree V1 node signature not matched");
+				throw new HdfException("B tree V2 node signature not matched");
 			}
 
 			final byte version = bb.get();
