@@ -14,13 +14,12 @@ import io.jhdf.exceptions.UnsupportedHdfException;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Class for reading compound data type messages.
- * */
+ */
 public class CompoundDataType extends DataType {
 
 	private final List<CompoundDataMember> members;

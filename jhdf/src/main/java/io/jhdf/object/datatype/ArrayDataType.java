@@ -9,13 +9,14 @@
  ******************************************************************************/
 package io.jhdf.object.datatype;
 
-import io.jhdf.Utils;
-
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 
 import static io.jhdf.Utils.readBytesAsUnsignedInt;
 
+/**
+ * Class for reading array data type messages.
+ */
 public class ArrayDataType extends DataType {
 
     private final DataType baseType;
