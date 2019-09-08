@@ -15,13 +15,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import java.io.File;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
-import org.apache.commons.lang3.ArrayUtils;
+import io.jhdf.TestUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
@@ -57,8 +54,8 @@ public class CompressedChunkedDatasetTest {
 		return () -> {
 			Dataset dataset = hdfFile.getDatasetByPath(datasetPath);
 			Object data = dataset.getData();
-			assertThat(getDimensions(data), is(equalTo(new int[] { 7, 5 })));
-			Object[] flatData = flatten((Object[]) data);
+			assertThat(TestUtils.getDimensions(data), is(equalTo(new int[] { 7, 5 })));
+			Object[] flatData = TestUtils.flatten((Object[]) data);
 			for (int i = 0; i < flatData.length; i++) {
 				// Do element comparison as there are all different primitive numeric types
 				// convert to double
@@ -67,32 +64,4 @@ public class CompressedChunkedDatasetTest {
 		};
 	}
 
-	private Object[] flatten(Object[] data) {
-		List<Object> flat = new ArrayList<>();
-		flattenInternal(data, flat);
-		return flat.toArray();
-	}
-
-	private void flattenInternal(Object data, List<Object> flat) {
-		int length = Array.getLength(data);
-		for (int i = 0; i < length; i++) {
-			Object element = Array.get(data, i);
-			if (element.getClass().isArray()) {
-				flattenInternal(element, flat);
-			} else {
-				flat.add(element);
-			}
-		}
-	}
-
-	private int[] getDimensions(Object data) {
-		List<Integer> dims = new ArrayList<>();
-		dims.add(Array.getLength(data));
-
-		while (Array.get(data, 0).getClass().isArray()) {
-			data = Array.get(data, 0);
-			dims.add(Array.getLength(data));
-		}
-		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
-	}
 }

@@ -10,9 +10,12 @@
 package io.jhdf.examples;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
@@ -29,6 +32,7 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -116,6 +120,10 @@ class TestAllFiles {
 			assertThat(data.getClass(), is(equalTo(dataset.getJavaType())));
 			// Should have some size
 			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+		} else if (dataset.isCompound()) {
+			// Compound datasets are currently returned as maps, maybe a custom CompoundDatset might be better in the future..
+			assertThat(data, is(instanceOf(Map.class)));
+			assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
 		} else {
 			assertThat(getDimensions(data), is(equalTo(dims)));
 			assertThat(getType(data), is(equalTo(dataset.getJavaType())));
