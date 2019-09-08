@@ -146,6 +146,9 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		return getDiskSize() == 0;
 	}
 
+	@Override
+	public boolean isCompound() { return getDataType() instanceof CompoundDataType; }
+
 	/**
 	 * Gets the buffer that holds this datasets data. The returned buffer will be of
 	 * the correct order (endiness).

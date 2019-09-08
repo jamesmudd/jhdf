@@ -55,6 +55,14 @@ public interface Dataset extends Node {
 	 */
 	boolean isEmpty();
 
+
+	/**
+	 * Checks if this dataset is a compound dataset. i.e. it contains several named datasets.
+	 *
+	 * @return <code>true</code> if this is a compount dataset, <code>false</code> otherwise
+	 */
+	boolean isCompound();
+
 	/**
 	 * Gets the max size of this dataset. If not specified this will be equal to
 	 * {@link #getDimensions()}
@@ -80,7 +88,8 @@ public interface Dataset extends Node {
 	 * <li>A Java array of dimensions of the dataset as returned by
 	 * {@link #getDimensions()}. The type of the array will be the return value of
 	 * {@link #getJavaType()}.</li>
-	 * <li><code>null</code> if the dataset if empty ({@link #isEmpty()}).</li>
+	 * <li>A Java {@link java.util.Map} if {@link #isCompound()} returns <code>true</code></li>
+	 * <li><code>null</code> if the dataset is empty ({@link #isEmpty()}).</li>
 	 * </ul>
 	 *
 	 * @return the data in the dataset as a Java object or <code>null</code> if the
