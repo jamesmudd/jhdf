@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static io.jhdf.TestUtils.flatten;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -60,24 +61,6 @@ public class OddDatasetTest {
 				assertThat(Double.valueOf(flatData[i].toString()), is(equalTo((double) i)));
 			}
 		};
-	}
-
-	private Object[] flatten(Object[] data) {
-		List<Object> flat = new ArrayList<>();
-		flattenInternal(data, flat);
-		return flat.toArray();
-	}
-
-	private void flattenInternal(Object data, List<Object> flat) {
-		int length = Array.getLength(data);
-		for (int i = 0; i < length; i++) {
-			Object element = Array.get(data, i);
-			if (element.getClass().isArray()) {
-				flattenInternal(element, flat);
-			} else {
-				flat.add(element);
-			}
-		}
 	}
 
 }
