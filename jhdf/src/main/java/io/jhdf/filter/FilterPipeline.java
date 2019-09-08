@@ -23,15 +23,15 @@ public class FilterPipeline {
 
 	private class PipelineFilterWithData {
 
-		final Filter filter;
-		final int[] filterData;
+		private final Filter filter;
+		private final int[] filterData;
 
-		public PipelineFilterWithData(Filter filter, int[] filterData) {
+		private PipelineFilterWithData(Filter filter, int[] filterData) {
 			this.filter = filter;
 			this.filterData = filterData;
 		}
 
-		byte[] decode(byte[] data) {
+		private byte[] decode(byte[] data) {
 			return filter.decode(data, filterData);
 		}
 	}

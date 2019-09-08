@@ -40,6 +40,7 @@ public enum FilterManager {; // Enum singleton pattern
 		// Load the built in filters
 		addFilter(new DeflatePipelineFilter());
 		addFilter(new ByteShuffleFilter());
+		addFilter(new FletcherChecksumFilter());
 
 		// Add dynamically loaded filters
 		ServiceLoader<Filter> serviceLoader = ServiceLoader.load(Filter.class);
