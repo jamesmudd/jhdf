@@ -45,7 +45,7 @@ public final class DatasetLoader {
 				return new ChunkedDatasetV3(hdfFc, address, name, parent, oh);
 
 			} else if (dlm instanceof ChunkedDataLayoutMessageV4) {
-				throw new UnsupportedHdfException("Chunked V4 dataset not supported");
+				return new ChunkedDatasetV4(hdfFc, address, name, parent, oh);
 
 			} else {
 				throw new HdfException("Unrecognized Dataset layout type: " + dlm.getClass().getCanonicalName());
