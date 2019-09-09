@@ -17,7 +17,7 @@ import java.util.List;
 
 public class TestUtils {
 
-    public static Object[] flatten(Object[] data) {
+    public static Object[] flatten(Object data) {
         List<Object> flat = new ArrayList<>();
         flattenInternal(data, flat);
         return flat.toArray();
