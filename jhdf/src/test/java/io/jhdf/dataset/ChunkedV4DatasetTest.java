@@ -10,30 +10,28 @@
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
+import io.jhdf.TestUtils;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.jhdf.TestUtils.flatten;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-public class ChunkedV4DatasetTest {
+class ChunkedV4DatasetTest {
 
     private static final String HDF5_TEST_FILE_NAME = "../chunked_v4_datasets.hdf5";
 
@@ -46,16 +44,11 @@ public class ChunkedV4DatasetTest {
     }
 
     @TestFactory
-    List<DynamicNode> allDatasets() throws Exception {
+    Stream<DynamicNode> verifyDatasets() throws Exception {
         List<Dataset> datasets = new ArrayList<>();
         getAllDatasets(hdfFile, datasets);
 
-        return datasets.stream().map(dataset -> dynamicTest(dataset.getPath(), () -> System.out.println(dataset))).collect(Collectors.toList());
-        //return dynamicTest(path.getFileName().toString(), () -> this::verifyDataset);
-    }
-
-    private void verifyDataset(Dataset dataset) {
-        dataset.getSize();
+        return datasets.stream().map(this::verifyDataset);
     }
 
     private void getAllDatasets(Group group, List<Dataset> datasets) {
@@ -68,4 +61,18 @@ public class ChunkedV4DatasetTest {
             }
         }
     }
+
+    private DynamicTest verifyDataset(Dataset dataset) {
+        return dynamicTest(dataset.getPath(), () -> {
+            assertThat(dataset.getDimensions(), is(equalTo(new int[]{5,3})));
+            Object data = dataset.getData();
+            Object[] flatData = flatten(data);
+            for (int i = 0; i < flatData.length; i++) {
+                // Do element comparison as there are all different primitive numeric types
+                assertThat(Double.valueOf(flatData[i].toString()), is(Matchers.equalTo((double) i)));
+            }
+        });
+    }
+
+
 }

@@ -148,7 +148,7 @@ public abstract class DataLayoutMessage extends Message {
 		private int nodeSize;
 		private byte splitPercent;
 		private byte mergePercent;
-		private final long[] dimSizes;
+		private final int[] chunkDimensions;
 
 		private ChunkedDataLayoutMessageV4(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
@@ -157,16 +157,16 @@ public abstract class DataLayoutMessage extends Message {
 			final int chunkDimensionality = bb.get();
 			final int dimSizeBytes = bb.get();
 
-			dimSizes = new long[chunkDimensionality];
-			for (int i = 0; i < dimSizes.length; i++) {
-				dimSizes[i] = Utils.readBytesAsUnsignedLong(bb, dimSizeBytes);
+			chunkDimensions = new int[chunkDimensionality];
+			for (int i = 0; i < chunkDimensions.length; i++) {
+				chunkDimensions[i] = Utils.readBytesAsUnsignedInt(bb, dimSizeBytes);
 			}
 
 			indexingType = bb.get();
 
 			switch (indexingType) {
 			case 1: // Single Chunk
-				if (flags.get(DONT_FILTER_PARTIAL_BOUND_CHUNKS)) {
+				if (chunkedFlags.get(DONT_FILTER_PARTIAL_BOUND_CHUNKS)) {
 					throw new UnsupportedHdfException("Filtered single chunk not supported");
 				}
 				break;
@@ -276,8 +276,8 @@ public abstract class DataLayoutMessage extends Message {
 			return indexingType;
 		}
 
-		public long[] getDimSizes() {
-			return dimSizes;
+		public int[] getChunkDimensions() {
+			return chunkDimensions;
 		}
 
 	}
