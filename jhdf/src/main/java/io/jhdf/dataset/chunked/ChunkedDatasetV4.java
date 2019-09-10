@@ -3,7 +3,9 @@ package io.jhdf.dataset.chunked;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
+import io.jhdf.dataset.chunked.indexing.FixedArrayIndex;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV4;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
@@ -39,11 +41,21 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
     protected Collection<Chunk> getAllChunks() {
         switch (layoutMessage.getIndexingType()) {
             case 1: // Single chunk
-                logger.debug("Reading single chunk dataset");
+                logger.debug("Reading single chunk indexed dataset");
                 return singletonList(new SingleChunk(layoutMessage.getAddress()));
+            case 2: // Implicit
+                throw new UnsupportedHdfException("Implicit indexing is currently not supported");
+            case 3: // Fixed array
+                logger.debug("Reading fixed array indexed dataset");
+                FixedArrayIndex fixedArrayIndex = new FixedArrayIndex(hdfFc, layoutMessage.getAddress(), getChunkSizeInBytes(), getDataType().getSize(), getDimensions());
+                return fixedArrayIndex.getAllChunks();
             default:
                 throw new HdfException("Unreconized chunk indexing type = " + layoutMessage.getIndexingType());
         }
+    }
+
+    private int getChunkSizeInBytes() {
+        return Arrays.stream(getChunkDimensions()).reduce(1, Math::multiplyExact) * getDataType().getSize();
     }
 
     private class SingleChunk implements Chunk {
@@ -56,8 +68,7 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
 
         @Override
         public int getSize() {
-            int elementsInChunk = Arrays.stream(layoutMessage.getChunkDimensions()).reduce(1, Math::multiplyExact);
-            return elementsInChunk * getDataType().getSize();
+            return getChunkSizeInBytes();
         }
 
         @Override
