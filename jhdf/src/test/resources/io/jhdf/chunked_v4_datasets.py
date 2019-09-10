@@ -35,6 +35,13 @@ def write_chunked_datasets(f):
     fixed_array_index_group.create_dataset('float32', data=data, dtype='f4', chunks=(2,3))
     fixed_array_index_group.create_dataset('float64', data=data, dtype='f8', chunks=(2,3))
 
+    filtered_fixed_array_index_group = f.create_group("filtered_fixed_array")
+    filtered_fixed_array_index_group.create_dataset("int8", data=data, dtype='i1', chunks=(2,3), compression="gzip")
+    filtered_fixed_array_index_group.create_dataset("int16", data=data, dtype='i2', chunks=(2,3), compression="gzip")
+    filtered_fixed_array_index_group.create_dataset("int32", data=data, dtype='i4', chunks=(2,3), compression="gzip")
+    filtered_fixed_array_index_group.create_dataset('float32', data=data, dtype='f4', chunks=(2,3), compression="gzip")
+    filtered_fixed_array_index_group.create_dataset('float64', data=data, dtype='f8', chunks=(2,3), compression="gzip")
+
     # Extensible Array Index - Only one dimension of unlimited extent. Index type 4
     extensible_array_index_group = f.create_group("extensible_array")
     extensible_array_index_group.create_dataset("int8", data=data, dtype='i1', chunks=(2,3), maxshape=(None,3))
