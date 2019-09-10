@@ -276,4 +276,26 @@ public final class Utils {
 		}
 		return (int) Math.ceil(BigInteger.valueOf(number).bitLength() / 8.0);
 	}
+
+    public static int[] linearIndexToDimensionIndex(int index, int[] dimensions) {
+        int[] dimIndex = new int[dimensions.length];
+
+        for (int i = dimIndex.length - 1; i >= 0; i--) {
+            dimIndex[i] = index % dimensions[i];
+            index = index / dimensions[i];
+        }
+        return dimIndex;
+    }
+
+    public static int dimensionIndexToLinearIndex(int[] index, int[] dimensions) {
+        int linear = 0;
+        for (int i = 0; i < dimensions.length; i++) {
+            int temp = index[i];
+            for (int j = i + 1; j < dimensions.length; j++) {
+                temp *= dimensions[j];
+            }
+            linear += temp;
+        }
+        return linear;
+    }
 }

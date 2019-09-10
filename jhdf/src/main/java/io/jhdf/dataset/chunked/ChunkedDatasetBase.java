@@ -2,6 +2,7 @@ package io.jhdf.dataset.chunked;
 
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
+import io.jhdf.Utils;
 import io.jhdf.api.Group;
 import io.jhdf.dataset.DatasetBase;
 import io.jhdf.exceptions.HdfException;
@@ -44,7 +45,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase {
 
         // Now need to figure out how to put this chunks data into the output array
         final int[] chunkOffset = chunk.getChunkOffset();
-        final int initialChunkOffset = dimensionIndexToLinearIndex(chunkOffset, getDimensions());
+        final int initialChunkOffset = Utils.dimensionIndexToLinearIndex(chunkOffset, getDimensions());
 
         if (!isPartialChunk(chunk)) {
             // Not a partial chunk so can always copy the max amount
@@ -88,7 +89,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase {
                                                 final int[] chunkDimensions,
                                                 final int[] chunkOffset) {
 
-        int[] locationInChunk = linearIndexToDimensionIndex(chunkInternalOffsetIndex, chunkDimensions);
+        int[] locationInChunk = Utils.linearIndexToDimensionIndex(chunkInternalOffsetIndex, chunkDimensions);
         for (int j = 0; j < locationInChunk.length - 1; j++) {
             // Check if this dimension would be outside the dataset
             if (chunkOffset[j] + locationInChunk[j] >= getDimensions()[j]) {
@@ -112,7 +113,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase {
 
         final int[] dataOffsets = new int[chunkInternalOffsets.length];
         for (int i = 0; i < chunkInternalOffsets.length; i++) {
-            final int[] chunkDimIndex = linearIndexToDimensionIndex((chunkInternalOffsets[i] / elementSize), chunkDimensions);
+            final int[] chunkDimIndex = Utils.linearIndexToDimensionIndex((chunkInternalOffsets[i] / elementSize), chunkDimensions);
 
             int dataOffset = 0;
             for (int j = 0; j < chunkDimIndex.length; j++) {
@@ -237,28 +238,6 @@ public abstract class ChunkedDatasetBase extends DatasetBase {
             throw new HdfException(
                     "Failed to read chunk for dataset '" + getPath() + "' at address " + chunk.getAddress());
         }
-    }
-
-    private int[] linearIndexToDimensionIndex(int index, int[] dimensions) {
-        int[] dimIndex = new int[dimensions.length];
-
-        for (int i = dimIndex.length - 1; i >= 0; i--) {
-            dimIndex[i] = index % dimensions[i];
-            index = index / dimensions[i];
-        }
-        return dimIndex;
-    }
-
-    private int dimensionIndexToLinearIndex(int[] index, int[] dimensions) {
-        int linear = 0;
-        for (int i = 0; i < dimensions.length; i++) {
-            int temp = index[i];
-            for (int j = i + 1; j < dimensions.length; j++) {
-                temp *= dimensions[j];
-            }
-            linear += temp;
-        }
-        return linear;
     }
 
     protected final class FilterPipelineLazyInitializer extends LazyInitializer<FilterPipeline> {
