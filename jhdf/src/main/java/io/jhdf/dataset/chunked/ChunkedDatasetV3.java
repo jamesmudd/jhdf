@@ -7,7 +7,7 @@
  *
  * MIT License see 'LICENSE' file
  */
-package io.jhdf.dataset;
+package io.jhdf.dataset.chunked;
 
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;

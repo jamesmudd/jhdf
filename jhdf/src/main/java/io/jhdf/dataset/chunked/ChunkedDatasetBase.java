@@ -1,10 +1,9 @@
-package io.jhdf.dataset;
+package io.jhdf.dataset.chunked;
 
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
-import io.jhdf.btree.BTreeV1Data;
-import io.jhdf.btree.Chunk;
+import io.jhdf.dataset.DatasetBase;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.filter.FilterManager;
 import io.jhdf.filter.FilterPipeline;

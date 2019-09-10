@@ -1,4 +1,4 @@
-package io.jhdf.btree;
+package io.jhdf.dataset.chunked;
 
 import java.util.BitSet;
 
