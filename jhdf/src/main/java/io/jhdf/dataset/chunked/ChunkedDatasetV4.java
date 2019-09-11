@@ -3,7 +3,9 @@ package io.jhdf.dataset.chunked;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
+import io.jhdf.dataset.chunked.indexing.ChunkIndex;
 import io.jhdf.dataset.chunked.indexing.FixedArrayIndex;
+import io.jhdf.dataset.chunked.indexing.SingleChunkIndex;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV4;
@@ -12,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collection;
 
 import static java.util.Collections.singletonList;
@@ -39,52 +40,26 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
 
     @Override
     protected Collection<Chunk> getAllChunks() {
+        final ChunkIndex chunkIndex;
         switch (layoutMessage.getIndexingType()) {
             case 1: // Single chunk
                 logger.debug("Reading single chunk indexed dataset");
-                return singletonList(new SingleChunk(layoutMessage.getAddress()));
+                chunkIndex = new SingleChunkIndex(layoutMessage.getAddress(), getChunkSizeInBytes(), getDimensions());
+                break;
             case 2: // Implicit
                 throw new UnsupportedHdfException("Implicit indexing is currently not supported");
             case 3: // Fixed array
                 logger.debug("Reading fixed array indexed dataset");
-                FixedArrayIndex fixedArrayIndex = new FixedArrayIndex(hdfFc, layoutMessage.getAddress(), getChunkSizeInBytes(), getDataType().getSize(), getDimensions());
-                return fixedArrayIndex.getAllChunks();
+                chunkIndex = new FixedArrayIndex(hdfFc, layoutMessage.getAddress(), getChunkSizeInBytes(), getDataType().getSize(), getDimensions());
+                break;
             default:
                 throw new HdfException("Unreconized chunk indexing type = " + layoutMessage.getIndexingType());
         }
+        return chunkIndex.getAllChunks();
     }
 
     private int getChunkSizeInBytes() {
         return Arrays.stream(getChunkDimensions()).reduce(1, Math::multiplyExact) * getDataType().getSize();
     }
 
-    private class SingleChunk implements Chunk {
-
-        private final long address;
-
-        public SingleChunk(long address) {
-            this.address = address;
-        }
-
-        @Override
-        public int getSize() {
-            return getChunkSizeInBytes();
-        }
-
-        @Override
-        public BitSet getFilterMask() {
-            return null;
-        }
-
-        @Override
-        public int[] getChunkOffset() {
-            // Single chunk so there are no offsets
-            return new int[getDimensions().length];
-        }
-
-        @Override
-        public long getAddress() {
-            return address;
-        }
-    }
 }
