@@ -4,7 +4,6 @@ import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.UnsupportedHdfException;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ public class FixedArrayIndex implements ChunkIndex {
     private static final byte[] FIXED_ARRAY_DATA_BLOCK_SIGNATURE = "FADB".getBytes();
 
     private final long headerAddress;
-    private final int chunkSizeInBytes;
+    private final int unfilteredChunkSize;
     private final int elementSize;
     private final int[] datasetDimensions;
 
@@ -31,9 +30,9 @@ public class FixedArrayIndex implements ChunkIndex {
 
     private final List<Chunk> chunks;
 
-    public FixedArrayIndex(HdfFileChannel hdfFc, long address, int chunkSizeInBytes, int elementSize, int[] datasetDimensions) {
+    public FixedArrayIndex(HdfFileChannel hdfFc, long address, int unfilterdChunkSize, int elementSize, int[] datasetDimensions) {
         this.headerAddress = address;
-        this.chunkSizeInBytes = chunkSizeInBytes;
+        this.unfilteredChunkSize = unfilterdChunkSize;
         this.elementSize = elementSize;
         this.datasetDimensions =datasetDimensions;
 
@@ -75,7 +74,7 @@ public class FixedArrayIndex implements ChunkIndex {
         public FixedArrayDataBlock(HdfFileChannel hdfFc, long address) {
 
             // TODO header size ignoring paging
-            final int headerSize = 6 + hdfFc.getSizeOfOffsets() * (maxNumberOfEntries +1);
+            final int headerSize = 6 + hdfFc.getSizeOfOffsets() + entrySize * maxNumberOfEntries;
             final ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
             byte[] formatSignatureBytes = new byte[4];
@@ -101,19 +100,22 @@ public class FixedArrayIndex implements ChunkIndex {
 
             // TODO ignoring paging here might need to revisit
 
-            if (clientId == 0) {
-                // Not filtered
+            if (clientId == 0) { // Not filtered
+                final BitSet filterMask = BitSet.valueOf(new byte[4]); // No filter mask so just all off
                 for (int i = 0; i < maxNumberOfEntries; i++) {
                     final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
-                    final int[] chunkOffset = Utils.linearIndexToDimensionIndex((i*chunkSizeInBytes)/elementSize, datasetDimensions);
-
-                    chunks.add(new FixedArrayChunk(chunkAddress, chunkSizeInBytes, chunkOffset));
+                    final int[] chunkOffset = Utils.linearIndexToDimensionIndex((i* unfilteredChunkSize)/elementSize, datasetDimensions);
+                    chunks.add(new FixedArrayChunk(chunkAddress, unfilteredChunkSize, chunkOffset, filterMask));
                 }
+            } else  if (clientId == 1) { // Filtered
+                for (int i = 0; i < maxNumberOfEntries; i++) {
+                    final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
+                    final int chunkSizeInBytes = Utils.readBytesAsUnsignedInt(bb, entrySize - hdfFc.getSizeOfOffsets() - 4);
+                    final BitSet filterMask = BitSet.valueOf(new byte[] { bb.get(), bb.get(), bb.get(), bb.get() });
+                    final int[] chunkOffset = Utils.linearIndexToDimensionIndex((i*unfilteredChunkSize)/elementSize, datasetDimensions);
 
-            } else  if (clientId == 1) {
-                // Filtered
-
-
+                    chunks.add(new FixedArrayChunk(chunkAddress, chunkSizeInBytes, chunkOffset, filterMask));
+                }
             } else {
                 throw new HdfException("Unreconized client ID  = " + clientId);
             }
@@ -125,11 +127,13 @@ public class FixedArrayIndex implements ChunkIndex {
         private final long address;
         private final int size;
         private final int[] chunkOffset;
+        private final BitSet filterMask;
 
-        public FixedArrayChunk(long address, int size, int[] chunkOffset) {
+        public FixedArrayChunk(long address, int size, int[] chunkOffset, BitSet filterMask) {
             this.address = address;
             this.size = size;
             this.chunkOffset = chunkOffset;
+            this.filterMask = filterMask;
         }
 
         @Override
@@ -139,7 +143,7 @@ public class FixedArrayIndex implements ChunkIndex {
 
         @Override
         public BitSet getFilterMask() {
-            return null;
+            return filterMask;
         }
 
         @Override
