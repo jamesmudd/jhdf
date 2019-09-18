@@ -2,6 +2,11 @@
 
 Please note this project is still in pre-release development.
 
+## v0.4.7
+- Fix bug #101 https://github.com/jamesmudd/jhdf/issues/101
+- Add additional testing of attributes
+- Add attribute example
+
 ## v0.4.6
 - Adds support for compound datasets
 - Adds support for array data type
