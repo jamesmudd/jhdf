@@ -59,7 +59,8 @@ public class GlobalHeap {
 			// Now start reading the heap into memory
 			bb = hdfFc.readBufferFromAddress(address + headerSize, collectionSize);
 
-			while (bb.remaining() > 8) {
+			// 32 = (the collection header of 16 bytes and the 16 bytes of information about each heap object)
+			while (bb.remaining() > 32) {
 				GlobalHeapObject object = new GlobalHeapObject(bb);
 				if (object.index == 0) {
 					break;
