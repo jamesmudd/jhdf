@@ -34,7 +34,7 @@ public class FixedArrayIndex implements ChunkIndex {
         this.headerAddress = address;
         this.unfilteredChunkSize = unfilterdChunkSize;
         this.elementSize = elementSize;
-        this.datasetDimensions =datasetDimensions;
+        this.datasetDimensions = datasetDimensions;
 
         final int headerSize = 12 + hdfFc.getSizeOfOffsets() + hdfFc.getSizeOfLengths();
         final ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
@@ -69,8 +69,6 @@ public class FixedArrayIndex implements ChunkIndex {
 
     private class FixedArrayDataBlock {
 
-        private final int clientId;
-
         public FixedArrayDataBlock(HdfFileChannel hdfFc, long address) {
 
             // TODO header size ignoring paging
@@ -91,7 +89,10 @@ public class FixedArrayIndex implements ChunkIndex {
                 throw new HdfException("Unsupported fixed array data block version detected. Version: " + version);
             }
 
-            clientId = bb.get();
+            final int clientId = bb.get();
+            if (clientId != FixedArrayIndex.this.clientId) {
+                throw new HdfException("Fixed array client ID mismatch. Possible file corruption detected");
+            }
 
             final long headerAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
             if (headerAddress != FixedArrayIndex.this.headerAddress) {
@@ -101,11 +102,10 @@ public class FixedArrayIndex implements ChunkIndex {
             // TODO ignoring paging here might need to revisit
 
             if (clientId == 0) { // Not filtered
-                final BitSet filterMask = BitSet.valueOf(new byte[4]); // No filter mask so just all off
                 for (int i = 0; i < maxNumberOfEntries; i++) {
                     final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
                     final int[] chunkOffset = Utils.linearIndexToDimensionIndex((i* unfilteredChunkSize)/elementSize, datasetDimensions);
-                    chunks.add(new FixedArrayChunk(chunkAddress, unfilteredChunkSize, chunkOffset, filterMask));
+                    chunks.add(new ChunkImpl(chunkAddress, unfilteredChunkSize, chunkOffset));
                 }
             } else  if (clientId == 1) { // Filtered
                 for (int i = 0; i < maxNumberOfEntries; i++) {
@@ -114,46 +114,12 @@ public class FixedArrayIndex implements ChunkIndex {
                     final BitSet filterMask = BitSet.valueOf(new byte[] { bb.get(), bb.get(), bb.get(), bb.get() });
                     final int[] chunkOffset = Utils.linearIndexToDimensionIndex((i*unfilteredChunkSize)/elementSize, datasetDimensions);
 
-                    chunks.add(new FixedArrayChunk(chunkAddress, chunkSizeInBytes, chunkOffset, filterMask));
+                    chunks.add(new ChunkImpl(chunkAddress, chunkSizeInBytes, chunkOffset, filterMask));
                 }
             } else {
-                throw new HdfException("Unreconized client ID  = " + clientId);
+                throw new HdfException("Unrecognized client ID  = " + clientId);
             }
 
-        }
-    }
-
-    private class FixedArrayChunk implements Chunk {
-        private final long address;
-        private final int size;
-        private final int[] chunkOffset;
-        private final BitSet filterMask;
-
-        public FixedArrayChunk(long address, int size, int[] chunkOffset, BitSet filterMask) {
-            this.address = address;
-            this.size = size;
-            this.chunkOffset = chunkOffset;
-            this.filterMask = filterMask;
-        }
-
-        @Override
-        public int getSize() {
-            return size;
-        }
-
-        @Override
-        public BitSet getFilterMask() {
-            return filterMask;
-        }
-
-        @Override
-        public int[] getChunkOffset() {
-            return chunkOffset;
-        }
-
-        @Override
-        public long getAddress() {
-            return address;
         }
     }
 

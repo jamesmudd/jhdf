@@ -4,6 +4,7 @@ import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
 import io.jhdf.dataset.chunked.indexing.ChunkIndex;
+import io.jhdf.dataset.chunked.indexing.ExtensibleArrayIndex;
 import io.jhdf.dataset.chunked.indexing.FixedArrayIndex;
 import io.jhdf.dataset.chunked.indexing.SingleChunkIndex;
 import io.jhdf.exceptions.HdfException;
@@ -52,6 +53,12 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
                 logger.debug("Reading fixed array indexed dataset");
                 chunkIndex = new FixedArrayIndex(hdfFc, layoutMessage.getAddress(), getChunkSizeInBytes(), getDataType().getSize(), getDimensions());
                 break;
+            case 4: // Extensible Array
+                logger.debug("Reading extensible array indexed dataset");
+                chunkIndex = new ExtensibleArrayIndex(hdfFc, layoutMessage.getAddress(), getChunkSizeInBytes(), getDataType().getSize(), getDimensions());
+                break;
+            case 5: // B Tree V2
+                throw new UnsupportedHdfException("B Tree V2");
             default:
                 throw new HdfException("Unreconized chunk indexing type = " + layoutMessage.getIndexingType());
         }
