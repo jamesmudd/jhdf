@@ -14,8 +14,10 @@ import numpy as np
 
 def write_chunked_datasets(f):
 
-    # Single chunk index - The current, maximum, and chunk dimension sizes are all the same. Index type 1
     data = np.arange(15).reshape(5,3)
+    large_data = np.arange(1500).reshape(100,5,3)
+
+    # Single chunk index - The current, maximum, and chunk dimension sizes are all the same. Index type 1
     single_chunk_group = f.create_group("single_chunk")
     single_chunk_group.create_dataset("int8", data=data, dtype='i1', chunks=(5,3))
     single_chunk_group.create_dataset("int16", data=data, dtype='i2', chunks=(5,3))
@@ -49,6 +51,8 @@ def write_chunked_datasets(f):
     extensible_array_index_group.create_dataset("int32", data=data, dtype='i4', chunks=(2,3), maxshape=(None,3))
     extensible_array_index_group.create_dataset('float32', data=data, dtype='f4', chunks=(2,3), maxshape=(None,3))
     extensible_array_index_group.create_dataset('float64', data=data, dtype='f8', chunks=(2,3), maxshape=(None,3))
+    # large data to use secondary blocks smallest chunk size
+    extensible_array_index_group.create_dataset("large_int8", data=large_data, dtype='i1', chunks=(1,1,1), maxshape=(None,5,3))
 
     # B Tree V2 Index - More than one dimension of unlimited extent. Index type 5
     btree_v2_index_group = f.create_group("btree_v2")
