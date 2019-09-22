@@ -12,8 +12,7 @@ public class SingleChunkIndex implements ChunkIndex {
 
     public SingleChunkIndex(long chunkAddress, int chunkSize, int[] dimensions) {
         final int[] chunkOffset = new int[dimensions.length]; // Single chunk so zero offset
-        final BitSet filterMask = BitSet.valueOf(new byte[]{}); // No filters so no mask
-        this.singleChunk = new SingleChunk(chunkAddress, chunkSize, chunkOffset, filterMask);
+        this.singleChunk = new ChunkImpl(chunkAddress, chunkSize, chunkOffset);
     }
 
     @Override
@@ -21,35 +20,4 @@ public class SingleChunkIndex implements ChunkIndex {
         return Collections.singletonList(singleChunk);
     }
 
-    private class SingleChunk implements Chunk {
-        private final long address;
-        private final int size;
-        private final int[] chunkOffset;
-        private final BitSet filterMask;
-
-        private SingleChunk(long address, int size, int[] chunkOffset, BitSet filterMask) {
-            this.address = address;
-            this.size = size;
-            this.chunkOffset = chunkOffset;
-            this.filterMask = filterMask;
-        }
-
-        @Override
-        public int getSize() {
-            return size;
-        }
-
-        @Override
-        public BitSet getFilterMask() {
-            return filterMask;
-        }
-
-        @Override
-        public int[] getChunkOffset() { return chunkOffset; }
-
-        @Override
-        public long getAddress() {
-            return address;
-        }
-    }
 }
