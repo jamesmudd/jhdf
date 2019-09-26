@@ -30,6 +30,7 @@ import io.jhdf.object.datatype.FixedPoint;
 import io.jhdf.object.datatype.FloatingPoint;
 import io.jhdf.object.datatype.Reference;
 import io.jhdf.object.datatype.StringData;
+import io.jhdf.object.datatype.ArrayDataType;
 
 /**
  * <p>
@@ -67,7 +68,7 @@ public final class DatasetReader {
 			// Scalar dataset
 			data = Array.newInstance(javaType, 1);
 			isScalar = true;
-			dimensions = new int[] { 1 }; // Fake the dimensions
+			dimensions = new int[]{1}; // Fake the dimensions
 		} else {
 			data = Array.newInstance(javaType, dimensions);
 			isScalar = false;
@@ -78,39 +79,39 @@ public final class DatasetReader {
 			ByteOrder byteOrder = fixedPoint.getByteOrder();
 			if (fixedPoint.isSigned()) {
 				switch (fixedPoint.getSize()) {
-				case 1:
-					fillData(data, dimensions, buffer.order(byteOrder));
-					break;
-				case 2:
-					fillData(data, dimensions, buffer.order(byteOrder).asShortBuffer());
-					break;
-				case 4:
-					fillData(data, dimensions, buffer.order(byteOrder).asIntBuffer());
-					break;
-				case 8:
-					fillData(data, dimensions, buffer.order(byteOrder).asLongBuffer());
-					break;
-				default:
-					throw new HdfTypeException(
-							"Unsupported signed integer type size " + fixedPoint.getSize() + " bytes");
+					case 1:
+						fillData(data, dimensions, buffer.order(byteOrder));
+						break;
+					case 2:
+						fillData(data, dimensions, buffer.order(byteOrder).asShortBuffer());
+						break;
+					case 4:
+						fillData(data, dimensions, buffer.order(byteOrder).asIntBuffer());
+						break;
+					case 8:
+						fillData(data, dimensions, buffer.order(byteOrder).asLongBuffer());
+						break;
+					default:
+						throw new HdfTypeException(
+								"Unsupported signed integer type size " + fixedPoint.getSize() + " bytes");
 				}
 			} else { // Unsigned
 				switch (fixedPoint.getSize()) {
-				case 1:
-					fillDataUnsigned(data, dimensions, buffer.order(byteOrder));
-					break;
-				case 2:
-					fillDataUnsigned(data, dimensions, buffer.order(byteOrder).asShortBuffer());
-					break;
-				case 4:
-					fillDataUnsigned(data, dimensions, buffer.order(byteOrder).asIntBuffer());
-					break;
-				case 8:
-					fillDataUnsigned(data, dimensions, buffer.order(byteOrder).asLongBuffer());
-					break;
-				default:
-					throw new HdfTypeException(
-							"Unsupported signed integer type size " + fixedPoint.getSize() + " bytes");
+					case 1:
+						fillDataUnsigned(data, dimensions, buffer.order(byteOrder));
+						break;
+					case 2:
+						fillDataUnsigned(data, dimensions, buffer.order(byteOrder).asShortBuffer());
+						break;
+					case 4:
+						fillDataUnsigned(data, dimensions, buffer.order(byteOrder).asIntBuffer());
+						break;
+					case 8:
+						fillDataUnsigned(data, dimensions, buffer.order(byteOrder).asLongBuffer());
+						break;
+					default:
+						throw new HdfTypeException(
+								"Unsupported signed integer type size " + fixedPoint.getSize() + " bytes");
 				}
 			}
 		} else if (type instanceof FloatingPoint) {
@@ -118,20 +119,19 @@ public final class DatasetReader {
 			ByteOrder byteOrder = floatingPoint.getByteOrder();
 
 			switch (floatingPoint.getSize()) {
-			case 4:
-				fillData(data, dimensions, buffer.order(byteOrder).asFloatBuffer());
-				break;
-			case 8:
-				fillData(data, dimensions, buffer.order(byteOrder).asDoubleBuffer());
-				break;
-			default:
-				throw new HdfTypeException(
-						"Unsupported floating point type size " + floatingPoint.getSize() + " bytes");
+				case 4:
+					fillData(data, dimensions, buffer.order(byteOrder).asFloatBuffer());
+					break;
+				case 8:
+					fillData(data, dimensions, buffer.order(byteOrder).asDoubleBuffer());
+					break;
+				default:
+					throw new HdfTypeException(
+							"Unsupported floating point type size " + floatingPoint.getSize() + " bytes");
 			}
 		} else if (type instanceof StringData) {
 			int stringLength = type.getSize();
 			fillFixedLengthStringData(data, dimensions, buffer, stringLength);
-
 		} else if (type instanceof Reference) {
 			//reference type handles addresses, which are always longs for this library
 			int size = type.getSize();
@@ -141,6 +141,18 @@ public final class DatasetReader {
 				fillLongData(data, dimensions, buffer.order(ByteOrder.LITTLE_ENDIAN), size);
 			} else {
 				throw new HdfTypeException("Unsupported address size in reference data type " + size + " bytes");
+			}
+		} else if (type instanceof ArrayDataType) {
+			final ArrayDataType arrayType = (ArrayDataType) type;
+			if (dimensions.length !=1) {
+				throw new HdfException("Multi dimension array data types are not supported");
+			}
+
+			for (int i = 0; i < dimensions[0]; i++) {
+				// Need to position the buffer ready for the read
+				buffer.position(i * arrayType.getBaseType().getSize() * arrayType.getDimensions()[0]);
+				Object elementDataset = readDataset(arrayType.getBaseType(), buffer, arrayType.getDimensions());
+				Array.set(data, i, elementDataset);
 			}
 		} else {
 			throw new HdfException(

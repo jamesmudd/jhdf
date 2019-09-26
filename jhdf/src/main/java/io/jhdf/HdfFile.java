@@ -41,6 +41,15 @@ import io.jhdf.exceptions.HdfException;
 public class HdfFile implements Group, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(HdfFile.class);
 
+	static {
+		final String versionStr =  HdfFile.class.getPackage().getImplementationVersion();
+		if( versionStr != null) {
+			logger.info("jHDF version: {}", HdfFile.class.getPackage().getImplementationVersion());
+		} else {
+			logger.warn("Using development version of jHDF");
+		}
+	}
+
 	private final File file;
 	private final HdfFileChannel hdfFc;
 

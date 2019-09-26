@@ -9,6 +9,7 @@
  ******************************************************************************/
 package io.jhdf.dataset;
 
+import static io.jhdf.TestUtils.flatten;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -110,24 +111,6 @@ public class StringDatasetTest {
 			// Do element comparison as there are all different primitive numeric types
 			// convert to double
 			assertThat(flatData[i], is(equalTo(Integer.toString(i))));
-		}
-	}
-
-	private Object[] flatten(Object[] data) {
-		List<Object> flat = new ArrayList<>();
-		flattenInternal(data, flat);
-		return flat.toArray();
-	}
-
-	private void flattenInternal(Object data, List<Object> flat) {
-		int length = Array.getLength(data);
-		for (int i = 0; i < length; i++) {
-			Object element = Array.get(data, i);
-			if (element.getClass().isArray()) {
-				flattenInternal(element, flat);
-			} else {
-				flat.add(element);
-			}
 		}
 	}
 

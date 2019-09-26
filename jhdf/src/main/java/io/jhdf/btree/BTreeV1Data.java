@@ -41,10 +41,10 @@ public abstract class BTreeV1Data extends BTreeV1 {
 	public class Chunk {
 		private final int size;
 		private final BitSet filterMask;
-		private final long[] chunkOffset;
+		private final int[] chunkOffset;
 		private final long address;
 
-		private Chunk(int size, BitSet filterMask, long[] chunkOffset, long address) {
+		private Chunk(int size, BitSet filterMask, int[] chunkOffset, long address) {
 			super();
 			this.size = size;
 			this.filterMask = filterMask;
@@ -60,7 +60,7 @@ public abstract class BTreeV1Data extends BTreeV1 {
 			return filterMask;
 		}
 
-		public long[] getChunkOffset() {
+		public int[] getChunkOffset() {
 			return chunkOffset;
 		}
 
@@ -102,9 +102,9 @@ public abstract class BTreeV1Data extends BTreeV1 {
 		private Chunk readKeyAsChunk(Superblock sb, int dataDimensions, ByteBuffer bb) {
 			int chunkSize = Utils.readBytesAsUnsignedInt(bb, 4);
 			BitSet filterMask = BitSet.valueOf(new byte[] { bb.get(), bb.get(), bb.get(), bb.get() });
-			long[] chunkOffset = new long[dataDimensions];
+			int[] chunkOffset = new int[dataDimensions];
 			for (int j = 0; j < dataDimensions; j++) {
-				chunkOffset[j] = Utils.readBytesAsUnsignedLong(bb, 8);
+				chunkOffset[j] = Utils.readBytesAsUnsignedInt(bb, 8);
 			}
 			long zero = Utils.readBytesAsUnsignedLong(bb, 8);
 			if (zero != 0) {

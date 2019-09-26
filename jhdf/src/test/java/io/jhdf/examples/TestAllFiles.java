@@ -9,14 +9,16 @@
  ******************************************************************************/
 package io.jhdf.examples;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import io.jhdf.HdfFile;
+import io.jhdf.api.Attribute;
+import io.jhdf.api.Dataset;
+import io.jhdf.api.Group;
+import io.jhdf.api.Link;
+import io.jhdf.api.Node;
+import io.jhdf.api.NodeType;
+import org.apache.commons.lang3.ArrayUtils;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.TestFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -29,18 +31,22 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.TestFactory;
-
-import io.jhdf.HdfFile;
-import io.jhdf.api.Dataset;
-import io.jhdf.api.Group;
-import io.jhdf.api.Node;
-import io.jhdf.api.NodeType;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anEmptyMap;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 /**
  * This is a "catch all" test designed to look at all the test HDF5 files and
@@ -51,7 +57,7 @@ import io.jhdf.api.NodeType;
  */
 class TestAllFiles {
 
-	private static final PathMatcher HDF5 = FileSystems.getDefault().getPathMatcher("glob:**.hdf5");
+	private static final PathMatcher HDF5 = FileSystems.getDefault().getPathMatcher("glob:**.{hdf5,h5}");
 
 	@TestFactory
 	Stream<DynamicNode> allHdf5TestFiles() throws IOException, URISyntaxException {
@@ -73,6 +79,7 @@ class TestAllFiles {
 	private DynamicNode createTest(Path path) {
 		return dynamicTest(path.getFileName().toString(), () -> {
 			try (HdfFile hdfFile = new HdfFile(path.toFile())) {
+				verifyAttributes(hdfFile);
 				recurseGroup(hdfFile);
 			}
 		});
@@ -86,6 +93,33 @@ class TestAllFiles {
 				recurseGroup(group2);
 			} else if (node instanceof Dataset) {
 				verifyDataset((Dataset) node, group);
+			}
+			verifyAttributes(node);
+		}
+	}
+
+	private void verifyAttributes(Node node) {
+		if(node instanceof Link) {
+			if(((Link) node).isBrokenLink()) {
+				return; // Can't verify broken links
+			}
+		}
+		for (Entry<String, Attribute> entry : node.getAttributes().entrySet()) {
+			Attribute attribute = entry.getValue();
+			assertThat(attribute.getName(), is(equalTo(entry.getKey())));
+			assertThat(attribute.getJavaType(), is(notNullValue()));
+			if (attribute.isEmpty()) {
+				assertThat(attribute.getSize(), is(equalTo(0L)));
+				assertThat(attribute.getDiskSize(), is(equalTo(0L)));
+				assertThat(attribute.getData(), is(nullValue()));
+			} else if (attribute.isScalar()) {
+				assertThat(attribute.getSize(), is(equalTo(1L)));
+				assertThat(attribute.getDiskSize(), is(greaterThan(0L)));
+				assertThat(attribute.getData(), is(notNullValue()));
+			} else {
+				assertThat(attribute.getSize(), is(greaterThan(0L)));
+				assertThat(attribute.getDiskSize(), is(greaterThan(0L)));
+				assertThat(attribute.getData(), is(notNullValue()));
 			}
 		}
 	}
@@ -116,6 +150,10 @@ class TestAllFiles {
 			assertThat(data.getClass(), is(equalTo(dataset.getJavaType())));
 			// Should have some size
 			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+		} else if (dataset.isCompound()) {
+			// Compound datasets are currently returned as maps, maybe a custom CompoundDatset might be better in the future..
+			assertThat(data, is(instanceOf(Map.class)));
+			assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
 		} else {
 			assertThat(getDimensions(data), is(equalTo(dims)));
 			assertThat(getType(data), is(equalTo(dataset.getJavaType())));

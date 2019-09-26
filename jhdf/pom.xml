@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.jhdf</groupId>
+  <artifactId>jhdf</artifactId>
+  <version>0.4.10</version>
+  <name>jhdf</name>
+  <description>A pure Java HDF5 library</description>
+  <url>http://jhdf.io/</url>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>jamesmudd</id>
+      <name>James Mudd</name>
+      <email>james.mudd@gmail.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/jamesmudd/jhdf.git</connection>
+    <developerConnection>scm:git:git://github.com/jamesmudd/jhdf.git</developerConnection>
+    <url>https://github.com/jamesmudd/jhdf.git</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.28</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.9</version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+</project>

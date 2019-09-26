@@ -15,6 +15,7 @@ import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import io.jhdf.object.datatype.CompoundDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,14 +117,20 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	@Override
 	public Object getData() {
 		logger.debug("Getting data for '{}'...", getPath());
-		if (isEmpty()) {
+
+		final ByteBuffer bb = getDataBuffer();
+		if (bb == null) {
+			// Empty
 			return null;
 		}
-		DataType type = getDataType();
-		ByteBuffer bb = getDataBuffer();
+
+		final DataType type = getDataType();
+
 		if (type instanceof VariableLength) {
 			return VariableLengthDatasetReader.readDataset((VariableLength) type, bb,
 					getDimensions(), hdfFc);
+		} else if(type instanceof CompoundDataType) {
+			return CompoundDatasetReader.readDataset((CompoundDataType) type, bb, getSize(), getDimensions());
 		} else {
 			return DatasetReader.readDataset(type, bb, getDimensions());
 		}
@@ -136,8 +143,11 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 	@Override
 	public boolean isEmpty() {
-		return getDataBuffer() == null;
+		return getDiskSize() == 0;
 	}
+
+	@Override
+	public boolean isCompound() { return getDataType() instanceof CompoundDataType; }
 
 	/**
 	 * Gets the buffer that holds this datasets data. The returned buffer will be of

@@ -2,6 +2,23 @@
 
 Please note this project is still in pre-release development.
 
+## v0.4.7
+- Fix bug #101 https://github.com/jamesmudd/jhdf/issues/101
+- Add additional testing of attributes
+- Add attribute example
+
+## v0.4.6
+- Adds support for compound datasets
+- Adds support for array data type
+- Adds support for reading chunked datasets with Fletcher32 checksums, Note: the checksum is not verified.
+- Improved performance of Dataset.isEmpty method
+- Dependency updates
+
+## v0.4.5
+- Fix #49 - Big (>10x) performance improvement for chunked dataset reads. Chunks are now decompressed in parallel and the resulting data copies are a large as possible.
+- Update Gradle to 5.5
+- Update test dependencies
+
 ## v0.4.4
 - Fix #88 error when running on Java 8 
 - Improvements to IDE support
