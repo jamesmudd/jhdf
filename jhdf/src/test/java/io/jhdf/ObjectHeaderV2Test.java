@@ -166,4 +166,23 @@ public class ObjectHeaderV2Test {
 		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
 	}
 
+	@Test
+	public void testCreationOrderTracked() throws IOException, URISyntaxException {
+		// this test fails without skipping the creation order in Message#readObjectHeaderV2Message
+		final URI testFileUri = this.getClass().getResource("test_attribute_with_creation_order.hdf5").toURI();
+		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
+		Superblock sb = Superblock.readSuperblock(fc, 0);
+		HdfFileChannel hdfFc = new HdfFileChannel(fc, sb);
+
+		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 48);
+
+		assertThat(oh.getVersion(), is(equalTo(2)));
+		assertThat(oh.getAddress(), is(equalTo(48L)));
+		assertThat(oh.getMessages().size(), is(equalTo(5)));
+		assertThat(oh.isAttributeCreationOrderIndexed(), is(true));
+		assertThat(oh.isAttributeCreationOrderTracked(), is(true));
+
+		hdfFc.close();
+	}
+
 }

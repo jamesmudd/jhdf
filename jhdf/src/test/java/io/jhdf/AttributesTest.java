@@ -68,6 +68,21 @@ public class AttributesTest {
 	private static final String SCALAR_STRING_ATTRIBUTE_NAME = "scalar_string";
 	private static final String EXPECTED_SCALAR_STRING_DATA = "hello";
 
+	private static final String SCALAR_REFERENCE_ATTRIBUTE_NAME = "object_reference";
+	private static final long EXPECTED_SCALAR_REFERENCE_DATA_EARLIEST = 96;
+	private static final long EXPECTED_SCALAR_REFERENCE_DATA_LATEST = 48;
+
+	private static final String ONE_D_REFERENCE_ATTRIBUTE_NAME = "1D_object_references";
+	private static final long[] EXPECTED_1D_REFERENCE_DATA_EARLIEST = {96, 800};
+	private static final long[] EXPECTED_1D_REFERENCE_DATA_LATEST = {48, 195};
+
+	private static final String TWO_D_REFERENCE_ATTRIBUTE_NAME = "2D_object_references";
+	private static final long[][] EXPECTED_2D_REFERENCE_DATA_EARLIEST = {EXPECTED_1D_REFERENCE_DATA_EARLIEST,
+			EXPECTED_1D_REFERENCE_DATA_EARLIEST};
+	private static final long[][] EXPECTED_2D_REFERENCE_DATA_LATEST = {EXPECTED_1D_REFERENCE_DATA_LATEST,
+			EXPECTED_1D_REFERENCE_DATA_LATEST};
+
+
 	private static HdfFile earliestHdfFile;
 	private static HdfFile latestHdfFile;
 
@@ -119,7 +134,16 @@ public class AttributesTest {
 												EXPECTED_SCALAR_INT_DATA)),
 								dynamicTest(SCALAR_STRING_ATTRIBUTE_NAME,
 										createTest(earliestHdfFile, GROUP_PATH, SCALAR_STRING_ATTRIBUTE_NAME,
-												EXPECTED_SCALAR_STRING_DATA)))),
+												EXPECTED_SCALAR_STRING_DATA)),
+								dynamicTest(TWO_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(earliestHdfFile, GROUP_PATH, TWO_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_2D_REFERENCE_DATA_EARLIEST)),
+								dynamicTest(ONE_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(earliestHdfFile, GROUP_PATH, ONE_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_1D_REFERENCE_DATA_EARLIEST)),
+								dynamicTest(SCALAR_REFERENCE_ATTRIBUTE_NAME,
+										createTest(earliestHdfFile, GROUP_PATH, SCALAR_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_SCALAR_REFERENCE_DATA_EARLIEST)))),
 
 						// Dataset
 						dynamicContainer(DATASET_PATH, Arrays.asList(
@@ -155,7 +179,16 @@ public class AttributesTest {
 												EXPECTED_SCALAR_INT_DATA)),
 								dynamicTest(SCALAR_STRING_ATTRIBUTE_NAME,
 										createTest(earliestHdfFile, DATASET_PATH, SCALAR_STRING_ATTRIBUTE_NAME,
-												EXPECTED_SCALAR_STRING_DATA)))),
+												EXPECTED_SCALAR_STRING_DATA)),
+								dynamicTest(TWO_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(earliestHdfFile, DATASET_PATH, TWO_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_2D_REFERENCE_DATA_EARLIEST)),
+								dynamicTest(ONE_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(earliestHdfFile, DATASET_PATH, ONE_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_1D_REFERENCE_DATA_EARLIEST)),
+								dynamicTest(SCALAR_REFERENCE_ATTRIBUTE_NAME,
+										createTest(earliestHdfFile, DATASET_PATH, SCALAR_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_SCALAR_REFERENCE_DATA_EARLIEST)))),
 
 						// Hard link
 						dynamicContainer(HARD_LINK_PATH, Arrays.asList(
@@ -191,7 +224,17 @@ public class AttributesTest {
 												EXPECTED_SCALAR_INT_DATA)),
 								dynamicTest(SCALAR_STRING_ATTRIBUTE_NAME,
 										createTest(earliestHdfFile, HARD_LINK_PATH, SCALAR_STRING_ATTRIBUTE_NAME,
-												EXPECTED_SCALAR_STRING_DATA)))),
+												EXPECTED_SCALAR_STRING_DATA)),
+								dynamicTest(TWO_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(earliestHdfFile, HARD_LINK_PATH, TWO_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_2D_REFERENCE_DATA_EARLIEST)),
+								dynamicTest(ONE_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(earliestHdfFile, HARD_LINK_PATH, ONE_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_1D_REFERENCE_DATA_EARLIEST)),
+								dynamicTest(SCALAR_REFERENCE_ATTRIBUTE_NAME,
+										createTest(earliestHdfFile, HARD_LINK_PATH, SCALAR_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_SCALAR_REFERENCE_DATA_EARLIEST)))),
+
 
 						// Soft link
 						dynamicContainer(SOFT_LINK_PATH, Arrays.asList(
@@ -227,7 +270,16 @@ public class AttributesTest {
 												EXPECTED_SCALAR_INT_DATA)),
 								dynamicTest(SCALAR_STRING_ATTRIBUTE_NAME,
 										createTest(earliestHdfFile, SOFT_LINK_PATH, SCALAR_STRING_ATTRIBUTE_NAME,
-												EXPECTED_SCALAR_STRING_DATA))))
+												EXPECTED_SCALAR_STRING_DATA)),
+								dynamicTest(TWO_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(earliestHdfFile, SOFT_LINK_PATH, TWO_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_2D_REFERENCE_DATA_EARLIEST)),
+								dynamicTest(ONE_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(earliestHdfFile, SOFT_LINK_PATH, ONE_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_1D_REFERENCE_DATA_EARLIEST)),
+								dynamicTest(SCALAR_REFERENCE_ATTRIBUTE_NAME,
+										createTest(earliestHdfFile, SOFT_LINK_PATH, SCALAR_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_SCALAR_REFERENCE_DATA_EARLIEST))))
 
 				)),
 				dynamicContainer("latest", Arrays.asList(
@@ -266,7 +318,16 @@ public class AttributesTest {
 												EXPECTED_SCALAR_INT_DATA)),
 								dynamicTest(SCALAR_STRING_ATTRIBUTE_NAME,
 										createTest(latestHdfFile, GROUP_PATH, SCALAR_STRING_ATTRIBUTE_NAME,
-												EXPECTED_SCALAR_STRING_DATA)))),
+												EXPECTED_SCALAR_STRING_DATA)),
+								dynamicTest(TWO_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(latestHdfFile, GROUP_PATH, TWO_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_2D_REFERENCE_DATA_LATEST)),
+								dynamicTest(ONE_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(latestHdfFile, GROUP_PATH, ONE_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_1D_REFERENCE_DATA_LATEST)),
+								dynamicTest(SCALAR_REFERENCE_ATTRIBUTE_NAME,
+										createTest(latestHdfFile, GROUP_PATH, SCALAR_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_SCALAR_REFERENCE_DATA_LATEST)))),
 
 						// Dataset
 						dynamicContainer(DATASET_PATH, Arrays.asList(
@@ -302,7 +363,19 @@ public class AttributesTest {
 												EXPECTED_SCALAR_INT_DATA)),
 								dynamicTest(SCALAR_STRING_ATTRIBUTE_NAME,
 										createTest(latestHdfFile, DATASET_PATH, SCALAR_STRING_ATTRIBUTE_NAME,
-												EXPECTED_SCALAR_STRING_DATA)))),
+												EXPECTED_SCALAR_STRING_DATA)),
+								dynamicTest(SCALAR_REFERENCE_ATTRIBUTE_NAME,
+										createTest(latestHdfFile, DATASET_PATH, SCALAR_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_SCALAR_REFERENCE_DATA_LATEST)),
+								dynamicTest(TWO_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(latestHdfFile, DATASET_PATH, TWO_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_2D_REFERENCE_DATA_LATEST)),
+								dynamicTest(ONE_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(latestHdfFile, DATASET_PATH, ONE_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_1D_REFERENCE_DATA_LATEST)),
+								dynamicTest(SCALAR_REFERENCE_ATTRIBUTE_NAME,
+										createTest(latestHdfFile, DATASET_PATH, SCALAR_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_SCALAR_REFERENCE_DATA_LATEST)))),
 
 						// Hard link
 						dynamicContainer(HARD_LINK_PATH, Arrays.asList(
@@ -338,7 +411,16 @@ public class AttributesTest {
 												EXPECTED_SCALAR_INT_DATA)),
 								dynamicTest(SCALAR_STRING_ATTRIBUTE_NAME,
 										createTest(latestHdfFile, HARD_LINK_PATH, SCALAR_STRING_ATTRIBUTE_NAME,
-												EXPECTED_SCALAR_STRING_DATA)))),
+												EXPECTED_SCALAR_STRING_DATA)),
+								dynamicTest(TWO_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(latestHdfFile, HARD_LINK_PATH, TWO_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_2D_REFERENCE_DATA_LATEST)),
+								dynamicTest(ONE_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(latestHdfFile, HARD_LINK_PATH, ONE_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_1D_REFERENCE_DATA_LATEST)),
+								dynamicTest(SCALAR_REFERENCE_ATTRIBUTE_NAME,
+										createTest(latestHdfFile, HARD_LINK_PATH, SCALAR_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_SCALAR_REFERENCE_DATA_LATEST)))),
 
 						// Soft link
 						dynamicContainer(SOFT_LINK_PATH, Arrays.asList(
@@ -374,7 +456,16 @@ public class AttributesTest {
 												EXPECTED_SCALAR_INT_DATA)),
 								dynamicTest(SCALAR_STRING_ATTRIBUTE_NAME,
 										createTest(latestHdfFile, SOFT_LINK_PATH, SCALAR_STRING_ATTRIBUTE_NAME,
-												EXPECTED_SCALAR_STRING_DATA))))
+												EXPECTED_SCALAR_STRING_DATA)),
+								dynamicTest(TWO_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(latestHdfFile, SOFT_LINK_PATH, TWO_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_2D_REFERENCE_DATA_LATEST)),
+								dynamicTest(ONE_D_REFERENCE_ATTRIBUTE_NAME,
+										createTest(latestHdfFile, SOFT_LINK_PATH, ONE_D_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_1D_REFERENCE_DATA_LATEST)),
+								dynamicTest(SCALAR_REFERENCE_ATTRIBUTE_NAME,
+										createTest(latestHdfFile, SOFT_LINK_PATH, SCALAR_REFERENCE_ATTRIBUTE_NAME,
+												EXPECTED_SCALAR_REFERENCE_DATA_LATEST))))
 
 				)));
 	}

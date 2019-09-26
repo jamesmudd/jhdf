@@ -31,6 +31,8 @@ import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.FixedPoint;
 import io.jhdf.object.datatype.FloatingPoint;
+import io.jhdf.object.datatype.Reference;
+
 
 class DatasetReaderTest {
 
@@ -74,6 +76,12 @@ class DatasetReaderTest {
 	private final DataType doubleDataType = mockFloatingPoint(double.class, Double.BYTES);
 	private final double[][] doubleResult = new double[][] { { 1, 2, 3 }, { 4, 5, 6 } };
 
+	// Reference
+	private final DataType referenceDataType = mockReference(long.class, Long.BYTES);
+	private final DataType referenceDataTypeSmall = mockReference(long.class, 4);
+	private final ByteBuffer referenceIntBuffer = createIntBuffer(new int[] { 1, 200, 3012, 414, 50, 666666 });
+	private final long[][] referenceIntLongResult = new long[][] { { 1L, 200L, 3012L }, { 414L, 50L, 666666L } };
+
 	@TestFactory
 	Collection<DynamicNode> datasetReadTests() {
 		return Arrays.asList(dynamicTest("Signed Byte", createTest(byteBuffer, byteDataType, dims, byteResult)),
@@ -86,7 +94,9 @@ class DatasetReaderTest {
 				dynamicTest("Signed Long", createTest(longBuffer, longDataType, dims, longResult)),
 				dynamicTest("Unsigned Long", createTest(longBuffer, unsignedLongDataType, dims, unsignedLongResult)),
 				dynamicTest("Float", createTest(floatBuffer, floatDataType, dims, floatResult)),
-				dynamicTest("Double", createTest(doubleBuffer, doubleDataType, dims, doubleResult)));
+				dynamicTest("Double", createTest(doubleBuffer, doubleDataType, dims, doubleResult)),
+				dynamicTest("Reference8", createTest(longBuffer, referenceDataType, dims, longResult)),
+				dynamicTest("Reference4", createTest(referenceIntBuffer, referenceDataTypeSmall, dims, referenceIntLongResult)));
 	}
 
 	@Test
@@ -104,6 +114,12 @@ class DatasetReaderTest {
 	@Test
 	void testUnsupportedFloatingPointLengthThrows() {
 		DataType invalidDataType = mockFloatingPoint(double.class, 11); // 11 byte data is not supported
+		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims));
+	}
+
+	@Test
+	void testUnsupportedReferenceLengthThrows() {
+		DataType invalidDataType = mockReference(long.class, 11); // 11 byte data is not supported
 		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims));
 	}
 
@@ -196,6 +212,14 @@ class DatasetReaderTest {
 		when(floatingPoint.getJavaType()).thenReturn(javaType);
 		when(floatingPoint.getSize()).thenReturn(size);
 		when(floatingPoint.getByteOrder()).thenReturn(ByteOrder.nativeOrder());
+		return floatingPoint;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Reference mockReference(@SuppressWarnings("rawtypes") Class javaType, int size) {
+		Reference floatingPoint = mock(Reference.class);
+		when(floatingPoint.getJavaType()).thenReturn(javaType);
+		when(floatingPoint.getSize()).thenReturn(size);
 		return floatingPoint;
 	}
 

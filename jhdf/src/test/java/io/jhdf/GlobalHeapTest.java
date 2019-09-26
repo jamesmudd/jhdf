@@ -12,6 +12,7 @@ package io.jhdf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -96,5 +97,15 @@ public class GlobalHeapTest {
 
 		HdfFileChannel hdfFileChannel = new HdfFileChannel(mockFc, sb);
 		assertThrows(HdfException.class, () -> new GlobalHeap(hdfFileChannel, 0));
+	}
+
+	@Test
+	void testDifferentObjectZero() throws URISyntaxException {
+		URI testFile = this.getClass().getResource("globalheaps_test.hdf5").toURI();
+		try (HdfFile file = new HdfFile(Paths.get(testFile).toFile())) {
+			Object data = file.getAttribute("attribute").getData();
+			assertArrayEquals(new String[]{"value0", "value1", "value2", "value3", "value4", "value5", "value6", ""},
+					(String[]) data);
+		}
 	}
 }

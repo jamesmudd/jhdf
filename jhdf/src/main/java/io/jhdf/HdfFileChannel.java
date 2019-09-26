@@ -83,6 +83,10 @@ public class HdfFileChannel {
 		return sb;
 	}
 
+	public FileChannel getFileChannel(){
+		return fc;
+	}
+
 	public int getSizeOfOffsets() {
 		return sb.getSizeOfOffsets();
 	}

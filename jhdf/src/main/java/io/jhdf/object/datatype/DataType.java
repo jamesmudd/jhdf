@@ -58,7 +58,7 @@ public abstract class DataType {
 			case 6: // Compound
 				throw new UnsupportedHdfException("Compound data type is not yet supported");
 			case 7: // Reference
-				throw new UnsupportedHdfException("Reference data type is not yet supported");
+				return new Reference(bb);
 			case 8: // Enum
 				throw new UnsupportedHdfException("Enumerated data type is not yet supported");
 			case 9: // Variable length

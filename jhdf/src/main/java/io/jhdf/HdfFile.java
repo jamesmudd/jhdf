@@ -263,4 +263,11 @@ public class HdfFile implements Group, AutoCloseable {
 		return rootGroup.isLinkCreationOrderTracked();
 	}
 
+	/**
+	 * @return the underlying {@link HdfFileChannel}
+	 */
+	public HdfFileChannel getHdfChannel() {
+		return hdfFc;
+	}
+
 }
