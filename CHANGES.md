@@ -1,7 +1,5 @@
 # jHDF Change Log
 
-Please note this project is still in pre-release development.
-
 ## v0.4.7
 - Fix bug #101 https://github.com/jamesmudd/jhdf/issues/101
 - Add additional testing of attributes
