@@ -114,7 +114,7 @@ public class StringDatasetTest {
 		}
 	}
 
-	private int[] getDimensions(Object data) {
+	static int[] getDimensions(Object data) {
 		List<Integer> dims = new ArrayList<>();
 		dims.add(Array.getLength(data));
 

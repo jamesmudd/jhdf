@@ -25,7 +25,11 @@ def write_attribute_file(f):
     # Add links
     f['hard_link_data'] = group['data']
     f['soft_link_to_data'] = h5py.SoftLink('/test_group/data')
-    
+
+    # Add references
+    refs = (f.ref, group.ref)
+    add_reference_attributes(group, refs)
+    add_reference_attributes(dataset, refs)
     
     f.flush()
     f.close()
@@ -53,7 +57,14 @@ def add_attributes(node):
     data = np.arange(6).reshape(2,3).astype(bytes)
     utf8 = h5py.special_dtype(vlen=str)
     node.attrs.create('2d_string', data=data, dtype=utf8)
-    
+
+
+def add_reference_attributes(node, refs):
+    ref_type = h5py.special_dtype(ref=h5py.Reference)
+    node.attrs.create("object_reference", refs[0], dtype=ref_type)
+    node.attrs.create("1D_object_references", refs, dtype=ref_type)
+    node.attrs.create("2D_object_references", (refs, refs), dtype=ref_type)
+
     
 
 if __name__ == '__main__':

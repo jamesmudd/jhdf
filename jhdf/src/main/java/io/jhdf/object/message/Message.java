@@ -15,6 +15,7 @@ import java.util.BitSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.jhdf.ObjectHeader;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
@@ -63,9 +64,17 @@ public class Message {
 	}
 
 	public static Message readObjectHeaderV2Message(ByteBuffer bb, Superblock sb) {
+		return readObjectHeaderV2Message(bb, sb, false);
+	}
+
+	public static Message readObjectHeaderV2Message(ByteBuffer bb, Superblock sb, boolean attributeCreationOrderTracked) {
 		int messageType = Utils.readBytesAsUnsignedInt(bb, 1);
 		int dataSize = Utils.readBytesAsUnsignedInt(bb, 2);
 		BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
+		if (attributeCreationOrderTracked) {
+			//skip creation order
+			bb.getShort();
+		}
 
 		// Create a new buffer holding this header data
 		final ByteBuffer headerData = Utils.createSubBuffer(bb, dataSize);

@@ -56,11 +56,13 @@ public class GlobalHeap {
 
 			int collectionSize = readBytesAsUnsignedInt(bb, hdfFc.getSizeOfLengths());
 
+			// Collection size contains size of whole collection, so substract already read bytes
+			int remainingCollectionSize = collectionSize - 8 - hdfFc.getSizeOfLengths();
 			// Now start reading the heap into memory
-			bb = hdfFc.readBufferFromAddress(address + headerSize, collectionSize);
+			bb = hdfFc.readBufferFromAddress(address + headerSize, remainingCollectionSize);
 
-			// 32 = (the collection header of 16 bytes and the 16 bytes of information about each heap object)
-			while (bb.remaining() > 32) {
+			// minimal global heap object is 16 bytes
+			while (bb.remaining() >= 16) {
 				GlobalHeapObject object = new GlobalHeapObject(bb);
 				if (object.index == 0) {
 					break;
@@ -91,6 +93,10 @@ public class GlobalHeap {
 			referenceCount = readBytesAsUnsignedInt(bb, 2);
 			bb.position(bb.position() + 4); // Skip 4 reserved bytes
 			int size = readBytesAsUnsignedInt(bb, hdfFc.getSizeOfOffsets());
+			if (index == 0) {
+				//the size in global heap object 0 is the free space without counting object 0
+				size = size - 2 - 2 - 4 - hdfFc.getSizeOfOffsets();
+			}
 			data = createSubBuffer(bb, size);
 			seekBufferToNextMultipleOfEight(bb);
 		}

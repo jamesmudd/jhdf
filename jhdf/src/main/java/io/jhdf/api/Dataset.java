@@ -9,6 +9,7 @@
  ******************************************************************************/
 package io.jhdf.api;
 
+import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataLayout;
 
 /**
@@ -103,6 +104,13 @@ public interface Dataset extends Node {
 	 * @return the Java type used to represent this dataset
 	 */
 	Class<?> getJavaType();
+
+	/**
+	 * Gets the {@link DataType} that is used to represent the data in the HDF5-file.
+	 *
+	 * @return the data type used to store the data in the HDF5-file
+	 */
+	DataType getDataType();
 
 	/**
 	 * Gets the fill value for this dataset or <code>null</code> if not defined. If

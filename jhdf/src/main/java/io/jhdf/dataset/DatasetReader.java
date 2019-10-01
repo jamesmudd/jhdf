@@ -28,6 +28,7 @@ import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.FixedPoint;
 import io.jhdf.object.datatype.FloatingPoint;
+import io.jhdf.object.datatype.Reference;
 import io.jhdf.object.datatype.StringData;
 import io.jhdf.object.datatype.ArrayDataType;
 
@@ -131,6 +132,16 @@ public final class DatasetReader {
 		} else if (type instanceof StringData) {
 			int stringLength = type.getSize();
 			fillFixedLengthStringData(data, dimensions, buffer, stringLength);
+		} else if (type instanceof Reference) {
+			//reference type handles addresses, which are always longs for this library
+			int size = type.getSize();
+			if (size == 8) {
+				fillData(data, dimensions, buffer.order(ByteOrder.LITTLE_ENDIAN).asLongBuffer());
+			} else if (size < 8) {
+				fillLongData(data, dimensions, buffer.order(ByteOrder.LITTLE_ENDIAN), size);
+			} else {
+				throw new HdfTypeException("Unsupported address size in reference data type " + size + " bytes");
+			}
 		} else if (type instanceof ArrayDataType) {
 			final ArrayDataType arrayType = (ArrayDataType) type;
 			if (dimensions.length !=1) {
@@ -143,7 +154,7 @@ public final class DatasetReader {
 				Object elementDataset = readDataset(arrayType.getBaseType(), buffer, arrayType.getDimensions());
 				Array.set(data, i, elementDataset);
 			}
-		}else {
+		} else {
 			throw new HdfException(
 					"DatasetReader was passed a type it cant fill. Type: " + type.getClass().getCanonicalName());
 		}
@@ -198,6 +209,20 @@ public final class DatasetReader {
 			}
 		} else {
 			buffer.get((long[]) data);
+		}
+	}
+
+	private static void fillLongData(Object data, int[] dims, ByteBuffer buffer, int size) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				fillLongData(newArray, stripLeadingIndex(dims), buffer, size);
+			}
+		} else {
+			long[] longData = (long[]) data;
+			for (int i = 0; i < longData.length; i++) {
+				longData[i] = Utils.readBytesAsUnsignedLong(buffer, size);
+			}
 		}
 	}
 
