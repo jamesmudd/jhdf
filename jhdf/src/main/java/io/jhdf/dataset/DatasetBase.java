@@ -110,6 +110,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		return type;
 	}
 
+	@Override
 	public DataType getDataType() {
 		return dataType;
 	}

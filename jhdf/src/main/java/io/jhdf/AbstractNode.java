@@ -116,7 +116,7 @@ public abstract class AbstractNode implements Node {
 
 	@Override
 	public String getPath() {
-		return parent == null ? null : parent.getPath() + name;
+		return parent.getPath() + name;
 	}
 
 	@Override
@@ -145,7 +145,7 @@ public abstract class AbstractNode implements Node {
 		return false;
 	}
 
-	public <T extends Message> T getHeaderMessage(Class<T> clazz) {
+	protected <T extends Message> T getHeaderMessage(Class<T> clazz) {
 		return getHeader().getMessageOfType(clazz);
 	}
 
