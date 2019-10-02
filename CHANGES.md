@@ -1,5 +1,11 @@
 # jHDF Change Log
 
+## v0.4.8
+- Add support for reference data type. Thanks to Gisa Meier and JCzogalla https://github.com/jamesmudd/jhdf/pull/106
+- Creation order tracking is skipped allowing these files to be read
+- FileChannel can now be accessed allowing more low-level access to datasets
+- Add version logging when the library is used
+
 ## v0.4.7
 - Fix bug #101 https://github.com/jamesmudd/jhdf/issues/101
 - Add additional testing of attributes
