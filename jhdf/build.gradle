@@ -37,20 +37,24 @@ repositories {
     jcenter()
 }
 
+ext {
+    slf4jVersion = '1.7.28'
+    junitVersion = '5.5.2'
+}
+
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
 	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
 
-    
     // Use JUnit 5 test framework
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.5.1'
-	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.5.1'
-	testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.5.1'
-    testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.28'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion
+	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junitVersion
+	testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion
+    testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
     
     // Mocking
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.0.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.1.0'
 	// Matchers
 	testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
 }
