@@ -35,7 +35,7 @@ public class Reference extends DataType {
 		OBJECT,
 
 		/** Dataset Region Reference: A reference to a region within a dataset in the HDF5 file. */
-		REGION;
+		REGION
 	}
 
 	private final ReferenceType type;
