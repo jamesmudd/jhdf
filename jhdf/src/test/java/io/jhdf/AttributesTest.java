@@ -29,7 +29,7 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-public class AttributesTest {
+class AttributesTest {
 
 	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "test_attribute_earliest.hdf5";
 	private static final String HDF5_TEST_LATEST_FILE_NAME = "test_attribute_latest.hdf5";

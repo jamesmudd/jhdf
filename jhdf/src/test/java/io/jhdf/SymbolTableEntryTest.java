@@ -24,11 +24,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-public class SymbolTableEntryTest {
+class SymbolTableEntryTest {
 	private HdfFileChannel hdfFc;
 
 	@BeforeEach
-	public void setUp() throws URISyntaxException, IOException {
+    void setUp() throws URISyntaxException, IOException {
 		final URI testFileUri = this.getClass().getResource("test_file.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
@@ -36,12 +36,12 @@ public class SymbolTableEntryTest {
 	}
 
 	@AfterEach
-	public void after() {
+    void after() {
 		hdfFc.close();
 	}
 
 	@Test
-	public void testSymbolTableEntry() {
+    void testSymbolTableEntry() {
 		SymbolTableEntry ste = new SymbolTableEntry(hdfFc, 56);
 		assertThat(ste.getLinkNameOffset(), is(equalTo(0)));
 		assertThat(ste.getObjectHeaderAddress(), is(equalTo(96L)));

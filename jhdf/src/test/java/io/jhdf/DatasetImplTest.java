@@ -29,7 +29,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class DatasetImplTest {
+class DatasetImplTest {
 
 	private static final String INT8_PATH = "/datasets_group/int/int8";
 	private static final String INT16_PATH = "/datasets_group/int/int16";

@@ -30,7 +30,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-public class ByteShuffleChunkedDatasetTest {
+class ByteShuffleChunkedDatasetTest {
 
 	private static final String HDF5_TEST_FILE_NAME = "../test_byteshuffle_compressed_datasets_earliest.hdf5";
 

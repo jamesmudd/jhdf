@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class HdfFileChannelTest {
+class HdfFileChannelTest {
 
 	@Mock
 	FileChannel fc;
@@ -43,7 +43,7 @@ public class HdfFileChannelTest {
 	Superblock sb;
 
 	// Under test
-	HdfFileChannel hdfFc;
+    private HdfFileChannel hdfFc;
 
 	@BeforeEach
 	void before() {

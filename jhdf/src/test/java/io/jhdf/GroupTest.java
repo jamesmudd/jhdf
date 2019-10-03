@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class GroupTest {
+class GroupTest {
 	private static final String DATASETS_GROUP = "datasets_group";
 
 	private HdfFileChannel hdfFc;
@@ -41,7 +41,7 @@ public class GroupTest {
 	private Group rootGroup;
 
 	@BeforeEach
-	public void setUp() throws IOException {
+    void setUp() throws IOException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		File file = new File(testFileUrl);
 		FileChannel fc = FileChannel.open(file.toPath(), StandardOpenOption.READ);
@@ -55,12 +55,12 @@ public class GroupTest {
 	}
 
 	@AfterEach
-	public void after() {
+    void after() {
 		hdfFc.close();
 	}
 
 	@Test
-	public void testGroup() {
+    void testGroup() {
 		Group group = GroupImpl.createGroup(hdfFc, 800, DATASETS_GROUP, rootGroup);
 		assertThat(group.getPath(), is(equalTo("/datasets_group/")));
 		assertThat(group.toString(), is(equalTo("Group [name=datasets_group, path=/datasets_group/, address=0x320]")));

@@ -26,7 +26,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-public class LargeGroupTest {
+class LargeGroupTest {
 
 	@TestFactory
 	Collection<DynamicNode> datasetReadTests() {

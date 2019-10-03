@@ -22,7 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
-public class CompoundDatasetTest {
+class CompoundDatasetTest {
 
     private static final String HDF5_TEST_FILE_NAME = "../compound_dataset_test.hdf5";
 

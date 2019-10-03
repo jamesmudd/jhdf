@@ -32,13 +32,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 
-public class ObjectHeaderTest {
+class ObjectHeaderTest {
 	private HdfFileChannel hdfFc;
 	private Superblock sb;
 	private FileChannel fc;
 
 	@BeforeEach
-	public void setUp() throws IOException, URISyntaxException {
+	void setUp() throws IOException, URISyntaxException {
 		final URI testFileUri = this.getClass().getResource("test_file.hdf5").toURI();
 		fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		sb = Superblock.readSuperblock(fc, 0);
@@ -46,12 +46,12 @@ public class ObjectHeaderTest {
 	}
 
 	@AfterEach
-	public void after() {
+	void after() {
 		hdfFc.close();
 	}
 
 	@Test
-	public void testObjectHeaderOnGroup() {
+	void testObjectHeaderOnGroup() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 800); // dataset_group header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
@@ -66,7 +66,7 @@ public class ObjectHeaderTest {
 	}
 
 	@Test
-	public void testObjectHeaderOnFloat32Dataset() {
+	void testObjectHeaderOnFloat32Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 7272); // float32 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
@@ -81,7 +81,7 @@ public class ObjectHeaderTest {
 	}
 
 	@Test
-	public void testObjectHeaderOnFloat64Dataset() {
+	void testObjectHeaderOnFloat64Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 7872); // float64 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
@@ -96,7 +96,7 @@ public class ObjectHeaderTest {
 	}
 
 	@Test
-	public void testObjectHeaderOnInt8Dataset() {
+	void testObjectHeaderOnInt8Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 10904); // int8 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
@@ -112,7 +112,7 @@ public class ObjectHeaderTest {
 	}
 
 	@Test
-	public void testLazyObjectHeader() throws ConcurrentException, IOException {
+	void testLazyObjectHeader() throws ConcurrentException, IOException {
 		FileChannel spyFc = Mockito.spy(fc);
 		HdfFileChannel hdfFileChannel = new HdfFileChannel(spyFc, sb);
 		LazyInitializer<ObjectHeader> lazyObjectHeader = ObjectHeader.lazyReadObjectHeader(hdfFileChannel, 10904); // int8

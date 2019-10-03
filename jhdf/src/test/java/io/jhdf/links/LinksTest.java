@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class LinksTest {
 
-	final String testFileUrl = this.getClass().getResource("../test_file.hdf5").getFile();
+	private final String testFileUrl = this.getClass().getResource("../test_file.hdf5").getFile();
 
 	@Test
 	void testSoftLink() {

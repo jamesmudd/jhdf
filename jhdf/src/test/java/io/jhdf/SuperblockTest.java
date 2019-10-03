@@ -26,25 +26,25 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class SuperblockTest {
+class SuperblockTest {
 	private FileChannel fc;
 	private RandomAccessFile raf;
 
 	@BeforeEach
-	public void setUp() throws FileNotFoundException {
+    void setUp() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
 	}
 
 	@AfterEach
-	public void after() throws IOException {
+    void after() throws IOException {
 		raf.close();
 		fc.close();
 	}
 
 	@Test
-	public void testExtractV0SuperblockFromFile() throws IOException {
+    void testExtractV0SuperblockFromFile() throws IOException {
 		Superblock sb = Superblock.readSuperblock(fc, 0);
 		// Test version independent methods
 		assertThat(sb.getVersionOfSuperblock(), is(equalTo(0)));
@@ -66,17 +66,17 @@ public class SuperblockTest {
 	}
 
 	@Test
-	public void testVerifySuperblock() {
+    void testVerifySuperblock() {
 		assertThat(Superblock.verifySignature(fc, 0), is(true));
 	}
 
 	@Test
-	public void testVerifySuperblockReturnsFalseWhenNotCorrect() {
+    void testVerifySuperblockReturnsFalseWhenNotCorrect() {
 		assertThat(Superblock.verifySignature(fc, 3), is(false));
 	}
 
 	@Test
-	public void testReadSuperblockThrowsWhenGivenInvalidOffset() {
+    void testReadSuperblockThrowsWhenGivenInvalidOffset() {
 		assertThrows(HdfException.class, () -> Superblock.readSuperblock(fc, 5));
 	}
 }

@@ -30,7 +30,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class GlobalHeapTest {
+class GlobalHeapTest {
 
 	private GlobalHeap globalHeap;
 	private Superblock sb;

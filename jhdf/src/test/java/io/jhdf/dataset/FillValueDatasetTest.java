@@ -26,7 +26,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-public class FillValueDatasetTest {
+class FillValueDatasetTest {
 
 	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "../test_fill_value_earliest.hdf5";
 	private static final String HDF5_TEST_LATEST_FILE_NAME = "../test_fill_value_latest.hdf5";

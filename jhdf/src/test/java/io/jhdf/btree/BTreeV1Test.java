@@ -31,11 +31,11 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class BTreeV1Test {
+class BTreeV1Test {
 	private HdfFileChannel hdfFc;
 
 	@BeforeEach
-	public void setUp() throws URISyntaxException, IOException {
+    void setUp() throws URISyntaxException, IOException {
 		final URI testFileUri = this.getClass().getResource("../test_chunked_datasets_earliest.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
@@ -43,7 +43,7 @@ public class BTreeV1Test {
 	}
 
 	@AfterEach
-	public void after() {
+    void after() {
 		hdfFc.close();
 	}
 

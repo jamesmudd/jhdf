@@ -32,7 +32,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-public class StringDatasetTest {
+class StringDatasetTest {
 
 	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "../test_string_datasets_earliest.hdf5";
 	private static final String HDF5_TEST_LATEST_FILE_NAME = "../test_string_datasets_latest.hdf5";

@@ -25,7 +25,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class FractalHeapTest {
+class FractalHeapTest {
 
 	private FractalHeap fractalHeap;
 

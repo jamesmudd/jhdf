@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 
-public class OrderedGroupTest {
+class OrderedGroupTest {
 	private static final String ORDERED_GROUP = "ordered_group";
 	private static final String UNORDERED_GROUP = "unordered_group";
 
@@ -41,14 +41,14 @@ public class OrderedGroupTest {
 	}
 
 	@Test
-	public void testOrderedGroup() {
+    void testOrderedGroup() {
 		Group group = (Group) hdfFile.getByPath(ORDERED_GROUP);
 		assertThat(group.isLinkCreationOrderTracked(), is(true));
 		assertThat(group.getChildren().keySet(), contains("z", "h", "a"));
 	}
 
 	@Test
-	public void testUnOrderedGroup() {
+    void testUnOrderedGroup() {
 		Group group = (Group) hdfFile.getByPath(UNORDERED_GROUP);
 		assertThat(group.isLinkCreationOrderTracked(), is(false));
 		assertThat(group.getChildren().keySet(), containsInAnyOrder("z", "h", "a"));

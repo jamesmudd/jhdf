@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-public class UserBlockTest {
+class UserBlockTest {
 
 	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "test_userblock_earliest.hdf5";
 	private static final String HDF5_TEST_LATEST_FILE_NAME = "test_userblock_latest.hdf5";

@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class MissingFilterTest {
+class MissingFilterTest {
 
 	private static final String HDF5_TEST_FILE_NAME = "../test_missing_filter.hdf5bad";
 

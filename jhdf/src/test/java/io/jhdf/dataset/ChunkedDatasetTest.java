@@ -30,7 +30,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-public class ChunkedDatasetTest {
+class ChunkedDatasetTest {
 
 	private static final String HDF5_TEST_FILE_NAME = "../test_chunked_datasets_earliest.hdf5";
 

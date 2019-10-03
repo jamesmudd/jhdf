@@ -26,7 +26,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-public class CompressedChunkedDatasetTest {
+class CompressedChunkedDatasetTest {
 
 	private static final String HDF5_TEST_FILE_NAME = "../test_compressed_chunked_datasets_earliest.hdf5";
 

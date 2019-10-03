@@ -29,14 +29,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-public class AttributeMessageV3Test {
+class AttributeMessageV3Test {
 	private FileChannel fc;
 	private RandomAccessFile raf;
 	private Superblock sb;
 	private ByteBuffer bb;
 
 	@BeforeEach
-	public void setUp() throws IOException {
+    void setUp() throws IOException {
 		final String testFileUrl = this.getClass().getResource("../../test_file2.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
@@ -46,13 +46,13 @@ public class AttributeMessageV3Test {
 	}
 
 	@AfterEach
-	public void after() throws IOException {
+    void after() throws IOException {
 		raf.close();
 		fc.close();
 	}
 
 	@Test
-	public void test() throws CharacterCodingException {
+    void test() throws CharacterCodingException {
 		AttributeMessage am = new AttributeMessage(bb, sb, BitSet.valueOf(new byte[1]));
 		assertThat(am.getVersion(), is(equalTo(3)));
 		assertThat(am.getName(), is(equalTo("string_attr")));

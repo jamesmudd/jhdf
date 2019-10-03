@@ -24,11 +24,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-public class GroupSymbolTableNodeTest {
-	HdfFileChannel hdfFc;
+class GroupSymbolTableNodeTest {
+	private HdfFileChannel hdfFc;
 
 	@BeforeEach
-	public void setUp() throws IOException, URISyntaxException {
+	void setUp() throws IOException, URISyntaxException {
 		final URI testFileUri = this.getClass().getResource("test_file.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
@@ -36,12 +36,12 @@ public class GroupSymbolTableNodeTest {
 	}
 
 	@AfterEach
-	public void after() {
+	void after() {
 		hdfFc.close();
 	}
 
 	@Test
-	public void testGroupSymbolTableNode() {
+	void testGroupSymbolTableNode() {
 		GroupSymbolTableNode node = new GroupSymbolTableNode(hdfFc, 1504);
 
 		assertThat(node.getVersion(), is(equalTo((short) 1)));

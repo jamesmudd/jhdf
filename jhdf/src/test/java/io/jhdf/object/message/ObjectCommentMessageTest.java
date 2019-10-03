@@ -27,7 +27,7 @@ class ObjectCommentMessageTest {
 	private ByteBuffer buffer;
 
 	@BeforeEach
-	private void createBuffer() {
+    void createBuffer() {
 		byte[] bytes = COMMENT.getBytes();
 		buffer = ByteBuffer.allocate(bytes.length + 1);
 		buffer.rewind();

@@ -31,7 +31,7 @@ class ObjectModificationTimeMessageTest {
 	private final BitSet flags = BitSet.valueOf(new byte[1]); // Empty flags
 
 	@BeforeEach
-	private void createBuffer() {
+	void createBuffer() {
 		buffer = ByteBuffer.allocate(8);
 		buffer.rewind();
 		buffer.put((byte) 1); // Version
