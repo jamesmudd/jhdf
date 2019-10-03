@@ -77,7 +77,7 @@ public class CompoundDataType extends DataType {
 		return members;
 	}
 
-	public class CompoundDataMember {
+	public static class CompoundDataMember {
 		private final String name;
 		private final int[] dimensionSize;
 		private final int offset;

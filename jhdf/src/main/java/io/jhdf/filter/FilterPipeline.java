@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class FilterPipeline {
 
-	private class PipelineFilterWithData {
+	private static class PipelineFilterWithData {
 
 		private final Filter filter;
 		private final int[] filterData;

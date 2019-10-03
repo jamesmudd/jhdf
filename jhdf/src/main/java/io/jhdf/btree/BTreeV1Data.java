@@ -38,7 +38,7 @@ public abstract class BTreeV1Data extends BTreeV1 {
 	 */
 	public abstract List<Chunk> getChunks();
 
-	public class Chunk {
+	public static class Chunk {
 		private final int size;
 		private final BitSet filterMask;
 		private final int[] chunkOffset;

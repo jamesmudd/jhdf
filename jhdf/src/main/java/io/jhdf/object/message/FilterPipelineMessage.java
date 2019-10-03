@@ -100,7 +100,7 @@ public class FilterPipelineMessage extends Message {
 		return filters;
 	}
 
-	public class FilterInfo {
+	public static class FilterInfo {
 
 		private final int id;
 		private final String name;
