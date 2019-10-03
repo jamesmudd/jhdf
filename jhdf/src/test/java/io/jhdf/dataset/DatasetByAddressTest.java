@@ -21,6 +21,7 @@ import org.junit.jupiter.api.function.Executable;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import static io.jhdf.TestUtils.flatten;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -45,7 +46,7 @@ class DatasetByAddressTest {
 	@TestFactory
 	Collection<DynamicNode> scalarDatasetTests() {
 		// List of all the datasetPaths
-		return Arrays.asList(
+		return Collections.singletonList(
 				dynamicContainer("earliest", Arrays.asList(
 						dynamicTest("fixed ASCII",
 								createTest(earliestHdfFile, 800)),

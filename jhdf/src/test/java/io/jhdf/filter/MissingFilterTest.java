@@ -39,7 +39,7 @@ class MissingFilterTest {
 	void testMissingFilter() {
 		Dataset dataset = hdfFile.getDatasetByPath("/float32");
 		assertThat(dataset, is(notNullValue()));
-		HdfFilterException exception = assertThrows(HdfFilterException.class, () -> dataset.getData());
+		HdfFilterException exception = assertThrows(HdfFilterException.class, dataset::getData);
 
 		// The missing filter name
 		assertThat(exception.getMessage(), containsString("lzf"));

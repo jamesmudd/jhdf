@@ -268,7 +268,7 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private ByteBuffer readMessages(HdfFileChannel hdfFc, ByteBuffer bb) {
+		private void readMessages(HdfFileChannel hdfFc, ByteBuffer bb) {
 			while (bb.remaining() >= 8) {
 				Message m = Message.readObjectHeaderV2Message(bb, hdfFc.getSuperblock(), this.isAttributeCreationOrderTracked());
 				messages.add(m);
@@ -289,7 +289,6 @@ public abstract class ObjectHeader {
 					readMessages(hdfFc, continuationBuffer);
 				}
 			}
-			return bb;
 		}
 
 		@Override
