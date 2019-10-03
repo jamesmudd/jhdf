@@ -9,25 +9,24 @@
  */
 package io.jhdf.dataset;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import io.jhdf.HdfFile;
+import io.jhdf.api.Dataset;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.File;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.function.Executable;
-
-import io.jhdf.HdfFile;
-import io.jhdf.api.Dataset;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 public class EmptyDatasetTest {
 

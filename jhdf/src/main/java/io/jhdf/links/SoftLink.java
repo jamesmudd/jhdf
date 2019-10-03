@@ -9,12 +9,11 @@
  */
 package io.jhdf.links;
 
-import org.apache.commons.lang3.concurrent.LazyInitializer;
-
 import io.jhdf.api.Group;
 import io.jhdf.api.Link;
 import io.jhdf.api.Node;
 import io.jhdf.exceptions.HdfBrokenLinkException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
 
 /**
  * Soft (symbolic) link to another {@link Node} in the HDF5 file.

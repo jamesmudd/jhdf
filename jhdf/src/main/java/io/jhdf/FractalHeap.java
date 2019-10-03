@@ -9,13 +9,10 @@
  */
 package io.jhdf;
 
-import static io.jhdf.Constants.UNDEFINED_ADDRESS;
-import static io.jhdf.Utils.bitsToInt;
-import static io.jhdf.Utils.bytesNeededToHoldNumber;
-import static io.jhdf.Utils.createSubBuffer;
-import static io.jhdf.Utils.readBytesAsUnsignedInt;
-import static io.jhdf.Utils.readBytesAsUnsignedLong;
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -27,11 +24,13 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.UnsupportedHdfException;
+import static io.jhdf.Constants.UNDEFINED_ADDRESS;
+import static io.jhdf.Utils.bitsToInt;
+import static io.jhdf.Utils.bytesNeededToHoldNumber;
+import static io.jhdf.Utils.createSubBuffer;
+import static io.jhdf.Utils.readBytesAsUnsignedInt;
+import static io.jhdf.Utils.readBytesAsUnsignedLong;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 /**
  * Fractal heap implementation. Used for storing data which can be looked up via

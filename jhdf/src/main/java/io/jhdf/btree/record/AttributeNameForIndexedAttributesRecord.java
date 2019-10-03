@@ -9,11 +9,11 @@
  */
 package io.jhdf.btree.record;
 
-import java.nio.ByteBuffer;
-import java.util.BitSet;
-
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+
+import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 public class AttributeNameForIndexedAttributesRecord extends BTreeRecord {
 

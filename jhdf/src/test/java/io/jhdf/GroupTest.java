@@ -9,6 +9,19 @@
  */
 package io.jhdf;
 
+import io.jhdf.api.Group;
+import io.jhdf.api.Node;
+import io.jhdf.api.NodeType;
+import io.jhdf.exceptions.HdfInvalidPathException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.file.StandardOpenOption;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -18,20 +31,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.file.StandardOpenOption;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import io.jhdf.api.Group;
-import io.jhdf.api.Node;
-import io.jhdf.api.NodeType;
-import io.jhdf.exceptions.HdfInvalidPathException;
 
 public class GroupTest {
 	private static final String DATASETS_GROUP = "datasets_group";

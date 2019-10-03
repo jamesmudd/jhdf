@@ -9,26 +9,25 @@
  */
 package io.jhdf.dataset;
 
+import io.jhdf.HdfFile;
+import io.jhdf.HdfFileChannel;
+import io.jhdf.ObjectHeader;
+import io.jhdf.api.Dataset;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+
 import static io.jhdf.TestUtils.flatten;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.function.Executable;
-
-import io.jhdf.HdfFile;
-import io.jhdf.HdfFileChannel;
-import io.jhdf.ObjectHeader;
-import io.jhdf.api.Dataset;
 
 
 class DatasetByAddressTest {

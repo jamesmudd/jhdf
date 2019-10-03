@@ -9,10 +9,10 @@
  */
 package io.jhdf.filter;
 
+import io.jhdf.exceptions.HdfFilterException;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import io.jhdf.exceptions.HdfFilterException;
 
 /**
  * A collection of filters making up a ordered pipeline to decode chunks.

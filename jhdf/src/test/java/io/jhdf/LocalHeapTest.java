@@ -9,9 +9,9 @@
  */
 package io.jhdf;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,9 +21,9 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 public class LocalHeapTest {
 	private HdfFileChannel hdfFc;

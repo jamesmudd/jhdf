@@ -9,17 +9,17 @@
  */
 package io.jhdf;
 
+import org.junit.jupiter.api.Test;
+
+import java.nio.ByteBuffer;
+import java.util.BitSet;
+
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.nio.ByteBuffer;
-import java.util.BitSet;
-
-import org.junit.jupiter.api.Test;
 
 public class UtilsTest {
 

@@ -9,15 +9,14 @@
  */
 package io.jhdf;
 
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import io.jhdf.exceptions.HdfException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.jhdf.exceptions.HdfException;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 public class GroupSymbolTableNode {
 	private static final Logger logger = LoggerFactory.getLogger(GroupSymbolTableNode.class);

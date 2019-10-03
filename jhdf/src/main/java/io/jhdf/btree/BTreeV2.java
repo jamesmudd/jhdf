@@ -9,7 +9,10 @@
  */
 package io.jhdf.btree;
 
-import static io.jhdf.Utils.readBytesAsUnsignedInt;
+import io.jhdf.HdfFileChannel;
+import io.jhdf.Utils;
+import io.jhdf.btree.record.BTreeRecord;
+import io.jhdf.exceptions.HdfException;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -17,10 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import io.jhdf.HdfFileChannel;
-import io.jhdf.Utils;
-import io.jhdf.btree.record.BTreeRecord;
-import io.jhdf.exceptions.HdfException;
+import static io.jhdf.Utils.readBytesAsUnsignedInt;
 
 public class BTreeV2<T extends BTreeRecord> {
 

@@ -9,7 +9,10 @@
  */
 package io.jhdf.btree;
 
-import static java.util.stream.Collectors.toList;
+import io.jhdf.HdfFileChannel;
+import io.jhdf.Superblock;
+import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfException;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -17,10 +20,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
-import io.jhdf.HdfFileChannel;
-import io.jhdf.Superblock;
-import io.jhdf.Utils;
-import io.jhdf.exceptions.HdfException;
+import static java.util.stream.Collectors.toList;
 
 /**
  * V1 B-trees where the node type is 1 i.e. points to raw data chunk nodes

@@ -10,7 +10,6 @@
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
-import io.jhdf.TestUtils;
 import io.jhdf.api.Dataset;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.util.Map;
 
-import static io.jhdf.TestUtils.getDimensions;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;

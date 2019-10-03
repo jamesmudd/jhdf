@@ -9,10 +9,10 @@
  */
 package io.jhdf.btree.record;
 
-import java.nio.ByteBuffer;
-
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+
+import java.nio.ByteBuffer;
 
 public class LinkNameForIndexedGroupRecord extends BTreeRecord {
 

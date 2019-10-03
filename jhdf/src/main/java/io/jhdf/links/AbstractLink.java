@@ -9,11 +9,6 @@
  */
 package io.jhdf.links;
 
-import java.io.File;
-import java.util.Map;
-
-import org.apache.commons.lang3.concurrent.LazyInitializer;
-
 import io.jhdf.HdfFile;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
@@ -21,6 +16,10 @@ import io.jhdf.api.Link;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
+
+import java.io.File;
+import java.util.Map;
 
 /**
  * Base class for {@link Link} implementations.

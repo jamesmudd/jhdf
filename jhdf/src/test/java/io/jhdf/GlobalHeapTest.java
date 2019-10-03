@@ -9,11 +9,11 @@
  */
 package io.jhdf;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import io.jhdf.exceptions.HdfException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.net.URI;
@@ -24,12 +24,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
-
-import io.jhdf.exceptions.HdfException;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class GlobalHeapTest {
 

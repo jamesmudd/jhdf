@@ -9,10 +9,10 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.exceptions.HdfException;
+
 import java.nio.ByteBuffer;
 import java.util.BitSet;
-
-import io.jhdf.exceptions.HdfException;
 
 /**
  * <p>

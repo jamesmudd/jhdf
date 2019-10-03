@@ -9,10 +9,10 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.object.datatype.DataType;
+
 import java.nio.ByteBuffer;
 import java.util.BitSet;
-
-import io.jhdf.object.datatype.DataType;
 
 public class DataTypeMessage extends Message {
 

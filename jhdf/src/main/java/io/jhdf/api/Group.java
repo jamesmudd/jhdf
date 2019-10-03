@@ -9,10 +9,10 @@
  */
 package io.jhdf.api;
 
-import java.util.Map;
-
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
+
+import java.util.Map;
 
 /**
  * HDF5 group. Groups can be considered the directories inside the HDF5

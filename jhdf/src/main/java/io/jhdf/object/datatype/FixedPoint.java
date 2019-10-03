@@ -9,11 +9,11 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.exceptions.HdfTypeException;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
-import io.jhdf.exceptions.HdfTypeException;
 
 public class FixedPoint extends DataType implements OrderedDataType {
 	private final ByteOrder order;

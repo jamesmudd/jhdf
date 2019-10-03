@@ -9,16 +9,16 @@
  */
 package io.jhdf.dataset;
 
-import java.io.File;
-import java.util.Iterator;
-import java.util.Map;
-
 import io.jhdf.HdfFile;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
+
+import java.io.File;
+import java.util.Iterator;
+import java.util.Map;
 
 
 /**

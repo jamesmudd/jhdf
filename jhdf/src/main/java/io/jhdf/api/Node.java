@@ -9,10 +9,10 @@
  */
 package io.jhdf.api;
 
+import io.jhdf.HdfFile;
+
 import java.io.File;
 import java.util.Map;
-
-import io.jhdf.HdfFile;
 
 /**
  * Represents all objects contained in a HDF5 file

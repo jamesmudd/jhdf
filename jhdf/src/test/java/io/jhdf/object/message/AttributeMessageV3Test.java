@@ -9,11 +9,10 @@
  */
 package io.jhdf.object.message;
 
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
-import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import io.jhdf.Superblock;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,11 +23,11 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import io.jhdf.Superblock;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 public class AttributeMessageV3Test {
 	private FileChannel fc;

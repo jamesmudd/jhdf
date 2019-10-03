@@ -9,11 +9,16 @@
  */
 package io.jhdf.dataset;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import io.jhdf.exceptions.HdfTypeException;
+import io.jhdf.object.datatype.DataType;
+import io.jhdf.object.datatype.FixedPoint;
+import io.jhdf.object.datatype.FloatingPoint;
+import io.jhdf.object.datatype.Reference;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.function.Executable;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -21,17 +26,11 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.function.Executable;
-
-import io.jhdf.exceptions.HdfTypeException;
-import io.jhdf.object.datatype.DataType;
-import io.jhdf.object.datatype.FixedPoint;
-import io.jhdf.object.datatype.FloatingPoint;
-import io.jhdf.object.datatype.Reference;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 class DatasetReaderTest {

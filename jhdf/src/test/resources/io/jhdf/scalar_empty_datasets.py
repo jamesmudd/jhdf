@@ -10,7 +10,6 @@
 import h5py
 
 import numpy as np
-from numpy import dtype
 
 
 def write_datasets(f):

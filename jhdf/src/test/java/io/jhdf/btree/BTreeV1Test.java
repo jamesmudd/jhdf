@@ -9,13 +9,12 @@
  */
 package io.jhdf.btree;
 
-import static io.jhdf.Constants.UNDEFINED_ADDRESS;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import io.jhdf.HdfFileChannel;
+import io.jhdf.Superblock;
+import io.jhdf.exceptions.HdfException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URI;
@@ -24,13 +23,13 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import io.jhdf.HdfFileChannel;
-import io.jhdf.Superblock;
-import io.jhdf.exceptions.HdfException;
+import static io.jhdf.Constants.UNDEFINED_ADDRESS;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BTreeV1Test {
 	private HdfFileChannel hdfFc;

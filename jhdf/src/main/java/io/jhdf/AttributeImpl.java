@@ -9,13 +9,6 @@
  */
 package io.jhdf;
 
-import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
-
-import java.nio.ByteBuffer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Node;
 import io.jhdf.dataset.DatasetReader;
@@ -23,6 +16,12 @@ import io.jhdf.dataset.VariableLengthDatasetReader;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.VariableLength;
 import io.jhdf.object.message.AttributeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
+
+import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 
 public class AttributeImpl implements Attribute {
 	private static final Logger logger = LoggerFactory.getLogger(AttributeImpl.class);

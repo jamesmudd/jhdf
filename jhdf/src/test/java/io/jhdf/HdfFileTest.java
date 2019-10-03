@@ -9,27 +9,6 @@
  */
 package io.jhdf;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Link;
@@ -37,6 +16,26 @@ import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class HdfFileTest {
 

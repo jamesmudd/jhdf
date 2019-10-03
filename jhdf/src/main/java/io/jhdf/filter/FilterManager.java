@@ -9,19 +9,18 @@
  */
 package io.jhdf.filter;
 
+import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.HdfFilterException;
+import io.jhdf.object.message.FilterPipelineMessage;
+import io.jhdf.object.message.FilterPipelineMessage.FilterInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
-
-import io.jhdf.exceptions.HdfException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.jhdf.exceptions.HdfFilterException;
-import io.jhdf.object.message.FilterPipelineMessage;
-import io.jhdf.object.message.FilterPipelineMessage.FilterInfo;
 
 /**
  * This is a singleton for managing the loaded HDF5 filters.

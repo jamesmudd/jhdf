@@ -9,14 +9,13 @@
  */
 package io.jhdf.filter;
 
-import java.io.ByteArrayOutputStream;
-import java.util.zip.DataFormatException;
-import java.util.zip.Inflater;
-
+import io.jhdf.exceptions.HdfFilterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.jhdf.exceptions.HdfFilterException;
+import java.io.ByteArrayOutputStream;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
 
 public class DeflatePipelineFilter implements Filter {
 

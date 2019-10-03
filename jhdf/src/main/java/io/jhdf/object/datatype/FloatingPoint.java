@@ -9,12 +9,12 @@
  */
 package io.jhdf.object.datatype;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class FloatingPoint extends DataType implements OrderedDataType {
 

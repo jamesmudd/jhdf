@@ -9,10 +9,10 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.Superblock;
+
 import java.nio.ByteBuffer;
 import java.util.BitSet;
-
-import io.jhdf.Superblock;
 
 /**
  * <p>

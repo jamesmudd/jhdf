@@ -9,7 +9,6 @@
 #-------------------------------------------------------------------------------
 import h5py
 import numpy as np
-from timeit import timeit
 
 data = np.arange(-10, 11, 1)
 data_3d = np.arange(1000).reshape((2,5,100)) 

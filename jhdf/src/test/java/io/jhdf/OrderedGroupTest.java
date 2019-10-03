@@ -9,18 +9,17 @@
  */
 package io.jhdf;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
-
-import java.io.File;
-
+import io.jhdf.api.Group;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import io.jhdf.api.Group;
+import java.io.File;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.is;
 
 public class OrderedGroupTest {
 	private static final String ORDERED_GROUP = "ordered_group";

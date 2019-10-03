@@ -9,12 +9,12 @@
  */
 package io.jhdf.object.message;
 
-import java.nio.ByteBuffer;
-import java.util.BitSet;
-
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.UnsupportedHdfException;
+
+import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 public abstract class DataLayoutMessage extends Message {
 

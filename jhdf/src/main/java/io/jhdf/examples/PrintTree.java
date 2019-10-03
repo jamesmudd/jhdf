@@ -9,14 +9,12 @@
  */
 package io.jhdf.examples;
 
-import static java.util.stream.Collectors.joining;
-
-import java.io.File;
-import java.util.Collections;
-
 import io.jhdf.HdfFile;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
+
+import java.io.File;
+import java.util.Collections;
 
 /**
  * An example of recursively parsing a HDF5 file tree and printing it to the

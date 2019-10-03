@@ -9,14 +9,14 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.Utils;
+import io.jhdf.exceptions.UnsupportedHdfException;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
-
-import io.jhdf.Utils;
-import io.jhdf.exceptions.UnsupportedHdfException;
 
 /**
  * <p>

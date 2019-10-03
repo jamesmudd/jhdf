@@ -9,12 +9,12 @@
  */
 package io.jhdf.object.datatype;
 
-import java.nio.ByteBuffer;
-
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+
+import java.nio.ByteBuffer;
 
 
 /**

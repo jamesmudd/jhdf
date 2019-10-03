@@ -9,12 +9,11 @@
  */
 package io.jhdf.examples;
 
-import java.io.File;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
+import org.apache.commons.lang3.ArrayUtils;
+
+import java.io.File;
 
 /**
  * Example application for reading a dataset from HDF5

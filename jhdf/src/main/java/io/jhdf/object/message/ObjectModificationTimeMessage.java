@@ -9,13 +9,13 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfException;
+
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.BitSet;
-
-import io.jhdf.Utils;
-import io.jhdf.exceptions.HdfException;
 
 /**
  * <p>

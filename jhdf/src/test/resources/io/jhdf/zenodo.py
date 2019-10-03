@@ -1,8 +1,8 @@
 # See https://help.zenodo.org/guides/search/ for search syntax
 
 import requests
-from pprint import pprint
 import urllib
+from pprint import pprint
 
 response = requests.get("https://zenodo.org/api/records",
                         params={'access_right': 'open',  # Only open access

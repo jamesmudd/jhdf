@@ -9,11 +9,11 @@
  */
 package io.jhdf.object.message;
 
-import java.nio.ByteBuffer;
-import java.util.BitSet;
-
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
+
+import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 public class LinkInfoMessage extends Message {
 

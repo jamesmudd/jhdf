@@ -9,23 +9,22 @@
  */
 package io.jhdf;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import io.jhdf.api.Dataset;
+import io.jhdf.api.Group;
+import io.jhdf.api.Node;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.function.Executable;
-
-import io.jhdf.api.Dataset;
-import io.jhdf.api.Group;
-import io.jhdf.api.Node;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 public class LargeGroupTest {
 

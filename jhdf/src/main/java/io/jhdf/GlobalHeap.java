@@ -9,16 +9,16 @@
  */
 package io.jhdf;
 
-import static io.jhdf.Utils.createSubBuffer;
-import static io.jhdf.Utils.readBytesAsUnsignedInt;
-import static io.jhdf.Utils.seekBufferToNextMultipleOfEight;
+import io.jhdf.exceptions.HdfException;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.jhdf.exceptions.HdfException;
+import static io.jhdf.Utils.createSubBuffer;
+import static io.jhdf.Utils.readBytesAsUnsignedInt;
+import static io.jhdf.Utils.seekBufferToNextMultipleOfEight;
 
 public class GlobalHeap {
 

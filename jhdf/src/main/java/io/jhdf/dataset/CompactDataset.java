@@ -9,12 +9,12 @@
  */
 package io.jhdf.dataset;
 
-import java.nio.ByteBuffer;
-
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
 import io.jhdf.object.message.DataLayoutMessage.CompactDataLayoutMessage;
+
+import java.nio.ByteBuffer;
 
 public class CompactDataset extends DatasetBase {
 

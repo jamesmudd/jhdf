@@ -9,12 +9,12 @@
  */
 package io.jhdf;
 
-import static io.jhdf.Utils.toHex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static io.jhdf.Utils.toHex;
 
 public class SymbolTableEntry {
 	private static final Logger logger = LoggerFactory.getLogger(SymbolTableEntry.class);

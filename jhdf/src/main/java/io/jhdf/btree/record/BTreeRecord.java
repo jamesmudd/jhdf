@@ -9,9 +9,9 @@
  */
 package io.jhdf.btree.record;
 
-import java.nio.ByteBuffer;
-
 import io.jhdf.exceptions.HdfException;
+
+import java.nio.ByteBuffer;
 
 public abstract class BTreeRecord {
 

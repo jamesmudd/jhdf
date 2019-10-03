@@ -9,16 +9,15 @@
  */
 package io.jhdf.btree;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Class to represent V1 B-trees

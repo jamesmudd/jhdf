@@ -9,11 +9,12 @@
  */
 package io.jhdf;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import io.jhdf.api.Dataset;
+import io.jhdf.dataset.DatasetBase;
+import io.jhdf.object.message.DataLayout;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -22,13 +23,11 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import io.jhdf.api.Dataset;
-import io.jhdf.dataset.DatasetBase;
-import io.jhdf.object.message.DataLayout;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class DatasetImplTest {
 

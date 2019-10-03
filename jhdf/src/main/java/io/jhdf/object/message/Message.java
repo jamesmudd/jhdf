@@ -9,17 +9,15 @@
  */
 package io.jhdf.object.message;
 
-import java.nio.ByteBuffer;
-import java.util.BitSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.jhdf.ObjectHeader;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 public class Message {
 	private static final Logger logger = LoggerFactory.getLogger(Message.class);

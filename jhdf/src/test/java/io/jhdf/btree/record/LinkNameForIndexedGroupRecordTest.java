@@ -9,17 +9,15 @@
  */
 package io.jhdf.btree.record;
 
+import io.jhdf.exceptions.HdfException;
+import org.junit.jupiter.api.Test;
+
+import java.nio.ByteBuffer;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.nio.ByteBuffer;
-
-import org.junit.jupiter.api.Test;
-
-import io.jhdf.btree.record.LinkNameForIndexedGroupRecord;
-import io.jhdf.exceptions.HdfException;
 
 class LinkNameForIndexedGroupRecordTest {
 

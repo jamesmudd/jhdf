@@ -9,7 +9,12 @@
  */
 package io.jhdf;
 
-import static io.jhdf.Utils.readBytesAsUnsignedInt;
+import io.jhdf.exceptions.HdfException;
+import io.jhdf.object.message.Message;
+import io.jhdf.object.message.ObjectHeaderContinuationMessage;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -18,13 +23,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.concurrent.LazyInitializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.jhdf.exceptions.HdfException;
-import io.jhdf.object.message.Message;
-import io.jhdf.object.message.ObjectHeaderContinuationMessage;
+import static io.jhdf.Utils.readBytesAsUnsignedInt;
 
 public abstract class ObjectHeader {
 	private static final Logger logger = LoggerFactory.getLogger(ObjectHeader.class);

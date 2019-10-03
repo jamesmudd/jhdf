@@ -9,12 +9,12 @@
  */
 package io.jhdf.btree;
 
+import io.jhdf.HdfFileChannel;
+import io.jhdf.Utils;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-
-import io.jhdf.HdfFileChannel;
-import io.jhdf.Utils;
 
 /**
  * V1 B-trees where the node type is 0 i.e. points to group nodes

@@ -9,6 +9,11 @@
  */
 package io.jhdf.dataset;
 
+import io.jhdf.GlobalHeap;
+import io.jhdf.HdfFileChannel;
+import io.jhdf.Utils;
+import io.jhdf.object.datatype.VariableLength;
+
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -19,11 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
-
-import io.jhdf.GlobalHeap;
-import io.jhdf.HdfFileChannel;
-import io.jhdf.Utils;
-import io.jhdf.object.datatype.VariableLength;
 
 public final class VariableLengthDatasetReader {
 
