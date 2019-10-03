@@ -37,7 +37,7 @@ public class PrintTree {
 
 	private static void recursivePrintGroup(Group group, int level) {
 		level++;
-		String indent = Collections.nCopies(level, "    ").stream().collect(joining());
+		String indent = String.join("", Collections.nCopies(level, "    "));
 		for (Node node : group) {
 			System.out.println(indent + node.getName());
 			if (node instanceof Group) {
