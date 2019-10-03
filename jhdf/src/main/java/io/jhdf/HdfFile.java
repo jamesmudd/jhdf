@@ -52,9 +52,7 @@ public class HdfFile implements Group, AutoCloseable {
 	private final File file;
 	private final HdfFileChannel hdfFc;
 
-	private final Superblock superblock;
-
-	private final Group rootGroup;
+    private final Group rootGroup;
 
 	private final Set<HdfFile> openExternalFiles = new HashSet<>();
 
@@ -83,7 +81,7 @@ public class HdfFile implements Group, AutoCloseable {
 			}
 
 			// We have a valid HDF5 file so read the full superblock
-			superblock = Superblock.readSuperblock(fc, offset);
+            final Superblock superblock = Superblock.readSuperblock(fc, offset);
 
 			// Validate the superblock
 			if (superblock.getBaseAddressByte() != offset) {

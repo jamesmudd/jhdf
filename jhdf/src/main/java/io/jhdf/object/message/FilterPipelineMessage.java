@@ -35,13 +35,12 @@ public class FilterPipelineMessage extends Message {
 
 	private static final int OPTIONAL = 0;
 
-	private final byte version;
 	private final List<FilterInfo> filters;
 
 	public FilterPipelineMessage(ByteBuffer bb, BitSet messageFlags) {
 		super(messageFlags);
 
-		version = bb.get();
+		final byte version = bb.get();
 
 		if (version != 1 && version != 2) {
 			throw new UnsupportedHdfException("Only filer pipeline version 1 or 2 are supported");

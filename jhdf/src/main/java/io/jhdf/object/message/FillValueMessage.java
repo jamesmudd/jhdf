@@ -32,7 +32,6 @@ public class FillValueMessage extends Message {
 
 	private static final int FILL_VALUE_DEFINED_BIT = 5;
 
-	private final byte version;
 	private final int spaceAllocationTime;
 	private final int fillValueWriteTime;
 	private final boolean fillValueDefined;
@@ -41,7 +40,7 @@ public class FillValueMessage extends Message {
 	/* package */ FillValueMessage(ByteBuffer bb, BitSet messageFlags) {
 		super(messageFlags);
 
-		version = bb.get();
+		final byte version = bb.get();
 		if (version == 1 || version == 2) {
 			spaceAllocationTime = bb.get();
 			fillValueWriteTime = bb.get();

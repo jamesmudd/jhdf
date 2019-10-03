@@ -171,8 +171,6 @@ public abstract class ObjectHeader {
 		/** Type of node. 0 = group, 1 = data */
 		private final byte version;
 
-		private final byte sizeOfChunk0;
-
 		private final long accessTime;
 		private final long modificationTime;
 		private final long changeTime;
@@ -208,6 +206,7 @@ public abstract class ObjectHeader {
 				flags = BitSet.valueOf(new byte[] { bb.get() });
 
 				// Size of chunk 0
+				final byte sizeOfChunk0;
 				if (flags.get(1)) {
 					if (flags.get(0)) {
 						sizeOfChunk0 = 8;
