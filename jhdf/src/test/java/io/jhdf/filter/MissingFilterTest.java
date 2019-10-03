@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,7 +6,7 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.filter;
 
 import io.jhdf.HdfFile;
@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class MissingFilterTest {
+class MissingFilterTest {
 
 	private static final String HDF5_TEST_FILE_NAME = "../test_missing_filter.hdf5bad";
 
@@ -39,7 +39,7 @@ public class MissingFilterTest {
 	void testMissingFilter() {
 		Dataset dataset = hdfFile.getDatasetByPath("/float32");
 		assertThat(dataset, is(notNullValue()));
-		HdfFilterException exception = assertThrows(HdfFilterException.class, () -> dataset.getData());
+		HdfFilterException exception = assertThrows(HdfFilterException.class, dataset::getData);
 
 		// The missing filter name
 		assertThat(exception.getMessage(), containsString("lzf"));

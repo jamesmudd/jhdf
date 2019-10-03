@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,8 +6,20 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf;
+
+import io.jhdf.Superblock.SuperblockV0V1;
+import io.jhdf.Superblock.SuperblockV2V3;
+import io.jhdf.api.Attribute;
+import io.jhdf.api.Dataset;
+import io.jhdf.api.Group;
+import io.jhdf.api.Node;
+import io.jhdf.api.NodeType;
+import io.jhdf.exceptions.HdfException;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,19 +30,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.jhdf.Superblock.SuperblockV0V1;
-import io.jhdf.Superblock.SuperblockV2V3;
-import io.jhdf.api.Attribute;
-import io.jhdf.api.Dataset;
-import io.jhdf.api.Group;
-import io.jhdf.api.Node;
-import io.jhdf.api.NodeType;
-import io.jhdf.exceptions.HdfException;
 
 /**
  * The HDF file class this object represents a HDF5 file on disk and provides
@@ -53,9 +52,7 @@ public class HdfFile implements Group, AutoCloseable {
 	private final File file;
 	private final HdfFileChannel hdfFc;
 
-	private final Superblock superblock;
-
-	private final Group rootGroup;
+    private final Group rootGroup;
 
 	private final Set<HdfFile> openExternalFiles = new HashSet<>();
 
@@ -84,7 +81,7 @@ public class HdfFile implements Group, AutoCloseable {
 			}
 
 			// We have a valid HDF5 file so read the full superblock
-			superblock = Superblock.readSuperblock(fc, offset);
+            final Superblock superblock = Superblock.readSuperblock(fc, offset);
 
 			// Validate the superblock
 			if (superblock.getBaseAddressByte() != offset) {

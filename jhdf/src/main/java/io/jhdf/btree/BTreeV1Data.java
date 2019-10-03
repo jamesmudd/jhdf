@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,10 +6,13 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.btree;
 
-import static java.util.stream.Collectors.toList;
+import io.jhdf.HdfFileChannel;
+import io.jhdf.Superblock;
+import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfException;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -17,10 +20,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
-import io.jhdf.HdfFileChannel;
-import io.jhdf.Superblock;
-import io.jhdf.Utils;
-import io.jhdf.exceptions.HdfException;
+import static java.util.stream.Collectors.toList;
 
 /**
  * V1 B-trees where the node type is 1 i.e. points to raw data chunk nodes
@@ -38,7 +38,7 @@ public abstract class BTreeV1Data extends BTreeV1 {
 	 */
 	public abstract List<Chunk> getChunks();
 
-	public class Chunk {
+	public static class Chunk {
 		private final int size;
 		private final BitSet filterMask;
 		private final int[] chunkOffset;

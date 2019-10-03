@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,15 +6,15 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.object.datatype;
-
-import java.nio.ByteBuffer;
 
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+
+import java.nio.ByteBuffer;
 
 
 /**
@@ -35,7 +35,7 @@ public class Reference extends DataType {
 		OBJECT,
 
 		/** Dataset Region Reference: A reference to a region within a dataset in the HDF5 file. */
-		REGION;
+		REGION
 	}
 
 	private final ReferenceType type;

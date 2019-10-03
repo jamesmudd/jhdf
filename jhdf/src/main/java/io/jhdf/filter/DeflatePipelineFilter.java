@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,17 +6,16 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.filter;
+
+import io.jhdf.exceptions.HdfFilterException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.jhdf.exceptions.HdfFilterException;
 
 public class DeflatePipelineFilter implements Filter {
 

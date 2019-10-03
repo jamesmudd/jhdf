@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,21 +6,8 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf;
-
-import static java.util.stream.Collectors.toMap;
-
-import java.io.File;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
@@ -32,6 +19,18 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.AttributeInfoMessage;
 import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.Message;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.stream.Collectors.toMap;
 
 public abstract class AbstractNode implements Node {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractNode.class);

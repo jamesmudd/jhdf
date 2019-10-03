@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,7 +6,7 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.object.datatype;
 
 import io.jhdf.Utils;
@@ -77,7 +77,7 @@ public class CompoundDataType extends DataType {
 		return members;
 	}
 
-	public class CompoundDataMember {
+	public static class CompoundDataMember {
 		private final String name;
 		private final int[] dimensionSize;
 		private final int offset;

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,13 +6,13 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.filter;
+
+import io.jhdf.exceptions.HdfFilterException;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.jhdf.exceptions.HdfFilterException;
 
 /**
  * A collection of filters making up a ordered pipeline to decode chunks.
@@ -21,7 +21,7 @@ import io.jhdf.exceptions.HdfFilterException;
  */
 public class FilterPipeline {
 
-	private class PipelineFilterWithData {
+	private static class PipelineFilterWithData {
 
 		private final Filter filter;
 		private final int[] filterData;

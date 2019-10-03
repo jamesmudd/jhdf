@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,10 +6,18 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.dataset;
 
-import static java.nio.charset.StandardCharsets.US_ASCII;
+import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.HdfTypeException;
+import io.jhdf.object.datatype.ArrayDataType;
+import io.jhdf.object.datatype.DataType;
+import io.jhdf.object.datatype.FixedPoint;
+import io.jhdf.object.datatype.FloatingPoint;
+import io.jhdf.object.datatype.Reference;
+import io.jhdf.object.datatype.StringData;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -22,15 +30,7 @@ import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
 
-import io.jhdf.Utils;
-import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.HdfTypeException;
-import io.jhdf.object.datatype.DataType;
-import io.jhdf.object.datatype.FixedPoint;
-import io.jhdf.object.datatype.FloatingPoint;
-import io.jhdf.object.datatype.Reference;
-import io.jhdf.object.datatype.StringData;
-import io.jhdf.object.datatype.ArrayDataType;
+import static java.nio.charset.StandardCharsets.US_ASCII;
 
 /**
  * <p>

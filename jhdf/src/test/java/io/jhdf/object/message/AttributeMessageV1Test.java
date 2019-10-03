@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,14 +6,13 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.object.message;
 
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
-import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import io.jhdf.Superblock;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,20 +21,20 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.BitSet;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
-import io.jhdf.Superblock;
-
-public class AttributeMessageV1Test {
+class AttributeMessageV1Test {
 	private FileChannel fc;
 	private RandomAccessFile raf;
 	private Superblock sb;
 	private ByteBuffer bb;
 
 	@BeforeEach
-	public void setUp() throws IOException {
+    void setUp() throws IOException {
 		final String testFileUrl = this.getClass().getResource("../../test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
@@ -45,13 +44,13 @@ public class AttributeMessageV1Test {
 	}
 
 	@AfterEach
-	public void after() throws IOException {
+    void after() throws IOException {
 		raf.close();
 		fc.close();
 	}
 
 	@Test
-	public void test() {
+    void test() {
 		AttributeMessage am = new AttributeMessage(bb, sb, BitSet.valueOf(new byte[1]));
 		assertThat(am.getName(), is(equalTo("string_attr")));
 		assertThat(am.getDataType().getDataClass(), is(equalTo(9)));

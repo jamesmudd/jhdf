@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,16 +6,13 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf;
 
-import static io.jhdf.Constants.UNDEFINED_ADDRESS;
-import static io.jhdf.Utils.bitsToInt;
-import static io.jhdf.Utils.bytesNeededToHoldNumber;
-import static io.jhdf.Utils.createSubBuffer;
-import static io.jhdf.Utils.readBytesAsUnsignedInt;
-import static io.jhdf.Utils.readBytesAsUnsignedLong;
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -27,11 +24,13 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.UnsupportedHdfException;
+import static io.jhdf.Constants.UNDEFINED_ADDRESS;
+import static io.jhdf.Utils.bitsToInt;
+import static io.jhdf.Utils.bytesNeededToHoldNumber;
+import static io.jhdf.Utils.createSubBuffer;
+import static io.jhdf.Utils.readBytesAsUnsignedInt;
+import static io.jhdf.Utils.readBytesAsUnsignedLong;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 /**
  * Fractal heap implementation. Used for storing data which can be looked up via
@@ -59,7 +58,6 @@ public class FractalHeap {
 
 	private final int maxDirectBlockSize;
 	private final long maxSizeOfManagedObjects;
-	private final long addressOfRootBlock;
 	private final int idLength;
 	private final int ioFiltersLength;
 	private final int currentRowsInRootIndirectBlock;
@@ -154,7 +152,7 @@ public class FractalHeap {
 
 			startingRowsInRootIndirectBlock = readBytesAsUnsignedInt(bb, 2);
 
-			addressOfRootBlock = readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+			final long addressOfRootBlock = readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 
 			currentRowsInRootIndirectBlock = readBytesAsUnsignedInt(bb, 2);
 
@@ -233,7 +231,6 @@ public class FractalHeap {
 	private class IndirectBlock {
 
 		private final List<Long> childBlockAddresses;
-		private final long blockOffset;
 
 		private IndirectBlock(long address) {
 			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset
@@ -261,7 +258,7 @@ public class FractalHeap {
 				throw new HdfException("Indirect block read from invalid fractal heap");
 			}
 
-			blockOffset = readBytesAsUnsignedLong(bb, bytesToStoreOffset);
+			final long blockOffset = readBytesAsUnsignedLong(bb, bytesToStoreOffset);
 
 			childBlockAddresses = new ArrayList<>(currentRowsInRootIndirectBlock * tableWidth);
 			for (int i = 0; i < currentRowsInRootIndirectBlock * tableWidth; i++) {

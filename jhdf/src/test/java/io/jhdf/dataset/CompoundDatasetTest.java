@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,11 +6,10 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
-import io.jhdf.TestUtils;
 import io.jhdf.api.Dataset;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -18,13 +17,12 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.util.Map;
 
-import static io.jhdf.TestUtils.getDimensions;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
-public class CompoundDatasetTest {
+class CompoundDatasetTest {
 
     private static final String HDF5_TEST_FILE_NAME = "../compound_dataset_test.hdf5";
 

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,16 +6,15 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
+import io.jhdf.exceptions.HdfException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.jhdf.exceptions.HdfException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class LocalHeap {
 	private static final Logger logger = LoggerFactory.getLogger(LocalHeap.class);

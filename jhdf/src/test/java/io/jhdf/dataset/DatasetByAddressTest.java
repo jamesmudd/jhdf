@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,8 +6,22 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.dataset;
+
+import io.jhdf.HdfFile;
+import io.jhdf.HdfFileChannel;
+import io.jhdf.ObjectHeader;
+import io.jhdf.api.Dataset;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 import static io.jhdf.TestUtils.flatten;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -15,20 +29,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.function.Executable;
-
-import io.jhdf.HdfFile;
-import io.jhdf.HdfFileChannel;
-import io.jhdf.ObjectHeader;
-import io.jhdf.api.Dataset;
 
 
 class DatasetByAddressTest {
@@ -46,7 +46,7 @@ class DatasetByAddressTest {
 	@TestFactory
 	Collection<DynamicNode> scalarDatasetTests() {
 		// List of all the datasetPaths
-		return Arrays.asList(
+		return Collections.singletonList(
 				dynamicContainer("earliest", Arrays.asList(
 						dynamicTest("fixed ASCII",
 								createTest(earliestHdfFile, 800)),

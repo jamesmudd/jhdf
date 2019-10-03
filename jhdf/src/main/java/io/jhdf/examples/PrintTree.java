@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,17 +6,15 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.examples;
-
-import static java.util.stream.Collectors.joining;
-
-import java.io.File;
-import java.util.Collections;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
+
+import java.io.File;
+import java.util.Collections;
 
 /**
  * An example of recursively parsing a HDF5 file tree and printing it to the
@@ -37,7 +35,7 @@ public class PrintTree {
 
 	private static void recursivePrintGroup(Group group, int level) {
 		level++;
-		String indent = Collections.nCopies(level, "    ").stream().collect(joining());
+		String indent = String.join("", Collections.nCopies(level, "    "));
 		for (Node node : group) {
 			System.out.println(indent + node.getName());
 			if (node instanceof Group) {

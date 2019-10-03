@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,13 +6,13 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.api;
+
+import io.jhdf.HdfFile;
 
 import java.io.File;
 import java.util.Map;
-
-import io.jhdf.HdfFile;
 
 /**
  * Represents all objects contained in a HDF5 file

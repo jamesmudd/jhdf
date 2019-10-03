@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,10 +6,15 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf;
 
-import static io.jhdf.Utils.readBytesAsUnsignedInt;
+import io.jhdf.exceptions.HdfException;
+import io.jhdf.object.message.Message;
+import io.jhdf.object.message.ObjectHeaderContinuationMessage;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -18,13 +23,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.concurrent.LazyInitializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.jhdf.exceptions.HdfException;
-import io.jhdf.object.message.Message;
-import io.jhdf.object.message.ObjectHeaderContinuationMessage;
+import static io.jhdf.Utils.readBytesAsUnsignedInt;
 
 public abstract class ObjectHeader {
 	private static final Logger logger = LoggerFactory.getLogger(ObjectHeader.class);
@@ -172,8 +171,6 @@ public abstract class ObjectHeader {
 		/** Type of node. 0 = group, 1 = data */
 		private final byte version;
 
-		private final byte sizeOfChunk0;
-
 		private final long accessTime;
 		private final long modificationTime;
 		private final long changeTime;
@@ -209,6 +206,7 @@ public abstract class ObjectHeader {
 				flags = BitSet.valueOf(new byte[] { bb.get() });
 
 				// Size of chunk 0
+				final byte sizeOfChunk0;
 				if (flags.get(1)) {
 					if (flags.get(0)) {
 						sizeOfChunk0 = 8;
@@ -269,7 +267,7 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private ByteBuffer readMessages(HdfFileChannel hdfFc, ByteBuffer bb) {
+		private void readMessages(HdfFileChannel hdfFc, ByteBuffer bb) {
 			while (bb.remaining() >= 8) {
 				Message m = Message.readObjectHeaderV2Message(bb, hdfFc.getSuperblock(), this.isAttributeCreationOrderTracked());
 				messages.add(m);
@@ -290,7 +288,6 @@ public abstract class ObjectHeader {
 					readMessages(hdfFc, continuationBuffer);
 				}
 			}
-			return bb;
 		}
 
 		@Override

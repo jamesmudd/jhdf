@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,14 +6,14 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.object.datatype;
+
+import io.jhdf.exceptions.HdfTypeException;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
-import io.jhdf.exceptions.HdfTypeException;
 
 public class FixedPoint extends DataType implements OrderedDataType {
 	private final ByteOrder order;

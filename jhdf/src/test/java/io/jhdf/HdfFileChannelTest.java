@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,8 +6,22 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf;
+
+import io.jhdf.exceptions.HdfException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
+import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -20,22 +34,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
-import java.nio.charset.StandardCharsets;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-
-import io.jhdf.exceptions.HdfException;
-
-public class HdfFileChannelTest {
+class HdfFileChannelTest {
 
 	@Mock
 	FileChannel fc;
@@ -44,7 +43,7 @@ public class HdfFileChannelTest {
 	Superblock sb;
 
 	// Under test
-	HdfFileChannel hdfFc;
+    private HdfFileChannel hdfFc;
 
 	@BeforeEach
 	void before() {
@@ -56,7 +55,8 @@ public class HdfFileChannelTest {
 		hdfFc = new HdfFileChannel(fc, sb);
 	}
 
-	@Test
+	@SuppressWarnings("SameReturnValue")
+    @Test
 	void testReadingBuffer() throws IOException {
 
 		Mockito.doAnswer(invocation -> {

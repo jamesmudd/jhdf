@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,18 +6,18 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.dataset;
-
-import static io.jhdf.Constants.UNDEFINED_ADDRESS;
-
-import java.nio.ByteBuffer;
 
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
+
+import java.nio.ByteBuffer;
+
+import static io.jhdf.Constants.UNDEFINED_ADDRESS;
 
 public class ContiguousDataset extends DatasetBase {
 

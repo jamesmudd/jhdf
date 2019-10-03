@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,19 +6,19 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.object.message;
 
-import static java.nio.charset.StandardCharsets.US_ASCII;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import io.jhdf.Superblock;
+import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfException;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.BitSet;
 
-import io.jhdf.Superblock;
-import io.jhdf.Utils;
-import io.jhdf.exceptions.HdfException;
+import static java.nio.charset.StandardCharsets.US_ASCII;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class LinkMessage extends Message {
 

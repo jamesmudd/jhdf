@@ -9,8 +9,6 @@
 #-------------------------------------------------------------------------------
 import h5py
 
-import numpy as np
-
 '''
 The idea of this test if to write userblock data to HDF5 file
 '''

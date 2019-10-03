@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,8 +6,19 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.links;
+
+import io.jhdf.HdfFile;
+import io.jhdf.api.Link;
+import io.jhdf.api.Node;
+import io.jhdf.api.NodeType;
+import io.jhdf.exceptions.HdfBrokenLinkException;
+import io.jhdf.exceptions.HdfException;
+import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -18,21 +29,9 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.File;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-
-import io.jhdf.HdfFile;
-import io.jhdf.api.Link;
-import io.jhdf.api.Node;
-import io.jhdf.api.NodeType;
-import io.jhdf.exceptions.HdfBrokenLinkException;
-import io.jhdf.exceptions.HdfException;
-
 class LinksTest {
 
-	final String testFileUrl = this.getClass().getResource("../test_file.hdf5").getFile();
+	private final String testFileUrl = this.getClass().getResource("../test_file.hdf5").getFile();
 
 	@Test
 	void testSoftLink() {

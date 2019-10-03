@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,12 +6,13 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import io.jhdf.ObjectHeader.ObjectHeaderV2;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URI;
@@ -20,13 +21,11 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
-import io.jhdf.ObjectHeader.ObjectHeaderV2;
-
-public class ObjectHeaderV2Test {
+class ObjectHeaderV2Test {
 
 	/** This will need to be updated each time the test files are regenerated */
 	private static final long TIMESTAMP = 1553279213L;
@@ -34,7 +33,7 @@ public class ObjectHeaderV2Test {
 	private HdfFileChannel hdfFc;
 
 	@BeforeEach
-	public void setUp() throws IOException, URISyntaxException {
+    void setUp() throws IOException, URISyntaxException {
 		final URI testFileUri = this.getClass().getResource("test_file2.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
@@ -42,12 +41,12 @@ public class ObjectHeaderV2Test {
 	}
 
 	@AfterEach
-	public void after() {
+    void after() {
 		hdfFc.close();
 	}
 
 	@Test
-	public void testRootGroupObjectHeaderV2() {
+    void testRootGroupObjectHeaderV2() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 48); // Root group header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -67,7 +66,7 @@ public class ObjectHeaderV2Test {
 	}
 
 	@Test
-	public void testDatasetsGroupObjectHeaderV2() {
+    void testDatasetsGroupObjectHeaderV2() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 195); // Root group header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -87,7 +86,7 @@ public class ObjectHeaderV2Test {
 	}
 
 	@Test
-	public void testObjectHeaderOnFloat16Dataset() {
+    void testObjectHeaderOnFloat16Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 608); // float16 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -107,7 +106,7 @@ public class ObjectHeaderV2Test {
 	}
 
 	@Test
-	public void testObjectHeaderOnFloat32Dataset() {
+    void testObjectHeaderOnFloat32Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 892); // float32 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -127,7 +126,7 @@ public class ObjectHeaderV2Test {
 	}
 
 	@Test
-	public void testObjectHeaderOnFloat64Dataset() {
+    void testObjectHeaderOnFloat64Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 1176); // float64 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -147,7 +146,7 @@ public class ObjectHeaderV2Test {
 	}
 
 	@Test
-	public void testObjectHeaderOnInt8Dataset() {
+    void testObjectHeaderOnInt8Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 1655); // int8 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -167,7 +166,7 @@ public class ObjectHeaderV2Test {
 	}
 
 	@Test
-	public void testCreationOrderTracked() throws IOException, URISyntaxException {
+    void testCreationOrderTracked() throws IOException, URISyntaxException {
 		// this test fails without skipping the creation order in Message#readObjectHeaderV2Message
 		final URI testFileUri = this.getClass().getResource("test_attribute_with_creation_order.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);

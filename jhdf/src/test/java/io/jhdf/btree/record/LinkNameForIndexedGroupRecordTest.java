@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,20 +6,18 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.btree.record;
+
+import io.jhdf.exceptions.HdfException;
+import org.junit.jupiter.api.Test;
+
+import java.nio.ByteBuffer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.nio.ByteBuffer;
-
-import org.junit.jupiter.api.Test;
-
-import io.jhdf.btree.record.LinkNameForIndexedGroupRecord;
-import io.jhdf.exceptions.HdfException;
 
 class LinkNameForIndexedGroupRecordTest {
 

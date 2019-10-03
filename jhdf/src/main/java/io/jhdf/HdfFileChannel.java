@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,10 +6,10 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf;
 
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import io.jhdf.exceptions.HdfException;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -17,7 +17,7 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 
-import io.jhdf.exceptions.HdfException;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 /**
  * This wraps a {@link FileChannel} and combines it with the HDF5

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,29 +6,8 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -37,8 +16,28 @@ import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class HdfFileTest {
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class HdfFileTest {
 
 	private static final String HDF5_TEST_FILE_NAME = "test_file.hdf5";
 	private static final String HDF5_TEST_FILE_TWO_NAME = "test_file2.hdf5";
@@ -48,14 +47,14 @@ public class HdfFileTest {
 	private String testFile2Url;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		testFileUrl = this.getClass().getResource(HDF5_TEST_FILE_NAME).getFile();
 		testFile2Url = this.getClass().getResource(HDF5_TEST_FILE_TWO_NAME).getFile();
 		nonHdfFile = this.getClass().getResource(NON_HDF5_TEST_FILE_NAME).getFile();
 	}
 
 	@Test
-	public void testOpeningValidFile() {
+	void testOpeningValidFile() {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.getUserBlockSize(), is(equalTo(0L)));
@@ -67,13 +66,13 @@ public class HdfFileTest {
 	}
 
 	@Test
-	public void testOpeningInvalidFile() {
+	void testOpeningInvalidFile() {
 		HdfException ex = assertThrows(HdfException.class, () -> new HdfFile(new File(nonHdfFile)));
 		assertThat(ex.getMessage(), is(equalTo("No valid HDF5 signature found")));
 	}
 
 	@Test
-	public void testOpeningMissingFile() {
+	void testOpeningMissingFile() {
 		HdfException ex = assertThrows(HdfException.class,
 				() -> new HdfFile(new File("madeUpFileNameThatDoesntExist.hello")));
 		assertThat(ex.getMessage(), is(startsWith("Failed to open file")));
@@ -81,7 +80,7 @@ public class HdfFileTest {
 	}
 
 	@Test
-	public void testRootGroup() {
+	void testRootGroup() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.getName(), is(equalTo(HDF5_TEST_FILE_NAME)));
 			assertThat(hdfFile.getType(), is(equalTo(NodeType.FILE)));
@@ -89,7 +88,7 @@ public class HdfFileTest {
 	}
 
 	@Test
-	public void testNodesUnderTheRootGroupHaveTheRightPath() {
+	void testNodesUnderTheRootGroupHaveTheRightPath() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			Group firstGroup = (Group) hdfFile.getChildren().values().iterator().next();
 			String firstGroupName = firstGroup.getName();
@@ -107,7 +106,7 @@ public class HdfFileTest {
 	}
 
 	@Test
-	public void testIteratingFile() {
+	void testIteratingFile() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			final Iterator<Node> iterator = hdfFile.iterator();
 			assertThat(iterator.hasNext(), is(true));

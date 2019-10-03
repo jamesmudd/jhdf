@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,16 +6,16 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.object.message;
+
+import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfException;
 
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.BitSet;
-
-import io.jhdf.Utils;
-import io.jhdf.exceptions.HdfException;
 
 /**
  * <p>

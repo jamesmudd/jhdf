@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,20 +6,8 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf;
-
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -38,6 +26,17 @@ import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.SymbolTableMessage;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GroupImpl extends AbstractNode implements Group {
 	private final class ChildrenLazyInitializer extends LazyInitializer<Map<String, Node>> {

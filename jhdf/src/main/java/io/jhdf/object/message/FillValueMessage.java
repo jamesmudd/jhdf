@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,14 +6,14 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf.object.message;
-
-import java.nio.ByteBuffer;
-import java.util.BitSet;
 
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+
+import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 /**
  * <p>
@@ -32,7 +32,6 @@ public class FillValueMessage extends Message {
 
 	private static final int FILL_VALUE_DEFINED_BIT = 5;
 
-	private final byte version;
 	private final int spaceAllocationTime;
 	private final int fillValueWriteTime;
 	private final boolean fillValueDefined;
@@ -41,7 +40,7 @@ public class FillValueMessage extends Message {
 	/* package */ FillValueMessage(ByteBuffer bb, BitSet messageFlags) {
 		super(messageFlags);
 
-		version = bb.get();
+		final byte version = bb.get();
 		if (version == 1 || version == 2) {
 			spaceAllocationTime = bb.get();
 			fillValueWriteTime = bb.get();

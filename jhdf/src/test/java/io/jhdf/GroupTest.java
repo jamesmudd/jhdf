@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,8 +6,21 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 package io.jhdf;
+
+import io.jhdf.api.Group;
+import io.jhdf.api.Node;
+import io.jhdf.api.NodeType;
+import io.jhdf.exceptions.HdfInvalidPathException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.file.StandardOpenOption;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -19,21 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.file.StandardOpenOption;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import io.jhdf.api.Group;
-import io.jhdf.api.Node;
-import io.jhdf.api.NodeType;
-import io.jhdf.exceptions.HdfInvalidPathException;
-
-public class GroupTest {
+class GroupTest {
 	private static final String DATASETS_GROUP = "datasets_group";
 
 	private HdfFileChannel hdfFc;
@@ -42,7 +41,7 @@ public class GroupTest {
 	private Group rootGroup;
 
 	@BeforeEach
-	public void setUp() throws IOException {
+    void setUp() throws IOException {
 		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
 		File file = new File(testFileUrl);
 		FileChannel fc = FileChannel.open(file.toPath(), StandardOpenOption.READ);
@@ -56,12 +55,12 @@ public class GroupTest {
 	}
 
 	@AfterEach
-	public void after() {
+    void after() {
 		hdfFc.close();
 	}
 
 	@Test
-	public void testGroup() {
+    void testGroup() {
 		Group group = GroupImpl.createGroup(hdfFc, 800, DATASETS_GROUP, rootGroup);
 		assertThat(group.getPath(), is(equalTo("/datasets_group/")));
 		assertThat(group.toString(), is(equalTo("Group [name=datasets_group, path=/datasets_group/, address=0x320]")));
