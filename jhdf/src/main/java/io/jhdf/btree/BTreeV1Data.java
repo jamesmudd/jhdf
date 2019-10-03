@@ -12,6 +12,8 @@ package io.jhdf.btree;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
+import io.jhdf.dataset.chunked.Chunk;
+import io.jhdf.dataset.chunked.indexing.ChunkImpl;
 import io.jhdf.exceptions.HdfException;
 
 import java.nio.ByteBuffer;

@@ -14,7 +14,6 @@ import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
 import io.jhdf.btree.BTreeV1;
 import io.jhdf.btree.BTreeV1Data;
-import io.jhdf.btree.Chunk;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
