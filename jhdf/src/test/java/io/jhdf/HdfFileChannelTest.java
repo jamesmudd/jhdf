@@ -55,7 +55,8 @@ class HdfFileChannelTest {
 		hdfFc = new HdfFileChannel(fc, sb);
 	}
 
-	@Test
+	@SuppressWarnings("SameReturnValue")
+    @Test
 	void testReadingBuffer() throws IOException {
 
 		Mockito.doAnswer(invocation -> {

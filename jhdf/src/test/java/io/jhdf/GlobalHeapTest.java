@@ -83,6 +83,7 @@ class GlobalHeapTest {
 		assertThat(globalHeap.toString(), is(equalTo("GlobalHeap [address=2048, objects=1]")));
 	}
 
+	@SuppressWarnings("SameReturnValue")
 	@Test
 	void testInvalidVersionThrows() throws IOException {
 		FileChannel mockFc = Mockito.mock(FileChannel.class);
