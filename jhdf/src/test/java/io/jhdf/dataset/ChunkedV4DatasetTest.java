@@ -64,12 +64,16 @@ class ChunkedV4DatasetTest {
 
     private DynamicTest verifyDataset(Dataset dataset) {
         return dynamicTest(dataset.getPath(), () -> {
-            assertThat(dataset.getDimensions(), is(equalTo(new int[]{5,3})));
+            if(dataset.getName().startsWith("large")) {
+                assertThat(dataset.getDimensions(), is(equalTo(new int[]{100, 5, 3})));
+            } else {
+                assertThat(dataset.getDimensions(), is(equalTo(new int[]{5, 3})));
+            }
             Object data = dataset.getData();
             Object[] flatData = flatten(data);
             for (int i = 0; i < flatData.length; i++) {
                 // Do element comparison as there are all different primitive numeric types
-                assertThat(Double.valueOf(flatData[i].toString()), is(Matchers.equalTo((double) i)));
+                assertThat(Double.valueOf(flatData[i].toString()), is(equalTo((double) i)));
             }
         });
     }
