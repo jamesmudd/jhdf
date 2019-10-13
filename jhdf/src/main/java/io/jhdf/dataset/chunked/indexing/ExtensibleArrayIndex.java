@@ -73,13 +73,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
         final int headerSize = 16 + hdfFc.getSizeOfOffsets() + 6 * hdfFc.getSizeOfLengths();
         final ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
-        byte[] formatSignatureBytes = new byte[4];
-        bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
-
-        // Verify signature
-        if (!Arrays.equals(EXTENSIBLE_ARRAY_HEADER_SIGNATURE, formatSignatureBytes)) {
-            throw new HdfException("Extensible array header signature 'EAHD' not matched, at address " + address);
-        }
+        verifySignature(bb, EXTENSIBLE_ARRAY_HEADER_SIGNATURE);
 
         // Version Number
         final byte version = bb.get();
@@ -138,13 +132,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
             final ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
-            byte[] formatSignatureBytes = new byte[4];
-            bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
-
-            // Verify signature
-            if (!Arrays.equals(EXTENSIBLE_ARRAY_INDEX_BLOCK_SIGNATURE, formatSignatureBytes)) {
-                throw new HdfException("Extensible array index block signature 'EAIB' not matched, at address " + address);
-            }
+            verifySignature(bb, EXTENSIBLE_ARRAY_INDEX_BLOCK_SIGNATURE);
 
             // Version Number
             final byte version = bb.get();
@@ -198,18 +186,12 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
                 final ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
-                byte[] formatSignatureBytes = new byte[4];
-                bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
-
-                // Verify signature
-                if (!Arrays.equals(EXTENSIBLE_ARRAY_DATA_BLOCK_SIGNATURE, formatSignatureBytes)) {
-                    throw new HdfException("Extensible array data block signature 'EADB' not matched, at address " + address);
-                }
+                verifySignature(bb, EXTENSIBLE_ARRAY_DATA_BLOCK_SIGNATURE);
 
                 // Version Number
                 final byte version = bb.get();
                 if (version != 0) {
-                    throw new HdfException("Unsupported fixed array data block version detected. Version: " + version);
+                    throw new HdfException("Unsupported extensible array data block version detected. Version: " + version);
                 }
 
                 final int clientId = bb.get();
@@ -224,7 +206,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
                 long blockOffset = readBytesAsUnsignedLong(bb, blockOffsetSize);
 
-                // TODO page bitmap
+                // Page bitmap
 
                 // Data block addresses
                 for (int i = 0; i < numberOfElements; i++) {
@@ -238,19 +220,11 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
         private class ExtensibleArraySecondaryBlock {
 
-            private final long blockOffset;
-
             private ExtensibleArraySecondaryBlock(HdfFileChannel hdfFc, long address) {
 
                 final ByteBuffer bb = hdfFc.readBufferFromAddress(address, 30 + secondaryBlockSize * elementSize);
 
-                byte[] formatSignatureBytes = new byte[4];
-                bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
-
-                // Verify signature
-                if (!Arrays.equals(EXTENSIBLE_ARRAY_SECONDARY_BLOCK_SIGNATURE, formatSignatureBytes)) {
-                    throw new HdfException("Extensible array index secondary block signature 'EASB' not matched, at address " + address);
-                }
+                verifySignature(bb, EXTENSIBLE_ARRAY_SECONDARY_BLOCK_SIGNATURE);
 
                 // Version Number
                 final byte version = bb.get();
@@ -268,7 +242,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
                     throw new HdfException("Extensible array data block header address missmatch");
                 }
 
-                blockOffset = readBytesAsUnsignedLong(bb, blockOffsetSize);
+                final long blockOffset = readBytesAsUnsignedLong(bb, blockOffsetSize);
 
                 // TODO page bitmap
 
@@ -295,6 +269,17 @@ public class ExtensibleArrayIndex implements ChunkIndex {
             elementCounter++;
         }
 
+    }
+
+    private void verifySignature(ByteBuffer bb, byte[] expectedSignature) {
+        byte[] actualSignature = new byte[expectedSignature.length];
+        bb.get(actualSignature, 0, expectedSignature.length);
+
+        // Verify signature
+        if (!Arrays.equals(expectedSignature, actualSignature)) {
+            String signatureStr = new String(expectedSignature);
+            throw new HdfException("Signature '" + signatureStr + "' not matched, at address ");
+        }
     }
 
     /**
