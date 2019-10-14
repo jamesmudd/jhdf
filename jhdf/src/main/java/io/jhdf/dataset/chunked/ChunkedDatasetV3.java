@@ -15,8 +15,6 @@ import io.jhdf.api.Group;
 import io.jhdf.btree.BTreeV1;
 import io.jhdf.btree.BTreeV1Data;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
@@ -28,7 +26,6 @@ import java.util.Collection;
  * @author James Mudd
  */
 public class ChunkedDatasetV3 extends ChunkedDatasetBase {
-    private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetV3.class);
 
     private final ChunkedDataLayoutMessageV3 layoutMessage;
 

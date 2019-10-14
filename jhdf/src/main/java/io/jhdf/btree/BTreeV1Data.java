@@ -18,7 +18,6 @@ import io.jhdf.exceptions.HdfException;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 

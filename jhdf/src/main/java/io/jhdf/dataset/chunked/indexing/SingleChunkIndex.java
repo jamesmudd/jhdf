@@ -11,7 +11,6 @@ package io.jhdf.dataset.chunked.indexing;
 
 import io.jhdf.dataset.chunked.Chunk;
 
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 

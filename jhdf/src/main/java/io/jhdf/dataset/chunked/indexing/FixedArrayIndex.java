@@ -26,7 +26,7 @@ public class FixedArrayIndex implements ChunkIndex {
     private static final byte[] FIXED_ARRAY_HEADER_SIGNATURE = "FAHD".getBytes();
     private static final byte[] FIXED_ARRAY_DATA_BLOCK_SIGNATURE = "FADB".getBytes();
 
-    private final long headerAddress;
+    private final long address;
     private final int unfilteredChunkSize;
     private final int elementSize;
     private final int[] datasetDimensions;
@@ -39,9 +39,9 @@ public class FixedArrayIndex implements ChunkIndex {
 
     private final List<Chunk> chunks;
 
-    public FixedArrayIndex(HdfFileChannel hdfFc, long address, int unfilterdChunkSize, int elementSize, int[] datasetDimensions) {
-        this.headerAddress = address;
-        this.unfilteredChunkSize = unfilterdChunkSize;
+    public FixedArrayIndex(HdfFileChannel hdfFc, long address, int unfilteredChunkSize, int elementSize, int[] datasetDimensions) {
+        this.address = address;
+        this.unfilteredChunkSize = unfilteredChunkSize;
         this.elementSize = elementSize;
         this.datasetDimensions = datasetDimensions;
 
@@ -71,14 +71,15 @@ public class FixedArrayIndex implements ChunkIndex {
 
         chunks = new ArrayList<>(maxNumberOfEntries);
 
-        // TODO checksum
+        // Checksum
 
-        FixedArrayDataBlock dataBlock = new FixedArrayDataBlock(hdfFc, dataBlockAddress);
+        // Building the object fills the chunks. Probably shoudld be changed
+        new FixedArrayDataBlock(hdfFc, dataBlockAddress);
     }
 
     private class FixedArrayDataBlock {
 
-        public FixedArrayDataBlock(HdfFileChannel hdfFc, long address) {
+        private FixedArrayDataBlock(HdfFileChannel hdfFc, long address) {
 
             // TODO header size ignoring paging
             final int headerSize = 6 + hdfFc.getSizeOfOffsets() + entrySize * maxNumberOfEntries;
@@ -104,7 +105,7 @@ public class FixedArrayIndex implements ChunkIndex {
             }
 
             final long headerAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
-            if (headerAddress != FixedArrayIndex.this.headerAddress) {
+            if (headerAddress != FixedArrayIndex.this.address) {
                 throw new HdfException("Fixed array data block header address missmatch");
             }
 

@@ -69,7 +69,7 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
             case 5: // B Tree V2
                 throw new UnsupportedHdfException("B Tree V2");
             default:
-                throw new HdfException("Unreconized chunk indexing type = " + layoutMessage.getIndexingType());
+                throw new HdfException("Unrecognized chunk indexing type = " + layoutMessage.getIndexingType());
         }
         return chunkIndex.getAllChunks();
     }

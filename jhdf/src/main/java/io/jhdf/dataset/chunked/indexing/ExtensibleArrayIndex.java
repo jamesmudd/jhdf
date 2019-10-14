@@ -148,7 +148,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
             final long headerAddress = readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
             if (headerAddress != ExtensibleArrayIndex.this.headerAddress) {
-                throw new HdfException("Extensible array data block header address missmatch");
+                throw new HdfException("Extensible array data block header address mismatch");
             }
 
             // Elements in Index block
@@ -186,8 +186,8 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
             private ExtensibleArrayDataBlock(HdfFileChannel hdfFc, long address) {
 
-                final int numberOfElements = extensibleArrayCounter.getNextNumberOfChunks();
-                final int headerSize = 6 + hdfFc.getSizeOfOffsets() + blockOffsetSize + numberOfElements * extensibleArrayElementSize + 4;
+                final int numberOfElementsInDataBlock = extensibleArrayCounter.getNextNumberOfChunks();
+                final int headerSize = 6 + hdfFc.getSizeOfOffsets() + blockOffsetSize + numberOfElementsInDataBlock * extensibleArrayElementSize + 4;
 
                 final ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
@@ -206,7 +206,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
                 final long headerAddress = readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
                 if (headerAddress != ExtensibleArrayIndex.this.headerAddress) {
-                    throw new HdfException("Extensible array data block header address missmatch");
+                    throw new HdfException("Extensible array data block header address mismatch");
                 }
 
                 long blockOffset = readBytesAsUnsignedLong(bb, blockOffsetSize);
@@ -215,7 +215,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
                 // Data block addresses
                 boolean readElement = true;
-                for (int i = 0; readElement && i < numberOfElements; i++) {
+                for (int i = 0; readElement && i < numberOfElementsInDataBlock; i++) {
                     readElement = readElement(bb, hdfFc);
                 }
 
@@ -253,7 +253,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
                 final long headerAddress = readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
                 if (headerAddress != ExtensibleArrayIndex.this.headerAddress) {
-                    throw new HdfException("Extensible array data block header address missmatch");
+                    throw new HdfException("Extensible array secondary block header address mismatch");
                 }
 
                 final long blockOffset = readBytesAsUnsignedLong(bb, blockOffsetSize);
@@ -272,8 +272,10 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
 
         /**
-         * @param bb
-         * @param hdfFc
+         * Reads an element from the buffer and adds it to the chunks list.
+         *
+         * @param bb buffer to read from
+         * @param hdfFc the HDF file channel
          * @return true if element was read false otherwise
          */
         private boolean readElement(ByteBuffer bb, HdfFileChannel hdfFc) {
