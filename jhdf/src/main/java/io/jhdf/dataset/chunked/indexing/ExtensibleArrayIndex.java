@@ -152,12 +152,13 @@ public class ExtensibleArrayIndex implements ChunkIndex {
             }
 
             // Elements in Index block
-            for (int i = 0; i < numberOfElementsInIndexBlock; i++) {
-                readElement(bb, hdfFc);
+            boolean readElement = true;
+            for (int i = 0; readElement && i < numberOfElementsInIndexBlock; i++) {
+                readElement = readElement(bb, hdfFc);
             }
 
             // Guard against all the elements having already been read
-            if (numberOfElements > numberOfElementsInIndexBlock) {
+            if (readElement && numberOfElements > numberOfElementsInIndexBlock) {
                 // Upto 6 data block pointers directly in the index block
                 for (int i = 0; i < 6; i++) {
                     final long dataBlockAddress = readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
@@ -213,8 +214,9 @@ public class ExtensibleArrayIndex implements ChunkIndex {
                 // Page bitmap
 
                 // Data block addresses
-                for (int i = 0; i < numberOfElements; i++) {
-                    readElement(bb, hdfFc);
+                boolean readElement = true;
+                for (int i = 0; readElement && i < numberOfElements; i++) {
+                    readElement = readElement(bb, hdfFc);
                 }
 
                 // Checksum
@@ -268,11 +270,17 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
         }
 
-        private void readElement(ByteBuffer bb, HdfFileChannel hdfFc) {
+
+        /**
+         * @param bb
+         * @param hdfFc
+         * @return true if element was read false otherwise
+         */
+        private boolean readElement(ByteBuffer bb, HdfFileChannel hdfFc) {
             final long chunkAddress = readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
             if (chunkAddress != UNDEFINED_ADDRESS) {
                 final int[] chunkOffset = Utils.linearIndexToDimensionIndex((elementCounter * unfilteredChunkSize) / elementSize, datasetDimensions);
-                if (filtered) {
+                if (filtered) { // Filtered
                     final int chunkSizeInBytes = Utils.readBytesAsUnsignedInt(bb, extensibleArrayElementSize - hdfFc.getSizeOfOffsets() - 4);
                     final BitSet filterMask = BitSet.valueOf(new byte[] { bb.get(), bb.get(), bb.get(), bb.get() });
                     chunks.add(new ChunkImpl(chunkAddress, chunkSizeInBytes, chunkOffset, filterMask));
@@ -280,6 +288,9 @@ public class ExtensibleArrayIndex implements ChunkIndex {
                     chunks.add(new ChunkImpl(chunkAddress, unfilteredChunkSize, chunkOffset));
                 }
                 elementCounter++;
+                return true;
+            } else {
+                return false;
             }
         }
 
