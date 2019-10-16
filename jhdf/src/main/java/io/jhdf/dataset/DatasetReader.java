@@ -31,8 +31,6 @@ import java.nio.ShortBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import static java.nio.charset.StandardCharsets.US_ASCII;
-
 /**
  * <p>
  * This class handles converting the {@link ByteBuffer} obtained from the file
