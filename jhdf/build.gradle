@@ -29,6 +29,9 @@ group = 'io.jhdf'
 version = '0.4.8'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+// Set source encoding to UTF-8
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
 
 // In this section you declare where to find the dependencies of your project
 repositories {
