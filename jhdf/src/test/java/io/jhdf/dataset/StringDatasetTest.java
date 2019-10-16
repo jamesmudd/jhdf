@@ -37,9 +37,11 @@ class StringDatasetTest {
 
 	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "../test_string_datasets_earliest.hdf5";
 	private static final String HDF5_TEST_LATEST_FILE_NAME = "../test_string_datasets_latest.hdf5";
+	private static final String HDF5_UTF8_FIXED = "../utf8-fixed-length.hdf5";
 
 	private static HdfFile earliestHdfFile;
 	private static HdfFile latestHdfFile;
+	private static HdfFile utf8FixedHdfFile;
 
 	@BeforeAll
 	static void setup() {
@@ -47,6 +49,8 @@ class StringDatasetTest {
 		earliestHdfFile = new HdfFile(new File(earliestTestFileUrl));
 		String latestTestFileUrl = StringDatasetTest.class.getResource(HDF5_TEST_LATEST_FILE_NAME).getFile();
 		latestHdfFile = new HdfFile(new File(latestTestFileUrl));
+		String utf8FixedTestFileUrl = StringDatasetTest.class.getResource(HDF5_UTF8_FIXED).getFile();
+		utf8FixedHdfFile = new HdfFile(new File(utf8FixedTestFileUrl));
 	}
 
 	@TestFactory
@@ -114,4 +118,14 @@ class StringDatasetTest {
 		}
 	}
 
+	@Test // https://github.com/jamesmudd/jhdf/issues/113
+	void testUtf8FixedLengthDataset() {
+		Dataset dataset = utf8FixedHdfFile.getDatasetByPath("a0");
+		Object data = dataset.getData();
+		assertThat(dataset.getDimensions(), is(equalTo(new int[]{ 10 })));
+		String[] stringData = (String[]) data;
+		assertThat(stringData[0], is(equalTo("att-1ä@µÜß?3")));
+		assertThat(stringData[4], is(equalTo("att-1ä@µÜß?0")));
+		assertThat(stringData[9], is(equalTo("att-1ä@µÜß?5")));
+	}
 }
