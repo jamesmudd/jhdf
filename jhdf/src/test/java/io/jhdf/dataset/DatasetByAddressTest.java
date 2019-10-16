@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static io.jhdf.TestUtils.flatten;
+import static io.jhdf.TestUtils.getDimensions;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -65,7 +66,7 @@ class DatasetByAddressTest {
 			ObjectHeader header = ObjectHeader.readObjectHeader(hdfFc, address);
 			Dataset dataset = DatasetLoader.createDataset(hdfFc, header, "unknown dataset", NoParent.INSTANCE);
 			Object data = dataset.getData();
-			assertThat(StringDatasetTest.getDimensions(data), is(equalTo(new int[]{10})));
+			assertThat(getDimensions(data), is(equalTo(new int[]{10})));
 			Object[] flatData = flatten((Object[]) data);
 			for (int i = 0; i < flatData.length; i++) {
 				// Do element comparison as there are all different primitive numeric types
