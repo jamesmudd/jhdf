@@ -28,6 +28,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -130,8 +131,9 @@ public final class DatasetReader {
 							"Unsupported floating point type size " + floatingPoint.getSize() + " bytes");
 			}
 		} else if (type instanceof StringData) {
-			int stringLength = type.getSize();
-			fillFixedLengthStringData(data, dimensions, buffer, stringLength);
+			final int stringLength = type.getSize();
+			final Charset charset = ((StringData) type).getCharset();
+			fillFixedLengthStringData(data, dimensions, buffer, stringLength, charset);
 		} else if (type instanceof Reference) {
 			//reference type handles addresses, which are always longs for this library
 			int size = type.getSize();
@@ -323,17 +325,17 @@ public final class DatasetReader {
 
 	// String Data
 
-	private static void fillFixedLengthStringData(Object data, int[] dims, ByteBuffer buffer, int stringLength) {
+	private static void fillFixedLengthStringData(Object data, int[] dims, ByteBuffer buffer, int stringLength, Charset charset) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillFixedLengthStringData(newArray, stripLeadingIndex(dims), buffer, stringLength);
+				fillFixedLengthStringData(newArray, stripLeadingIndex(dims), buffer, stringLength, charset);
 			}
 		} else {
 			for (int i = 0; i < dims[0]; i++) {
 				buffer.position(i * stringLength);
 				ByteBuffer elementBuffer = Utils.createSubBuffer(buffer, stringLength);
-				Array.set(data, i, US_ASCII.decode(elementBuffer).toString().trim());
+				Array.set(data, i, charset.decode(elementBuffer).toString().trim());
 			}
 		}
 	}
