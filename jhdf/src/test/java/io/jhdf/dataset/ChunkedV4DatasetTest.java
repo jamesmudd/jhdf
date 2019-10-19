@@ -65,7 +65,7 @@ class ChunkedV4DatasetTest {
     private DynamicTest verifyDataset(Dataset dataset) {
         return dynamicTest(dataset.getPath(), () -> {
             if(dataset.getName().startsWith("large")) {
-                assertThat(dataset.getDimensions(), is(equalTo(new int[]{100, 5, 3})));
+                assertThat(dataset.getDimensions(), is(equalTo(new int[]{200, 5, 10})));
             } else {
                 assertThat(dataset.getDimensions(), is(equalTo(new int[]{5, 3})));
             }
