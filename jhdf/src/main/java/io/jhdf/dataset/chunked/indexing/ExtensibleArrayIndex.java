@@ -359,7 +359,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
     /* package */ static class ExtensibleArraySecondaryBlockPointerCounter {
 
-        private static final int repeats = 2;
+        private static final int REPEATS = 2;
 
         private int numberOfPointers;
         private int counter = 0;
@@ -369,7 +369,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
         }
 
         public int getNextNumberOfPointers() {
-            if (counter < repeats) {
+            if (counter < REPEATS) {
                 counter++;
             } else {
                 numberOfPointers *= 2;
