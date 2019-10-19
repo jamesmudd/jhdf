@@ -36,6 +36,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.jhdf.TestUtils.getDimensions;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.equalTo;
@@ -160,17 +161,6 @@ class TestAllFiles {
 			// Should have some size
 			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
 		}
-	}
-
-	private int[] getDimensions(Object data) {
-		List<Integer> dims = new ArrayList<>();
-		dims.add(Array.getLength(data));
-
-		while (Array.get(data, 0).getClass().isArray()) {
-			data = Array.get(data, 0);
-			dims.add(Array.getLength(data));
-		}
-		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
 	}
 
 	private Class<?> getType(Object data) {
