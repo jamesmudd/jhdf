@@ -15,7 +15,11 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestUtils {
+public final class TestUtils {
+
+    private TestUtils() {
+        throw new AssertionError("No instances of TestUtils");
+    }
 
     public static Object[] flatten(Object data) {
         List<Object> flat = new ArrayList<>();
