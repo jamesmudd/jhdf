@@ -11,6 +11,8 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
+import io.jhdf.object.datatype.StringData;
+import io.jhdf.object.datatype.VariableLength;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
@@ -18,14 +20,18 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static io.jhdf.TestUtils.flatten;
 import static io.jhdf.TestUtils.getDimensions;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -34,10 +40,12 @@ class StringDatasetTest {
 	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "../test_string_datasets_earliest.hdf5";
 	private static final String HDF5_TEST_LATEST_FILE_NAME = "../test_string_datasets_latest.hdf5";
 	private static final String HDF5_UTF8_FIXED = "../utf8-fixed-length.hdf5";
+	private static final String HDF5_UTF8_VARIABLE_LENTGH_REUSED = "../var-length-strings-reused.hdf5";
 
 	private static HdfFile earliestHdfFile;
 	private static HdfFile latestHdfFile;
 	private static HdfFile utf8FixedHdfFile;
+	private static HdfFile utf8VariableLengthReusedHdfFile;
 
 	@BeforeAll
 	static void setup() {
@@ -47,6 +55,8 @@ class StringDatasetTest {
 		latestHdfFile = new HdfFile(new File(latestTestFileUrl));
 		String utf8FixedTestFileUrl = StringDatasetTest.class.getResource(HDF5_UTF8_FIXED).getFile();
 		utf8FixedHdfFile = new HdfFile(new File(utf8FixedTestFileUrl));
+		String utf8VariableLengthReusedTestFileUrl = StringDatasetTest.class.getResource(HDF5_UTF8_VARIABLE_LENTGH_REUSED).getFile();
+		utf8VariableLengthReusedHdfFile = new HdfFile(new File(utf8VariableLengthReusedTestFileUrl));
 	}
 
 	@TestFactory
@@ -117,11 +127,48 @@ class StringDatasetTest {
 	@Test // https://github.com/jamesmudd/jhdf/issues/113
 	void testUtf8FixedLengthDataset() {
 		Dataset dataset = utf8FixedHdfFile.getDatasetByPath("a0");
-		Object data = dataset.getData();
+
 		assertThat(dataset.getDimensions(), is(equalTo(new int[]{ 10 })));
+
+		StringData stringDataType = (StringData) dataset.getDataType();
+		assertThat(stringDataType.getCharset(), is(sameInstance(UTF_8)));
+
+		Object data = dataset.getData();
 		String[] stringData = (String[]) data;
-		assertThat(stringData[0], is(equalTo("att-1ä@µÜß?3")));
-		assertThat(stringData[4], is(equalTo("att-1ä@µÜß?0")));
-		assertThat(stringData[9], is(equalTo("att-1ä@µÜß?5")));
+		assertThat(stringData, is(arrayContaining(
+				"att-1ä@µÜß?3",
+				"att-1ä@µÜß?1",
+				"att-1ä@µÜß?0",
+				"att-1ä@µÜß?0",
+				"att-1ä@µÜß?0",
+				"att-1ä@µÜß?6",
+				"att-1ä@µÜß?2",
+				"att-1ä@µÜß?5",
+				"att-1ä@µÜß?0",
+				"att-1ä@µÜß?5")));
+	}
+
+	@Test // https://github.com/jamesmudd/jhdf/issues/113
+	void testUtf8VariableLengthReusedDataset() {
+		Dataset dataset = utf8VariableLengthReusedHdfFile.getDatasetByPath("a0");
+
+		assertThat(dataset.getDimensions(), is(equalTo(new int[]{ 10 })));
+
+		VariableLength variableLengthDataType = (VariableLength) dataset.getDataType();
+		assertThat(variableLengthDataType.getEncoding(), is(sameInstance(UTF_8)));
+
+		Object data = dataset.getData();
+		String[] stringData = (String[]) data;
+		assertThat(stringData, is(arrayContaining(
+				"att-0-value-1",
+				"att-0-value-1",
+				"NULL",
+				"NULL",
+				"NULL",
+				"att-0-value-1",
+				"att-0-value-0",
+				"att-0-value-1",
+				"NULL",
+				"NULL")));
 	}
 }

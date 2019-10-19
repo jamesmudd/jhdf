@@ -114,7 +114,7 @@ public class GlobalHeap {
 			throw new IllegalArgumentException("Global heap doesn't contain object with index: " + index);
 		}
 
-		return objects.get(index).data;
+		return objects.get(index).data.slice();
 	}
 
 	/**
