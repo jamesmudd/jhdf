@@ -58,8 +58,9 @@ public class ExtensibleArrayIndex implements ChunkIndex {
     private final int unfilteredChunkSize;
     private final int[] datasetDimensions;
     private final int minNumberOfElementsInDataBlock;
-    private final ExtensibleArrayCounter extensibleArrayCounter;
+    private final ExtensibleArrayCounter dataBlockElementCounter;
     private final int minNumberOfDataBlockPointers;
+    private final ExtensibleArraySecondaryBlockPointerCounter secondaryBlockPointerCounter;
     private final int maxNumberOfElementsInDataBlockPageBits;
     private final int extensibleArrayElementSize;
 
@@ -97,8 +98,9 @@ public class ExtensibleArrayIndex implements ChunkIndex {
         blockOffsetSize = maxNumberOfElementsBits / 8; // TODO round up?
         numberOfElementsInIndexBlock = bb.get();
         minNumberOfElementsInDataBlock = bb.get();
-        extensibleArrayCounter = new ExtensibleArrayCounter(minNumberOfElementsInDataBlock);
+        dataBlockElementCounter = new ExtensibleArrayCounter(minNumberOfElementsInDataBlock);
         minNumberOfDataBlockPointers = bb.get();
+        secondaryBlockPointerCounter = new ExtensibleArraySecondaryBlockPointerCounter(minNumberOfDataBlockPointers);
         maxNumberOfElementsInDataBlockPageBits = bb.get();
 
         numberOfSecondaryBlocks = Utils.readBytesAsUnsignedInt(bb, hdfFc.getSizeOfLengths());
@@ -172,9 +174,6 @@ public class ExtensibleArrayIndex implements ChunkIndex {
             // Now read secondary blocks
             for (int i = 0; i < numberOfSecondaryBlocks; i++) {
                 final long secondaryBlockAddress = readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
-                if (secondaryBlockAddress == UNDEFINED_ADDRESS) {
-                    break; // There was less than 6 data blocks for the full dataset
-                }
                 new ExtensibleArraySecondaryBlock(hdfFc, secondaryBlockAddress);
             }
 
@@ -186,8 +185,10 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
             private ExtensibleArrayDataBlock(HdfFileChannel hdfFc, long address) {
 
-                final int numberOfElementsInDataBlock = extensibleArrayCounter.getNextNumberOfChunks();
-                final int headerSize = 6 + hdfFc.getSizeOfOffsets() + blockOffsetSize + numberOfElementsInDataBlock * extensibleArrayElementSize + 4;
+                final int numberOfElementsInDataBlock = dataBlockElementCounter.getNextNumberOfChunks();
+                final int headerSize = 6 + hdfFc.getSizeOfOffsets() + blockOffsetSize
+                        + numberOfElementsInDataBlock * extensibleArrayElementSize // elements (chunks)
+                        + 4; // checksum
 
                 final ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
@@ -228,15 +229,15 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
             private ExtensibleArraySecondaryBlock(HdfFileChannel hdfFc, long address) {
 
-                final int i1 = 6 + hdfFc.getSizeOfOffsets() +
+                final int numberOfPointers = secondaryBlockPointerCounter.getNextNumberOfPointers();
+                final int secondaryBlockSize = 6 + hdfFc.getSizeOfOffsets() +
                         blockOffsetSize +
                         // Page Bitmap ?
-                        // TODO what about when secondary blocks also get expanded
-                        minNumberOfDataBlockPointers * extensibleArrayElementSize +
+                        numberOfPointers * extensibleArrayElementSize +
                         4; // checksum
 
 
-                final ByteBuffer bb = hdfFc.readBufferFromAddress(address, i1);
+                final ByteBuffer bb = hdfFc.readBufferFromAddress(address, secondaryBlockSize);
 
                 verifySignature(bb, EXTENSIBLE_ARRAY_SECONDARY_BLOCK_SIGNATURE);
 
@@ -261,8 +262,11 @@ public class ExtensibleArrayIndex implements ChunkIndex {
                 // TODO page bitmap
 
                 // Data block addresses
-                for (int i = 0; i < minNumberOfDataBlockPointers; i++) {
+                for (int i = 0; i < numberOfPointers; i++) {
                     long dataBlockAddress = readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
+                    if (dataBlockAddress == UNDEFINED_ADDRESS) {
+                        break; // This is the last secondary block and not full.
+                    }
                     new ExtensibleArrayDataBlock(hdfFc, dataBlockAddress);
                 }
 
@@ -322,8 +326,8 @@ public class ExtensibleArrayIndex implements ChunkIndex {
         private int blockCounter = 0;
         private boolean increaseNumberOfBlocksNext = false;
 
-        /* package */ ExtensibleArrayCounter(int minNumberOfElementsInDataBlock) {
-            this.minNumberOfElementsInDataBlock = minNumberOfElementsInDataBlock;
+        /* package */ ExtensibleArrayCounter(int initialNumberOfElements) {
+            this.minNumberOfElementsInDataBlock = initialNumberOfElements;
         }
 
         public int getNextNumberOfChunks() {
@@ -340,6 +344,40 @@ public class ExtensibleArrayIndex implements ChunkIndex {
             }
             return blockSizeMultiplier * minNumberOfElementsInDataBlock;
         }
+
+        @Override
+        public String toString() {
+            return "ExtensibleArrayCounter{" +
+                    "minNumberOfElementsInDataBlock=" + minNumberOfElementsInDataBlock +
+                    ", blockSizeMultiplier=" + blockSizeMultiplier +
+                    ", numberOfBlocks=" + numberOfBlocks +
+                    ", blockCounter=" + blockCounter +
+                    ", increaseNumberOfBlocksNext=" + increaseNumberOfBlocksNext +
+                    '}';
+        }
+    }
+
+    /* package */ static class ExtensibleArraySecondaryBlockPointerCounter {
+
+        private static final int repeats = 2;
+
+        private int numberOfPointers;
+        private int counter = 0;
+
+        /* package */ ExtensibleArraySecondaryBlockPointerCounter(int initialNumberOfPointers) {
+            this.numberOfPointers = initialNumberOfPointers;
+        }
+
+        public int getNextNumberOfPointers() {
+            if (counter < repeats) {
+                counter++;
+            } else {
+                numberOfPointers *= 2;
+                counter = 1;
+            }
+            return numberOfPointers;
+        }
+
     }
 
     @Override
