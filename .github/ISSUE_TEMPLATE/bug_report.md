@@ -21,8 +21,9 @@ A clear and concise description of what you expected to happen.
 **Please complete the following information:**
 - `jhdf` version
 - Java version
+- OS (Windows, Mac, Linux)
 - Stack trace
 - `jhdf` logging if possible.
 
 **Additional context**
-Add any other context about the problem here.
+Add any other context about the problem here, or possible solutions/workarounds.
