@@ -13,8 +13,9 @@ import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
+import io.jhdf.dataset.chunked.ChunkedDatasetV3;
+import io.jhdf.dataset.chunked.ChunkedDatasetV4;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.message.DataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV4;
@@ -45,7 +46,7 @@ public final class DatasetLoader {
 				return new ChunkedDatasetV3(hdfFc, address, name, parent, oh);
 
 			} else if (dlm instanceof ChunkedDataLayoutMessageV4) {
-				throw new UnsupportedHdfException("Chunked V4 dataset not supported");
+				return new ChunkedDatasetV4(hdfFc, address, name, parent, oh);
 
 			} else {
 				throw new HdfException("Unrecognized Dataset layout type: " + dlm.getClass().getCanonicalName());
