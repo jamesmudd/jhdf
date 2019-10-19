@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static io.jhdf.TestUtils.flatten;
+import static io.jhdf.TestUtils.getDimensions;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -67,14 +68,4 @@ class ChunkedDatasetTest {
 		};
 	}
 
-	private int[] getDimensions(Object data) {
-		List<Integer> dims = new ArrayList<>();
-		dims.add(Array.getLength(data));
-
-		while (Array.get(data, 0).getClass().isArray()) {
-			data = Array.get(data, 0);
-			dims.add(Array.getLength(data));
-		}
-		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
-	}
 }
