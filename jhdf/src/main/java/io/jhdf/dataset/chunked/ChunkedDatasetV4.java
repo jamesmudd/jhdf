@@ -54,7 +54,7 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
         switch (layoutMessage.getIndexingType()) {
             case 1: // Single chunk
                 logger.debug("Reading single chunk indexed dataset");
-                chunkIndex = new SingleChunkIndex(layoutMessage.getAddress(), getChunkSizeInBytes(), getDimensions());
+                chunkIndex = new SingleChunkIndex(layoutMessage, getChunkSizeInBytes(), getDimensions());
                 break;
             case 2: // Implicit
                 throw new UnsupportedHdfException("Implicit indexing is currently not supported");

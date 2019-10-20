@@ -11,6 +11,7 @@ package io.jhdf.object.message;
 
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 
 import java.nio.ByteBuffer;
@@ -139,6 +140,7 @@ public abstract class DataLayoutMessage extends Message {
 
 		private final long address;
 		private final byte indexingType;
+		private final int[] chunkDimensions;
 
 		private byte pageBits;
 		private byte maxBits;
@@ -148,7 +150,11 @@ public abstract class DataLayoutMessage extends Message {
 		private int nodeSize;
 		private byte splitPercent;
 		private byte mergePercent;
-		private final int[] chunkDimensions;
+
+		// Fields only for filtered single chunk
+		private boolean isFilteredSingleChunk = false;
+		private int sizeOfFilteredSingleChunk;
+		private BitSet filterMaskFilteredSingleChunk;
 
 		private ChunkedDataLayoutMessageV4(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
@@ -166,8 +172,10 @@ public abstract class DataLayoutMessage extends Message {
 
 			switch (indexingType) {
 			case 1: // Single Chunk
-				if (chunkedFlags.get(DONT_FILTER_PARTIAL_BOUND_CHUNKS)) {
-					throw new UnsupportedHdfException("Filtered single chunk not supported");
+				if (chunkedFlags.get(SINGLE_INDEX_WITH_FILTER)) {
+					isFilteredSingleChunk = true;
+					sizeOfFilteredSingleChunk = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
+					filterMaskFilteredSingleChunk = BitSet.valueOf(new byte[] { bb.get(), bb.get(), bb.get(), bb.get() });
 				}
 				break;
 
@@ -212,64 +220,32 @@ public abstract class DataLayoutMessage extends Message {
 			return pageBits;
 		}
 
-		public void setPageBits(byte pageBits) {
-			this.pageBits = pageBits;
-		}
-
 		public byte getMaxBits() {
 			return maxBits;
-		}
-
-		public void setMaxBits(byte maxBits) {
-			this.maxBits = maxBits;
 		}
 
 		public byte getIndexElements() {
 			return indexElements;
 		}
 
-		public void setIndexElements(byte indexElements) {
-			this.indexElements = indexElements;
-		}
-
 		public byte getMinPointers() {
 			return minPointers;
-		}
-
-		public void setMinPointers(byte minPointers) {
-			this.minPointers = minPointers;
 		}
 
 		public byte getMinElements() {
 			return minElements;
 		}
 
-		public void setMinElements(byte minElements) {
-			this.minElements = minElements;
-		}
-
 		public int getNodeSize() {
 			return nodeSize;
-		}
-
-		public void setNodeSize(int nodeSize) {
-			this.nodeSize = nodeSize;
 		}
 
 		public byte getSplitPercent() {
 			return splitPercent;
 		}
 
-		public void setSplitPercent(byte splitPercent) {
-			this.splitPercent = splitPercent;
-		}
-
 		public byte getMergePercent() {
 			return mergePercent;
-		}
-
-		public void setMergePercent(byte mergePercent) {
-			this.mergePercent = mergePercent;
 		}
 
 		public byte getIndexingType() {
@@ -280,6 +256,23 @@ public abstract class DataLayoutMessage extends Message {
 			return chunkDimensions;
 		}
 
+		public int getSizeOfFilteredSingleChunk() {
+			if(!isFilteredSingleChunk) {
+				throw new HdfException("Requested size of filtered single chunk when its not set.");
+			}
+			return sizeOfFilteredSingleChunk;
+		}
+
+		public BitSet getFilterMaskFilteredSingleChunk() {
+			if(!isFilteredSingleChunk){
+				throw new HdfException("Requested filter mask of filtered single chunk when its not set.");
+			}
+			return filterMaskFilteredSingleChunk;
+		}
+
+		public boolean isFilteredSingleChunk() {
+			return isFilteredSingleChunk;
+		}
 	}
 
 }
