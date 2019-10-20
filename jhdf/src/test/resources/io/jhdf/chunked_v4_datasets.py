@@ -25,6 +25,13 @@ def write_chunked_datasets(f):
     single_chunk_group.create_dataset('float32', data=data, dtype='f4', chunks=(5,3))
     single_chunk_group.create_dataset('float64', data=data, dtype='f8', chunks=(5,3))
 
+    filtered_single_chunk_group = f.create_group("filtered_single_chunk")
+    filtered_single_chunk_group.create_dataset("int8", data=data, dtype='i1', chunks=(5,3), compression="gzip")
+    filtered_single_chunk_group.create_dataset("int16", data=data, dtype='i2', chunks=(5,3), compression="gzip")
+    filtered_single_chunk_group.create_dataset("int32", data=data, dtype='i4', chunks=(5,3), compression="gzip")
+    filtered_single_chunk_group.create_dataset('float32', data=data, dtype='f4', chunks=(5,3), compression="gzip")
+    filtered_single_chunk_group.create_dataset('float64', data=data, dtype='f8', chunks=(5,3), compression="gzip")
+
     # Implicit Index - fixed maximum dimension sizes, no filter applied to the dataset,
     # the timing for the space allocation of the dataset chunks is H5P_ALLOC_TIME_EARLY
     # TODO...

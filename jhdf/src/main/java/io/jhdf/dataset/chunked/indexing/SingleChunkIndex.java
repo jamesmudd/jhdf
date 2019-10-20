@@ -10,6 +10,7 @@
 package io.jhdf.dataset.chunked.indexing;
 
 import io.jhdf.dataset.chunked.Chunk;
+import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV4;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -18,9 +19,13 @@ public class SingleChunkIndex implements ChunkIndex {
 
     private final Chunk singleChunk;
 
-    public SingleChunkIndex(long chunkAddress, int chunkSize, int[] dimensions) {
+    public SingleChunkIndex(ChunkedDataLayoutMessageV4 layoutMessageV4, int unfilteredChunkSize, int[] dimensions) {
         final int[] chunkOffset = new int[dimensions.length]; // Single chunk so zero offset
-        this.singleChunk = new ChunkImpl(chunkAddress, chunkSize, chunkOffset);
+        if (layoutMessageV4.isFilteredSingleChunk()) {
+            this.singleChunk = new ChunkImpl(layoutMessageV4.getAddress(), layoutMessageV4.getSizeOfFilteredSingleChunk(), chunkOffset, layoutMessageV4.getFilterMaskFilteredSingleChunk());
+        } else {
+            this.singleChunk = new ChunkImpl(layoutMessageV4.getAddress(), unfilteredChunkSize, chunkOffset);
+        }
     }
 
     @Override
