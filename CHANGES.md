@@ -1,5 +1,15 @@
 # jHDF Change Log
 
+## v0.5.0
+- Adds support for some types (the most common) of chunked v4 datasets:
+  - Single chunk
+  - Fixed array
+  - Extensible array
+- Fixes https://github.com/jamesmudd/jhdf/issues/113 fixed length UTF8 datasets can now be read correctly.
+- Fixes https://github.com/jamesmudd/jhdf/issues/112 multiple accesses to a global heap object now behave correctly.
+- Lots of code cleanup and minor improvements
+- Updates dependencies
+
 ## v0.4.8
 - Add support for reference data type. Thanks to Gisa Meier and JCzogalla https://github.com/jamesmudd/jhdf/pull/106
 - Creation order tracking is skipped allowing these files to be read
