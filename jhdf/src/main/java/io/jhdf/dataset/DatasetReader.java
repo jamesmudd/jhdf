@@ -14,6 +14,7 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.ArrayDataType;
 import io.jhdf.object.datatype.DataType;
+import io.jhdf.object.datatype.EnumDataType;
 import io.jhdf.object.datatype.FixedPoint;
 import io.jhdf.object.datatype.FloatingPoint;
 import io.jhdf.object.datatype.Reference;
@@ -154,6 +155,9 @@ public final class DatasetReader {
 				Object elementDataset = readDataset(arrayType.getBaseType(), buffer, arrayType.getDimensions());
 				Array.set(data, i, elementDataset);
 			}
+		} else if (type instanceof EnumDataType) {
+			final EnumDataType enumDataType = (EnumDataType) type;
+			return EnumDatasetReader.readEnumDataset(enumDataType, buffer, dimensions);
 		} else {
 			throw new HdfException(
 					"DatasetReader was passed a type it cant fill. Type: " + type.getClass().getCanonicalName());

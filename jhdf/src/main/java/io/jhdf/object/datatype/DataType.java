@@ -32,11 +32,8 @@ public abstract class DataType {
 		int version = Utils.bitsToInt(classAndVersion, 4, 4);
 		int dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
 
-		if (version == 0) {
-			throw new HdfException("Unrecognized datatype version 0 detected");
-		}
-		if (version == 3) {
-			throw new UnsupportedHdfException("VAX byte ordered datatype encountered");
+		if (version == 0 || version > 3) {
+			throw new HdfException("Unrecognized datatype version '" + version + "' detected");
 		}
 
 		// Move the buffer back to the start of the data type message
@@ -60,7 +57,7 @@ public abstract class DataType {
 			case 7: // Reference
 				return new Reference(bb);
 			case 8: // Enum
-				throw new UnsupportedHdfException("Enumerated data type is not yet supported");
+				return new EnumDataType(bb);
 			case 9: // Variable length
 				return new VariableLength(bb);
 			case 10: // Array
