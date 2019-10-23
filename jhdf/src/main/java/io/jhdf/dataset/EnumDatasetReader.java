@@ -33,6 +33,11 @@ import java.util.Map;
  */
 public class EnumDatasetReader {
 
+    /** No instances */
+    private EnumDatasetReader() {
+        throw new AssertionError("No instances of EnumDatasetReader");
+    }
+
     public static Object readEnumDataset(EnumDataType enumDataType, ByteBuffer buffer, int[] dimensions) {
 
         final DataType baseType = enumDataType.getBaseType();

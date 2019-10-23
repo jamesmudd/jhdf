@@ -55,6 +55,7 @@ public final class DatasetReader {
 
 	/** No instances */
 	private DatasetReader() {
+		throw new AssertionError("No instances of DatasetReader");
 	}
 
 	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions) {
