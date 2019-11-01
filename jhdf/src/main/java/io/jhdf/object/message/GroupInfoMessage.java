@@ -31,7 +31,7 @@ import java.util.BitSet;
 public class GroupInfoMessage extends Message {
 
 	private static final int LINK_PHASE_CHANGE_PRESENT = 0;
-	private static final int ESTIMATED_ENTRY_INFORMATION_PRESENT = 0;
+	private static final int ESTIMATED_ENTRY_INFORMATION_PRESENT = 1;
 
 	private final int maximumCompactLinks;
 	private final int minimumDenseLinks;
