@@ -11,21 +11,17 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
-import java.io.File;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import static io.jhdf.TestUtils.flatten;
 import static io.jhdf.TestUtils.getDimensions;
+import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -33,14 +29,13 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class ChunkedDatasetTest {
 
-	private static final String HDF5_TEST_FILE_NAME = "../test_chunked_datasets_earliest.hdf5";
+	private static final String HDF5_TEST_FILE_NAME = "test_chunked_datasets_earliest.hdf5";
 
 	private static HdfFile hdfFile;
 
 	@BeforeAll
-	static void setup() {
-		String testFileUrl = ChunkedDatasetTest.class.getResource(HDF5_TEST_FILE_NAME).getFile();
-		hdfFile = new HdfFile(new File(testFileUrl));
+	static void setup() throws Exception {
+		hdfFile = loadTestHdfFile(HDF5_TEST_FILE_NAME);
 	}
 
 	@TestFactory

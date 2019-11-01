@@ -16,7 +16,6 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Link;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 
@@ -29,7 +28,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -131,6 +129,7 @@ class TestAllFiles {
 	 * @param dataset the dataset to be exercised
 	 * @param group   its parent group
 	 */
+	@SuppressWarnings("unchecked")
 	private void verifyDataset(Dataset dataset, Group group) {
 		assertThat(dataset.getName(), is(notNullValue()));
 		assertThat(dataset.getPath(), is(group.getPath() + dataset.getName()));
@@ -152,7 +151,7 @@ class TestAllFiles {
 			// Should have some size
 			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
 		} else if (dataset.isCompound()) {
-			// Compound datasets are currently returned as maps, maybe a custom CompoundDatset might be better in the future..
+			// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future..
 			assertThat(data, is(instanceOf(Map.class)));
 			assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
 		} else {

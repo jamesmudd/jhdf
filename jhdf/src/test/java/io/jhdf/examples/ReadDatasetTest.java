@@ -15,12 +15,12 @@ class ReadDatasetTest {
 
 	@Test
     void testOpeningV1File() {
-		ReadDataset.main(new String[] { "src/test/resources/io/jhdf/test_file.hdf5", "/nD_Datasets/3D_float32" });
+		ReadDataset.main(new String[] { "src/test/resources/hdf5/test_file.hdf5", "/nD_Datasets/3D_float32" });
 	}
 
 	@Test
     void testOpeningV2File() {
-		ReadDataset.main(new String[] { "src/test/resources/io/jhdf/test_file2.hdf5", "/nD_Datasets/3D_float32" });
+		ReadDataset.main(new String[] { "src/test/resources/hdf5/test_file2.hdf5", "/nD_Datasets/3D_float32" });
 	}
 
 }

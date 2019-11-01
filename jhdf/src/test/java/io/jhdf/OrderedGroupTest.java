@@ -14,8 +14,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -30,9 +28,8 @@ class OrderedGroupTest {
 	private static HdfFile hdfFile;
 
 	@BeforeAll
-	static void setup() {
-		String earliestTestFileUrl = AttributesTest.class.getResource(HDF5_TEST_FILE_NAME).getFile();
-		hdfFile = new HdfFile(new File(earliestTestFileUrl));
+	static void setup() throws Exception {
+		hdfFile = TestUtils.loadTestHdfFile(HDF5_TEST_FILE_NAME);
 	}
 
 	@AfterAll

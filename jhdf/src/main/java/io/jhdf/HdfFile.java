@@ -23,8 +23,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -55,6 +59,14 @@ public class HdfFile implements Group, AutoCloseable {
     private final Group rootGroup;
 
 	private final Set<HdfFile> openExternalFiles = new HashSet<>();
+
+	public HdfFile(Path path) {
+		this(path.toFile());
+	}
+
+	public HdfFile(URI uri) {
+		this(Paths.get(uri).toFile());
+	}
 
 	public HdfFile(File hdfFile) {
 		logger.info("Opening HDF5 file '{}'...", hdfFile.getAbsolutePath());

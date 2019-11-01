@@ -42,7 +42,7 @@ class GroupTest {
 
 	@BeforeEach
     void setUp() throws IOException {
-		final String testFileUrl = this.getClass().getResource("test_file.hdf5").getFile();
+		final String testFileUrl = this.getClass().getResource("/hdf5/test_file.hdf5").getFile();
 		File file = new File(testFileUrl);
 		FileChannel fc = FileChannel.open(file.toPath(), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);

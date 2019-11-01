@@ -16,11 +16,11 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
-import java.io.File;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -30,18 +30,16 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class ScalarDatasetTest {
 
-	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "../test_scalar_empty_datasets_latest.hdf5";
-	private static final String HDF5_TEST_LATEST_FILE_NAME = "../test_scalar_empty_datasets_earliest.hdf5";
+	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "test_scalar_empty_datasets_latest.hdf5";
+	private static final String HDF5_TEST_LATEST_FILE_NAME = "test_scalar_empty_datasets_earliest.hdf5";
 
 	private static HdfFile earliestHdfFile;
 	private static HdfFile latestHdfFile;
 
 	@BeforeAll
-	static void setup() {
-		String earliestTestFileUrl = ScalarDatasetTest.class.getResource(HDF5_TEST_EARLIEST_FILE_NAME).getFile();
-		earliestHdfFile = new HdfFile(new File(earliestTestFileUrl));
-		String latestTestFileUrl = ScalarDatasetTest.class.getResource(HDF5_TEST_LATEST_FILE_NAME).getFile();
-		latestHdfFile = new HdfFile(new File(latestTestFileUrl));
+	static void setup() throws Exception {
+		earliestHdfFile = loadTestHdfFile(HDF5_TEST_EARLIEST_FILE_NAME);
+		latestHdfFile = loadTestHdfFile(HDF5_TEST_LATEST_FILE_NAME);
 	}
 
 	@TestFactory

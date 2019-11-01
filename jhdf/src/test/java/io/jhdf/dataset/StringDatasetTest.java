@@ -19,13 +19,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
-import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static io.jhdf.TestUtils.flatten;
 import static io.jhdf.TestUtils.getDimensions;
+import static io.jhdf.TestUtils.loadTestHdfFile;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
@@ -37,10 +36,10 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class StringDatasetTest {
 
-	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "../test_string_datasets_earliest.hdf5";
-	private static final String HDF5_TEST_LATEST_FILE_NAME = "../test_string_datasets_latest.hdf5";
-	private static final String HDF5_UTF8_FIXED = "../utf8-fixed-length.hdf5";
-	private static final String HDF5_UTF8_VARIABLE_LENTGH_REUSED = "../var-length-strings-reused.hdf5";
+	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "test_string_datasets_earliest.hdf5";
+	private static final String HDF5_TEST_LATEST_FILE_NAME = "test_string_datasets_latest.hdf5";
+	private static final String HDF5_UTF8_FIXED = "utf8-fixed-length.hdf5";
+	private static final String HKDF5_UTF8_VARIABLE_LENGTH_REUSED = "var-length-strings-reused.hdf5";
 
 	private static HdfFile earliestHdfFile;
 	private static HdfFile latestHdfFile;
@@ -48,15 +47,11 @@ class StringDatasetTest {
 	private static HdfFile utf8VariableLengthReusedHdfFile;
 
 	@BeforeAll
-	static void setup() {
-		String earliestTestFileUrl = StringDatasetTest.class.getResource(HDF5_TEST_EARLIEST_FILE_NAME).getFile();
-		earliestHdfFile = new HdfFile(new File(earliestTestFileUrl));
-		String latestTestFileUrl = StringDatasetTest.class.getResource(HDF5_TEST_LATEST_FILE_NAME).getFile();
-		latestHdfFile = new HdfFile(new File(latestTestFileUrl));
-		String utf8FixedTestFileUrl = StringDatasetTest.class.getResource(HDF5_UTF8_FIXED).getFile();
-		utf8FixedHdfFile = new HdfFile(new File(utf8FixedTestFileUrl));
-		String utf8VariableLengthReusedTestFileUrl = StringDatasetTest.class.getResource(HDF5_UTF8_VARIABLE_LENTGH_REUSED).getFile();
-		utf8VariableLengthReusedHdfFile = new HdfFile(new File(utf8VariableLengthReusedTestFileUrl));
+	static void setup() throws Exception {
+		earliestHdfFile = loadTestHdfFile(HDF5_TEST_EARLIEST_FILE_NAME);
+		latestHdfFile = loadTestHdfFile(HDF5_TEST_LATEST_FILE_NAME);
+		utf8FixedHdfFile = loadTestHdfFile(HDF5_UTF8_FIXED);
+		utf8VariableLengthReusedHdfFile = loadTestHdfFile(HKDF5_UTF8_VARIABLE_LENGTH_REUSED);
 	}
 
 	@TestFactory

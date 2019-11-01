@@ -34,7 +34,7 @@ class ObjectHeaderV2Test {
 
 	@BeforeEach
     void setUp() throws IOException, URISyntaxException {
-		final URI testFileUri = this.getClass().getResource("test_file2.hdf5").toURI();
+		final URI testFileUri = this.getClass().getResource("/hdf5/test_file2.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
 		hdfFc = new HdfFileChannel(fc, sb);
@@ -168,7 +168,7 @@ class ObjectHeaderV2Test {
 	@Test
     void testCreationOrderTracked() throws IOException, URISyntaxException {
 		// this test fails without skipping the creation order in Message#readObjectHeaderV2Message
-		final URI testFileUri = this.getClass().getResource("test_attribute_with_creation_order.hdf5").toURI();
+		final URI testFileUri = this.getClass().getResource("/hdf5/test_attribute_with_creation_order.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
 		HdfFileChannel hdfFc = new HdfFileChannel(fc, sb);

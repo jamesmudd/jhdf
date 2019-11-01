@@ -10,11 +10,11 @@
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
+import io.jhdf.TestUtils;
 import io.jhdf.api.Dataset;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -24,16 +24,16 @@ import static org.hamcrest.Matchers.nullValue;
 
 class CompoundDatasetTest {
 
-    private static final String HDF5_TEST_FILE_NAME = "../compound_dataset_test.hdf5";
+    private static final String HDF5_TEST_FILE_NAME = "compound_dataset_test.hdf5";
 
     private static HdfFile hdfFile;
 
     @BeforeAll
-    static void setup() {
-        String testFileUrl = ChunkedDatasetTest.class.getResource(HDF5_TEST_FILE_NAME).getFile();
-        hdfFile = new HdfFile(new File(testFileUrl));
+    static void setup() throws Exception {
+        hdfFile = TestUtils.loadTestHdfFile(HDF5_TEST_FILE_NAME);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void test2dCompound() {
         Dataset twoDCompound = hdfFile.getDatasetByPath("/2d_compound");
@@ -56,6 +56,7 @@ class CompoundDatasetTest {
         assertThat(floatData, is(equalTo(new float[][]{{1,2},{3,4}})));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void testChunkedCompound() {
         Dataset chunkedCompound = hdfFile.getDatasetByPath("/chunked_compound");
@@ -78,6 +79,7 @@ class CompoundDatasetTest {
         assertThat(doubleData, is(equalTo(new double[][]{{1.0,2.0,3.0},{-23.4,-0.3,28.0},{44.4,33.3,22.2},{-1.1,-2.2,-3.3}})));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void testContiguousCompound() {
         Dataset contiguousCompound = hdfFile.getDatasetByPath("/contiguous_compound");

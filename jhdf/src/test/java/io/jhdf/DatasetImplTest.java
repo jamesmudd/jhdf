@@ -16,13 +16,13 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
+import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -37,7 +37,6 @@ class DatasetImplTest {
 	private static final String FLOAT64_PATH = "/datasets_group/float/float64";
 	private static final String FLOAT32_PATH = "/datasets_group/float/float32";
 	private static final String HDF5_TEST_FILE_NAME = "test_file.hdf5";
-	private static final String TEST_FILE_URL = DatasetImplTest.class.getResource(HDF5_TEST_FILE_NAME).getFile();
 
 	// These are the "correct" contents of the datasets i.e need to match what was
 	// written by h5py
@@ -59,8 +58,8 @@ class DatasetImplTest {
 	private static HdfFile hdfFile;
 
 	@BeforeAll
-	static void beforeAll() {
-		hdfFile = new HdfFile(new File(TEST_FILE_URL));
+	static void beforeAll() throws Exception {
+		hdfFile = loadTestHdfFile(HDF5_TEST_FILE_NAME);
 	}
 
 	@AfterAll

@@ -10,13 +10,13 @@
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
+import io.jhdf.TestUtils;
 import io.jhdf.api.Dataset;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -28,14 +28,13 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class OddDatasetTest {
 
-	private static final String HDF5_TEST_FILE_NAME = "../test_odd_datasets_earliest.hdf5";
+	private static final String HDF5_TEST_FILE_NAME = "test_odd_datasets_earliest.hdf5";
 
 	private static HdfFile hdfFile;
 
 	@BeforeAll
-	static void setup() {
-		String testFileUrl = OddDatasetTest.class.getResource(HDF5_TEST_FILE_NAME).getFile();
-		hdfFile = new HdfFile(new File(testFileUrl));
+	static void setup() throws Exception {
+		hdfFile = TestUtils.loadTestHdfFile(HDF5_TEST_FILE_NAME);
 	}
 
 	@TestFactory

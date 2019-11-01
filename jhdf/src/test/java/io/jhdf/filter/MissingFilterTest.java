@@ -15,8 +15,7 @@ import io.jhdf.exceptions.HdfFilterException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-
+import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -25,14 +24,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MissingFilterTest {
 
-	private static final String HDF5_TEST_FILE_NAME = "../test_missing_filter.hdf5bad";
+	private static final String HDF5_TEST_FILE_NAME = "test_missing_filter.hdf5bad";
 
 	private static HdfFile hdfFile;
 
 	@BeforeAll
-	static void setup() {
-		String testFileUrl = MissingFilterTest.class.getResource(HDF5_TEST_FILE_NAME).getFile();
-		hdfFile = new HdfFile(new File(testFileUrl));
+	static void setup() throws Exception {
+		hdfFile = loadTestHdfFile(HDF5_TEST_FILE_NAME);
 	}
 
 	@Test

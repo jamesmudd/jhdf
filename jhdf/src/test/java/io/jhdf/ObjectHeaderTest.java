@@ -39,7 +39,7 @@ class ObjectHeaderTest {
 
 	@BeforeEach
 	void setUp() throws IOException, URISyntaxException {
-		final URI testFileUri = this.getClass().getResource("test_file.hdf5").toURI();
+		final URI testFileUri = this.getClass().getResource("/hdf5/test_file.hdf5").toURI();
 		fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		sb = Superblock.readSuperblock(fc, 0);
 		hdfFc = new HdfFileChannel(fc, sb);

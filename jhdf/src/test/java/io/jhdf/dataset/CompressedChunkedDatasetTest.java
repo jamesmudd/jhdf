@@ -17,10 +17,10 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -28,14 +28,13 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class CompressedChunkedDatasetTest {
 
-	private static final String HDF5_TEST_FILE_NAME = "../test_compressed_chunked_datasets_earliest.hdf5";
+	private static final String HDF5_TEST_FILE_NAME = "test_compressed_chunked_datasets_earliest.hdf5";
 
 	private static HdfFile hdfFile;
 
 	@BeforeAll
-	static void setup() {
-		String testFileUrl = CompressedChunkedDatasetTest.class.getResource(HDF5_TEST_FILE_NAME).getFile();
-		hdfFile = new HdfFile(new File(testFileUrl));
+	static void setup() throws Exception {
+		hdfFile = loadTestHdfFile(HDF5_TEST_FILE_NAME);
 	}
 
 	@TestFactory

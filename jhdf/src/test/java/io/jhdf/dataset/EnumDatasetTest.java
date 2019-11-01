@@ -19,12 +19,12 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static io.jhdf.TestUtils.flatten;
+import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
@@ -34,32 +34,30 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class EnumDatasetTest {
 
-    private static final String ENUM_EARLIEST_TEST_FILE_NAME = "../test_enum_datasets_earliest.hdf5";
-    private static final String ENUM_LATEST_TEST_FILE_NAME = "../test_enum_datasets_latest.hdf5";
+    private static final String ENUM_EARLIEST_TEST_FILE_NAME = "test_enum_datasets_earliest.hdf5";
+    private static final String ENUM_LATEST_TEST_FILE_NAME = "test_enum_datasets_latest.hdf5";
 
-    private static HdfFile earliesthdfFile;
-    private static HdfFile latesthdfFile;
+    private static HdfFile earliestHdfFile;
+    private static HdfFile latestHdfFile;
 
     @BeforeAll
-    static void setup() {
-        String testFileUrl = ChunkedDatasetTest.class.getResource(ENUM_EARLIEST_TEST_FILE_NAME).getFile();
-        earliesthdfFile = new HdfFile(new File(testFileUrl));
-        testFileUrl = ChunkedDatasetTest.class.getResource(ENUM_LATEST_TEST_FILE_NAME).getFile();
-        latesthdfFile = new HdfFile(new File(testFileUrl));
+    static void setup() throws Exception {
+        earliestHdfFile = loadTestHdfFile(ENUM_EARLIEST_TEST_FILE_NAME);
+        latestHdfFile = loadTestHdfFile(ENUM_LATEST_TEST_FILE_NAME);
     }
 
     @TestFactory
-    Stream<DynamicNode> earliest() throws Exception {
+    Stream<DynamicNode> earliest() {
         List<Dataset> datasets = new ArrayList<>();
-        getAllDatasets(earliesthdfFile, datasets);
+        getAllDatasets(earliestHdfFile, datasets);
 
         return datasets.stream().map(this::verifyDataset);
     }
 
     @TestFactory
-    Stream<DynamicNode> latest() throws Exception {
+    Stream<DynamicNode> latest() {
         List<Dataset> datasets = new ArrayList<>();
-        getAllDatasets(latesthdfFile, datasets);
+        getAllDatasets(latestHdfFile, datasets);
 
         return datasets.stream().map(this::verifyDataset);
     }

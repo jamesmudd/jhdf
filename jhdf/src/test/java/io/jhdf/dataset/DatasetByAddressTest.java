@@ -18,13 +18,13 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
 import static io.jhdf.TestUtils.flatten;
 import static io.jhdf.TestUtils.getDimensions;
+import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -34,14 +34,13 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class DatasetByAddressTest {
 
-	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "../test_string_datasets_earliest.hdf5";
+	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "test_string_datasets_earliest.hdf5";
 
 	private static HdfFile earliestHdfFile;
 
 	@BeforeAll
-	static void setup() {
-		String earliestTestFileUrl = ScalarDatasetTest.class.getResource(HDF5_TEST_EARLIEST_FILE_NAME).getFile();
-		earliestHdfFile = new HdfFile(new File(earliestTestFileUrl));
+	static void setup() throws Exception {
+		earliestHdfFile = loadTestHdfFile(HDF5_TEST_EARLIEST_FILE_NAME);
 	}
 
 	@TestFactory
@@ -67,7 +66,7 @@ class DatasetByAddressTest {
 			Dataset dataset = DatasetLoader.createDataset(hdfFc, header, "unknown dataset", NoParent.INSTANCE);
 			Object data = dataset.getData();
 			assertThat(getDimensions(data), is(equalTo(new int[]{10})));
-			Object[] flatData = flatten((Object[]) data);
+			Object[] flatData = flatten(data);
 			for (int i = 0; i < flatData.length; i++) {
 				// Do element comparison as there are all different primitive numeric types
 				// convert to double

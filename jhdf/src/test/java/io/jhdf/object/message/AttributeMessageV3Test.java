@@ -37,7 +37,7 @@ class AttributeMessageV3Test {
 
 	@BeforeEach
     void setUp() throws IOException {
-		final String testFileUrl = this.getClass().getResource("../../test_file2.hdf5").getFile();
+		final String testFileUrl = this.getClass().getResource("/hdf5/test_file2.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
 		sb = Superblock.readSuperblock(fc, 0);
