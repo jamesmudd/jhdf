@@ -59,7 +59,7 @@ dependencies {
     // Mocking
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.1.0'
 	// Matchers
-	testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
+	testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
 }
 
 test {
