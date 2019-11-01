@@ -65,7 +65,7 @@ class TestAllFiles {
 
 		// Auto discover the test files assuming they exist in under the directory
 		// containing test_file.hdf5
-		URL resource = this.getClass().getResource("../test_file.hdf5");
+		URL resource = this.getClass().getResource("/hdf5/");
 		Path path = Paths.get(resource.toURI()).getParent();
 		List<Path> files = Files.walk(path).filter(HDF5::matches).collect(Collectors.toList());
 
