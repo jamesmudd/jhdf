@@ -37,8 +37,6 @@ if __name__ == '__main__':
     write_chunked_datasets(f)
     print('test_byteshuffle_compressed_datasets_earliest.hdf5')
 
-# Start working just on 1.8 files first
-#     f = h5py.File('test_byteshuffle_compressed_datasets_latest.hdf5', 'w', libver='latest')
-#     write_chunked_datasets(f)
-#     print('test_byteshuffle_compressed_datasets_latest.hdf5')
-    
+    f = h5py.File('test_byteshuffle_compressed_datasets_latest.hdf5', 'w', libver='latest')
+    write_chunked_datasets(f)
+    print('test_byteshuffle_compressed_datasets_latest.hdf5')
