@@ -22,6 +22,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -256,6 +260,22 @@ class HdfFileTest {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.isLinkCreationOrderTracked(), is(false));
 		}
+	}
+
+	@Test
+	void testURIConstructor() throws URISyntaxException {
+		URI uri = this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI();
+		HdfFile hdfFile = new HdfFile(uri);
+		assertThat(hdfFile.getFile(), is(notNullValue()));
+		hdfFile.close();
+	}
+
+	@Test
+	void testPathConstructor() throws URISyntaxException {
+		Path path = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI());
+		HdfFile hdfFile = new HdfFile(path);
+		assertThat(hdfFile.getFile(), is(notNullValue()));
+		hdfFile.close();
 	}
 
 }
