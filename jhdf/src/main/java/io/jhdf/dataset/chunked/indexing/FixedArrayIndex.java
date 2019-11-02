@@ -28,7 +28,8 @@ public class FixedArrayIndex implements ChunkIndex {
 
     private final long address;
     private final int unfilteredChunkSize;
-    private final int elementSize;
+    private final int elementsPerChunk;
+
     private final int[] datasetDimensions;
 
     private final int clientId;
@@ -42,7 +43,7 @@ public class FixedArrayIndex implements ChunkIndex {
     public FixedArrayIndex(HdfFileChannel hdfFc, long address, int unfilteredChunkSize, int elementSize, int[] datasetDimensions) {
         this.address = address;
         this.unfilteredChunkSize = unfilteredChunkSize;
-        this.elementSize = elementSize;
+        this.elementsPerChunk = unfilteredChunkSize / elementSize;
         this.datasetDimensions = datasetDimensions;
 
         final int headerSize = 12 + hdfFc.getSizeOfOffsets() + hdfFc.getSizeOfLengths();
@@ -114,7 +115,7 @@ public class FixedArrayIndex implements ChunkIndex {
             if (clientId == 0) { // Not filtered
                 for (int i = 0; i < maxNumberOfEntries; i++) {
                     final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
-                    final int[] chunkOffset = Utils.linearIndexToDimensionIndex((i* unfilteredChunkSize)/elementSize, datasetDimensions);
+                    final int[] chunkOffset = Utils.linearIndexToDimensionIndex(i* elementsPerChunk, datasetDimensions);
                     chunks.add(new ChunkImpl(chunkAddress, unfilteredChunkSize, chunkOffset));
                 }
             } else  if (clientId == 1) { // Filtered
@@ -122,7 +123,7 @@ public class FixedArrayIndex implements ChunkIndex {
                     final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
                     final int chunkSizeInBytes = Utils.readBytesAsUnsignedInt(bb, entrySize - hdfFc.getSizeOfOffsets() - 4);
                     final BitSet filterMask = BitSet.valueOf(new byte[] { bb.get(), bb.get(), bb.get(), bb.get() });
-                    final int[] chunkOffset = Utils.linearIndexToDimensionIndex((i*unfilteredChunkSize)/elementSize, datasetDimensions);
+                    final int[] chunkOffset = Utils.linearIndexToDimensionIndex(i* elementsPerChunk, datasetDimensions);
 
                     chunks.add(new ChunkImpl(chunkAddress, chunkSizeInBytes, chunkOffset, filterMask));
                 }
