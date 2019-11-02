@@ -10,13 +10,14 @@
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
-import io.jhdf.TestUtils;
 import io.jhdf.api.Dataset;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
+import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -30,7 +31,12 @@ class CompoundDatasetTest {
 
     @BeforeAll
     static void setup() throws Exception {
-        hdfFile = TestUtils.loadTestHdfFile(HDF5_TEST_FILE_NAME);
+        hdfFile = loadTestHdfFile(HDF5_TEST_FILE_NAME);
+    }
+
+    @AfterAll
+    static void tearDown() {
+        hdfFile.close();
     }
 
     @SuppressWarnings("unchecked")

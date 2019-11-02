@@ -13,6 +13,7 @@ import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
 import io.jhdf.object.datatype.StringData;
 import io.jhdf.object.datatype.VariableLength;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,14 @@ class StringDatasetTest {
 		latestHdfFile = loadTestHdfFile(HDF5_TEST_LATEST_FILE_NAME);
 		utf8FixedHdfFile = loadTestHdfFile(HDF5_UTF8_FIXED);
 		utf8VariableLengthReusedHdfFile = loadTestHdfFile(HKDF5_UTF8_VARIABLE_LENGTH_REUSED);
+	}
+
+	@AfterAll
+	static void tearDown() {
+		earliestHdfFile.close();
+		latestHdfFile.close();
+		utf8FixedHdfFile.close();
+		utf8VariableLengthReusedHdfFile.close();
 	}
 
 	@TestFactory

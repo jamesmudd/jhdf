@@ -10,6 +10,7 @@
 package io.jhdf;
 
 import io.jhdf.exceptions.HdfException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -44,6 +45,11 @@ class GlobalHeapTest {
 		hdfFc = new HdfFileChannel(fc, sb);
 
 		globalHeap = new GlobalHeap(hdfFc, 2048);
+	}
+
+	@AfterEach
+	void tearDown() {
+		hdfFc.close();
 	}
 
 	@Test

@@ -13,6 +13,7 @@ import io.jhdf.HdfFile;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Dataset;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
@@ -41,6 +42,11 @@ class DatasetByAddressTest {
 	@BeforeAll
 	static void setup() throws Exception {
 		earliestHdfFile = loadTestHdfFile(HDF5_TEST_EARLIEST_FILE_NAME);
+	}
+
+	@AfterAll
+	static void tearDown() {
+		earliestHdfFile.close();
 	}
 
 	@TestFactory

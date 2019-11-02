@@ -14,6 +14,7 @@ import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.object.datatype.EnumDataType;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
@@ -44,6 +45,12 @@ class EnumDatasetTest {
     static void setup() throws Exception {
         earliestHdfFile = loadTestHdfFile(ENUM_EARLIEST_TEST_FILE_NAME);
         latestHdfFile = loadTestHdfFile(ENUM_LATEST_TEST_FILE_NAME);
+    }
+
+    @AfterAll
+    static void tearDown() {
+        earliestHdfFile.close();
+        latestHdfFile.close();
     }
 
     @TestFactory

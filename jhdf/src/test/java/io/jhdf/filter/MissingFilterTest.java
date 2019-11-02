@@ -12,6 +12,7 @@ package io.jhdf.filter;
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
 import io.jhdf.exceptions.HdfFilterException;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +32,11 @@ class MissingFilterTest {
 	@BeforeAll
 	static void setup() throws Exception {
 		hdfFile = loadTestHdfFile(HDF5_TEST_FILE_NAME);
+	}
+
+	@AfterAll
+	static void tearDown() {
+		hdfFile.close();
 	}
 
 	@Test

@@ -11,6 +11,7 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
@@ -36,6 +37,11 @@ class ChunkedDatasetTest {
 	@BeforeAll
 	static void setup() throws Exception {
 		hdfFile = loadTestHdfFile(HDF5_TEST_FILE_NAME);
+	}
+
+	@AfterAll
+	static void tearDown() {
+		hdfFile.close();
 	}
 
 	@TestFactory

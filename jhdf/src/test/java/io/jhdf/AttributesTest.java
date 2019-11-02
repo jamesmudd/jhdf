@@ -11,6 +11,7 @@ package io.jhdf;
 
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Node;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
@@ -89,6 +90,12 @@ class AttributesTest {
 	static void setup() throws Exception {
 		earliestHdfFile = loadTestHdfFile(HDF5_TEST_EARLIEST_FILE_NAME);
 		latestHdfFile = loadTestHdfFile(HDF5_TEST_LATEST_FILE_NAME);
+	}
+
+	@AfterAll
+	static void tearDown() {
+		earliestHdfFile.close();
+		latestHdfFile.close();
 	}
 
 	@TestFactory

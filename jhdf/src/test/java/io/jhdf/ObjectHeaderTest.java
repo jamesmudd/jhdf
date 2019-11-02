@@ -46,8 +46,9 @@ class ObjectHeaderTest {
 	}
 
 	@AfterEach
-	void after() {
+	void after() throws IOException {
 		hdfFc.close();
+		fc.close();
 	}
 
 	@Test
