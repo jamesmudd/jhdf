@@ -31,7 +31,7 @@ class FractalHeapTest {
 
 	@BeforeEach
 	void setup() throws IOException {
-		String testFile = this.getClass().getResource("test_large_group_latest.hdf5").getFile();
+		String testFile = this.getClass().getResource("/hdf5/test_large_group_latest.hdf5").getFile();
 		try (RandomAccessFile raf = new RandomAccessFile(new File(testFile), "r")) {
 			FileChannel fc = raf.getChannel();
 			Superblock sb = Superblock.readSuperblock(fc, 0);

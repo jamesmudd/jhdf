@@ -16,10 +16,10 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
@@ -36,7 +36,7 @@ class LargeGroupTest {
 
 	private Executable createTest(String file) {
 		return () -> {
-			try (HdfFile hdfFile = new HdfFile(new File(this.getClass().getResource(file).getFile()))) {
+			try (HdfFile hdfFile = loadTestHdfFile(file)) {
 				Group largeGroup = (Group) hdfFile.getByPath("large_group");
 				assertThat(largeGroup.getChildren().size(), is(equalTo(1000)));
 

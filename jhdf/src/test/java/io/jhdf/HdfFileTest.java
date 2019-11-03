@@ -22,6 +22,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -40,16 +44,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class HdfFileTest {
 
 	private static final String HDF5_TEST_FILE_NAME = "test_file.hdf5";
+	private static final String HDF5_TEST_FILE_PATH = "/hdf5/" + HDF5_TEST_FILE_NAME;
 	private static final String HDF5_TEST_FILE_TWO_NAME = "test_file2.hdf5";
-	private static final String NON_HDF5_TEST_FILE_NAME = "make_test_files.py";
+	private static final String HDF5_TEST_FILE_TWO_PATH = "/hdf5/" + HDF5_TEST_FILE_TWO_NAME;
+	private static final String NON_HDF5_TEST_FILE_NAME = "/scripts/make_test_files.py";
 	private String testFileUrl;
 	private String nonHdfFile;
 	private String testFile2Url;
 
 	@BeforeEach
 	void setup() {
-		testFileUrl = this.getClass().getResource(HDF5_TEST_FILE_NAME).getFile();
-		testFile2Url = this.getClass().getResource(HDF5_TEST_FILE_TWO_NAME).getFile();
+		testFileUrl = this.getClass().getResource(HDF5_TEST_FILE_PATH).getFile();
+		testFile2Url = this.getClass().getResource(HDF5_TEST_FILE_TWO_PATH).getFile();
 		nonHdfFile = this.getClass().getResource(NON_HDF5_TEST_FILE_NAME).getFile();
 	}
 
@@ -254,6 +260,22 @@ class HdfFileTest {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			assertThat(hdfFile.isLinkCreationOrderTracked(), is(false));
 		}
+	}
+
+	@Test
+	void testURIConstructor() throws URISyntaxException {
+		URI uri = this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI();
+		HdfFile hdfFile = new HdfFile(uri);
+		assertThat(hdfFile.getFile(), is(notNullValue()));
+		hdfFile.close();
+	}
+
+	@Test
+	void testPathConstructor() throws URISyntaxException {
+		Path path = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI());
+		HdfFile hdfFile = new HdfFile(path);
+		assertThat(hdfFile.getFile(), is(notNullValue()));
+		hdfFile.close();
 	}
 
 }

@@ -12,6 +12,8 @@ package io.jhdf;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +21,14 @@ public final class TestUtils {
 
     private TestUtils() {
         throw new AssertionError("No instances of TestUtils");
+    }
+
+    public static HdfFile loadTestHdfFile(String fileName) throws Exception {
+        URL url = TestUtils.class.getResource("/hdf5/" + fileName);
+        if (url == null) {
+            throw new RuntimeException("Could not find test file named: " + fileName);
+        }
+        return new HdfFile(Paths.get(url.toURI()));
     }
 
     public static Object[] flatten(Object data) {

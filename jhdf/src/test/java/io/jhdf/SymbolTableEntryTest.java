@@ -29,7 +29,7 @@ class SymbolTableEntryTest {
 
 	@BeforeEach
     void setUp() throws URISyntaxException, IOException {
-		final URI testFileUri = this.getClass().getResource("test_file.hdf5").toURI();
+		final URI testFileUri = this.getClass().getResource("/hdf5/test_file.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
 		hdfFc = new HdfFileChannel(fc, sb);

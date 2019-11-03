@@ -10,6 +10,7 @@
 package io.jhdf;
 
 import io.jhdf.exceptions.HdfException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -25,9 +26,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class GlobalHeapTest {
@@ -38,12 +39,17 @@ class GlobalHeapTest {
 
 	@BeforeEach
 	void setup() throws IOException, URISyntaxException {
-		URI testFile = this.getClass().getResource("test_file.hdf5").toURI();
+		URI testFile = this.getClass().getResource("/hdf5/test_file.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFile), StandardOpenOption.READ);
 		sb = Superblock.readSuperblock(fc, 0);
 		hdfFc = new HdfFileChannel(fc, sb);
 
 		globalHeap = new GlobalHeap(hdfFc, 2048);
+	}
+
+	@AfterEach
+	void tearDown() {
+		hdfFc.close();
 	}
 
 	@Test
@@ -100,12 +106,10 @@ class GlobalHeapTest {
 	}
 
 	@Test
-	void testDifferentObjectZero() throws URISyntaxException {
-		URI testFile = this.getClass().getResource("globalheaps_test.hdf5").toURI();
-		try (HdfFile file = new HdfFile(Paths.get(testFile).toFile())) {
+	void testDifferentObjectZero() throws Exception {
+		HdfFile file = TestUtils.loadTestHdfFile("globalheaps_test.hdf5");
 			Object data = file.getAttribute("attribute").getData();
-			assertArrayEquals(new String[]{"value0", "value1", "value2", "value3", "value4", "value5", "value6", ""},
-					(String[]) data);
-		}
+			assertThat((String[]) data, is(arrayContaining(
+					"value0", "value1", "value2", "value3", "value4", "value5", "value6", "")));
 	}
 }

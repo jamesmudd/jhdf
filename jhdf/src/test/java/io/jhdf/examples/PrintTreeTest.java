@@ -15,12 +15,12 @@ class PrintTreeTest {
 
 	@Test
     void testOpeningV1File() {
-		PrintTree.main(new String[] { "src/test/resources/io/jhdf/test_file.hdf5" });
+		PrintTree.main(new String[] { "src/test/resources/hdf5/test_file.hdf5" });
 	}
 
 	@Test
     void testOpeningV2File() {
-		PrintTree.main(new String[] { "src/test/resources/io/jhdf/test_file2.hdf5" });
+		PrintTree.main(new String[] { "src/test/resources/hdf5/test_file2.hdf5" });
 	}
 
 }

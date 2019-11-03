@@ -298,4 +298,31 @@ public final class Utils {
         }
         return linear;
     }
+
+	/**
+	 * Calculates the chunk offset from a given chunk index
+	 *
+	 * @param chunkIndex The index to calculate for
+	 * @param chunkDimensions The chunk dimensions
+	 * @param datasetDimensions The dataset dimensions
+	 * @return The chunk offset for the chunk of this index
+	 */
+    public static int[] chunkIndexToChunkOffset(int chunkIndex, int[] chunkDimensions, int[] datasetDimensions) {
+		final int[] chunkOffset = new int[chunkDimensions.length];
+
+		// Start from the slowest dim
+		for (int i = 0; i < chunkOffset.length; i++) {
+			// Find out how many chunks make one chunk in this dim
+			int chunksBelowThisDim = 1;
+			// Start one dim faster
+			for (int j = i+ 1; j < chunkOffset.length; j++) {
+				chunksBelowThisDim *= (int) Math.ceil((double) datasetDimensions[j] / chunkDimensions[j]);
+			}
+
+			chunkOffset[i] = (chunkIndex / chunksBelowThisDim ) * chunkDimensions[i];
+			chunkIndex -= chunkOffset[i]/chunkDimensions[i] * chunksBelowThisDim;
+		}
+
+		return chunkOffset;
+	}
 }

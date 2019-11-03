@@ -9,12 +9,13 @@
  */
 package io.jhdf;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.nio.ByteBuffer;
 
+import static io.jhdf.TestUtils.loadTestHdfFile;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -30,11 +31,15 @@ class UserBlockTest {
 	private static HdfFile latestHdfFile;
 
 	@BeforeAll
-	static void setup() {
-		String earliestTestFileUrl = UserBlockTest.class.getResource(HDF5_TEST_EARLIEST_FILE_NAME).getFile();
-		earliestHdfFile = new HdfFile(new File(earliestTestFileUrl));
-		String latestTestFileUrl = UserBlockTest.class.getResource(HDF5_TEST_LATEST_FILE_NAME).getFile();
-		latestHdfFile = new HdfFile(new File(latestTestFileUrl));
+	static void setup() throws Exception {
+		earliestHdfFile = loadTestHdfFile(HDF5_TEST_EARLIEST_FILE_NAME);
+		latestHdfFile = loadTestHdfFile(HDF5_TEST_LATEST_FILE_NAME);
+	}
+
+	@AfterAll
+	static void tearDown() {
+		earliestHdfFile.close();
+		latestHdfFile.close();
 	}
 
 	@Test

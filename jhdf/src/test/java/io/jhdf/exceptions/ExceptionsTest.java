@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 
-public class ExceptionsTest {
+class ExceptionsTest {
 
 	private static final String TEST_MESSAGE = "test message";
 

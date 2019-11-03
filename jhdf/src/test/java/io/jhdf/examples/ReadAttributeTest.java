@@ -15,12 +15,12 @@ class ReadAttributeTest {
 
     @Test
     void testReadingAttributeEarliest() {
-        ReadAttribute.main(new String[]{"src/test/resources/io/jhdf/test_attribute_earliest.hdf5", "/test_group/data", "2d_string"});
+        ReadAttribute.main(new String[]{"src/test/resources/hdf5/test_attribute_earliest.hdf5", "/test_group/data", "2d_string"});
     }
 
     @Test
     void testReadingAttributeLatest() {
-		ReadAttribute.main(new String[]{"src/test/resources/io/jhdf/test_attribute_latest.hdf5", "/test_group/data", "2d_string"});
+		ReadAttribute.main(new String[]{"src/test/resources/hdf5/test_attribute_latest.hdf5", "/test_group/data", "2d_string"});
     }
 
 }
