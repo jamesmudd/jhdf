@@ -16,7 +16,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.BitSet;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
