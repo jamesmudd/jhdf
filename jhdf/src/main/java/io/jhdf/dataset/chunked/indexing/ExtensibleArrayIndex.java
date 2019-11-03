@@ -46,7 +46,6 @@ public class ExtensibleArrayIndex implements ChunkIndex {
     private final long headerAddress;
     private final int clientId;
     private final boolean filtered; // If the chunks have filters applied
-    private final int elementSize;
     private final int numberOfElementsInIndexBlock;
     private final int numberOfElements;
     private final int numberOfSecondaryBlocks;
@@ -56,8 +55,9 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
     private final List<Chunk> chunks;
     private final int unfilteredChunkSize;
-    private final int elementsPerChunk;
     private final int[] datasetDimensions;
+    private final int[] chunkDimensions;
+
     private final int minNumberOfElementsInDataBlock;
     private final ExtensibleArrayCounter dataBlockElementCounter;
     private final int minNumberOfDataBlockPointers;
@@ -67,12 +67,11 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
     private int elementCounter = 0;
 
-    public ExtensibleArrayIndex(HdfFileChannel hdfFc, long address, int chunkSizeInBytes, int elementSize, int[] dimensions) {
+    public ExtensibleArrayIndex(HdfFileChannel hdfFc, long address, int chunkSizeInBytes, int[] datasetDimensions, int[] chunkDimensions) {
         this.headerAddress = address;
         this.unfilteredChunkSize = chunkSizeInBytes;
-        this.elementSize = elementSize;
-        this.elementsPerChunk = unfilteredChunkSize / elementSize;
-        this.datasetDimensions = dimensions;
+        this.datasetDimensions = datasetDimensions;
+        this.chunkDimensions = chunkDimensions;
 
         final int headerSize = 16 + hdfFc.getSizeOfOffsets() + 6 * hdfFc.getSizeOfLengths();
         final ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
@@ -287,7 +286,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
         private boolean readElement(ByteBuffer bb, HdfFileChannel hdfFc) {
             final long chunkAddress = readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
             if (chunkAddress != UNDEFINED_ADDRESS) {
-                final int[] chunkOffset = Utils.linearIndexToDimensionIndex(elementCounter * elementsPerChunk, datasetDimensions);
+                final int[] chunkOffset = Utils.chunkIndexToChunkOffset(elementCounter, chunkDimensions, datasetDimensions);
                 if (filtered) { // Filtered
                     final int chunkSizeInBytes = Utils.readBytesAsUnsignedInt(bb, extensibleArrayElementSize - hdfFc.getSizeOfOffsets() - 4);
                     final BitSet filterMask = BitSet.valueOf(new byte[] { bb.get(), bb.get(), bb.get(), bb.get() });

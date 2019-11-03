@@ -10,9 +10,14 @@
 package io.jhdf;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
+import java.util.stream.Stream;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
@@ -340,4 +345,55 @@ class UtilsTest {
 		assertThrows(IllegalArgumentException.class, () -> Utils.bytesNeededToHoldNumber(-123));
 	}
 
+	@ParameterizedTest
+	@MethodSource("chunkIndexToChunkOffsetTestCases")
+	void test(int chunkIndex, int[] chunkDimensions, int[] datasetDimensions, int[] expectedChunkOffset) {
+		assertThat(Utils.chunkIndexToChunkOffset(chunkIndex, chunkDimensions, datasetDimensions), is(equalTo(expectedChunkOffset)));
+	}
+
+	private static Stream<Arguments> chunkIndexToChunkOffsetTestCases() {
+		return Stream.of(
+				//1D
+				Arguments.of(0, new int[]{2}, new int[]{5}, new int[] {0}),
+				Arguments.of(1, new int[]{2}, new int[]{5}, new int[] {2}),
+				Arguments.of(2, new int[]{2}, new int[]{5}, new int[] {4}),
+				Arguments.of(3, new int[]{2}, new int[]{5}, new int[] {6}), // This is outside the data
+
+				// 2D
+				// Mismatched in both directions i.e dataset dims not a multiple of chunk dims
+				Arguments.of(0, new int[]{2,3}, new int[]{7,5}, new int[] {0,0}),
+				Arguments.of(1, new int[]{2,3}, new int[]{7,5}, new int[] {0,3}),
+				Arguments.of(2, new int[]{2,3}, new int[]{7,5}, new int[] {2,0}),
+				Arguments.of(3, new int[]{2,3}, new int[]{7,5}, new int[] {2,3}),
+				Arguments.of(4, new int[]{2,3}, new int[]{7,5}, new int[] {4,0}),
+				Arguments.of(5, new int[]{2,3}, new int[]{7,5}, new int[] {4,3}),
+				Arguments.of(6, new int[]{2,3}, new int[]{7,5}, new int[] {6,0}),
+				Arguments.of(7, new int[]{2,3}, new int[]{7,5}, new int[] {6,3}), // This is outside the data
+
+				// Matched in both dims
+				Arguments.of(0, new int[]{3,5}, new int[]{9,20}, new int[] {0,0}),
+				Arguments.of(1, new int[]{3,5}, new int[]{9,20}, new int[] {0,5}),
+				Arguments.of(2, new int[]{3,5}, new int[]{9,20}, new int[] {0,10}),
+				Arguments.of(3, new int[]{3,5}, new int[]{9,20}, new int[] {0,15}),
+				Arguments.of(4, new int[]{3,5}, new int[]{9,20}, new int[] {3,0}),
+				Arguments.of(5, new int[]{3,5}, new int[]{9,20}, new int[] {3,5}),
+				Arguments.of(6, new int[]{3,5}, new int[]{9,20}, new int[] {3,10}),
+				Arguments.of(7, new int[]{3,5}, new int[]{9,20}, new int[] {3,15}),
+				Arguments.of(8, new int[]{3,5}, new int[]{9,20}, new int[] {6,0}),
+				Arguments.of(9, new int[]{3,5}, new int[]{9,20}, new int[] {6,5}),
+				Arguments.of(10, new int[]{3,5}, new int[]{9,20}, new int[] {6,10}),
+				Arguments.of(11, new int[]{3,5}, new int[]{9,20}, new int[] {6,15}),
+
+				// 3D
+				Arguments.of(0, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {0,0,0}),
+				Arguments.of(1, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {0,0,4}),
+				Arguments.of(2, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {0,3,0}),
+				Arguments.of(3, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {0,3,4}),
+				Arguments.of(4, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {2,0,0}),
+				Arguments.of(5, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {2,0,4}),
+				Arguments.of(6, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {2,3,0}),
+				Arguments.of(7, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {2,3,4}),
+				Arguments.of(8, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {4,0,0})
+		);
+	}
 }

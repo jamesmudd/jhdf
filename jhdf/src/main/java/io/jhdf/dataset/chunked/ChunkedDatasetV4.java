@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static java.util.Collections.singletonList;
-
 public class ChunkedDatasetV4 extends ChunkedDatasetBase {
     private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetV4.class);
 
@@ -60,11 +58,11 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
                 throw new UnsupportedHdfException("Implicit indexing is currently not supported");
             case 3: // Fixed array
                 logger.debug("Reading fixed array indexed dataset");
-                chunkIndex = new FixedArrayIndex(hdfFc, layoutMessage.getAddress(), getChunkSizeInBytes(), getDataType().getSize(), getDimensions());
+                chunkIndex = new FixedArrayIndex(hdfFc, layoutMessage.getAddress(), getChunkSizeInBytes(), getDimensions(), getChunkDimensions());
                 break;
             case 4: // Extensible Array
                 logger.debug("Reading extensible array indexed dataset");
-                chunkIndex = new ExtensibleArrayIndex(hdfFc, layoutMessage.getAddress(), getChunkSizeInBytes(), getDataType().getSize(), getDimensions());
+                chunkIndex = new ExtensibleArrayIndex(hdfFc, layoutMessage.getAddress(), getChunkSizeInBytes(), getDimensions(), getChunkDimensions());
                 break;
             case 5: // B Tree V2
                 throw new UnsupportedHdfException("B Tree V2");
