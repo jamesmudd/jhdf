@@ -40,8 +40,6 @@ if __name__ == '__main__':
     write_chunked_datasets(f)
     print('created test_chunked_datasets_earliest.hdf5')
 
-# Start working just on 1.8 files first
-#     f = h5py.File('test_chunked_datasets_latest.hdf5', 'w', libver='latest')
-#     write_chunked_datasets(f)
-#     print('created test_chunked_datasets_latest.hdf5')
-    
+    f = h5py.File('test_chunked_datasets_latest.hdf5', 'w', libver='latest')
+    write_chunked_datasets(f)
+    print('created test_chunked_datasets_latest.hdf5')
