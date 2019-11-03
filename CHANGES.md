@@ -1,5 +1,14 @@
 # jHDF Change Log
 
+## v0.5.1
+- Fix bug in chunked v4 datasets (added in v0.5.0) where incorrect data was returned if, fixed array or extensible array indexing was used and the dataset dimensions were not a multiple of the chunk dimensions.
+- Adds support for enum datasets (which are returned in string form) https://github.com/jamesmudd/jhdf/issues/121
+- Adds HdfFile convenience constructors for URI and Path
+- Fix https://github.com/jamesmudd/jhdf/issues/125
+- Update dependencies
+- Refactors test files to separate HDF5 files from scrips.
+- Improvements to test coverage.
+
 ## v0.5.0
 - Adds support for some types (the most common) of chunked v4 datasets:
   - Single chunk
