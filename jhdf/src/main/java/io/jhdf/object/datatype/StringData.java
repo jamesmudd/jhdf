@@ -16,20 +16,40 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Data type representing strings.
+ *
+ * @author James Mudd
+ */
 public class StringData extends DataType {
 
-	private final boolean nullTerminated;
-	private final boolean nullPad;
-	private final boolean spacePad;
+	private final PaddingType paddingType;
 
 	private final Charset charset;
+
+	public enum PaddingType {
+		NULL_TERMINATED,
+		NULL_PADDED,
+		SPACE_PADDED
+	}
 
 	public StringData(ByteBuffer bb) {
 		super(bb);
 
-		nullTerminated = classBits.get(0);
-		nullPad = classBits.get(1);
-		spacePad = classBits.get(2);
+		int paddingTypeValue = Utils.bitsToInt(classBits, 0, 4);
+		switch (paddingTypeValue) {
+			case 0:
+				paddingType = PaddingType.NULL_TERMINATED;
+				break;
+			case 1:
+				paddingType = PaddingType.NULL_PADDED;
+				break;
+			case 2:
+				paddingType = PaddingType.SPACE_PADDED;
+				break;
+			default:
+				throw new HdfException("Unreconized padding type. Value is: " + paddingTypeValue);
+		}
 
 		final int charsetIndex = Utils.bitsToInt(classBits, 4, 4);
 		switch (charsetIndex) {
@@ -44,16 +64,8 @@ public class StringData extends DataType {
 		}
 	}
 
-	public boolean isNullTerminated() {
-		return nullTerminated;
-	}
-
-	public boolean isNullPad() {
-		return nullPad;
-	}
-
-	public boolean isSpacePad() {
-		return spacePad;
+	public PaddingType getPaddingType() {
+		return paddingType;
 	}
 
 	public Charset getCharset() {
@@ -61,14 +73,15 @@ public class StringData extends DataType {
 	}
 
 	@Override
-	public String toString() {
-		return "StringData [nullTerminated=" + nullTerminated + ", nullPad=" + nullPad + ", spacePad=" + spacePad
-				+ ", charset=" + charset + "]";
-	}
-
-	@Override
 	public Class<?> getJavaType() {
 		return String.class;
 	}
 
+	@Override
+	public String toString() {
+		return "StringData{" +
+				"paddingType=" + paddingType +
+				", charset=" + charset +
+				'}';
+	}
 }
