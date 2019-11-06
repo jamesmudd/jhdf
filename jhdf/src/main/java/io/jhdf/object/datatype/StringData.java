@@ -28,9 +28,15 @@ public class StringData extends DataType {
 	private final Charset charset;
 
 	public enum PaddingType {
-		NULL_TERMINATED,
-		NULL_PADDED,
-		SPACE_PADDED
+		NULL_TERMINATED(new NullTerminated()),
+		NULL_PADDED(new NullPadded()),
+		SPACE_PADDED(new SpacePadded());
+
+		private final StringPaddingHandler stringPaddingHandler;
+
+		PaddingType(StringPaddingHandler stringPaddingHandler) {
+			this.stringPaddingHandler = stringPaddingHandler;
+		}
 	}
 
 	public StringData(ByteBuffer bb) {
@@ -68,6 +74,10 @@ public class StringData extends DataType {
 		return paddingType;
 	}
 
+	public StringPaddingHandler getStringPaddingHandler() {
+		return paddingType.stringPaddingHandler;
+	}
+
 	public Charset getCharset() {
 		return charset;
 	}
@@ -75,6 +85,46 @@ public class StringData extends DataType {
 	@Override
 	public Class<?> getJavaType() {
 		return String.class;
+	}
+
+	public interface StringPaddingHandler {
+		void setBufferLimit(ByteBuffer byteBuffer);
+	}
+
+	private static class NullTerminated implements StringPaddingHandler {
+		@Override
+		public void setBufferLimit(ByteBuffer byteBuffer) {
+			int i = 0;
+			while (byteBuffer.get(i) != Constants.NULL) {
+				i++;
+			}
+			// Set the limit to terminate before the null
+			byteBuffer.limit(i);
+		}
+	}
+
+	private static class NullPadded implements StringPaddingHandler {
+		@Override
+		public void setBufferLimit(ByteBuffer byteBuffer) {
+			int i = byteBuffer.limit() - 1;
+			while (byteBuffer.get(i) == Constants.NULL) {
+				i--;
+			}
+			// Set the limit to terminate before the nulls
+			byteBuffer.limit(i + 1);
+		}
+	}
+
+	private static class SpacePadded implements StringPaddingHandler {
+		@Override
+		public void setBufferLimit(ByteBuffer byteBuffer) {
+			int i = byteBuffer.limit() - 1;
+			while (byteBuffer.get(i) == (byte) ' ') {
+				i--;
+			}
+			// Set the limit to terminate before the spaces
+			byteBuffer.limit(i + 1);
+		}
 	}
 
 	@Override
