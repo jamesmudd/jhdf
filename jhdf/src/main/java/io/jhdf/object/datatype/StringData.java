@@ -42,7 +42,7 @@ public class StringData extends DataType {
 	public StringData(ByteBuffer bb) {
 		super(bb);
 
-		int paddingTypeValue = Utils.bitsToInt(classBits, 0, 4);
+		final int paddingTypeValue = Utils.bitsToInt(classBits, 0, 4);
 		switch (paddingTypeValue) {
 			case 0:
 				paddingType = PaddingType.NULL_TERMINATED;
@@ -54,7 +54,7 @@ public class StringData extends DataType {
 				paddingType = PaddingType.SPACE_PADDED;
 				break;
 			default:
-				throw new HdfException("Unreconized padding type. Value is: " + paddingTypeValue);
+				throw new HdfException("Unrecognized padding type. Value is: " + paddingTypeValue);
 		}
 
 		final int charsetIndex = Utils.bitsToInt(classBits, 4, 4);
@@ -91,7 +91,7 @@ public class StringData extends DataType {
 		void setBufferLimit(ByteBuffer byteBuffer);
 	}
 
-	private static class NullTerminated implements StringPaddingHandler {
+	/*package */ static class NullTerminated implements StringPaddingHandler {
 		@Override
 		public void setBufferLimit(ByteBuffer byteBuffer) {
 			int i = 0;
@@ -103,7 +103,7 @@ public class StringData extends DataType {
 		}
 	}
 
-	private static class NullPadded implements StringPaddingHandler {
+	/*package */ static class NullPadded implements StringPaddingHandler {
 		@Override
 		public void setBufferLimit(ByteBuffer byteBuffer) {
 			int i = byteBuffer.limit() - 1;
@@ -115,7 +115,7 @@ public class StringData extends DataType {
 		}
 	}
 
-	private static class SpacePadded implements StringPaddingHandler {
+	/*package */ static class SpacePadded implements StringPaddingHandler {
 		@Override
 		public void setBufferLimit(ByteBuffer byteBuffer) {
 			int i = byteBuffer.limit() - 1;
