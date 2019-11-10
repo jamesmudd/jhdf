@@ -16,6 +16,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import static io.jhdf.Constants.NULL;
+import static io.jhdf.Constants.SPACE;
+
 /**
  * Data type representing strings.
  *
@@ -95,7 +98,7 @@ public class StringData extends DataType {
 		@Override
 		public void setBufferLimit(ByteBuffer byteBuffer) {
 			int i = 0;
-			while (byteBuffer.get(i) != Constants.NULL) {
+			while (byteBuffer.get(i) != NULL) {
 				i++;
 			}
 			// Set the limit to terminate before the null
@@ -107,7 +110,7 @@ public class StringData extends DataType {
 		@Override
 		public void setBufferLimit(ByteBuffer byteBuffer) {
 			int i = byteBuffer.limit() - 1;
-			while (byteBuffer.get(i) == Constants.NULL) {
+			while (byteBuffer.get(i) == NULL) {
 				i--;
 			}
 			// Set the limit to terminate before the nulls
@@ -119,7 +122,7 @@ public class StringData extends DataType {
 		@Override
 		public void setBufferLimit(ByteBuffer byteBuffer) {
 			int i = byteBuffer.limit() - 1;
-			while (byteBuffer.get(i) == (byte) ' ') {
+			while (byteBuffer.get(i) == SPACE) {
 				i--;
 			}
 			// Set the limit to terminate before the spaces

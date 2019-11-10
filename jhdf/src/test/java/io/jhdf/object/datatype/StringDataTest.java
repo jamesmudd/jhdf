@@ -1,3 +1,12 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright 2019 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
 package io.jhdf.object.datatype;
 
 import io.jhdf.Constants;
@@ -14,7 +23,7 @@ import static org.hamcrest.Matchers.is;
 
 class StringDataTest {
 
-    private static final char nullAsChar = (char) Constants.NULL;
+    private static final char NULL_AS_CHAR = (char) Constants.NULL;
 
     @Test
     void testNullTerminated() {
@@ -53,7 +62,7 @@ class StringDataTest {
         assertThat(byteBuffer.limit(), is(11)); // hello + null + again is 11 chars
 
         // Read the string back and check the value
-        assertThat(US_ASCII.decode(byteBuffer).toString(), is("hello" + nullAsChar + "again"));
+        assertThat(US_ASCII.decode(byteBuffer).toString(), is("hello" + NULL_AS_CHAR + "again"));
 
     }
 
