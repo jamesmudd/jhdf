@@ -9,9 +9,17 @@
  */
 package io.jhdf;
 
+/**
+ * Constants used in HDF5 files
+ *
+ * @author James Mudd
+ */
 public final class Constants {
 
 	public static final byte NULL = '\0';
+
+	public static final byte SPACE = ' ';
+
 	/** All bits on */
 	public static final long UNDEFINED_ADDRESS = -1L;
 

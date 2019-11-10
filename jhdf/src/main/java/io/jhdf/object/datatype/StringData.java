@@ -16,20 +16,49 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import static io.jhdf.Constants.NULL;
+import static io.jhdf.Constants.SPACE;
+
+/**
+ * Data type representing strings.
+ *
+ * @author James Mudd
+ */
 public class StringData extends DataType {
 
-	private final boolean nullTerminated;
-	private final boolean nullPad;
-	private final boolean spacePad;
+	private final PaddingType paddingType;
 
 	private final Charset charset;
+
+	public enum PaddingType {
+		NULL_TERMINATED(new NullTerminated()),
+		NULL_PADDED(new NullPadded()),
+		SPACE_PADDED(new SpacePadded());
+
+		private final StringPaddingHandler stringPaddingHandler;
+
+		PaddingType(StringPaddingHandler stringPaddingHandler) {
+			this.stringPaddingHandler = stringPaddingHandler;
+		}
+	}
 
 	public StringData(ByteBuffer bb) {
 		super(bb);
 
-		nullTerminated = classBits.get(0);
-		nullPad = classBits.get(1);
-		spacePad = classBits.get(2);
+		final int paddingTypeValue = Utils.bitsToInt(classBits, 0, 4);
+		switch (paddingTypeValue) {
+			case 0:
+				paddingType = PaddingType.NULL_TERMINATED;
+				break;
+			case 1:
+				paddingType = PaddingType.NULL_PADDED;
+				break;
+			case 2:
+				paddingType = PaddingType.SPACE_PADDED;
+				break;
+			default:
+				throw new HdfException("Unrecognized padding type. Value is: " + paddingTypeValue);
+		}
 
 		final int charsetIndex = Utils.bitsToInt(classBits, 4, 4);
 		switch (charsetIndex) {
@@ -44,16 +73,12 @@ public class StringData extends DataType {
 		}
 	}
 
-	public boolean isNullTerminated() {
-		return nullTerminated;
+	public PaddingType getPaddingType() {
+		return paddingType;
 	}
 
-	public boolean isNullPad() {
-		return nullPad;
-	}
-
-	public boolean isSpacePad() {
-		return spacePad;
+	public StringPaddingHandler getStringPaddingHandler() {
+		return paddingType.stringPaddingHandler;
 	}
 
 	public Charset getCharset() {
@@ -61,14 +86,55 @@ public class StringData extends DataType {
 	}
 
 	@Override
-	public String toString() {
-		return "StringData [nullTerminated=" + nullTerminated + ", nullPad=" + nullPad + ", spacePad=" + spacePad
-				+ ", charset=" + charset + "]";
-	}
-
-	@Override
 	public Class<?> getJavaType() {
 		return String.class;
 	}
 
+	public interface StringPaddingHandler {
+		void setBufferLimit(ByteBuffer byteBuffer);
+	}
+
+	/*package */ static class NullTerminated implements StringPaddingHandler {
+		@Override
+		public void setBufferLimit(ByteBuffer byteBuffer) {
+			int i = 0;
+			while (byteBuffer.get(i) != NULL) {
+				i++;
+			}
+			// Set the limit to terminate before the null
+			byteBuffer.limit(i);
+		}
+	}
+
+	/*package */ static class NullPadded implements StringPaddingHandler {
+		@Override
+		public void setBufferLimit(ByteBuffer byteBuffer) {
+			int i = byteBuffer.limit() - 1;
+			while (byteBuffer.get(i) == NULL) {
+				i--;
+			}
+			// Set the limit to terminate before the nulls
+			byteBuffer.limit(i + 1);
+		}
+	}
+
+	/*package */ static class SpacePadded implements StringPaddingHandler {
+		@Override
+		public void setBufferLimit(ByteBuffer byteBuffer) {
+			int i = byteBuffer.limit() - 1;
+			while (byteBuffer.get(i) == SPACE) {
+				i--;
+			}
+			// Set the limit to terminate before the spaces
+			byteBuffer.limit(i + 1);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return "StringData{" +
+				"paddingType=" + paddingType +
+				", charset=" + charset +
+				'}';
+	}
 }
