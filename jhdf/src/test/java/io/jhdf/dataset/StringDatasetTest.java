@@ -10,6 +10,7 @@
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
+import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.object.datatype.StringData;
 import io.jhdf.object.datatype.VariableLength;
@@ -40,19 +41,22 @@ class StringDatasetTest {
 	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "test_string_datasets_earliest.hdf5";
 	private static final String HDF5_TEST_LATEST_FILE_NAME = "test_string_datasets_latest.hdf5";
 	private static final String HDF5_UTF8_FIXED = "utf8-fixed-length.hdf5";
-	private static final String HKDF5_UTF8_VARIABLE_LENGTH_REUSED = "var-length-strings-reused.hdf5";
+	private static final String HDF5_UTF8_VARIABLE_LENGTH_REUSED = "var-length-strings-reused.hdf5";
+	private static final String HDF5_STRING_PADDED_DATASET = "space_padding_problem.hdf5";
 
 	private static HdfFile earliestHdfFile;
 	private static HdfFile latestHdfFile;
 	private static HdfFile utf8FixedHdfFile;
 	private static HdfFile utf8VariableLengthReusedHdfFile;
+	private static HdfFile stringPaddedHdfFile;
 
 	@BeforeAll
 	static void setup() throws Exception {
 		earliestHdfFile = loadTestHdfFile(HDF5_TEST_EARLIEST_FILE_NAME);
 		latestHdfFile = loadTestHdfFile(HDF5_TEST_LATEST_FILE_NAME);
 		utf8FixedHdfFile = loadTestHdfFile(HDF5_UTF8_FIXED);
-		utf8VariableLengthReusedHdfFile = loadTestHdfFile(HKDF5_UTF8_VARIABLE_LENGTH_REUSED);
+		utf8VariableLengthReusedHdfFile = loadTestHdfFile(HDF5_UTF8_VARIABLE_LENGTH_REUSED);
+		stringPaddedHdfFile = loadTestHdfFile(HDF5_STRING_PADDED_DATASET);
 	}
 
 	@AfterAll
@@ -61,6 +65,7 @@ class StringDatasetTest {
 		latestHdfFile.close();
 		utf8FixedHdfFile.close();
 		utf8VariableLengthReusedHdfFile.close();
+		stringPaddedHdfFile.close();
 	}
 
 	@TestFactory
@@ -174,5 +179,13 @@ class StringDatasetTest {
 				"att-0-value-1",
 				"NULL",
 				"NULL")));
+	}
+
+	@Test // https://github.com/jamesmudd/jhdf/issues/124
+	void testStringPaddedDataset() {
+		Attribute attribute = stringPaddedHdfFile.getAttribute("Test");
+		Object data = attribute.getData();
+		String[] stringData = (String[]) data;
+		assertThat(stringData, is(arrayContaining("a")));
 	}
 }

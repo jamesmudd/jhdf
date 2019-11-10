@@ -133,7 +133,8 @@ public final class DatasetReader {
 		} else if (type instanceof StringData) {
 			final int stringLength = type.getSize();
 			final Charset charset = ((StringData) type).getCharset();
-			fillFixedLengthStringData(data, dimensions, buffer, stringLength, charset);
+			final StringData.StringPaddingHandler stringPaddingHandler = ((StringData) type).getStringPaddingHandler();
+			fillFixedLengthStringData(data, dimensions, buffer, stringLength, charset, stringPaddingHandler);
 		} else if (type instanceof Reference) {
 			//reference type handles addresses, which are always longs for this library
 			int size = type.getSize();
@@ -328,17 +329,18 @@ public final class DatasetReader {
 
 	// String Data
 
-	private static void fillFixedLengthStringData(Object data, int[] dims, ByteBuffer buffer, int stringLength, Charset charset) {
+	private static void fillFixedLengthStringData(Object data, int[] dims, ByteBuffer buffer, int stringLength, Charset charset, StringData.StringPaddingHandler stringPaddingHandler) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillFixedLengthStringData(newArray, stripLeadingIndex(dims), buffer, stringLength, charset);
+				fillFixedLengthStringData(newArray, stripLeadingIndex(dims), buffer, stringLength, charset, stringPaddingHandler);
 			}
 		} else {
 			for (int i = 0; i < dims[0]; i++) {
 				buffer.position(i * stringLength);
 				ByteBuffer elementBuffer = Utils.createSubBuffer(buffer, stringLength);
-				Array.set(data, i, charset.decode(elementBuffer).toString().trim());
+				stringPaddingHandler.setBufferLimit(elementBuffer);
+				Array.set(data, i, charset.decode(elementBuffer).toString());
 			}
 		}
 	}
