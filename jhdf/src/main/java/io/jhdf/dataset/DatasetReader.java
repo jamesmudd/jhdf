@@ -337,7 +337,6 @@ public final class DatasetReader {
 			}
 		} else {
 			for (int i = 0; i < dims[0]; i++) {
-				buffer.position(i * stringLength);
 				ByteBuffer elementBuffer = Utils.createSubBuffer(buffer, stringLength);
 				stringPaddingHandler.setBufferLimit(elementBuffer);
 				Array.set(data, i, charset.decode(elementBuffer).toString());
