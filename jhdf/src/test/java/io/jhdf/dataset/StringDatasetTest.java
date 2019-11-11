@@ -28,6 +28,7 @@ import static io.jhdf.TestUtils.flatten;
 import static io.jhdf.TestUtils.getDimensions;
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.equalTo;
@@ -43,12 +44,14 @@ class StringDatasetTest {
 	private static final String HDF5_UTF8_FIXED = "utf8-fixed-length.hdf5";
 	private static final String HDF5_UTF8_VARIABLE_LENGTH_REUSED = "var-length-strings-reused.hdf5";
 	private static final String HDF5_STRING_PADDED_DATASET = "space_padding_problem.hdf5";
+	private static final String HDF5_MULTI_DIM_FIXED_LENGTH_STRING_DATASET = "multidim_string_datasest.hdf5";
 
 	private static HdfFile earliestHdfFile;
 	private static HdfFile latestHdfFile;
 	private static HdfFile utf8FixedHdfFile;
 	private static HdfFile utf8VariableLengthReusedHdfFile;
 	private static HdfFile stringPaddedHdfFile;
+	private static HdfFile multiDimDatasetHdfFile;
 
 	@BeforeAll
 	static void setup() throws Exception {
@@ -57,6 +60,7 @@ class StringDatasetTest {
 		utf8FixedHdfFile = loadTestHdfFile(HDF5_UTF8_FIXED);
 		utf8VariableLengthReusedHdfFile = loadTestHdfFile(HDF5_UTF8_VARIABLE_LENGTH_REUSED);
 		stringPaddedHdfFile = loadTestHdfFile(HDF5_STRING_PADDED_DATASET);
+		multiDimDatasetHdfFile = loadTestHdfFile(HDF5_MULTI_DIM_FIXED_LENGTH_STRING_DATASET);
 	}
 
 	@AfterAll
@@ -66,6 +70,7 @@ class StringDatasetTest {
 		utf8FixedHdfFile.close();
 		utf8VariableLengthReusedHdfFile.close();
 		stringPaddedHdfFile.close();
+		multiDimDatasetHdfFile.close();
 	}
 
 	@TestFactory
@@ -187,5 +192,20 @@ class StringDatasetTest {
 		Object data = attribute.getData();
 		String[] stringData = (String[]) data;
 		assertThat(stringData, is(arrayContaining("a")));
+	}
+
+	@Test
+	void testMultiDimensionalFixedLengthDataset() {
+		Dataset dataset = multiDimDatasetHdfFile.getDatasetByPath("test");
+		assertThat(toObject(dataset.getDimensions()), is(arrayContaining(3, 2)));
+
+		Object data = dataset.getData();
+		assertThat(toObject(getDimensions(data)), is(arrayContaining(3, 2)));
+
+		Object[] flatData = flatten(data);
+		assertThat(flatData, is(arrayContaining(
+				"a1", "a2",
+				"a3", "a4",
+				"a5", "a6")));
 	}
 }
