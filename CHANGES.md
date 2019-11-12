@@ -1,5 +1,9 @@
 # jHDF Change Log
 
+## v0.5.2
+- Fix https://github.com/jamesmudd/jhdf/issues/124 String padding not handled correctly.
+- Fix https://github.com/jamesmudd/jhdf/issues/132 Multi dimensional fixed length string datasets read incorrectly.
+
 ## v0.5.1
 - Fix bug in chunked v4 datasets (added in v0.5.0) where incorrect data was returned if, fixed array or extensible array indexing was used and the dataset dimensions were not a multiple of the chunk dimensions.
 - Adds support for enum datasets (which are returned in string form) https://github.com/jamesmudd/jhdf/issues/121
