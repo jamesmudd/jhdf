@@ -12,6 +12,7 @@ package io.jhdf.btree;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.btree.record.BTreeRecord;
+import io.jhdf.dataset.chunked.DatasetInfo;
 import io.jhdf.exceptions.HdfException;
 
 import java.math.BigInteger;
@@ -20,7 +21,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.jhdf.Utils.createSubBuffer;
 import static io.jhdf.Utils.readBytesAsUnsignedInt;
+import static io.jhdf.Utils.readBytesAsUnsignedLong;
+import static io.jhdf.btree.record.BTreeRecord.readRecord;
 
 public class BTreeV2<T extends BTreeRecord> {
 
@@ -33,7 +37,7 @@ public class BTreeV2<T extends BTreeRecord> {
 	/** The location of this B tree in the file */
 	private final long address;
 	/** Type of node. */
-	private final short nodeType;
+	private final int nodeType;
 	/** The records in this b-tree */
 	private final List<T> records;
 	/** bytes in each node */
@@ -46,6 +50,10 @@ public class BTreeV2<T extends BTreeRecord> {
 	}
 
 	public BTreeV2(HdfFileChannel hdfFc, long address) {
+		this(hdfFc, address, null);
+	}
+
+	public BTreeV2(HdfFileChannel hdfFc, long address, DatasetInfo datasetInfo) {
 		this.address = address;
 		try {
 			// B Tree V2 Header
@@ -65,6 +73,10 @@ public class BTreeV2<T extends BTreeRecord> {
 			}
 
 			nodeType = bb.get();
+			if((nodeType == 10 || nodeType == 11) && datasetInfo == null) {
+				throw new HdfException("datasetInfo not set when building chunk B tree");
+			}
+
 			nodeSize = Utils.readBytesAsUnsignedInt(bb, 4);
 			recordSize = Utils.readBytesAsUnsignedInt(bb, 2);
 			final int depth = Utils.readBytesAsUnsignedInt(bb, 2);
@@ -72,16 +84,16 @@ public class BTreeV2<T extends BTreeRecord> {
 			final int splitPercent = Utils.readBytesAsUnsignedInt(bb, 1);
 			final int mergePercent = Utils.readBytesAsUnsignedInt(bb, 1);
 
-			final long rootNodeAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
+			final long rootNodeAddress = readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
 
 			final int numberOfRecordsInRoot = Utils.readBytesAsUnsignedInt(bb, 2);
 			final int totalNumberOfRecordsInTree = Utils.readBytesAsUnsignedInt(bb, hdfFc.getSizeOfLengths());
 
-			final long checksum = Utils.readBytesAsUnsignedLong(bb, 4);
+			final long checksum = readBytesAsUnsignedLong(bb, 4);
 
 			records = new ArrayList<>(totalNumberOfRecordsInTree);
 
-			readRecords(hdfFc, rootNodeAddress, depth, numberOfRecordsInRoot, totalNumberOfRecordsInTree);
+			readRecords(hdfFc, rootNodeAddress, depth, numberOfRecordsInRoot, totalNumberOfRecordsInTree, datasetInfo);
 
 		} catch (HdfException e) {
 			throw new HdfException("Error reading B Tree node", e);
@@ -89,7 +101,7 @@ public class BTreeV2<T extends BTreeRecord> {
 
 	}
 
-	private void readRecords(HdfFileChannel hdfFc, long address, int depth, int numberOfRecords, int totalRecords) {
+	private void readRecords(HdfFileChannel hdfFc, long address, int depth, int numberOfRecords, int totalRecords, DatasetInfo datasetInfo) {
 
 		ByteBuffer bb = hdfFc.readBufferFromAddress(address, nodeSize);
 
@@ -113,12 +125,12 @@ public class BTreeV2<T extends BTreeRecord> {
 		final byte type = bb.get();
 
 		for (int i = 0; i < numberOfRecords; i++) {
-			records.add(BTreeRecord.readRecord(type, Utils.createSubBuffer(bb, recordSize)));
+			records.add(readRecord(type, createSubBuffer(bb, recordSize), datasetInfo));
 		}
 
 		if (!leafNode) {
 			for (int i = 0; i < numberOfRecords + 1; i++) {
-				final long childAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
+				final long childAddress = readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
 				int sizeOfNumberOfRecords = getSizeOfNumberOfRecords(nodeSize, depth, totalRecords, recordSize,
 						hdfFc.getSizeOfOffsets());
 				final int numberOfChildRecords = readBytesAsUnsignedInt(bb, sizeOfNumberOfRecords);
@@ -129,7 +141,7 @@ public class BTreeV2<T extends BTreeRecord> {
 				} else {
 					totalNumberOfChildRecords = -1;
 				}
-				readRecords(hdfFc, childAddress, depth - 1, numberOfChildRecords, totalNumberOfChildRecords);
+				readRecords(hdfFc, childAddress, depth - 1, numberOfChildRecords, totalNumberOfChildRecords, datasetInfo);
 			}
 		}
 		// TODO Checksum
