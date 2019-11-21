@@ -12,6 +12,9 @@ package io.jhdf.dataset.chunked;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
+import io.jhdf.btree.BTreeV2;
+import io.jhdf.btree.record.FilteredDatasetChunks;
+import io.jhdf.dataset.chunked.indexing.BTreeIndex;
 import io.jhdf.dataset.chunked.indexing.ChunkIndex;
 import io.jhdf.dataset.chunked.indexing.ExtensibleArrayIndex;
 import io.jhdf.dataset.chunked.indexing.FixedArrayIndex;
@@ -25,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class ChunkedDatasetV4 extends ChunkedDatasetBase {
     private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetV4.class);
@@ -48,6 +52,7 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
 
     @Override
     protected Collection<Chunk> getAllChunks() {
+        final DatasetInfo datasetInfo = new DatasetInfo(getChunkSizeInBytes(), getDimensions(), getChunkDimensions());
         final ChunkIndex chunkIndex;
         switch (layoutMessage.getIndexingType()) {
             case 1: // Single chunk
@@ -65,7 +70,9 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
                 chunkIndex = new ExtensibleArrayIndex(hdfFc, layoutMessage.getAddress(), getChunkSizeInBytes(), getDimensions(), getChunkDimensions());
                 break;
             case 5: // B Tree V2
-                throw new UnsupportedHdfException("B Tree V2");
+                logger.debug("Reading B tree v2 indexed dataset");
+                chunkIndex = new BTreeIndex(hdfFc, layoutMessage.getAddress(), datasetInfo);
+                break;
             default:
                 throw new HdfException("Unrecognized chunk indexing type = " + layoutMessage.getIndexingType());
         }
