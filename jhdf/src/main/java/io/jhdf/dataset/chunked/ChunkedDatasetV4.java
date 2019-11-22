@@ -12,8 +12,6 @@ package io.jhdf.dataset.chunked;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
-import io.jhdf.btree.BTreeV2;
-import io.jhdf.btree.record.FilteredDatasetChunks;
 import io.jhdf.dataset.chunked.indexing.BTreeIndex;
 import io.jhdf.dataset.chunked.indexing.ChunkIndex;
 import io.jhdf.dataset.chunked.indexing.ExtensibleArrayIndex;
@@ -28,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 public class ChunkedDatasetV4 extends ChunkedDatasetBase {
     private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetV4.class);
@@ -57,17 +54,17 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
         switch (layoutMessage.getIndexingType()) {
             case 1: // Single chunk
                 logger.debug("Reading single chunk indexed dataset");
-                chunkIndex = new SingleChunkIndex(layoutMessage, getChunkSizeInBytes(), getDimensions());
+                chunkIndex = new SingleChunkIndex(layoutMessage, datasetInfo);
                 break;
             case 2: // Implicit
                 throw new UnsupportedHdfException("Implicit indexing is currently not supported");
             case 3: // Fixed array
                 logger.debug("Reading fixed array indexed dataset");
-                chunkIndex = new FixedArrayIndex(hdfFc, layoutMessage.getAddress(), getChunkSizeInBytes(), getDimensions(), getChunkDimensions());
+                chunkIndex = new FixedArrayIndex(hdfFc, layoutMessage.getAddress(), datasetInfo);
                 break;
             case 4: // Extensible Array
                 logger.debug("Reading extensible array indexed dataset");
-                chunkIndex = new ExtensibleArrayIndex(hdfFc, layoutMessage.getAddress(), getChunkSizeInBytes(), getDimensions(), getChunkDimensions());
+                chunkIndex = new ExtensibleArrayIndex(hdfFc, layoutMessage.getAddress(), datasetInfo);
                 break;
             case 5: // B Tree V2
                 logger.debug("Reading B tree v2 indexed dataset");

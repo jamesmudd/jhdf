@@ -12,6 +12,7 @@ package io.jhdf.dataset.chunked.indexing;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.dataset.chunked.Chunk;
+import io.jhdf.dataset.chunked.DatasetInfo;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 
@@ -67,11 +68,11 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
     private int elementCounter = 0;
 
-    public ExtensibleArrayIndex(HdfFileChannel hdfFc, long address, int chunkSizeInBytes, int[] datasetDimensions, int[] chunkDimensions) {
+    public ExtensibleArrayIndex(HdfFileChannel hdfFc, long address, DatasetInfo datasetInfo) {
         this.headerAddress = address;
-        this.unfilteredChunkSize = chunkSizeInBytes;
-        this.datasetDimensions = datasetDimensions;
-        this.chunkDimensions = chunkDimensions;
+        this.unfilteredChunkSize = datasetInfo.getChunkSizeInBytes();
+        this.datasetDimensions = datasetInfo.getDatasetDimensions();
+        this.chunkDimensions = datasetInfo.getChunkDimensions();
 
         final int headerSize = 16 + hdfFc.getSizeOfOffsets() + 6 * hdfFc.getSizeOfLengths();
         final ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
