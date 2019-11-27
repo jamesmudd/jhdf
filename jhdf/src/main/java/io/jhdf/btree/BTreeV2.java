@@ -122,7 +122,7 @@ public class BTreeV2<T extends BTreeRecord> {
 			throw new HdfException("Unsupported B tree v2 internal node version detected. Version: " + version);
 		}
 
-		final byte type = bb.get();
+		final int type = bb.get();
 
 		for (int i = 0; i < numberOfRecords; i++) {
 			records.add(readRecord(type, createSubBuffer(bb, recordSize), datasetInfo));

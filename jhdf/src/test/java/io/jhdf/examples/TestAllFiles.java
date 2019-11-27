@@ -136,12 +136,20 @@ class TestAllFiles {
 		assertThat(dataset.getParent(), is(sameInstance(group)));
 		int[] dims = dataset.getDimensions();
 		assertThat(dims, is(notNullValue()));
+
+		// Call getAttributes twice to check lazy initialisation
 		assertThat(dataset.getAttributes(), is(notNullValue()));
+		assertThat(dataset.getAttributes(), is(notNullValue()));
+
 		assertThat(dataset.isGroup(), is(false));
 		assertThat(dataset.isLink(), is(false));
 		assertThat(dataset.getType(), is(NodeType.DATASET));
 		assertThat(dataset.getDataLayout(), is(notNullValue()));
+
+		// Call getData twice to check cases of lazy initialisation are working correctly
+		dataset.getData();
 		final Object data = dataset.getData();
+
 		if (dataset.isEmpty()) {
 			assertThat(data, is(nullValue()));
 			// Empty so should have 0 size
