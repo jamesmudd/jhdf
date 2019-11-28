@@ -112,7 +112,10 @@ public abstract class ChunkedDatasetBase extends DatasetBase {
     /**
      * Calculates the linear offsets into the dataset for each of the chunks internal offsets. It can be thought of as
      * only doing this do the first chunk as to calculate the offsets required for any other chunk you need to add
-     * the inital linear offset of that chunk to each of these values.
+     * the initial linear offset of that chunk to each of these values.
+     *
+     * @param chunkInternalOffsets a chunk offset
+     * @return offset in the dataset
      */
     protected int[] getDataOffsets(int[] chunkInternalOffsets) {
 
@@ -165,6 +168,8 @@ public abstract class ChunkedDatasetBase extends DatasetBase {
 
     /**
      * Gets the number of linear steps to move for one step in the corresponding dimension
+     *
+     * @return array of the number of linear step to move for one step in each dimension
      */
     private int[] getDimensionLinearOffsets() {
         int dimLength = getDimensions().length;
@@ -181,6 +186,10 @@ public abstract class ChunkedDatasetBase extends DatasetBase {
 
     /**
      * Gets the offsets inside a chunk where a contiguous run of data starts.
+     *
+     * @param chunkDimensions the dimensions of each chunk
+     * @param elementSize number of bytes in a an dataset element
+     * @return an array of locations inside the chunk where contiguous data starts
      */
     protected int[] getChunkInternalOffsets(int[] chunkDimensions, int elementSize) {
         final int fastestChunkDim = chunkDimensions[chunkDimensions.length - 1];
@@ -198,6 +207,9 @@ public abstract class ChunkedDatasetBase extends DatasetBase {
     /**
      * A partial chunk is one that is not completely inside the dataset. i.e. some of its contents are not part of the
      * dataset
+     *
+     * @param chunk The chunk to test
+     * @return true if this is a partial chunk
      */
     private boolean isPartialChunk(Chunk chunk) {
         final int[] datasetDims = getDimensions();
