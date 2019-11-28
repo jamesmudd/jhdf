@@ -26,7 +26,7 @@ plugins {
 
 // Variables
 group = 'io.jhdf'
-version = '0.5.2'
+version = '0.5.3'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 // Set source encoding to UTF-8
