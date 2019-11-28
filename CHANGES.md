@@ -1,5 +1,11 @@
 # jHDF Change Log
 
+## v0.5.3
+- Add support for chunked v4 datasets with b-tree chunk indexing
+- Improve exceptions for unsupported b-tree records
+- Improve test coverage
+- Upgrade to Gradle 6.0.1
+
 ## v0.5.2
 - Fix https://github.com/jamesmudd/jhdf/issues/124 String padding not handled correctly.
 - Fix https://github.com/jamesmudd/jhdf/issues/132 Multi dimensional fixed length string datasets read incorrectly.
