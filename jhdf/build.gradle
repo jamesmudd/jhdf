@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * http://jhdf.io
@@ -6,7 +6,7 @@
  * Copyright 2019 James Mudd
  *
  * MIT License see 'LICENSE' file
- ******************************************************************************/
+ */
 
 /*
  * Gradle build file for jHDF
@@ -27,16 +27,20 @@ plugins {
 // Variables
 group = 'io.jhdf'
 version = '0.5.3'
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-// Set source encoding to UTF-8
-compileJava.options.encoding = "UTF-8"
-compileTestJava.options.encoding = "UTF-8"
 
-// In this section you declare where to find the dependencies of your project
+compileJava {
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
+    options.encoding = "UTF-8"
+}
+
+compileTestJava {
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
+    options.encoding = "UTF-8"
+}
+
 repositories {
-    // Use jcenter for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     jcenter()
 }
 
@@ -78,6 +82,7 @@ def getGitHash = { ->
         }
         return stdout.toString().trim()
     } catch (Exception e) {
+        e.printStackTrace()
         // Can happen if git is unavailable
         return "UNAVALIABLE"
     }
