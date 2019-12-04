@@ -29,7 +29,7 @@ public class BTreeIndex implements ChunkIndex {
     private final BTreeV2<BTreeDatasetChunkRecord> bTreeV2;
 
     public BTreeIndex(HdfFileChannel hdfFc, long address, DatasetInfo datasetInfo) {
-        bTreeV2 = new BTreeV2(hdfFc, address, datasetInfo);
+        bTreeV2 = new BTreeV2<>(hdfFc, address, datasetInfo);
     }
 
     @Override
