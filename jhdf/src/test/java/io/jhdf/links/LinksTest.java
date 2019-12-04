@@ -11,6 +11,7 @@ package io.jhdf.links;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
+import io.jhdf.api.Group;
 import io.jhdf.api.Link;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
@@ -53,7 +54,8 @@ class LinksTest {
 
     @Test
     void testSoftLink() {
-        Node softLinkNode = hdfFile.getByPath("/links_group/soft_link_to_int8");
+        Group linkGroup = (Group) hdfFile.getChild("links_group");
+        Node softLinkNode = linkGroup.getChild("soft_link_to_int8");
         Link softLink = (Link) softLinkNode;
         assertThat(softLink.isLink(), is(true));
         assertThat(softLink.isBrokenLink(), is(false));
@@ -86,8 +88,8 @@ class LinksTest {
 
     @Test
     void testExternalLink() {
-        Node softLinkNode = hdfFile.getByPath("/links_group/external_link");
-        Link externalLink = (Link) softLinkNode;
+        Group linkGroup = (Group) hdfFile.getChild("links_group");
+        Link externalLink = (Link) linkGroup.getChild("external_link");
         assertThat(externalLink.isLink(), is(true));
         assertThat(externalLink.isGroup(), is(false));
         assertThat(externalLink.getPath(), is(equalTo("/links_group/external_link")));
