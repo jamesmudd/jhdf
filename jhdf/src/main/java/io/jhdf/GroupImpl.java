@@ -11,6 +11,7 @@ package io.jhdf;
 
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
+import io.jhdf.api.Link;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.btree.BTreeV1;
@@ -278,7 +279,11 @@ public class GroupImpl extends AbstractNode implements Group {
 		// Try splitting into 2 sections the child of this group and the remaining path
 		// to pass down.
 		final String[] pathElements = path.split(Constants.PATH_SEPARATOR, 2);
-		final Node child = getChild(pathElements[0]);
+		Node child = getChild(pathElements[0]);
+		// If we have a link try to resolve it
+		if (child instanceof Link) {
+			child = ((Link) child).getTarget();
+		}
 		if (pathElements.length == 1 && child != null) {
 			// There is no remaining path to resolve so we have the result
 			return child;
@@ -295,6 +300,9 @@ public class GroupImpl extends AbstractNode implements Group {
 	@Override
 	public Dataset getDatasetByPath(String path) {
 		Node node = getByPath(path);
+		if (node instanceof Link) {
+			node = ((Link) node).getTarget();
+		}
 		if (node instanceof Dataset) {
 			return (Dataset) node;
 		} else {
