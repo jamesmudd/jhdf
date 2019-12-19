@@ -16,6 +16,7 @@ import io.jhdf.object.datatype.VariableLength;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,6 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
+
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 public final class VariableLengthDatasetReader {
 
@@ -95,6 +98,9 @@ public final class VariableLengthDatasetReader {
 		List<GlobalHeapId> ids = new ArrayList<>(datasetTotalSize);
 
 		final int skipBytes = length - hdfFc.getSizeOfOffsets() - 4; // id=4
+
+		// Assume all global heap buffers are little endian
+		bb.order(LITTLE_ENDIAN);
 
 		while (bb.remaining() >= length) {
 			// Move past the skipped bytes. TODO figure out what this is for
