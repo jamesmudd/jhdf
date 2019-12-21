@@ -174,4 +174,8 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		return "DatasetBase [path=" + getPath() + "]";
 	}
 
+	@Override
+	public boolean isVariableLentgh() {
+		return getDataType() instanceof VariableLength;
+	}
 }
