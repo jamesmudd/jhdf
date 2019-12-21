@@ -12,12 +12,11 @@ package io.jhdf.dataset;
 import io.jhdf.GlobalHeap;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
+import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.VariableLength;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,19 +52,21 @@ public final class VariableLengthDatasetReader {
 
 		final Map<Long, GlobalHeap> heaps = new HashMap<>();
 
-		Charset charset = type.getEncoding();
-		List<String> objects = new ArrayList<>();
+		List<ByteBuffer> elements = new ArrayList<>();
 		for (GlobalHeapId globalHeapId : getGlobalHeapIds(buffer, type.getSize(), hdfFc, getTotalPoints(dimensions))) {
 			GlobalHeap heap = heaps.computeIfAbsent(globalHeapId.getHeapAddress(),
 					address -> new GlobalHeap(hdfFc, address));
 
 			ByteBuffer bb = heap.getObjectData(globalHeapId.getIndex());
-			String element = charset.decode(bb).toString();
-			objects.add(element);
+			elements.add(bb);
 		}
 
 		// Make the output array
-		fillData(data, dimensions, objects.iterator());
+		if(type.isVariableLengthString()) {
+			fillStringData(type, data, dimensions, elements.iterator());
+		} else {
+			fillData(type.getParent(), data, dimensions, elements.iterator());
+		}
 
 		if (isScalar) {
 			return Array.get(data, 0);
@@ -74,15 +75,33 @@ public final class VariableLengthDatasetReader {
 		}
 	}
 
-	private static void fillData(Object data, int[] dims, Iterator<String> objects) {
+	private static void fillData(DataType dataType, Object data, int[] dims, Iterator<ByteBuffer> elements) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillData(newArray, stripLeadingIndex(dims), objects);
+				fillData(dataType, newArray, stripLeadingIndex(dims), elements);
 			}
 		} else {
 			for (int i = 0; i < dims[0]; i++) {
-				Array.set(data, i, objects.next());
+				ByteBuffer buffer = elements.next();
+				int[] elementDims = new int[]{ buffer.limit() / dataType.getSize()};
+				Object elementData = DatasetReader.readDataset(dataType, buffer, elementDims);
+				Array.set(data, i, elementData);
+			}
+		}
+	}
+
+	private static void fillStringData(VariableLength dataType, Object data, int[] dims, Iterator<ByteBuffer> elements) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				fillStringData(dataType, newArray, stripLeadingIndex(dims), elements);
+			}
+		} else {
+			for (int i = 0; i < dims[0]; i++) {
+				ByteBuffer buffer = elements.next();
+				String element = dataType.getEncoding().decode(buffer).toString();
+				Array.set(data, i, element);
 			}
 		}
 	}

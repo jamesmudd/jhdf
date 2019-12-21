@@ -11,6 +11,7 @@ package io.jhdf.object.datatype;
 
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.object.datatype.StringData.PaddingType;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -19,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 public class VariableLength extends DataType {
 
 	private final int type;
-	private final int paddingType;
+	private final PaddingType paddingType;
 	private final Charset encoding;
 	private final DataType parent;
 
@@ -27,8 +28,23 @@ public class VariableLength extends DataType {
 		super(bb);
 
 		type = Utils.bitsToInt(classBits, 0, 4);
-		paddingType = Utils.bitsToInt(classBits, 4, 4);
-		int characterEncoding = Utils.bitsToInt(classBits, 8, 4);
+
+		final int paddingTypeValue = Utils.bitsToInt(classBits, 4, 4);
+		switch (paddingTypeValue) {
+			case 0:
+				paddingType = PaddingType.NULL_TERMINATED;
+				break;
+			case 1:
+				paddingType = PaddingType.NULL_PADDED;
+				break;
+			case 2:
+				paddingType = PaddingType.SPACE_PADDED;
+				break;
+			default:
+				throw new HdfException("Unrecognized padding type. Value is: " + paddingTypeValue);
+		}
+
+		final int characterEncoding = Utils.bitsToInt(classBits, 8, 4);
 		switch (characterEncoding) {
 		case 0:
 			encoding = StandardCharsets.US_ASCII;
@@ -43,15 +59,25 @@ public class VariableLength extends DataType {
 		parent = DataType.readDataType(bb);
 	}
 
+	public boolean isVariableLengthString() {
+		return type == 1;
+	}
+
 	public int getType() {
 		return type;
 	}
 
-	public int getPaddingType() {
+	public PaddingType getPaddingType() {
+		if(!isVariableLengthString()) {
+			throw new HdfException("Cannot get padding type for variable length dataset thats not string type");
+		}
 		return paddingType;
 	}
 
 	public Charset getEncoding() {
+		if(!isVariableLengthString()) {
+			throw new HdfException("Cannot get encoding for variable length dataset thats not string type");
+		}
 		return encoding;
 	}
 
@@ -61,10 +87,10 @@ public class VariableLength extends DataType {
 
 	@Override
 	public Class<?> getJavaType() {
-		if (type == 1) {
+		if (isVariableLengthString()) {
 			return String.class;
 		} else {
-			return parent.getJavaType();
+			return Object.class;
 		}
 	}
 
