@@ -110,15 +110,33 @@ class CompoundDatasetTest {
 
         // Check the compoundness
         Map<String, Object> compoundData = (Map<String, Object>) dataset.getData();
-        assertThat(compoundData.size(), is(equalTo(2)));
+        assertThat(compoundData.size(), is(equalTo(6)));
 
-        // Check the name element should be a string array
-        String[] nameData = (String[]) compoundData.get("name");
-        assertThat(nameData, is(equalTo(new String[]{"one", "two", "three", "four"})));
+        // Check the first name element should be a string array
+        String[] firstNames = (String[]) compoundData.get("firstName");
+        assertThat(firstNames, is(equalTo(new String[]{"Bob","Peter","James", "Ellie"})));
+
+        String[] surnames = (String[]) compoundData.get("surname");
+        assertThat(surnames, is(equalTo(new String[]{"Smith", "Fletcher", "Mudd", "Kyle"})));
+
+        // Test enum type
+        String[] genders = (String[]) compoundData.get("gender");
+        assertThat(genders, is(equalTo(new String[]{"MALE", "MALE", "MALE", "FEMALE"})));
+
+        int[] ages = (int[]) compoundData.get("age");
+        assertThat(ages, is(equalTo(new int[]{32, 43, 12, 22})));
+
+        float[] favNumber = (float[]) compoundData.get("fav_number");
+        assertThat(favNumber, is(equalTo(new float[]{1.0f, 2.0f, 3.0f, 4.0f})));
 
         // Check vector element
-        double[][] doubleData = (double[][]) compoundData.get("vector");
-        assertThat(doubleData, is(equalTo(new double[][]{{1.0,2.0,3.0},{-23.4,-0.3,28.0},{44.4,33.3,22.2},{-1.1,-2.2,-3.3}})));
+        float[][] doubleData = (float[][]) compoundData.get("vector");
+        assertThat(doubleData, is(equalTo(new float[][]{
+                {1.0f,2.0f,3.0f},
+                {16.2f,2.2f,-32.4f},
+                {-32.1f,-774.1f,-3.0f},
+                {2.1f,74.1f,-3.8f}
+        })));
     }
 
 }
