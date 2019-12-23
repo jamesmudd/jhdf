@@ -130,7 +130,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 			return VariableLengthDatasetReader.readDataset((VariableLength) type, bb,
 					getDimensions(), hdfFc);
 		} else if(type instanceof CompoundDataType) {
-			return CompoundDatasetReader.readDataset((CompoundDataType) type, bb, getSize(), getDimensions());
+			return CompoundDatasetReader.readDataset((CompoundDataType) type, bb, getSize(), getDimensions(), hdfFc);
 		} else {
 			return DatasetReader.readDataset(type, bb, getDimensions());
 		}

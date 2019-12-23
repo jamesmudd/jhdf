@@ -9,8 +9,10 @@
  */
 package io.jhdf.dataset;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.object.datatype.CompoundDataType;
 import io.jhdf.object.datatype.CompoundDataType.CompoundDataMember;
+import io.jhdf.object.datatype.VariableLength;
 
 import java.nio.ByteBuffer;
 import java.util.LinkedHashMap;
@@ -25,7 +27,7 @@ public final class CompoundDatasetReader {
 	private CompoundDatasetReader() {
 	}
 
-	public static Map<String, Object> readDataset(CompoundDataType type, ByteBuffer buffer, long size, int[] dimensions) {
+	public static Map<String, Object> readDataset(CompoundDataType type, ByteBuffer buffer, long size, int[] dimensions, HdfFileChannel hdfFc) {
 		final int sizeAsInt = toIntExact(size);
 
 		final List<CompoundDataMember> members = type.getMembers();
@@ -45,7 +47,14 @@ public final class CompoundDatasetReader {
 
 			// Now read this member
 			memberBuffer.rewind();
-			final Object memberData = DatasetReader.readDataset(member.getDataType(), memberBuffer, dimensions);
+
+			final Object memberData;
+			if(member.getDataType() instanceof VariableLength) {
+				final VariableLength variableLentghDataType = (VariableLength) member.getDataType();
+				memberData = VariableLengthDatasetReader.readDataset(variableLentghDataType, memberBuffer, dimensions, hdfFc);
+			} else {
+				memberData = DatasetReader.readDataset(member.getDataType(), memberBuffer, dimensions);
+			}
 			data.put(member.getName(), memberData);
 		}
 
