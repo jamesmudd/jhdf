@@ -19,6 +19,8 @@ import java.util.Map;
 
 /**
  * Class for reading compound data type messages.
+ *
+ * @author James Mudd
  */
 public class CompoundDataType extends DataType {
 
@@ -27,8 +29,9 @@ public class CompoundDataType extends DataType {
 	public CompoundDataType(ByteBuffer bb) {
 		super(bb);
 
-		if(getVersion() == 3) {
-			throw new UnsupportedHdfException("Compound data type version 3 is not yet supported");
+		final int version = getVersion();
+		if(version > 3) {
+			throw new UnsupportedHdfException("Compound data type version is not yet supported: version = " + version);
 		}
 
 		int numberOfMembers = Utils.bitsToInt(classBits, 0, 16);
@@ -39,18 +42,28 @@ public class CompoundDataType extends DataType {
 			// The name is null padded to 8 bytes so need to work that out
 			final int posBeforeName = bb.position();
 			final String name = Utils.readUntilNull(bb);
-			final int posAfterName = bb.position();
-			final int bytesPastEight = (posAfterName - posBeforeName) % 8;
-			if(bytesPastEight != 0) {
-				int bytesToSkip = 8 - bytesPastEight;
-				bb.position(bb.position() + bytesToSkip);
+
+			// <3 it is null padded, v3 is NOT padded
+			if (version < 3) {
+				final int posAfterName = bb.position();
+				final int bytesPastEight = (posAfterName - posBeforeName) % 8;
+				if(bytesPastEight != 0) {
+					int bytesToSkip = 8 - bytesPastEight;
+					bb.position(bb.position() + bytesToSkip);
+				}
 			}
 
-			final int offset = Utils.readBytesAsUnsignedInt(bb, 4);
+			final int offset;
+			if(version < 3)
+				offset = Utils.readBytesAsUnsignedInt(bb, 4);
+			else {
+				int offsetBytes = Utils.bytesNeededToHoldNumber(getSize());
+				offset = Utils.readBytesAsUnsignedInt(bb, offsetBytes);
+			}
 
 			// Think this dimension size is pointless but its the spec...
 			int[] dimensionSize = null;
-			if (getVersion() == 1) {
+			if (version == 1) {
 				final int dimensionality = Utils.readBytesAsUnsignedInt(bb, 1);
 				// Skip 3 reserved bytes + 4 not implemented permutation bytes + 4 more reserved bytes
 				bb.position(bb.position() + 3 + 4 + 4);
@@ -64,7 +77,9 @@ public class CompoundDataType extends DataType {
 				}
 			}
 
-			members.add(new CompoundDataMember(name, dimensionSize, offset, DataType.readDataType(bb)));
+			final DataType memberDataType = DataType.readDataType(bb);
+
+			members.add(new CompoundDataMember(name, dimensionSize, offset, memberDataType));
 		}
 	}
 
