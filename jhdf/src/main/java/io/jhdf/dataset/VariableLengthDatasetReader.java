@@ -65,7 +65,7 @@ public final class VariableLengthDatasetReader {
 		if(type.isVariableLengthString()) {
 			fillStringData(type, data, dimensions, elements.iterator());
 		} else {
-			fillData(type.getParent(), data, dimensions, elements.iterator());
+			fillData(type.getParent(), data, dimensions, elements.iterator(), hdfFc);
 		}
 
 		if (isScalar) {
@@ -75,17 +75,17 @@ public final class VariableLengthDatasetReader {
 		}
 	}
 
-	private static void fillData(DataType dataType, Object data, int[] dims, Iterator<ByteBuffer> elements) {
+	private static void fillData(DataType dataType, Object data, int[] dims, Iterator<ByteBuffer> elements, HdfFileChannel hdfFc) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillData(dataType, newArray, stripLeadingIndex(dims), elements);
+				fillData(dataType, newArray, stripLeadingIndex(dims), elements, hdfFc);
 			}
 		} else {
 			for (int i = 0; i < dims[0]; i++) {
 				ByteBuffer buffer = elements.next();
 				int[] elementDims = new int[]{ buffer.limit() / dataType.getSize()};
-				Object elementData = DatasetReader.readDataset(dataType, buffer, elementDims);
+				Object elementData = DatasetReader.readDataset(dataType, buffer, elementDims, hdfFc);
 				Array.set(data, i, elementData);
 			}
 		}

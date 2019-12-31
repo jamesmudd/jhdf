@@ -48,13 +48,7 @@ public final class CompoundDatasetReader {
 			// Now read this member
 			memberBuffer.rewind();
 
-			final Object memberData;
-			if(member.getDataType() instanceof VariableLength) {
-				final VariableLength variableLentghDataType = (VariableLength) member.getDataType();
-				memberData = VariableLengthDatasetReader.readDataset(variableLentghDataType, memberBuffer, dimensions, hdfFc);
-			} else {
-				memberData = DatasetReader.readDataset(member.getDataType(), memberBuffer, dimensions);
-			}
+			final Object memberData = DatasetReader.readDataset(member.getDataType(), memberBuffer, dimensions, hdfFc);
 			data.put(member.getName(), memberData);
 		}
 

@@ -71,12 +71,7 @@ public class AttributeImpl implements Attribute {
 		}
 		DataType type = message.getDataType();
 		ByteBuffer bb = message.getDataBuffer();
-		if (type instanceof VariableLength) {
-			return VariableLengthDatasetReader.readDataset((VariableLength) type, bb,
-					getDimensions(), hdfFc);
-		} else {
-			return DatasetReader.readDataset(type, bb, getDimensions());
-		}
+		return DatasetReader.readDataset(type, bb, getDimensions(), hdfFc);
 	}
 
 	@Override
