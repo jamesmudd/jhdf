@@ -13,19 +13,19 @@ import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static io.jhdf.TestUtils.loadTestHdfFile;
+import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
@@ -62,10 +62,11 @@ class CompoundDatasetTest {
     @MethodSource("test2dCompound")
     void test2dCompound(Dataset dataset) {
         // General checks
-        assertThat(dataset.getDimensions(), is(equalTo(new int[]{3,3})));
-        assertThat(dataset.getMaxSize(), is(equalTo(new int[]{3,3})));
+        assertThat(dataset.getDimensions(), is(equalTo(new int[]{3, 3})));
+        assertThat(dataset.getMaxSize(), is(equalTo(new int[]{3, 3})));
         assertThat(dataset.getJavaType(), is(Map.class));
         assertThat(dataset.getFillValue(), is(nullValue()));
+        assertThat(dataset.isCompound(), is(true));
 
         // Check the compoundness
         @SuppressWarnings("unchecked")
@@ -107,6 +108,7 @@ class CompoundDatasetTest {
         assertThat(dataset.getMaxSize(), is(equalTo(new int[]{4})));
         assertThat(dataset.getJavaType(), is(Map.class));
         assertThat(dataset.getFillValue(), is(nullValue()));
+        assertThat(dataset.isCompound(), is(true));
 
         // Check the compoundness
         Map<String, Object> compoundData = (Map<String, Object>) dataset.getData();
@@ -114,7 +116,7 @@ class CompoundDatasetTest {
 
         // Check the first name element should be a string array
         String[] firstNames = (String[]) compoundData.get("firstName");
-        assertThat(firstNames, is(equalTo(new String[]{"Bob","Peter","James", "Ellie"})));
+        assertThat(firstNames, is(equalTo(new String[]{"Bob", "Peter", "James", "Ellie"})));
 
         String[] surnames = (String[]) compoundData.get("surname");
         assertThat(surnames, is(equalTo(new String[]{"Smith", "Fletcher", "Mudd", "Kyle"})));
@@ -132,11 +134,74 @@ class CompoundDatasetTest {
         // Check vector element
         float[][] doubleData = (float[][]) compoundData.get("vector");
         assertThat(doubleData, is(equalTo(new float[][]{
-                {1.0f,2.0f,3.0f},
-                {16.2f,2.2f,-32.4f},
-                {-32.1f,-774.1f,-3.0f},
-                {2.1f,74.1f,-3.8f}
+                {1.0f, 2.0f, 3.0f},
+                {16.2f, 2.2f, -32.4f},
+                {-32.1f, -774.1f, -3.0f},
+                {2.1f, 74.1f, -3.8f}
         })));
+    }
+
+    private static Stream<Arguments> testArrayVariableLength() {
+        return Stream.of(
+                Arguments.of(earliestHdfFile.getDatasetByPath("/array_vlen_chunked_compound")),
+                Arguments.of(earliestHdfFile.getDatasetByPath("/array_vlen_contigious_compound")),
+                Arguments.of(latestHdfFile.getDatasetByPath("/array_vlen_chunked_compound")),
+                Arguments.of(latestHdfFile.getDatasetByPath("/array_vlen_contigious_compound"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("testArrayVariableLength")
+    void testArrayVariableLength(Dataset dataset) {
+        assertThat(dataset.getDimensions(), is(equalTo(new int[]{1})));
+        assertThat(dataset.getMaxSize(), is(equalTo(new int[]{1})));
+        assertThat(dataset.isCompound(), is(true));
+        assertThat(dataset.getJavaType(), is(Map.class));
+        assertThat(dataset.getFillValue(), is(nullValue()));
+
+        // Check the compoundness
+        Map<String, Object> compoundData = (Map<String, Object>) dataset.getData();
+        assertThat(compoundData.size(), is(equalTo(1)));
+
+        // Check the first name element should be a string array
+        String[][] names = (String[][]) compoundData.get("name");
+        assertThat(names.length, is(1));
+        assertThat(names[0], is(equalTo(new String[]{"James", "Ellie"})));
+    }
+
+    private static Stream<Arguments> testVariableLengthCompound() {
+        return Stream.of(
+                Arguments.of(earliestHdfFile.getDatasetByPath("/vlen_chunked_compound")),
+                Arguments.of(earliestHdfFile.getDatasetByPath("/vlen_contigious_compound")),
+                Arguments.of(latestHdfFile.getDatasetByPath("/vlen_chunked_compound")),
+                Arguments.of(latestHdfFile.getDatasetByPath("/vlen_contigious_compound"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("testVariableLengthCompound")
+    void testVariableLengthCompound(Dataset dataset) {
+        assertThat(dataset.getDimensions(), is(equalTo(new int[]{3})));
+        assertThat(dataset.getMaxSize(), is(equalTo(new int[]{3})));
+        assertThat(dataset.isCompound(), is(true));
+        assertThat(dataset.getJavaType(), is(Map.class));
+        assertThat(dataset.getFillValue(), is(nullValue()));
+
+        // Check the compoundness
+        Map<String, Object> compoundData = (Map<String, Object>) dataset.getData();
+        assertThat(compoundData.keySet(), contains("one", "two"));
+
+        Object[] oneData = (Object[]) compoundData.get("one");
+        assertThat(oneData.length, is(3));
+        assertThat(toObject((int[]) oneData[0]), is(arrayContaining(1)));
+        assertThat(toObject((int[]) oneData[1]), is(arrayContaining(1, 1)));
+        assertThat(toObject((int[]) oneData[2]), is(arrayContaining(1, 1, 1)));
+
+        Object[] twoData = (Object[]) compoundData.get("two");
+        assertThat(twoData.length, is(3));
+        assertThat(toObject((int[]) twoData[0]), is(arrayContaining(2)));
+        assertThat(toObject((int[]) twoData[1]), is(arrayContaining(2, 2)));
+        assertThat(toObject((int[]) twoData[2]), is(arrayContaining(2, 2, 2)));
     }
 
 }
