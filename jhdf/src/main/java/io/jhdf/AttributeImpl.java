@@ -12,9 +12,7 @@ package io.jhdf;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Node;
 import io.jhdf.dataset.DatasetReader;
-import io.jhdf.dataset.VariableLengthDatasetReader;
 import io.jhdf.object.datatype.DataType;
-import io.jhdf.object.datatype.VariableLength;
 import io.jhdf.object.message.AttributeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,12 +69,7 @@ public class AttributeImpl implements Attribute {
 		}
 		DataType type = message.getDataType();
 		ByteBuffer bb = message.getDataBuffer();
-		if (type instanceof VariableLength) {
-			return VariableLengthDatasetReader.readDataset((VariableLength) type, bb,
-					getDimensions(), hdfFc);
-		} else {
-			return DatasetReader.readDataset(type, bb, getDimensions());
-		}
+		return DatasetReader.readDataset(type, bb, getDimensions(), hdfFc);
 	}
 
 	@Override

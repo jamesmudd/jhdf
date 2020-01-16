@@ -9,6 +9,7 @@
  */
 package io.jhdf.dataset;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfTypeException;
@@ -19,6 +20,7 @@ import io.jhdf.object.datatype.FixedPoint;
 import io.jhdf.object.datatype.FloatingPoint;
 import io.jhdf.object.datatype.Reference;
 import io.jhdf.object.datatype.StringData;
+import io.jhdf.object.datatype.VariableLength;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -58,12 +60,12 @@ public final class DatasetReader {
 		throw new AssertionError("No instances of DatasetReader");
 	}
 
-	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions) {
+	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
 		// Make the array to hold the data
 		Class<?> javaType = type.getJavaType();
 
 		// If the data is scalar make a fake one element array then remove it at the end
-		final Object data;
+		Object data;
 		final boolean isScalar;
 		if (dimensions.length == 0) {
 			// Scalar dataset
@@ -154,12 +156,13 @@ public final class DatasetReader {
 			for (int i = 0; i < dimensions[0]; i++) {
 				// Need to position the buffer ready for the read
 				buffer.position(i * arrayType.getBaseType().getSize() * arrayType.getDimensions()[0]);
-				Object elementDataset = readDataset(arrayType.getBaseType(), buffer, arrayType.getDimensions());
+				Object elementDataset = readDataset(arrayType.getBaseType(), buffer, arrayType.getDimensions(), hdfFc);
 				Array.set(data, i, elementDataset);
 			}
 		} else if (type instanceof EnumDataType) {
-			final EnumDataType enumDataType = (EnumDataType) type;
-			return EnumDatasetReader.readEnumDataset(enumDataType, buffer, dimensions);
+			return EnumDatasetReader.readEnumDataset((EnumDataType) type, buffer, dimensions);
+		} else if (type instanceof VariableLength) {
+			data = VariableLengthDatasetReader.readDataset((VariableLength) type, buffer, dimensions, hdfFc);
 		} else {
 			throw new HdfException(
 					"DatasetReader was passed a type it cant fill. Type: " + type.getClass().getCanonicalName());

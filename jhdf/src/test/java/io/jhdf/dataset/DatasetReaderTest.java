@@ -9,6 +9,7 @@
  */
 package io.jhdf.dataset;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.FixedPoint;
@@ -101,25 +102,25 @@ class DatasetReaderTest {
 	@Test
 	void testUnsupportedFixedPointLengthThrows() {
 		DataType invalidDataType = mockFixedPoint(int.class, true, 11); // 11 byte data is not supported
-		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims));
+		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims, mock(HdfFileChannel.class)));
 	}
 
 	@Test
 	void testUnsupportedUnsignedFixedPointLengthThrows() {
 		DataType invalidDataType = mockFixedPoint(int.class, false, 11); // 11 byte data is not supported
-		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims));
+		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims, mock(HdfFileChannel.class)));
 	}
 
 	@Test
 	void testUnsupportedFloatingPointLengthThrows() {
 		DataType invalidDataType = mockFloatingPoint(double.class, 11); // 11 byte data is not supported
-		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims));
+		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims, mock(HdfFileChannel.class)));
 	}
 
 	@Test
 	void testUnsupportedReferenceLengthThrows() {
 		DataType invalidDataType = mockReference(long.class, 11); // 11 byte data is not supported
-		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims));
+		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims, mock(HdfFileChannel.class)));
 	}
 
 	private BigInteger[][] createUnsignedLongResult() {
@@ -130,7 +131,7 @@ class DatasetReaderTest {
 	private Executable createTest(ByteBuffer buffer, DataType dataType, int[] dims, Object expected) {
 		return () -> {
 			buffer.rewind(); // For shared buffers
-			Object actual = DatasetReader.readDataset(dataType, buffer, dims);
+			Object actual = DatasetReader.readDataset(dataType, buffer, dims, mock(HdfFileChannel.class));
 			verifyArray(actual, expected);
 		};
 	}

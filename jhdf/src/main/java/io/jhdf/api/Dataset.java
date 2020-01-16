@@ -60,9 +60,16 @@ public interface Dataset extends Node {
 	/**
 	 * Checks if this dataset is a compound dataset. i.e. it contains several named datasets.
 	 *
-	 * @return <code>true</code> if this is a compount dataset, <code>false</code> otherwise
+	 * @return <code>true</code> if this is a compound dataset, <code>false</code> otherwise
 	 */
 	boolean isCompound();
+
+	/**
+	 * Checks if this dataset is a variable length dataset. (ragged array)
+	 *
+	 * @return <code>true</code> if this is a variable length dataset, <code>false</code> otherwise
+	 */
+	boolean isVariableLentgh();
 
 	/**
 	 * Gets the max size of this dataset. If not specified this will be equal to

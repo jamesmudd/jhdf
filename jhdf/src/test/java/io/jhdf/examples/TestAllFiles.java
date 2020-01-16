@@ -162,6 +162,10 @@ class TestAllFiles {
 			// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future..
 			assertThat(data, is(instanceOf(Map.class)));
 			assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
+			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+		} else if (dataset.isVariableLentgh()) {
+			assertThat(getDimensions(data)[0], is(equalTo(dims[0])));
+			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
 		} else {
 			assertThat(getDimensions(data), is(equalTo(dims)));
 			assertThat(getType(data), is(equalTo(dataset.getJavaType())));
