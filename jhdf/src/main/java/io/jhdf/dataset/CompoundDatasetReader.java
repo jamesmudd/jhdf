@@ -12,7 +12,6 @@ package io.jhdf.dataset;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.object.datatype.CompoundDataType;
 import io.jhdf.object.datatype.CompoundDataType.CompoundDataMember;
-import io.jhdf.object.datatype.VariableLength;
 
 import java.nio.ByteBuffer;
 import java.util.LinkedHashMap;
