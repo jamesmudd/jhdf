@@ -13,6 +13,7 @@ import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.Utils;
 import io.jhdf.api.Group;
+import io.jhdf.api.dataset.ChunkedDataset;
 import io.jhdf.dataset.DatasetBase;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.filter.FilterManager;
@@ -29,7 +30,7 @@ import java.util.Collection;
 
 import static java.lang.Math.toIntExact;
 
-public abstract class ChunkedDatasetBase extends DatasetBase {
+public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedDataset {
     private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetBase.class);
 
     protected final FilterPipelineLazyInitializer lazyPipeline;
