@@ -45,7 +45,7 @@ repositories {
 }
 
 ext {
-    slf4jVersion = '1.7.29'
+    slf4jVersion = '1.7.30'
     junitVersion = '5.5.2'
 }
 
@@ -61,7 +61,7 @@ dependencies {
     testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
     
     // Mocking
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.2.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.2.4'
 	// Matchers
 	testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
 }
