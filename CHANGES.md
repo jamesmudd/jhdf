@@ -1,5 +1,14 @@
 # jHDF Change Log
 
+## v0.5.4
+- Add support for variable length datasets https://github.com/jamesmudd/jhdf/issues/123
+- Add support for Compound datatype v3 messages allowing more compound datasets to be read
+- Fix https://github.com/jamesmudd/jhdf/issues/139 bug accessing chunked v4 string datasets
+- Fix https://github.com/jamesmudd/jhdf/issues/143 bug traversing links
+- Code cleanup
+- Upgrade to Gradle 6.1
+- Update dependencies
+
 ## v0.5.3
 - Add support for chunked v4 datasets with b-tree chunk indexing
 - Improve exceptions for unsupported b-tree records
