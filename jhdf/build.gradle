@@ -22,6 +22,7 @@ plugins {
     // Community plugins (need versions)
     id 'com.jfrog.bintray' version '1.8.4' // For publishing to Bintray
     id 'org.sonarqube' version '2.8' // Code quality
+    id "com.github.spotbugs" version "3.0.0" // Static analysis
 }
 
 // Variables
@@ -191,4 +192,12 @@ bintray {
     	rename 'pom-default.xml.asc', "jhdf-${project.version}.pom.asc"
     }
     
+}
+
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
+    reports.html.enabled = false
+    reports.xml.enabled = true // Used by Sonar
+    ignoreFailures = true // Allow build to continue with errors
+    effort="max"
+    reportLevel="low" // Report all issues even low priority
 }
