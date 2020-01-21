@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -160,8 +161,8 @@ public abstract class ObjectHeader {
 	 */
 	public static class ObjectHeaderV2 extends ObjectHeader {
 
-		private static final byte[] OBJECT_HEADER_V2_SIGNATURE = "OHDR".getBytes();
-		private static final byte[] OBJECT_HEADER_V2_CONTINUATION_SIGNATURE = "OCHK".getBytes();
+		private static final byte[] OBJECT_HEADER_V2_SIGNATURE = "OHDR".getBytes(StandardCharsets.US_ASCII);
+		private static final byte[] OBJECT_HEADER_V2_CONTINUATION_SIGNATURE = "OCHK".getBytes(StandardCharsets.US_ASCII);
 
 		private static final int ATTRIBUTE_CREATION_ORDER_TRACKED = 2;
 		private static final int ATTRIBUTE_CREATION_ORDER_INDEXED = 3;

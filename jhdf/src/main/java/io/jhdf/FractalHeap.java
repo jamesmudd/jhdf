@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -46,9 +47,9 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 public class FractalHeap {
 	private static final Logger logger = LoggerFactory.getLogger(FractalHeap.class);
 
-	private static final byte[] FRACTAL_HEAP_SIGNATURE = "FRHP".getBytes();
-	private static final byte[] INDIRECT_BLOCK_SIGNATURE = "FHIB".getBytes();
-	private static final byte[] DIRECT_BLOCK_SIGNATURE = "FHDB".getBytes();
+	private static final byte[] FRACTAL_HEAP_SIGNATURE = "FRHP".getBytes(StandardCharsets.US_ASCII);
+	private static final byte[] INDIRECT_BLOCK_SIGNATURE = "FHIB".getBytes(StandardCharsets.US_ASCII);
+	private static final byte[] DIRECT_BLOCK_SIGNATURE = "FHDB".getBytes(StandardCharsets.US_ASCII);
 
 	private static final BigInteger TWO = BigInteger.valueOf(2L);
 

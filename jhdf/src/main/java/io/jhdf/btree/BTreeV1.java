@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,7 +34,7 @@ import java.util.List;
 public abstract class BTreeV1 {
 	private static final Logger logger = LoggerFactory.getLogger(BTreeV1.class);
 
-	private static final byte[] BTREE_NODE_V1_SIGNATURE = "TREE".getBytes();
+	private static final byte[] BTREE_NODE_V1_SIGNATURE = "TREE".getBytes(StandardCharsets.US_ASCII);
 	private static final int HEADER_BYTES = 6;
 
 	/** The location of this B tree in the file */

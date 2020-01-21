@@ -14,12 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public class LocalHeap {
 	private static final Logger logger = LoggerFactory.getLogger(LocalHeap.class);
 
-	private static final byte[] HEAP_SIGNATURE = "HEAP".getBytes();
+	private static final byte[] HEAP_SIGNATURE = "HEAP".getBytes(StandardCharsets.US_ASCII);
 
 	/** The location of this Heap in the file */
 	private final long address;

@@ -25,7 +25,7 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 public abstract class Superblock {
 	private static final Logger logger = LoggerFactory.getLogger(Superblock.class);
 
-	private static final byte[] HDF5_FILE_SIGNATURE = new byte[] { -119, 72, 68, 70, 13, 10, 26, 10 };
+	private static final byte[] HDF5_FILE_SIGNATURE = new byte[] {(byte) 137, 72, 68, 70, 13, 10, 26, 10 };
 	private static final int HDF5_FILE_SIGNATURE_LENGTH = HDF5_FILE_SIGNATURE.length;
 
 	public abstract int getVersionOfSuperblock();
