@@ -14,6 +14,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.ArrayDataType;
+import io.jhdf.object.datatype.BitField;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.EnumDataType;
 import io.jhdf.object.datatype.FixedPoint;
@@ -132,6 +133,10 @@ public final class DatasetReader {
 					throw new HdfTypeException(
 							"Unsupported floating point type size " + floatingPoint.getSize() + " bytes");
 			}
+		} else if (type instanceof BitField) {
+			BitField bf = (BitField) type;
+			ByteOrder byteOrder = bf.getByteOrder();
+			fillData(data, dimensions, buffer.order(byteOrder));
 		} else if (type instanceof StringData) {
 			final int stringLength = type.getSize();
 			final Charset charset = ((StringData) type).getCharset();
