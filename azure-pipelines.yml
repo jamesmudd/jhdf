@@ -51,7 +51,7 @@ jobs:
     -Dsonar.organization=jamesmudd-github
     -Dsonar.host.url=https://sonarcloud.io
     -Dsonar.login=$(sonar.login)
-    -Dsonar.java.spotbugs.reportPaths=build/reports/spotbugs/main.xml,build/reports/spotbugs/test.xml'
+    -Dsonar.java.spotbugs.reportPaths=./build/reports/spotbugs/main.xml,./build/reports/spotbugs/test.xml'
     displayName: SonarQube
     # Only run for Java 1.8 and not for PR
     condition: and(eq(variables['java.version'], '1.8'), ne(variables['Build.Reason'], 'PullRequest'))
@@ -63,7 +63,7 @@ jobs:
     -Dsonar.organization=jamesmudd-github
     -Dsonar.host.url=https://sonarcloud.io
     -Dsonar.login=$(sonar.login)
-    -Dsonar.java.spotbugs.reportPaths=build/reports/spotbugs/main.xml,build/reports/spotbugs/test.xml
+    -Dsonar.java.spotbugs.reportPaths=./build/reports/spotbugs/main.xml,./build/reports/spotbugs/test.xml
     -Dsonar.pullrequest.branch=$(Build.SourceBranch)
     -Dsonar.pullrequest.key=$(System.PullRequest.PullRequestNumber)
     -Dsonar.pullrequest.base=$(System.PullRequest.TargetBranch)
