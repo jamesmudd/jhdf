@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
@@ -21,7 +22,7 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 public class GroupSymbolTableNode {
 	private static final Logger logger = LoggerFactory.getLogger(GroupSymbolTableNode.class);
 
-	private static final byte[] NODE_SIGNATURE = "SNOD".getBytes();
+	private static final byte[] NODE_SIGNATURE = "SNOD".getBytes(StandardCharsets.US_ASCII);
 
 	/** The location of this GroupSymbolTableNode in the file */
 	private final long address;

@@ -12,6 +12,7 @@ package io.jhdf;
 import io.jhdf.exceptions.HdfException;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +23,7 @@ import static io.jhdf.Utils.seekBufferToNextMultipleOfEight;
 
 public class GlobalHeap {
 
-	private static final byte[] GLOBAL_HEAP_SIGNATURE = "GCOL".getBytes();
+	private static final byte[] GLOBAL_HEAP_SIGNATURE = "GCOL".getBytes(StandardCharsets.US_ASCII);
 
 	private final HdfFileChannel hdfFc;
 	private final long address;

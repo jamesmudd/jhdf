@@ -16,6 +16,7 @@ import io.jhdf.dataset.chunked.DatasetInfo;
 import io.jhdf.exceptions.HdfException;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -24,8 +25,8 @@ import java.util.List;
 
 public class FixedArrayIndex implements ChunkIndex {
 
-    private static final byte[] FIXED_ARRAY_HEADER_SIGNATURE = "FAHD".getBytes();
-    private static final byte[] FIXED_ARRAY_DATA_BLOCK_SIGNATURE = "FADB".getBytes();
+    private static final byte[] FIXED_ARRAY_HEADER_SIGNATURE = "FAHD".getBytes(StandardCharsets.US_ASCII);
+    private static final byte[] FIXED_ARRAY_DATA_BLOCK_SIGNATURE = "FADB".getBytes(StandardCharsets.US_ASCII);
 
     private final long address;
     private final int unfilteredChunkSize;

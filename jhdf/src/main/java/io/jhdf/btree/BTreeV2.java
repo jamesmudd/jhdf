@@ -17,6 +17,7 @@ import io.jhdf.exceptions.HdfException;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,9 +31,9 @@ public class BTreeV2<T extends BTreeRecord> {
 
 	private static final int NODE_OVERHEAD_BYTES = 10;
 
-	private static final byte[] BTREE_NODE_V2_SIGNATURE = "BTHD".getBytes();
-	private static final byte[] BTREE_INTERNAL_NODE_SIGNATURE = "BTIN".getBytes();
-	private static final byte[] BTREE_LEAF_NODE_SIGNATURE = "BTLF".getBytes();
+	private static final byte[] BTREE_NODE_V2_SIGNATURE = "BTHD".getBytes(StandardCharsets.US_ASCII);
+	private static final byte[] BTREE_INTERNAL_NODE_SIGNATURE = "BTIN".getBytes(StandardCharsets.US_ASCII);
+	private static final byte[] BTREE_LEAF_NODE_SIGNATURE = "BTLF".getBytes(StandardCharsets.US_ASCII);
 
 	/** The location of this B tree in the file */
 	private final long address;
