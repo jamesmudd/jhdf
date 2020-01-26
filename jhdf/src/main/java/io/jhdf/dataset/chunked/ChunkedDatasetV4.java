@@ -73,10 +73,6 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
         }
     }
 
-    private int getChunkSizeInBytes() {
-        return Arrays.stream(getChunkDimensions()).reduce(1, Math::multiplyExact) * getDataType().getSize();
-    }
-
     private final class ChunkLookupLazyInitializer extends LazyInitializer<Map<ChunkOffset, Chunk>> {
         @Override
         protected Map<ChunkOffset, Chunk> initialize() {
@@ -113,6 +109,11 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
                     collect(toMap(chunk -> new ChunkOffset(chunk.getChunkOffset()) // keys
                             , Function.identity())); // values
         }
+
+        private int getChunkSizeInBytes() {
+            return Arrays.stream(getChunkDimensions()).reduce(1, Math::multiplyExact) * getDataType().getSize();
+        }
+
     }
 
 }
