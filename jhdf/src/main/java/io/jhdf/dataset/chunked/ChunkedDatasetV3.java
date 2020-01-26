@@ -68,7 +68,7 @@ public class ChunkedDatasetV3 extends ChunkedDatasetBase {
     }
 
     @Override
-    protected int[] getChunkDimensions() {
+    public int[] getChunkDimensions() {
         return layoutMessage.getChunkDimensions();
     }
 

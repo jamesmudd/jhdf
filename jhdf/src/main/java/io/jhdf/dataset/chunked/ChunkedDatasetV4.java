@@ -49,7 +49,7 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
     }
 
     @Override
-    protected int[] getChunkDimensions() {
+    public int[] getChunkDimensions() {
         // TODO understand why there is an extra one on the end of this array
         int[] chunkDimensions = layoutMessage.getChunkDimensions();
         return ArrayUtils.subarray(chunkDimensions, 0, chunkDimensions.length -1);

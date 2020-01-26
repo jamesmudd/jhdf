@@ -167,8 +167,6 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 
     protected abstract Chunk getChunk(ChunkOffset chunkOffset);
 
-    protected abstract int[] getChunkDimensions();
-
     /**
      * Gets the number of linear steps to move for one step in the corresponding dimension
      *
