@@ -278,37 +278,6 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
         }
     }
 
-    /**
-     * Class to wrap an int[] to be used as Map keys
-     */
-    protected final class ChunkOffset {
-        private final int[] chunkOffset;
-
-        public ChunkOffset(int[] chunkOffset) {
-            this.chunkOffset = chunkOffset;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            ChunkOffset that = (ChunkOffset) o;
-            return Arrays.equals(chunkOffset, that.chunkOffset);
-        }
-
-        @Override
-        public int hashCode() {
-            return Arrays.hashCode(chunkOffset);
-        }
-
-        @Override
-        public String toString() {
-            return "ChunkOffset{" +
-                    "chunkOffset=" + Arrays.toString(chunkOffset) +
-                    '}';
-        }
-    }
-
 
     @Override
     public ByteBuffer getRawChunkBuffer(int[] chunkOffset) {
