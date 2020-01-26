@@ -165,6 +165,8 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 
     protected abstract Collection<Chunk> getAllChunks();
 
+    protected abstract Chunk getChunk(ChunkOffset chunkOffset);
+
     protected abstract int[] getChunkDimensions();
 
     /**
@@ -277,4 +279,47 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
             }
         }
     }
+
+    /**
+     * Class to wrap an int[] to be used as Map keys
+     */
+    protected final class ChunkOffset {
+        private final int[] chunkOffset;
+
+        public ChunkOffset(int[] chunkOffset) {
+            this.chunkOffset = chunkOffset;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ChunkOffset that = (ChunkOffset) o;
+            return Arrays.equals(chunkOffset, that.chunkOffset);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(chunkOffset);
+        }
+
+        @Override
+        public String toString() {
+            return "ChunkOffset{" +
+                    "chunkOffset=" + Arrays.toString(chunkOffset) +
+                    '}';
+        }
+    }
+
+
+    @Override
+    public ByteBuffer getRawChunkBuffer(int[] chunkOffset) {
+        final Chunk chunk = getChunk(new ChunkOffset(chunkOffset));
+        if(chunk == null) {
+            throw new HdfException("No chunk with offset " + Arrays.toString(chunkOffset) +
+                    " in dataset: " + getPath());
+        }
+        return getDataBuffer(chunk);
+    }
+
 }
