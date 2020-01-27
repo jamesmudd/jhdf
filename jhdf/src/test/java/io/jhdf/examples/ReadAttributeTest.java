@@ -11,16 +11,20 @@ package io.jhdf.examples;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 class ReadAttributeTest {
 
     @Test
     void testReadingAttributeEarliest() {
-        ReadAttribute.main(new String[]{"src/test/resources/hdf5/test_attribute_earliest.hdf5", "/test_group/data", "2d_string"});
+        assertDoesNotThrow(() ->
+            ReadAttribute.main(new String[]{"src/test/resources/hdf5/test_attribute_earliest.hdf5", "/test_group/data", "2d_string"}));
     }
 
     @Test
     void testReadingAttributeLatest() {
-		ReadAttribute.main(new String[]{"src/test/resources/hdf5/test_attribute_latest.hdf5", "/test_group/data", "2d_string"});
+        assertDoesNotThrow(() ->
+		    ReadAttribute.main(new String[]{"src/test/resources/hdf5/test_attribute_latest.hdf5", "/test_group/data", "2d_string"}));
     }
 
 }
