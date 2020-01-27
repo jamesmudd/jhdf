@@ -51,17 +51,17 @@ public class ChunkedDatasetV3 extends ChunkedDatasetBase {
 
     @Override
     protected Collection<Chunk> getAllChunks() {
-        try {
-            return chunkLookupLazyInitializer.get().values();
-        } catch (ConcurrentException e) {
-            throw new HdfException("Failed to create chunk lookup for: " + getPath(), e);
-        }
+        return getChunkLookup().values();
     }
 
     @Override
     protected Chunk getChunk(ChunkOffset chunkOffset) {
+        return getChunkLookup().get(chunkOffset);
+    }
+
+    private Map<ChunkOffset, Chunk> getChunkLookup() {
         try {
-            return chunkLookupLazyInitializer.get().get(chunkOffset);
+            return chunkLookupLazyInitializer.get();
         } catch (ConcurrentException e) {
             throw new HdfException("Failed to create chunk lookup for: " + getPath(), e);
         }
