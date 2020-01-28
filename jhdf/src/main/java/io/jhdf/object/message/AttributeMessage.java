@@ -77,14 +77,14 @@ public class AttributeMessage extends Message {
 			logger.trace("Name: {}", name);
 
 			if (flags.get(DATA_TYPE_SHARED)) {
-				throw new UnsupportedHdfException("Attribute contains shared data type");
+				throw new UnsupportedHdfException("Attribute [" + name + "] contains shared data type");
 			} else {
 				dataType = DataType.readDataType(Utils.createSubBuffer(bb, dataTypeSize));
 				logger.trace("Datatype: {}", dataType);
 			}
 
 			if (flags.get(DATA_SPACE_SHARED)) {
-				throw new UnsupportedHdfException("Attribute contains shared data space");
+				throw new UnsupportedHdfException("Attribute [" + name + "]  contains shared data space");
 			} else {
 				dataSpace = DataSpace.readDataSpace(Utils.createSubBuffer(bb, dataSpaceSize), sb);
 				logger.trace("Dataspace: {}", dataSpace);
@@ -122,14 +122,14 @@ public class AttributeMessage extends Message {
 			logger.trace("Name: {}", name);
 
 			if (flags.get(DATA_TYPE_SHARED)) {
-				throw new UnsupportedHdfException("Attribute contains shared data type");
+				throw new UnsupportedHdfException("Attribute [" + name + "] contains shared data type");
 			} else {
 				dataType = DataType.readDataType(Utils.createSubBuffer(bb, dataTypeSize));
 				logger.trace("Datatype: {}", dataType);
 			}
 
 			if (flags.get(DATA_SPACE_SHARED)) {
-				throw new UnsupportedHdfException("Attribute contains shared data space");
+				throw new UnsupportedHdfException("Attribute [" + name + "]  contains shared data space");
 			} else {
 				dataSpace = DataSpace.readDataSpace(Utils.createSubBuffer(bb, dataSpaceSize), sb);
 				logger.trace("Dataspace: {}", dataSpace);
