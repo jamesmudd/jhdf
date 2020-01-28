@@ -114,7 +114,7 @@ public final class DatasetReader {
 						break;
 					default:
 						throw new HdfTypeException(
-								"Unsupported signed integer type size " + fixedPoint.getSize() + " bytes");
+								"Unsupported unsigned integer type size " + fixedPoint.getSize() + " bytes");
 				}
 			}
 		} else if (type instanceof FloatingPoint) {
