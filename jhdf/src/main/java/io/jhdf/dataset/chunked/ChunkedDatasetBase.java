@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 
 import static java.lang.Math.toIntExact;
 
@@ -163,10 +164,6 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
         return ByteBuffer.wrap(dataArray);
     }
 
-    protected abstract Collection<Chunk> getAllChunks();
-
-    protected abstract Chunk getChunk(ChunkOffset chunkOffset);
-
     /**
      * Gets the number of linear steps to move for one step in the corresponding dimension
      *
@@ -288,5 +285,15 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
         }
         return getDataBuffer(chunk);
     }
+
+    private Collection<Chunk> getAllChunks() {
+        return getChunkLookup().values();
+    }
+
+    private Chunk getChunk(ChunkOffset chunkOffset) {
+        return getChunkLookup().get(chunkOffset);
+    }
+
+    protected abstract Map<ChunkOffset, Chunk> getChunkLookup();
 
 }

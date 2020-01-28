@@ -50,16 +50,7 @@ public class ChunkedDatasetV3 extends ChunkedDatasetBase {
     }
 
     @Override
-    protected Collection<Chunk> getAllChunks() {
-        return getChunkLookup().values();
-    }
-
-    @Override
-    protected Chunk getChunk(ChunkOffset chunkOffset) {
-        return getChunkLookup().get(chunkOffset);
-    }
-
-    private Map<ChunkOffset, Chunk> getChunkLookup() {
+    protected Map<ChunkOffset, Chunk> getChunkLookup() {
         try {
             return chunkLookupLazyInitializer.get();
         } catch (ConcurrentException e) {
