@@ -3,7 +3,7 @@
 # 
 # http://jhdf.io
 # 
-# Copyright 2019 James Mudd
+# Copyright (c) 2020 James Mudd
 # 
 # MIT License see 'LICENSE' file
 #-------------------------------------------------------------------------------
