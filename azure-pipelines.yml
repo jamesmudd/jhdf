@@ -3,7 +3,7 @@
 jobs:
 - job: Linux
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-latest'
   variables:
    osName: Linux
   strategy:
@@ -74,7 +74,7 @@ jobs:
 
 - job: Windows
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-latest'
   variables:
    osName: Windows
   strategy:
@@ -109,7 +109,7 @@ jobs:
 
 - job: Mac
   pool:
-    vmImage: 'macOS-10.13'
+    vmImage: 'macOS-latest'
   variables:
    osName: Mac
   strategy:
