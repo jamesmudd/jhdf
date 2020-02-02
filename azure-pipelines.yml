@@ -45,32 +45,34 @@ jobs:
       publishJUnitResults: false
   
   # SonarQube
-  - script: 'cd jhdf;
-    ./gradlew sonarqube
-    -Dsonar.projectKey=jamesmudd_jhdf
-    -Dsonar.organization=jamesmudd-github
-    -Dsonar.host.url=https://sonarcloud.io
-    -Dsonar.login=$(sonar.login)
-    -Dsonar.java.spotbugs.reportPaths=./build/reports/spotbugs/main.xml,./build/reports/spotbugs/test.xml'
-    displayName: SonarQube
+  - task: Gradle@2
     # Only run for Java 1.8 and not for PR
     condition: and(eq(variables['java.version'], '1.8'), ne(variables['Build.Reason'], 'PullRequest'))
+    displayName: SonarQube
+    inputs:
+      gradleWrapperFile: 'jhdf/gradlew'
+      workingDirectory: jhdf
+      tasks: 'sonarqube'
+      jdkVersionOption: $(java.version)
+      publishJUnitResults: false
+      gradleOptions: '-Dsonar.login=$(sonar.login)'
 
   # SonarQube for Pull requests
-  - script: 'cd jhdf;
-    ./gradlew sonarqube
-    -Dsonar.projectKey=jamesmudd_jhdf
-    -Dsonar.organization=jamesmudd-github
-    -Dsonar.host.url=https://sonarcloud.io
-    -Dsonar.login=$(sonar.login)
-    -Dsonar.java.spotbugs.reportPaths=./build/reports/spotbugs/main.xml,./build/reports/spotbugs/test.xml
-    -Dsonar.pullrequest.branch=$(Build.SourceBranch)
-    -Dsonar.pullrequest.key=$(System.PullRequest.PullRequestNumber)
-    -Dsonar.pullrequest.base=$(System.PullRequest.TargetBranch)
-    -Dsonar.pullrequest.github.repository=$(Build.Repository.Uri)'
-    displayName: SonarQube PR
+  - task: Gradle@2
     # Only run for Java 1.8 and PR
     condition: and(eq(variables['java.version'], '1.8'), eq(variables['Build.Reason'], 'PullRequest'))
+    displayName: SonarQube PR
+    inputs:
+      gradleWrapperFile: 'jhdf/gradlew'
+      workingDirectory: jhdf
+      tasks: 'sonarqube'
+      jdkVersionOption: $(java.version)
+      publishJUnitResults: false
+      gradleOptions: '-Dsonar.login=$(sonar.login)
+        -Dsonar.pullrequest.branch=$(Build.SourceBranch)
+        -Dsonar.pullrequest.key=$(System.PullRequest.PullRequestNumber)
+        -Dsonar.pullrequest.base=$(System.PullRequest.TargetBranch)
+        -Dsonar.pullrequest.github.repository=$(Build.Repository.Uri)'
 
 - job: Windows
   pool:
