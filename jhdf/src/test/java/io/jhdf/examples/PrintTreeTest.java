@@ -11,16 +11,20 @@ package io.jhdf.examples;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 class PrintTreeTest {
 
 	@Test
     void testOpeningV1File() {
-		PrintTree.main(new String[] { "src/test/resources/hdf5/test_file.hdf5" });
+		assertDoesNotThrow(() ->
+			PrintTree.main(new String[] { "src/test/resources/hdf5/test_file.hdf5" }));
 	}
 
 	@Test
     void testOpeningV2File() {
-		PrintTree.main(new String[] { "src/test/resources/hdf5/test_file2.hdf5" });
+		assertDoesNotThrow(() ->
+			PrintTree.main(new String[] { "src/test/resources/hdf5/test_file2.hdf5" }));
 	}
 
 }

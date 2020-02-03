@@ -13,6 +13,7 @@ import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.Utils;
 import io.jhdf.api.Group;
+import io.jhdf.api.dataset.ChunkedDataset;
 import io.jhdf.dataset.DatasetBase;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.filter.FilterManager;
@@ -26,10 +27,11 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 
 import static java.lang.Math.toIntExact;
 
-public abstract class ChunkedDatasetBase extends DatasetBase {
+public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedDataset {
     private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetBase.class);
 
     protected final FilterPipelineLazyInitializer lazyPipeline;
@@ -162,10 +164,6 @@ public abstract class ChunkedDatasetBase extends DatasetBase {
         return ByteBuffer.wrap(dataArray);
     }
 
-    protected abstract Collection<Chunk> getAllChunks();
-
-    protected abstract int[] getChunkDimensions();
-
     /**
      * Gets the number of linear steps to move for one step in the corresponding dimension
      *
@@ -276,4 +274,26 @@ public abstract class ChunkedDatasetBase extends DatasetBase {
             }
         }
     }
+
+
+    @Override
+    public ByteBuffer getRawChunkBuffer(int[] chunkOffset) {
+        final Chunk chunk = getChunk(new ChunkOffset(chunkOffset));
+        if(chunk == null) {
+            throw new HdfException("No chunk with offset " + Arrays.toString(chunkOffset) +
+                    " in dataset: " + getPath());
+        }
+        return getDataBuffer(chunk);
+    }
+
+    private Collection<Chunk> getAllChunks() {
+        return getChunkLookup().values();
+    }
+
+    private Chunk getChunk(ChunkOffset chunkOffset) {
+        return getChunkLookup().get(chunkOffset);
+    }
+
+    protected abstract Map<ChunkOffset, Chunk> getChunkLookup();
+
 }
