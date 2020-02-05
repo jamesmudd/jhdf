@@ -47,7 +47,7 @@ public final class CompoundDatasetReader {
 			// Now read this member
 			memberBuffer.rewind();
 
-			final Object memberData = DatasetReader.readDataset(member.getDataType(), memberBuffer, dimensions, hdfFc);
+			final Object memberData = DatasetReader.readDataset(member.getDataType(), memberBuffer, size, dimensions, hdfFc);
 			data.put(member.getName(), memberData);
 		}
 
