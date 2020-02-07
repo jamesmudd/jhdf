@@ -94,11 +94,12 @@ public class StringData extends DataType {
 		void setBufferLimit(ByteBuffer byteBuffer);
 	}
 
-	/*package */ static class NullTerminated implements StringPaddingHandler {
+	/* package */ static class NullTerminated implements StringPaddingHandler {
 		@Override
 		public void setBufferLimit(ByteBuffer byteBuffer) {
+			final int limit = byteBuffer.limit();
 			int i = 0;
-			while (byteBuffer.get(i) != NULL) {
+			while (i < limit && byteBuffer.get(i) != NULL) {
 				i++;
 			}
 			// Set the limit to terminate before the null
@@ -106,7 +107,7 @@ public class StringData extends DataType {
 		}
 	}
 
-	/*package */ static class NullPadded implements StringPaddingHandler {
+	/* package */ static class NullPadded implements StringPaddingHandler {
 		@Override
 		public void setBufferLimit(ByteBuffer byteBuffer) {
 			int i = byteBuffer.limit() - 1;
@@ -118,7 +119,7 @@ public class StringData extends DataType {
 		}
 	}
 
-	/*package */ static class SpacePadded implements StringPaddingHandler {
+	/* package */ static class SpacePadded implements StringPaddingHandler {
 		@Override
 		public void setBufferLimit(ByteBuffer byteBuffer) {
 			int i = byteBuffer.limit() - 1;
