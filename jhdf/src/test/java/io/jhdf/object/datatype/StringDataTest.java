@@ -42,7 +42,24 @@ class StringDataTest {
 
         // Read the string back and check the value
         assertThat(US_ASCII.decode(byteBuffer).toString(), is("hello"));
+    }
 
+    @Test
+    void testNullTerminatedWithFullBuffer() {
+        StringPaddingHandler nullTerminated = new StringData.NullTerminated();
+
+        ByteBuffer byteBuffer = ByteBuffer.allocate(5);
+
+        byteBuffer.put("hello".getBytes(US_ASCII));
+        // No null terminater as the string fills the full buffer
+        byteBuffer.rewind();
+
+        assertThat(byteBuffer.limit(), is(5)); // length of buffer
+        nullTerminated.setBufferLimit(byteBuffer);
+        assertThat(byteBuffer.limit(), is(5)); // hello is 5 chars
+
+        // Read the string back and check the value
+        assertThat(US_ASCII.decode(byteBuffer).toString(), is("hello"));
     }
 
     @Test
