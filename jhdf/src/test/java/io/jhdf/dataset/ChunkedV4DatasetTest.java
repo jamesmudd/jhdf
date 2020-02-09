@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static io.jhdf.TestUtils.flatten;
-import static io.jhdf.TestUtils.getDimensions;
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -38,8 +37,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class ChunkedV4DatasetTest {
 
