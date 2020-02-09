@@ -21,8 +21,11 @@ def write_chunked_datasets(f):
     f.create_dataset('8D_int16', data=data, dtype='i2', chunks=(2,3,1,2,3,1,1,2), compression="gzip")
 
     # Small data with inappropriate chunking
-    data = np.arange(5*5*5).reshape(5, 5, 5);
+    data = np.arange(5*5*5).reshape(5, 5, 5)
     f.create_dataset('1D_int16', data=data, dtype='i2', chunks=(4, 4, 4), compression="gzip")
+
+    f.create_dataset('contiguous_no_storage', dtype='i2')
+    f.create_dataset('chunked_no_storage', dtype='i2', shape=(5,), chunks=(2,))
 
     f.flush()
     f.close()
@@ -32,7 +35,7 @@ if __name__ == '__main__':
 
     f = h5py.File('test_odd_datasets_earliest.hdf5', 'w', libver='earliest')
     write_chunked_datasets(f)
-    print('test_compressed_chunked_datasets_earliest.hdf5')
+    print('created test_odd_datasets_earliest.hdf5')
 
     f = h5py.File('test_odd_datasets_latest.hdf5', 'w', libver='latest')
     write_chunked_datasets(f)
