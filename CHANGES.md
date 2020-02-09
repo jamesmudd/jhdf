@@ -1,5 +1,14 @@
 # jHDF Change Log
 
+## v0.5.5
+- Add support for bitfield datasets https://github.com/jamesmudd/jhdf/issues/84
+- Fix https://github.com/jamesmudd/jhdf/issues/157 support nested compound datasets
+- Fix https://github.com/jamesmudd/jhdf/issues/159 reading null terminated strings filling their buffer
+- Add support for raw chunk access. See https://github.com/jamesmudd/jhdf/blob/master/jhdf/src/main/java/io/jhdf/examples/RawChunkAccess.java
+- Fix issues running on systems where default charset is not ASCII/UTF8
+- Upgrade to Gradle 6.1.1
+- Some CI improvements
+
 ## v0.5.4
 - Add support for variable length datasets https://github.com/jamesmudd/jhdf/issues/123
 - Add support for Compound datatype v3 messages allowing more compound datasets to be read
