@@ -1,5 +1,15 @@
-from tables import *
+#-------------------------------------------------------------------------------
+# This file is part of jHDF. A pure Java library for accessing HDF5 files.
+#
+# http://jhdf.io
+#
+# Copyright (c) 2020 James Mudd
+#
+# MIT License see 'LICENSE' file
+#-------------------------------------------------------------------------------
+
 import numpy as np
+from tables import *
 
 # Open a file in "w"rite mode
 file = open_file("../hdf5/bitfield_datasets.hdf5", mode ="w")

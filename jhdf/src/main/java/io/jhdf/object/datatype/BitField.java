@@ -1,8 +1,14 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright (c) 2020 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
 package io.jhdf.object.datatype;
 
-import io.jhdf.exceptions.HdfTypeException;
-
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -12,23 +18,23 @@ public class BitField extends DataType implements OrderedDataType {
     private final boolean highPadding;
     private final short bitOffset;
     private final short bitPrecision;
-    
+
     public BitField(ByteBuffer bb) {
         super(bb);
-        
+
         if (classBits.get(0)) {
             order = ByteOrder.BIG_ENDIAN;
         } else {
             order = ByteOrder.LITTLE_ENDIAN;
         }
-        
+
         lowPadding = classBits.get(1);
         highPadding = classBits.get(2);
-        
+
         bitOffset = bb.getShort();
         bitPrecision = bb.getShort();
     }
-    
+
     @Override
     public ByteOrder getByteOrder() {
         return order;
