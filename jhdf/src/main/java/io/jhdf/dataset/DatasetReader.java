@@ -61,6 +61,16 @@ public final class DatasetReader {
 		throw new AssertionError("No instances of DatasetReader");
 	}
 
+	/**
+	 * This converts a buffer into a Java object representing this dataset.
+	 *
+	 * @param type The data type of this dataset
+	 * @param buffer The buffer containing the dataset
+	 * @param size The number of elements in this dataset
+	 * @param dimensions The dimensions of this dataset
+	 * @param hdfFc The file channel of the file containing this dataset
+	 * @return A Java object representation of this dataset
+	 */
 	public static Object readDataset(DataType type, ByteBuffer buffer, long size, int[] dimensions, HdfFileChannel hdfFc) {
 		// Make the array to hold the data
 		Class<?> javaType = type.getJavaType();
