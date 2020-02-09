@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -37,6 +38,9 @@ import static org.mockito.Mockito.when;
 class DatasetReaderTest {
 
 	private final int[] dims = new int[] { 2, 3 };
+	private final long size = IntStream.of(dims)
+								.mapToLong(Long::valueOf) // Convert to long to avoid int overflow
+								.reduce(1, Math::multiplyExact);
 
 	// Byte
 	private final ByteBuffer byteBuffer = createByteBuffer(new byte[] { 1, -2, 3, -4, 5, -6 });
@@ -87,8 +91,7 @@ class DatasetReaderTest {
 		return Arrays.asList(dynamicTest("Signed Byte", createTest(byteBuffer, byteDataType, dims, byteResult)),
 				dynamicTest("Unsigned Byte", createTest(byteBuffer, unsignedByteDataType, dims, unsignedByteResult)),
 				dynamicTest("Signed Short", createTest(shortBuffer, shortDataType, dims, shortResult)),
-				dynamicTest("Unsigned Short",
-						createTest(shortBuffer, unsignedShortDataType, dims, unsignedShortResult)),
+				dynamicTest("Unsigned Short", createTest(shortBuffer, unsignedShortDataType, dims, unsignedShortResult)),
 				dynamicTest("Signed Int", createTest(intBuffer, intDataType, dims, intResult)),
 				dynamicTest("Unsigned Int", createTest(intBuffer, unsignedIntDataType, dims, unsignedIntResult)),
 				dynamicTest("Signed Long", createTest(longBuffer, longDataType, dims, longResult)),
@@ -102,25 +105,25 @@ class DatasetReaderTest {
 	@Test
 	void testUnsupportedFixedPointLengthThrows() {
 		DataType invalidDataType = mockFixedPoint(int.class, true, 11); // 11 byte data is not supported
-		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims, mock(HdfFileChannel.class)));
+		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, size, dims, mock(HdfFileChannel.class)));
 	}
 
 	@Test
 	void testUnsupportedUnsignedFixedPointLengthThrows() {
 		DataType invalidDataType = mockFixedPoint(int.class, false, 11); // 11 byte data is not supported
-		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims, mock(HdfFileChannel.class)));
+		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, size, dims, mock(HdfFileChannel.class)));
 	}
 
 	@Test
 	void testUnsupportedFloatingPointLengthThrows() {
 		DataType invalidDataType = mockFloatingPoint(double.class, 11); // 11 byte data is not supported
-		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims, mock(HdfFileChannel.class)));
+		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, size, dims, mock(HdfFileChannel.class)));
 	}
 
 	@Test
 	void testUnsupportedReferenceLengthThrows() {
 		DataType invalidDataType = mockReference(long.class, 11); // 11 byte data is not supported
-		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, dims, mock(HdfFileChannel.class)));
+		assertThrows(HdfTypeException.class, () -> DatasetReader.readDataset(invalidDataType, longBuffer, size, dims, mock(HdfFileChannel.class)));
 	}
 
 	private BigInteger[][] createUnsignedLongResult() {
@@ -131,7 +134,7 @@ class DatasetReaderTest {
 	private Executable createTest(ByteBuffer buffer, DataType dataType, int[] dims, Object expected) {
 		return () -> {
 			buffer.rewind(); // For shared buffers
-			Object actual = DatasetReader.readDataset(dataType, buffer, dims, mock(HdfFileChannel.class));
+			Object actual = DatasetReader.readDataset(dataType, buffer, size, dims, mock(HdfFileChannel.class));
 			verifyArray(actual, expected);
 		};
 	}

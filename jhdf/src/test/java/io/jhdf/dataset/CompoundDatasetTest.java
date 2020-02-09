@@ -52,14 +52,14 @@ class CompoundDatasetTest {
     private static Stream<Arguments> test2dCompound() {
         return Stream.of(
                 Arguments.of(earliestHdfFile.getDatasetByPath("/2d_chunked_compound")),
-                Arguments.of(earliestHdfFile.getDatasetByPath("/2d_contigious_compound")),
+                Arguments.of(earliestHdfFile.getDatasetByPath("/2d_contiguous_compound")),
                 Arguments.of(latestHdfFile.getDatasetByPath("/2d_chunked_compound")),
-                Arguments.of(latestHdfFile.getDatasetByPath("/2d_contigious_compound"))
+                Arguments.of(latestHdfFile.getDatasetByPath("/2d_contiguous_compound"))
         );
     }
 
     @ParameterizedTest
-    @MethodSource("test2dCompound")
+    @MethodSource
     void test2dCompound(Dataset dataset) {
         // General checks
         assertThat(dataset.getDimensions(), is(equalTo(new int[]{3, 3})));
@@ -93,15 +93,15 @@ class CompoundDatasetTest {
     private static Stream<Arguments> testCompound() {
         return Stream.of(
                 Arguments.of(earliestHdfFile.getDatasetByPath("/chunked_compound")),
-                Arguments.of(earliestHdfFile.getDatasetByPath("/contigious_compound")),
+                Arguments.of(earliestHdfFile.getDatasetByPath("/contiguous_compound")),
                 Arguments.of(latestHdfFile.getDatasetByPath("/chunked_compound")),
-                Arguments.of(latestHdfFile.getDatasetByPath("/contigious_compound"))
+                Arguments.of(latestHdfFile.getDatasetByPath("/contiguous_compound"))
         );
     }
 
     @SuppressWarnings("unchecked")
     @ParameterizedTest
-    @MethodSource("testCompound")
+    @MethodSource
     void testCompound(Dataset dataset) {
         // General checks
         assertThat(dataset.getDimensions(), is(equalTo(new int[]{4})));
@@ -144,14 +144,14 @@ class CompoundDatasetTest {
     private static Stream<Arguments> testArrayVariableLength() {
         return Stream.of(
                 Arguments.of(earliestHdfFile.getDatasetByPath("/array_vlen_chunked_compound")),
-                Arguments.of(earliestHdfFile.getDatasetByPath("/array_vlen_contigious_compound")),
+                Arguments.of(earliestHdfFile.getDatasetByPath("/array_vlen_contiguous_compound")),
                 Arguments.of(latestHdfFile.getDatasetByPath("/array_vlen_chunked_compound")),
-                Arguments.of(latestHdfFile.getDatasetByPath("/array_vlen_contigious_compound"))
+                Arguments.of(latestHdfFile.getDatasetByPath("/array_vlen_contiguous_compound"))
         );
     }
 
     @ParameterizedTest
-    @MethodSource("testArrayVariableLength")
+    @MethodSource
     void testArrayVariableLength(Dataset dataset) {
         assertThat(dataset.getDimensions(), is(equalTo(new int[]{1})));
         assertThat(dataset.getMaxSize(), is(equalTo(new int[]{1})));
@@ -172,14 +172,14 @@ class CompoundDatasetTest {
     private static Stream<Arguments> testVariableLengthCompound() {
         return Stream.of(
                 Arguments.of(earliestHdfFile.getDatasetByPath("/vlen_chunked_compound")),
-                Arguments.of(earliestHdfFile.getDatasetByPath("/vlen_contigious_compound")),
+                Arguments.of(earliestHdfFile.getDatasetByPath("/vlen_contiguous_compound")),
                 Arguments.of(latestHdfFile.getDatasetByPath("/vlen_chunked_compound")),
-                Arguments.of(latestHdfFile.getDatasetByPath("/vlen_contigious_compound"))
+                Arguments.of(latestHdfFile.getDatasetByPath("/vlen_contiguous_compound"))
         );
     }
 
     @ParameterizedTest
-    @MethodSource("testVariableLengthCompound")
+    @MethodSource
     void testVariableLengthCompound(Dataset dataset) {
         assertThat(dataset.getDimensions(), is(equalTo(new int[]{3})));
         assertThat(dataset.getMaxSize(), is(equalTo(new int[]{3})));
@@ -204,4 +204,36 @@ class CompoundDatasetTest {
         assertThat(toObject((int[]) twoData[2]), is(arrayContaining(2, 2, 2)));
     }
 
+    private static Stream<Arguments> testNestedCompound() {
+        return Stream.of(
+                Arguments.of(earliestHdfFile.getDatasetByPath("/nested_chunked_compound")),
+                Arguments.of(earliestHdfFile.getDatasetByPath("/nested_contiguous_compound")),
+                Arguments.of(latestHdfFile.getDatasetByPath("/nested_chunked_compound")),
+                Arguments.of(latestHdfFile.getDatasetByPath("/nested_contiguous_compound"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void testNestedCompound(Dataset dataset) {
+        assertThat(dataset.getDimensions(), is(equalTo(new int[]{3})));
+        assertThat(dataset.getMaxSize(), is(equalTo(new int[]{3})));
+        assertThat(dataset.isCompound(), is(true));
+        assertThat(dataset.getJavaType(), is(Map.class));
+        assertThat(dataset.getFillValue(), is(nullValue()));
+
+        // Check the compoundness
+        Map<String, Object> compoundData = (Map<String, Object>) dataset.getData();
+        assertThat(compoundData.keySet(), contains("firstNumber", "secondNumber"));
+
+        Map<String, Object> firstNumberData = (Map<String, Object>) compoundData.get("firstNumber");
+        assertThat(firstNumberData.keySet(), contains("real", "img"));
+        assertThat(toObject((float[]) firstNumberData.get("real")), is(arrayContaining(0.0f, 1.0f, 2.0f)));
+        assertThat(toObject((float[]) firstNumberData.get("img")), is(arrayContaining(0.0f, 1.0f, 2.0f)));
+
+        Map<String, Object> secondNumberData = (Map<String, Object>) compoundData.get("secondNumber");
+        assertThat(secondNumberData.keySet(), contains("real", "img"));
+        assertThat(toObject((float[]) secondNumberData.get("real")), is(arrayContaining(0.0f, 1.0f, 2.0f)));
+        assertThat(toObject((float[]) secondNumberData.get("img")), is(arrayContaining(0.0f, 1.0f, 2.0f)));
+    }
 }

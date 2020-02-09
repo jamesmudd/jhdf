@@ -32,7 +32,7 @@ def write_compound_datasets(f):
     data[2] = ('James', 'Mudd', 0, 12, 3.0, [-32.1,-774.1,-3.0])
     data[3] = ('Ellie', 'Kyle', 1, 22, 4.0, [2.1,74.1,-3.8])
 
-    f.create_dataset('contigious_compound', data=data)
+    f.create_dataset('contiguous_compound', data=data)
     f.create_dataset('chunked_compound', data=data, chunks=(1,), compression="gzip")
 
     # 2d compound use img number example
@@ -51,7 +51,7 @@ def write_compound_datasets(f):
     data[2][1] = (12.3, -17.3)
     data[2][2] = (-32.3, -0.3)
 
-    f.create_dataset('2d_contigious_compound', data=data)
+    f.create_dataset('2d_contiguous_compound', data=data)
     f.create_dataset('2d_chunked_compound', data=data, chunks=(1,2), compression="gzip")
 
     # Compound dataset containing ragged arrays
@@ -65,7 +65,7 @@ def write_compound_datasets(f):
     data[1] = (np.array([1,1]), np.array([2,2]))
     data[2] = (np.array([1,1,1]), np.array([2,2,2]))
 
-    f.create_dataset('vlen_contigious_compound', data=data, dtype=compound_vlen_dtype)
+    f.create_dataset('vlen_contiguous_compound', data=data, dtype=compound_vlen_dtype)
     f.create_dataset('vlen_chunked_compound', data=data, dtype=compound_vlen_dtype, chunks=(1,), compression="gzip")
 
     # Compound dataset arrays of vlen type
@@ -78,8 +78,20 @@ def write_compound_datasets(f):
     data = np.zeros(1, dtype=compound_vlen_dtype)
     data['name'] = np.array(pointData)
 
-    f.create_dataset('array_vlen_contigious_compound', data=data, dtype=compound_vlen_dtype)
+    f.create_dataset('array_vlen_contiguous_compound', data=data, dtype=compound_vlen_dtype)
     f.create_dataset('array_vlen_chunked_compound', data=data, dtype=compound_vlen_dtype, chunks=(1,), compression="gzip")
+
+    # Nested compound datasets use 2 img numbers as an example
+    nested_dt = np.dtype([
+        ('firstNumber', imgdt),
+        ('secondNumber', imgdt),
+    ])
+
+    data = np.zeros(3, dtype=nested_dt)
+    data[1] = ((1,1), (1,1))
+    data[2] = ((2,2), (2,2))
+    f.create_dataset('nested_contiguous_compound', data=data, dtype=nested_dt)
+    f.create_dataset('nested_chunked_compound', data=data, dtype=nested_dt, chunks=(2,), compression="gzip")
 
     f.flush()
     f.close()

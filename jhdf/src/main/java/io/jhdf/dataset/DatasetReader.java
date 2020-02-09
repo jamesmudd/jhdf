@@ -14,6 +14,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.ArrayDataType;
+import io.jhdf.object.datatype.CompoundDataType;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.EnumDataType;
 import io.jhdf.object.datatype.FixedPoint;
@@ -60,7 +61,17 @@ public final class DatasetReader {
 		throw new AssertionError("No instances of DatasetReader");
 	}
 
-	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+	/**
+	 * This converts a buffer into a Java object representing this dataset.
+	 *
+	 * @param type The data type of this dataset
+	 * @param buffer The buffer containing the dataset
+	 * @param size The number of elements in this dataset
+	 * @param dimensions The dimensions of this dataset
+	 * @param hdfFc The file channel of the file containing this dataset
+	 * @return A Java object representation of this dataset
+	 */
+	public static Object readDataset(DataType type, ByteBuffer buffer, long size, int[] dimensions, HdfFileChannel hdfFc) {
 		// Make the array to hold the data
 		Class<?> javaType = type.getJavaType();
 
@@ -139,13 +150,13 @@ public final class DatasetReader {
 			fillFixedLengthStringData(data, dimensions, buffer, stringLength, charset, stringPaddingHandler);
 		} else if (type instanceof Reference) {
 			//reference type handles addresses, which are always longs for this library
-			int size = type.getSize();
-			if (size == 8) {
+			int elementSize = type.getSize();
+			if (elementSize == 8) {
 				fillData(data, dimensions, buffer.order(ByteOrder.LITTLE_ENDIAN).asLongBuffer());
-			} else if (size < 8) {
-				fillLongData(data, dimensions, buffer.order(ByteOrder.LITTLE_ENDIAN), size);
+			} else if (elementSize < 8) {
+				fillLongData(data, dimensions, buffer.order(ByteOrder.LITTLE_ENDIAN), elementSize);
 			} else {
-				throw new HdfTypeException("Unsupported address size in reference data type " + size + " bytes");
+				throw new HdfTypeException("Unsupported address size in reference data type " + elementSize + " bytes");
 			}
 		} else if (type instanceof ArrayDataType) {
 			final ArrayDataType arrayType = (ArrayDataType) type;
@@ -156,13 +167,15 @@ public final class DatasetReader {
 			for (int i = 0; i < dimensions[0]; i++) {
 				// Need to position the buffer ready for the read
 				buffer.position(i * arrayType.getBaseType().getSize() * arrayType.getDimensions()[0]);
-				Object elementDataset = readDataset(arrayType.getBaseType(), buffer, arrayType.getDimensions(), hdfFc);
+				Object elementDataset = readDataset(arrayType.getBaseType(), buffer, size, arrayType.getDimensions(), hdfFc);
 				Array.set(data, i, elementDataset);
 			}
 		} else if (type instanceof EnumDataType) {
 			return EnumDatasetReader.readEnumDataset((EnumDataType) type, buffer, dimensions);
 		} else if (type instanceof VariableLength) {
-			data = VariableLengthDatasetReader.readDataset((VariableLength) type, buffer, dimensions, hdfFc);
+			data = VariableLengthDatasetReader.readDataset((VariableLength) type, buffer, size, dimensions, hdfFc);
+		} else if (type instanceof CompoundDataType) {
+			data = CompoundDatasetReader.readDataset((CompoundDataType) type, buffer, size, dimensions, hdfFc);
 		} else {
 			throw new HdfException(
 					"DatasetReader was passed a type it cant fill. Type: " + type.getClass().getCanonicalName());
