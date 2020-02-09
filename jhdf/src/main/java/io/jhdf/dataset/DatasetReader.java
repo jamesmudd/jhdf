@@ -14,6 +14,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.ArrayDataType;
+import io.jhdf.object.datatype.BitField;
 import io.jhdf.object.datatype.CompoundDataType;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.EnumDataType;
@@ -148,6 +149,9 @@ public final class DatasetReader {
 			final Charset charset = ((StringData) type).getCharset();
 			final StringData.StringPaddingHandler stringPaddingHandler = ((StringData) type).getStringPaddingHandler();
 			fillFixedLengthStringData(data, dimensions, buffer, stringLength, charset, stringPaddingHandler);
+		} else if (type instanceof BitField) {
+			final BitField bitField = (BitField) type;
+			fillBitfieldData(data, dimensions, buffer.order(bitField.getByteOrder()));
 		} else if (type instanceof Reference) {
 			//reference type handles addresses, which are always longs for this library
 			int elementSize = type.getSize();
@@ -185,6 +189,19 @@ public final class DatasetReader {
 			return Array.get(data, 0);
 		} else {
 			return data;
+		}
+	}
+
+	private static void fillBitfieldData(Object data, int[] dims, ByteBuffer buffer) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				fillBitfieldData(newArray, stripLeadingIndex(dims), buffer);
+			}
+		} else {
+			for (int i = 0; i < Array.getLength(data); i++) {
+				Array.set(data, i, buffer.get() == 1);
+			}
 		}
 	}
 
