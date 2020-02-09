@@ -9,6 +9,7 @@
  */
 package io.jhdf.dataset.chunked;
 
+import io.jhdf.Constants;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
@@ -67,6 +68,10 @@ public class ChunkedDatasetV3 extends ChunkedDatasetBase {
         @Override
         protected Map<ChunkOffset, Chunk> initialize() {
             logger.debug("Creating chunk lookup for '{}'", getPath());
+
+            if(layoutMessage.getBTreeAddress() == Constants.UNDEFINED_ADDRESS) {
+                throw new HdfException("No storage allocated for '" + getPath() + "'");
+            }
 
             final BTreeV1Data bTree = BTreeV1.createDataBTree(hdfFc, layoutMessage.getBTreeAddress(), getDimensions().length);
             final Collection<Chunk> allChunks = bTree.getChunks();
