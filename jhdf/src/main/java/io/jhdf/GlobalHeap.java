@@ -64,7 +64,7 @@ public class GlobalHeap {
 
 			// minimal global heap object is 16 bytes
 			while (bb.remaining() >= 16) {
-				GlobalHeapObject object = new GlobalHeapObject(bb);
+				GlobalHeapObject object = new GlobalHeapObject(this, bb);
 				if (object.index == 0) {
 					break;
 				} else {
@@ -82,21 +82,21 @@ public class GlobalHeap {
 		return "GlobalHeap [address=" + address + ", objects=" + objects.size() + "]";
 	}
 
-	private class GlobalHeapObject {
+	private static class GlobalHeapObject {
 
 		final int index;
 		final int referenceCount;
 		final ByteBuffer data;
 
-		private GlobalHeapObject(ByteBuffer bb) {
+		private GlobalHeapObject(GlobalHeap globalHeap, ByteBuffer bb) {
 
 			index = readBytesAsUnsignedInt(bb, 2);
 			referenceCount = readBytesAsUnsignedInt(bb, 2);
 			bb.position(bb.position() + 4); // Skip 4 reserved bytes
-			int size = readBytesAsUnsignedInt(bb, hdfFc.getSizeOfOffsets());
+			int size = readBytesAsUnsignedInt(bb, globalHeap.hdfFc.getSizeOfOffsets());
 			if (index == 0) {
 				//the size in global heap object 0 is the free space without counting object 0
-				size = size - 2 - 2 - 4 - hdfFc.getSizeOfOffsets();
+				size = size - 2 - 2 - 4 - globalHeap.hdfFc.getSizeOfOffsets();
 			}
 			data = createSubBuffer(bb, size);
 			seekBufferToNextMultipleOfEight(bb);

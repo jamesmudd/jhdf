@@ -49,7 +49,7 @@ class CompoundDatasetTest {
         latestHdfFile.close();
     }
 
-    private static Stream<Arguments> test2dCompound() {
+    static Stream<Arguments> test2dCompound() {
         return Stream.of(
                 Arguments.of(earliestHdfFile.getDatasetByPath("/2d_chunked_compound")),
                 Arguments.of(earliestHdfFile.getDatasetByPath("/2d_contiguous_compound")),
@@ -90,7 +90,7 @@ class CompoundDatasetTest {
         })));
     }
 
-    private static Stream<Arguments> testCompound() {
+    static Stream<Arguments> testCompound() {
         return Stream.of(
                 Arguments.of(earliestHdfFile.getDatasetByPath("/chunked_compound")),
                 Arguments.of(earliestHdfFile.getDatasetByPath("/contiguous_compound")),
@@ -141,7 +141,7 @@ class CompoundDatasetTest {
         })));
     }
 
-    private static Stream<Arguments> testArrayVariableLength() {
+    static Stream<Arguments> testArrayVariableLength() {
         return Stream.of(
                 Arguments.of(earliestHdfFile.getDatasetByPath("/array_vlen_chunked_compound")),
                 Arguments.of(earliestHdfFile.getDatasetByPath("/array_vlen_contiguous_compound")),
@@ -169,7 +169,7 @@ class CompoundDatasetTest {
         assertThat(names[0], is(equalTo(new String[]{"James", "Ellie"})));
     }
 
-    private static Stream<Arguments> testVariableLengthCompound() {
+    static Stream<Arguments> testVariableLengthCompound() {
         return Stream.of(
                 Arguments.of(earliestHdfFile.getDatasetByPath("/vlen_chunked_compound")),
                 Arguments.of(earliestHdfFile.getDatasetByPath("/vlen_contiguous_compound")),
@@ -204,7 +204,7 @@ class CompoundDatasetTest {
         assertThat(toObject((int[]) twoData[2]), is(arrayContaining(2, 2, 2)));
     }
 
-    private static Stream<Arguments> testNestedCompound() {
+    static Stream<Arguments> testNestedCompound() {
         return Stream.of(
                 Arguments.of(earliestHdfFile.getDatasetByPath("/nested_chunked_compound")),
                 Arguments.of(earliestHdfFile.getDatasetByPath("/nested_contiguous_compound")),

@@ -345,12 +345,12 @@ class UtilsTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("chunkIndexToChunkOffsetTestCases")
-	void test(int chunkIndex, int[] chunkDimensions, int[] datasetDimensions, int[] expectedChunkOffset) {
+	@MethodSource
+	void chunkIndexToChunkOffset(int chunkIndex, int[] chunkDimensions, int[] datasetDimensions, int[] expectedChunkOffset) {
 		assertThat(Utils.chunkIndexToChunkOffset(chunkIndex, chunkDimensions, datasetDimensions), is(equalTo(expectedChunkOffset)));
 	}
 
-	private static Stream<Arguments> chunkIndexToChunkOffsetTestCases() {
+	static Stream<Arguments> chunkIndexToChunkOffset() {
 		return Stream.of(
 				//1D
 				Arguments.of(0, new int[]{2}, new int[]{5}, new int[] {0}),
