@@ -95,99 +95,93 @@ public class FractalHeap {
 		this.sb = hdfFc.getSuperblock();
 		this.address = address;
 
-		try {
-			final int headerSize = 4 + 1 + 2 + 2 + 1 + 4 + 12 * sb.getSizeOfLengths() + 3 * sb.getSizeOfOffsets() + 2
-					+ 2 + 2 + 2;
+		final int headerSize = 4 + 1 + 2 + 2 + 1 + 4 + 12 * sb.getSizeOfLengths() + 3 * sb.getSizeOfOffsets() + 2
+				+ 2 + 2 + 2;
 
-			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
+		ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
-			byte[] formatSignatureBytes = new byte[4];
-			bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
+		byte[] formatSignatureBytes = new byte[4];
+		bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
 
-			// Verify signature
-			if (!Arrays.equals(FRACTAL_HEAP_SIGNATURE, formatSignatureBytes)) {
-				throw new HdfException("Fractal heap signature 'FRHP' not matched, at address " + address);
-			}
+		// Verify signature
+		if (!Arrays.equals(FRACTAL_HEAP_SIGNATURE, formatSignatureBytes)) {
+			throw new HdfException("Fractal heap signature 'FRHP' not matched, at address " + address);
+		}
 
-			// Version Number
-			final byte version = bb.get();
-			if (version != 0) {
-				throw new HdfException("Unsupported fractal heap version detected. Version: " + version);
-			}
+		// Version Number
+		final byte version = bb.get();
+		if (version != 0) {
+			throw new HdfException("Unsupported fractal heap version detected. Version: " + version);
+		}
 
-			idLength = readBytesAsUnsignedInt(bb, 2);
-			ioFiltersLength = readBytesAsUnsignedInt(bb, 2);
+		idLength = readBytesAsUnsignedInt(bb, 2);
+		ioFiltersLength = readBytesAsUnsignedInt(bb, 2);
 
-			flags = BitSet.valueOf(new byte[] { bb.get() });
+		flags = BitSet.valueOf(new byte[] { bb.get() });
 
-			maxSizeOfManagedObjects = readBytesAsUnsignedLong(bb, 4);
+		maxSizeOfManagedObjects = readBytesAsUnsignedLong(bb, 4);
 
-			nextHugeObjectId = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
+		nextHugeObjectId = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 
-			bTreeAddressOfHugeObjects = readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+		bTreeAddressOfHugeObjects = readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 
-			freeSpaceInManagedBlocks = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
+		freeSpaceInManagedBlocks = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 
-			addressOfManagedBlocksFreeSpaceManager = readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+		addressOfManagedBlocksFreeSpaceManager = readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 
-			amountOfManagedSpaceInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
-			amountOfAllocatedManagedSpaceInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
-			offsetOfDirectBlockAllocationIteratorInManagedSpace = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
-			numberOfManagedObjectsInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
+		amountOfManagedSpaceInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
+		amountOfAllocatedManagedSpaceInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
+		offsetOfDirectBlockAllocationIteratorInManagedSpace = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
+		numberOfManagedObjectsInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 
-			sizeOfHugeObjectsInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
-			numberOfHugeObjectsInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
-			sizeOfTinyObjectsInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
-			numberOfTinyObjectsInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
+		sizeOfHugeObjectsInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
+		numberOfHugeObjectsInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
+		sizeOfTinyObjectsInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
+		numberOfTinyObjectsInHeap = readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 
-			tableWidth = readBytesAsUnsignedInt(bb, 2);
+		tableWidth = readBytesAsUnsignedInt(bb, 2);
 
-			startingBlockSize = readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
-			maxDirectBlockSize = readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
+		startingBlockSize = readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
+		maxDirectBlockSize = readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
 
-			// Value stored in bits
-			final int maxHeapSize = readBytesAsUnsignedInt(bb, 2);
-			// Calculate byte sizes needed later
-			bytesToStoreOffset = (int) Math.ceil(maxHeapSize / 8.0);
-			bytesToStoreLength = bytesNeededToHoldNumber(Math.min(maxDirectBlockSize, maxSizeOfManagedObjects));
+		// Value stored in bits
+		final int maxHeapSize = readBytesAsUnsignedInt(bb, 2);
+		// Calculate byte sizes needed later
+		bytesToStoreOffset = (int) Math.ceil(maxHeapSize / 8.0);
+		bytesToStoreLength = bytesNeededToHoldNumber(Math.min(maxDirectBlockSize, maxSizeOfManagedObjects));
 
-			startingRowsInRootIndirectBlock = readBytesAsUnsignedInt(bb, 2);
+		startingRowsInRootIndirectBlock = readBytesAsUnsignedInt(bb, 2);
 
-			final long addressOfRootBlock = readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+		final long addressOfRootBlock = readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 
-			currentRowsInRootIndirectBlock = readBytesAsUnsignedInt(bb, 2);
+		currentRowsInRootIndirectBlock = readBytesAsUnsignedInt(bb, 2);
 
-			if (ioFiltersLength > 0) {
-				throw new UnsupportedHdfException("IO filters are currently not supported");
-			}
+		if (ioFiltersLength > 0) {
+			throw new UnsupportedHdfException("IO filters are currently not supported");
+		}
 
-			// Read the root block
-			if (addressOfRootBlock != UNDEFINED_ADDRESS) {
-				if (currentRowsInRootIndirectBlock == 0) {
-					// Read direct block
-					DirectBlock db = new DirectBlock(addressOfRootBlock);
-					directBlocks.put(db.blockOffset, db);
-				} else {
-					// Read indirect block
-					IndirectBlock indirectBlock = new IndirectBlock(addressOfRootBlock);
-					for (long directBlockAddress : indirectBlock.childBlockAddresses) {
-						int blockSize = getSizeOfDirectBlock(blockIndex++);
-						if (blockSize != -1) {
-							DirectBlock db = new DirectBlock(directBlockAddress);
-							directBlocks.put(db.getBlockOffset(), db);
-						} else {
-							new IndirectBlock(address);
-						}
+		// Read the root block
+		if (addressOfRootBlock != UNDEFINED_ADDRESS) {
+			if (currentRowsInRootIndirectBlock == 0) {
+				// Read direct block
+				DirectBlock db = new DirectBlock(addressOfRootBlock);
+				directBlocks.put(db.blockOffset, db);
+			} else {
+				// Read indirect block
+				IndirectBlock indirectBlock = new IndirectBlock(addressOfRootBlock);
+				for (long directBlockAddress : indirectBlock.childBlockAddresses) {
+					int blockSize = getSizeOfDirectBlock(blockIndex++);
+					if (blockSize != -1) {
+						DirectBlock db = new DirectBlock(directBlockAddress);
+						directBlocks.put(db.getBlockOffset(), db);
+					} else {
+						new IndirectBlock(address);
 					}
 				}
 			}
-
-			logger.debug("Read fractal heap at address {}, loaded {} direct blocks", address, directBlocks.size());
-
-		} catch (Exception e) {
-			throw new HdfException("Error reading fractal heap at address " + address, e);
 		}
 
+		logger.debug("Read fractal heap at address {}, loaded {} direct blocks", address, directBlocks.size());
 	}
 
 	public ByteBuffer getId(ByteBuffer buffer) {
