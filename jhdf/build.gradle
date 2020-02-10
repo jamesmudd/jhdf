@@ -1,3 +1,5 @@
+import com.github.spotbugs.SpotBugsTask
+
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
@@ -199,6 +201,12 @@ spotbugs {
     effort = "max"
     reportLevel = "low" // Report all issues even low priority
 }
+tasks.withType(SpotBugsTask) {
+    reports {
+        xml.withMessages true
+    }
+}
+
 
 sonarqube {
     properties {
