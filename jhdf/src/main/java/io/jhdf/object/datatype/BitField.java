@@ -12,6 +12,8 @@ package io.jhdf.object.datatype;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import io.jhdf.exceptions.HdfTypeException;
+
 public class BitField extends DataType implements OrderedDataType {
     private final ByteOrder order;
     private final boolean lowPadding;
@@ -58,6 +60,13 @@ public class BitField extends DataType implements OrderedDataType {
 
     @Override
     public Class<?> getJavaType() {
-        return boolean.class;
+        switch (bitPrecision) {
+        case 8: 
+            return byte.class;
+        case 1:
+            return boolean.class;
+        default:
+            throw new HdfTypeException("Unsupported bitfield data precision");
+        }
     }
 }

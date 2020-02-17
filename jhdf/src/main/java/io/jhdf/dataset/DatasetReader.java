@@ -151,7 +151,7 @@ public final class DatasetReader {
 			fillFixedLengthStringData(data, dimensions, buffer, stringLength, charset, stringPaddingHandler);
 		} else if (type instanceof BitField) {
 			final BitField bitField = (BitField) type;
-			fillBitfieldData(data, dimensions, buffer.order(bitField.getByteOrder()));
+			fillBitfieldData(data, dimensions, buffer.order(bitField.getByteOrder()), javaType);
 		} else if (type instanceof Reference) {
 			//reference type handles addresses, which are always longs for this library
 			int elementSize = type.getSize();
@@ -192,15 +192,21 @@ public final class DatasetReader {
 		}
 	}
 
-	private static void fillBitfieldData(Object data, int[] dims, ByteBuffer buffer) {
+	private static void fillBitfieldData(Object data, int[] dims, ByteBuffer buffer, Class<?> javaType) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillBitfieldData(newArray, stripLeadingIndex(dims), buffer);
+				fillBitfieldData(newArray, stripLeadingIndex(dims), buffer, javaType);
 			}
 		} else {
-			for (int i = 0; i < Array.getLength(data); i++) {
-				Array.set(data, i, buffer.get() == 1);
+			if (javaType == boolean.class) {
+				for (int i = 0; i < Array.getLength(data); i++) {
+					Array.set(data, i, buffer.get() == 1);
+				}
+			} else if (javaType == byte.class) {
+				buffer.get((byte[]) data);
+			} else {
+				throw new HdfTypeException("Unsupported bitfield precision for class " + javaType.getName());
 			}
 		}
 	}
