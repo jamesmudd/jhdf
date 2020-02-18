@@ -61,7 +61,7 @@ public class BitField extends DataType implements OrderedDataType {
     @Override
     public Class<?> getJavaType() {
         switch (bitPrecision) {
-        case 8: 
+        case 8:
             return byte.class;
         case 1:
             return boolean.class;
