@@ -40,7 +40,7 @@ public final class DatasetLoader {
 				return new CompactDataset(hdfFc, address, name, parent, oh);
 
 			} else if (dlm instanceof ContiguousDataLayoutMessage) {
-				return new ContiguousDataset(hdfFc, address, name, parent, oh);
+				return new ContiguousDatasetImpl(hdfFc, address, name, parent, oh);
 
 			} else if (dlm instanceof ChunkedDataLayoutMessageV3) {
 				return new ChunkedDatasetV3(hdfFc, address, name, parent, oh);

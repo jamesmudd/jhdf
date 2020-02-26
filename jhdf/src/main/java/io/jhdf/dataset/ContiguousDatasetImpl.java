@@ -12,6 +12,7 @@ package io.jhdf.dataset;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
+import io.jhdf.api.dataset.ContiguousDataset;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
 
@@ -19,9 +20,9 @@ import java.nio.ByteBuffer;
 
 import static io.jhdf.Constants.UNDEFINED_ADDRESS;
 
-public class ContiguousDataset extends DatasetBase {
+public class ContiguousDatasetImpl extends DatasetBase implements ContiguousDataset {
 
-	public ContiguousDataset(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
+	public ContiguousDatasetImpl(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
 		super(hdfFc, address, name, parent, oh);
 	}
 
@@ -42,6 +43,11 @@ public class ContiguousDataset extends DatasetBase {
 		} catch (Exception e) {
 			throw new HdfException("Failed to map data buffer for dataset '" + getPath() + "'", e);
 		}
+	}
+
+	@Override
+	public ByteBuffer getBuffer() {
+		return getDataBuffer();
 	}
 
 	/**
