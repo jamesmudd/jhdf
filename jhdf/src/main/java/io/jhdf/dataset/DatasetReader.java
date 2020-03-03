@@ -36,6 +36,8 @@ import java.nio.ShortBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import static io.jhdf.Utils.stripLeadingIndex;
+
 /**
  * <p>
  * This class handles converting the {@link ByteBuffer} obtained from the file
@@ -375,12 +377,6 @@ public final class DatasetReader {
 				Array.set(data, i, charset.decode(elementBuffer).toString());
 			}
 		}
-	}
-
-	// Utils
-
-	private static int[] stripLeadingIndex(int[] dims) {
-		return Arrays.copyOfRange(dims, 1, dims.length);
 	}
 
 }
