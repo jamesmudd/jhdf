@@ -10,7 +10,6 @@
 package io.jhdf.api.dataset;
 
 import io.jhdf.api.Dataset;
-import io.jhdf.exceptions.HdfException;
 
 import java.nio.ByteBuffer;
 
