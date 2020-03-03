@@ -118,10 +118,12 @@ class TestAllFiles {
 				assertThat(attribute.getSize(), is(equalTo(1L)));
 				assertThat(attribute.getDiskSize(), is(greaterThan(0L)));
 				assertThat(attribute.getData(), is(notNullValue()));
+				assertThat(attribute.getBuffer(), is(notNullValue()));
 			} else {
 				assertThat(attribute.getSize(), is(greaterThan(0L)));
 				assertThat(attribute.getDiskSize(), is(greaterThan(0L)));
 				assertThat(attribute.getData(), is(notNullValue()));
+				assertThat(attribute.getBuffer(), is(notNullValue()));
 			}
 		}
 	}
