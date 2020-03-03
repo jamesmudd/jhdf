@@ -96,4 +96,8 @@ public class AttributeImpl implements Attribute {
 		return type;
 	}
 
+	@Override
+	public ByteBuffer getBuffer() {
+		return message.getDataBuffer();
+	}
 }
