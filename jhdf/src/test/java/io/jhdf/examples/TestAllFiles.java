@@ -16,6 +16,8 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Link;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
+import io.jhdf.api.dataset.ChunkedDataset;
+import io.jhdf.api.dataset.ContiguousDataset;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -171,6 +174,21 @@ class TestAllFiles {
 			assertThat(getType(data), is(equalTo(dataset.getJavaType())));
 			// Should have some size
 			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+		}
+
+		if (dataset instanceof ContiguousDataset && !dataset.isEmpty()) {
+			ContiguousDataset contiguousDataset = (ContiguousDataset) dataset;
+			ByteBuffer buffer = contiguousDataset.getBuffer();
+			assertThat(buffer, is(notNullValue()));
+			assertThat(buffer.capacity(), is(greaterThan(0)));
+		}
+
+		if (dataset instanceof ChunkedDataset && !dataset.isEmpty()) {
+			ChunkedDataset chunkedDataset = (ChunkedDataset) dataset;
+			// Get the first chunk
+			ByteBuffer buffer = chunkedDataset.getRawChunkBuffer(new int[dataset.getDimensions().length]);
+			assertThat(buffer, is(notNullValue()));
+			assertThat(buffer.capacity(), is(greaterThan(0)));
 		}
 	}
 
