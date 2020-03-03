@@ -27,4 +27,12 @@ public interface ContiguousDataset extends Dataset {
      */
     ByteBuffer getBuffer();
 
+
+    /**
+     * Gets the address of the data in the HDF5-file relative to the end of the userblock. To get the absolute data
+     * address in the file, {@code file.getUserBlockSize()} needs to be added.
+     *
+     * @return the address where the data of this contiguous dataset starts relative to the userblock
+     */
+    long getDataAddress();
 }

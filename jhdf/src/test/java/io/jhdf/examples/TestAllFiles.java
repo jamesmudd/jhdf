@@ -183,6 +183,7 @@ class TestAllFiles {
 			ByteBuffer buffer = contiguousDataset.getBuffer();
 			assertThat(buffer, is(notNullValue()));
 			assertThat(buffer.capacity(), is(greaterThan(0)));
+			assertThat(contiguousDataset.getDataAddress(), is(greaterThan(0L)));
 		}
 
 		if (dataset instanceof ChunkedDataset && !dataset.isEmpty()) {
