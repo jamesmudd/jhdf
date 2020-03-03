@@ -12,6 +12,7 @@ package io.jhdf.dataset;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
+import io.jhdf.api.dataset.ContiguousDataset;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
 
@@ -19,9 +20,9 @@ import java.nio.ByteBuffer;
 
 import static io.jhdf.Constants.UNDEFINED_ADDRESS;
 
-public class ContiguousDataset extends DatasetBase {
+public class ContiguousDatasetImpl extends DatasetBase implements ContiguousDataset {
 
-	public ContiguousDataset(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
+	public ContiguousDatasetImpl(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
 		super(hdfFc, address, name, parent, oh);
 	}
 
@@ -44,12 +45,12 @@ public class ContiguousDataset extends DatasetBase {
 		}
 	}
 
-	/**
-	 * Gets the address of the data in the HDF5-file relative to the end of the userblock. To get the absolute data
-	 * address in the file, {@code file.getUserBlockSize()} needs to be added.
-	 *
-	 * @return the address where the data of this contiguous dataset starts relative to the userblock
-	 */
+	@Override
+	public ByteBuffer getBuffer() {
+		return getDataBuffer();
+	}
+
+	@Override
 	public long getDataAddress() {
 		ContiguousDataLayoutMessage contiguousDataLayoutMessage = getHeaderMessage(ContiguousDataLayoutMessage.class);
 		return contiguousDataLayoutMessage.getAddress();

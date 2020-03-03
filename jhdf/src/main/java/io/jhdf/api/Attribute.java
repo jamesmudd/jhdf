@@ -18,6 +18,8 @@
  */
 package io.jhdf.api;
 
+import java.nio.ByteBuffer;
+
 /**
  * Interface for HDF5 attributes. Attributes can be attached to {@link Group}s
  * or {@link Dataset}s. They contain metadata about that object.
@@ -99,5 +101,13 @@ public interface Attribute {
 	 * @see Dataset#isEmpty()
 	 */
 	boolean isEmpty();
+
+	/**
+	 * Gets the buffer for this attribute
+	 *
+	 * @return the buffer for this attribute
+	 */
+	ByteBuffer getBuffer();
+
 
 }
