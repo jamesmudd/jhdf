@@ -16,6 +16,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.BitSet;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
@@ -324,5 +325,15 @@ public final class Utils {
 		}
 
 		return chunkOffset;
+	}
+
+	/**
+	 * Removes the zeroth (leading) index. e.g [1,2,3] → [2,3]
+	 *
+	 * @param dims the array to strip
+	 * @return dims with the zeroth element removed
+	 */
+	public static int[] stripLeadingIndex(int[] dims) {
+		return Arrays.copyOfRange(dims, 1, dims.length);
 	}
 }

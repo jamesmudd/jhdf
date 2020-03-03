@@ -395,4 +395,17 @@ class UtilsTest {
 				Arguments.of(8, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {4,0,0})
 		);
 	}
+
+	static Stream<Arguments> testStripLeadingIndex() {
+		return Stream.of(
+			Arguments.of(new int[]{1,2,3}, new int[]{2,3}),
+			Arguments.of(new int[]{1,2,3,4,5}, new int[]{2,3,4,5})
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource
+    void testStripLeadingIndex(int[] input, int[] output) {
+		assertThat(Utils.stripLeadingIndex(input), is(output));
+    }
 }
