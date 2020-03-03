@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import static io.jhdf.Utils.stripLeadingIndex;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 public final class VariableLengthDatasetReader {
@@ -104,10 +105,6 @@ public final class VariableLengthDatasetReader {
 				Array.set(data, i, element);
 			}
 		}
-	}
-
-	private static int[] stripLeadingIndex(int[] dims) {
-		return Arrays.copyOfRange(dims, 1, dims.length);
 	}
 
 	private static List<GlobalHeapId> getGlobalHeapIds(ByteBuffer bb, int length, HdfFileChannel hdfFc,

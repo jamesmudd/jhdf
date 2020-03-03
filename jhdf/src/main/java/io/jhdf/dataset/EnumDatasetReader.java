@@ -24,6 +24,8 @@ import java.nio.ShortBuffer;
 import java.util.Arrays;
 import java.util.Map;
 
+import static io.jhdf.Utils.stripLeadingIndex;
+
 /**
  * Special case of dataset reader for filling enum datasets, handles converting integer values into the enum strings on
  * the fly while filling. In the future might want to consider if this is actually what people want, maybe a way to read
@@ -140,7 +142,4 @@ public class EnumDatasetReader {
         }
     }
 
-    private static int[] stripLeadingIndex(int[] dims) {
-        return Arrays.copyOfRange(dims, 1, dims.length);
-    }
 }
