@@ -97,24 +97,15 @@ public final class DatasetReader {
 		} else if (type instanceof FloatingPoint) {
 			FloatingPoint floatingPoint = (FloatingPoint) type;
 			data = floatingPoint.fillData(dimensions, buffer);
-
 		} else if (type instanceof StringData) {
 			final StringData stringData = (StringData) type;
 			data = stringData.fillData(dimensions, buffer);
 		} else if (type instanceof BitField) {
 			final BitField bitField = (BitField) type;
 			data = bitField.fillData(dimensions, buffer);
-//			fillBitfieldData(data, dimensions, buffer.order(bitField.getByteOrder()));
-//		} else if (type instanceof Reference) {
-//			//reference type handles addresses, which are always longs for this library
-//			int elementSize = type.getSize();
-//			if (elementSize == 8) {
-//				fillData(data, dimensions, buffer.order(ByteOrder.LITTLE_ENDIAN).asLongBuffer());
-//			} else if (elementSize < 8) {
-//				fillLongData(data, dimensions, buffer.order(ByteOrder.LITTLE_ENDIAN), elementSize);
-//			} else {
-//				throw new HdfTypeException("Unsupported address size in reference data type " + elementSize + " bytes");
-//			}
+		} else if (type instanceof Reference) {
+			Reference reference = (Reference) type;
+			data = reference.fillData(dimensions, buffer);
 		} else if (type instanceof ArrayDataType) {
 			final ArrayDataType arrayType = (ArrayDataType) type;
 			if (dimensions.length !=1) {
