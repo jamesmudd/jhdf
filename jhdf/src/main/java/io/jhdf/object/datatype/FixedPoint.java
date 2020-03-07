@@ -103,9 +103,7 @@ public class FixedPoint extends DataType implements OrderedDataType {
 	}
 
 	public Object fillData(int[] dimensions, ByteBuffer buffer) {
-
-		Object data = Array.newInstance(getJavaType(), dimensions);
-
+		final Object data = Array.newInstance(getJavaType(), dimensions);
 		final ByteOrder byteOrder = getByteOrder();
 		if (isSigned()) {
 			switch (getSize()) {

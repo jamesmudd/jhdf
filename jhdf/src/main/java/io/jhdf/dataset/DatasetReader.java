@@ -96,19 +96,8 @@ public final class DatasetReader {
 			data = fixedPoint.fillData(dimensions, buffer);
 		} else if (type instanceof FloatingPoint) {
 			FloatingPoint floatingPoint = (FloatingPoint) type;
-			ByteOrder byteOrder = floatingPoint.getByteOrder();
+			data = floatingPoint.fillData(dimensions, buffer);
 
-			switch (floatingPoint.getSize()) {
-				case 4:
-					fillData(data, dimensions, buffer.order(byteOrder).asFloatBuffer());
-					break;
-				case 8:
-					fillData(data, dimensions, buffer.order(byteOrder).asDoubleBuffer());
-					break;
-				default:
-					throw new HdfTypeException(
-							"Unsupported floating point type size " + floatingPoint.getSize() + " bytes");
-			}
 		} else if (type instanceof StringData) {
 			final int stringLength = type.getSize();
 			final Charset charset = ((StringData) type).getCharset();
@@ -167,32 +156,6 @@ public final class DatasetReader {
 			for (int i = 0; i < Array.getLength(data); i++) {
 				Array.set(data, i, buffer.get() == 1);
 			}
-		}
-	}
-
-
-
-	// Floating Point
-
-	private static void fillData(Object data, int[] dims, FloatBuffer buffer) {
-		if (dims.length > 1) {
-			for (int i = 0; i < dims[0]; i++) {
-				Object newArray = Array.get(data, i);
-				fillData(newArray, stripLeadingIndex(dims), buffer);
-			}
-		} else {
-			buffer.get((float[]) data);
-		}
-	}
-
-	private static void fillData(Object data, int[] dims, DoubleBuffer buffer) {
-		if (dims.length > 1) {
-			for (int i = 0; i < dims[0]; i++) {
-				Object newArray = Array.get(data, i);
-				fillData(newArray, stripLeadingIndex(dims), buffer);
-			}
-		} else {
-			buffer.get((double[]) data);
 		}
 	}
 
