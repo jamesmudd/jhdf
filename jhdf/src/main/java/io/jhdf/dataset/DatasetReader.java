@@ -99,10 +99,8 @@ public final class DatasetReader {
 			data = floatingPoint.fillData(dimensions, buffer);
 
 		} else if (type instanceof StringData) {
-			final int stringLength = type.getSize();
-			final Charset charset = ((StringData) type).getCharset();
-			final StringData.StringPaddingHandler stringPaddingHandler = ((StringData) type).getStringPaddingHandler();
-			fillFixedLengthStringData(data, dimensions, buffer, stringLength, charset, stringPaddingHandler);
+			final StringData stringData = (StringData) type;
+			data = stringData.fillData(dimensions, buffer);
 		} else if (type instanceof BitField) {
 			final BitField bitField = (BitField) type;
 			fillBitfieldData(data, dimensions, buffer.order(bitField.getByteOrder()));
@@ -161,19 +159,6 @@ public final class DatasetReader {
 
 	// String Data
 
-	private static void fillFixedLengthStringData(Object data, int[] dims, ByteBuffer buffer, int stringLength, Charset charset, StringData.StringPaddingHandler stringPaddingHandler) {
-		if (dims.length > 1) {
-			for (int i = 0; i < dims[0]; i++) {
-				Object newArray = Array.get(data, i);
-				fillFixedLengthStringData(newArray, stripLeadingIndex(dims), buffer, stringLength, charset, stringPaddingHandler);
-			}
-		} else {
-			for (int i = 0; i < dims[0]; i++) {
-				ByteBuffer elementBuffer = Utils.createSubBuffer(buffer, stringLength);
-				stringPaddingHandler.setBufferLimit(elementBuffer);
-				Array.set(data, i, charset.decode(elementBuffer).toString());
-			}
-		}
-	}
+
 
 }

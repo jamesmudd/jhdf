@@ -12,12 +12,15 @@ package io.jhdf.object.datatype;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import static io.jhdf.Constants.NULL;
 import static io.jhdf.Constants.SPACE;
+import static io.jhdf.Utils.stripLeadingIndex;
 
 /**
  * Data type representing strings.
@@ -30,7 +33,28 @@ public class StringData extends DataType {
 
 	private final Charset charset;
 
-	public enum PaddingType {
+	public Object fillData(int[] dimensions, ByteBuffer buffer) {
+		final Object data = Array.newInstance(getJavaType(), dimensions);
+		fillFixedLengthStringData(data, dimensions, buffer, getSize(), getCharset(), getStringPaddingHandler());
+		return data;
+	}
+
+	private static void fillFixedLengthStringData(Object data, int[] dims, ByteBuffer buffer, int stringLength, Charset charset, StringPaddingHandler stringPaddingHandler) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				fillFixedLengthStringData(newArray, stripLeadingIndex(dims), buffer, stringLength, charset, stringPaddingHandler);
+			}
+		} else {
+			for (int i = 0; i < dims[0]; i++) {
+				ByteBuffer elementBuffer = Utils.createSubBuffer(buffer, stringLength);
+				stringPaddingHandler.setBufferLimit(elementBuffer);
+				Array.set(data, i, charset.decode(elementBuffer).toString());
+			}
+		}
+	}
+
+    public enum PaddingType {
 		NULL_TERMINATED(new NullTerminated()),
 		NULL_PADDED(new NullPadded()),
 		SPACE_PADDED(new SpacePadded());
