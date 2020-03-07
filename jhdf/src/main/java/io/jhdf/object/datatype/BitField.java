@@ -9,8 +9,11 @@
  */
 package io.jhdf.object.datatype;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+
+import static io.jhdf.Utils.stripLeadingIndex;
 
 public class BitField extends DataType implements OrderedDataType {
     private final ByteOrder order;
@@ -60,4 +63,25 @@ public class BitField extends DataType implements OrderedDataType {
     public Class<?> getJavaType() {
         return boolean.class;
     }
+
+    public Object fillData(int[] dimensions, ByteBuffer buffer) {
+        final Object data = Array.newInstance(getJavaType(), dimensions);
+        fillBitfieldData(data, dimensions, buffer.order(getByteOrder()));
+        return data;
+    }
+
+    private static void fillBitfieldData(Object data, int[] dims, ByteBuffer buffer) {
+        if (dims.length > 1) {
+            for (int i = 0; i < dims[0]; i++) {
+                Object newArray = Array.get(data, i);
+                fillBitfieldData(newArray, stripLeadingIndex(dims), buffer);
+            }
+        } else {
+            for (int i = 0; i < Array.getLength(data); i++) {
+                Array.set(data, i, buffer.get() == 1);
+            }
+        }
+    }
+
+
 }

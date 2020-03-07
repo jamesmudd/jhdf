@@ -103,7 +103,8 @@ public final class DatasetReader {
 			data = stringData.fillData(dimensions, buffer);
 		} else if (type instanceof BitField) {
 			final BitField bitField = (BitField) type;
-			fillBitfieldData(data, dimensions, buffer.order(bitField.getByteOrder()));
+			data = bitField.fillData(dimensions, buffer);
+//			fillBitfieldData(data, dimensions, buffer.order(bitField.getByteOrder()));
 //		} else if (type instanceof Reference) {
 //			//reference type handles addresses, which are always longs for this library
 //			int elementSize = type.getSize();
@@ -144,18 +145,7 @@ public final class DatasetReader {
 		}
 	}
 
-	private static void fillBitfieldData(Object data, int[] dims, ByteBuffer buffer) {
-		if (dims.length > 1) {
-			for (int i = 0; i < dims[0]; i++) {
-				Object newArray = Array.get(data, i);
-				fillBitfieldData(newArray, stripLeadingIndex(dims), buffer);
-			}
-		} else {
-			for (int i = 0; i < Array.getLength(data); i++) {
-				Array.set(data, i, buffer.get() == 1);
-			}
-		}
-	}
+
 
 	// String Data
 
