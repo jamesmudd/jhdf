@@ -61,19 +61,14 @@ public final class DatasetReader {
 	 * @return A Java object representation of this dataset
 	 */
 	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
-		// Make the array to hold the data
-		Class<?> javaType = type.getJavaType();
-
 		// If the data is scalar make a fake one element array then remove it at the end
 		Object data;
 		final boolean isScalar;
 		if (dimensions.length == 0) {
 			// Scalar dataset
-			data = Array.newInstance(javaType, 1);
 			isScalar = true;
 			dimensions = new int[]{1}; // Fake the dimensions
 		} else {
-			data = Array.newInstance(javaType, dimensions);
 			isScalar = false;
 		}
 
@@ -94,16 +89,7 @@ public final class DatasetReader {
 			data = reference.fillData(dimensions, buffer);
 		} else if (type instanceof ArrayDataType) {
 			final ArrayDataType arrayType = (ArrayDataType) type;
-			if (dimensions.length !=1) {
-				throw new HdfException("Multi dimension array data types are not supported");
-			}
-
-			for (int i = 0; i < dimensions[0]; i++) {
-				// Need to position the buffer ready for the read
-				buffer.position(i * arrayType.getBaseType().getSize() * arrayType.getDimensions()[0]);
-				Object elementDataset = readDataset(arrayType.getBaseType(), buffer, arrayType.getDimensions(), hdfFc);
-				Array.set(data, i, elementDataset);
-			}
+			data = arrayType.fillData(dimensions, buffer, hdfFc);
 		} else if (type instanceof EnumDataType) {
 			EnumDataType enumDataType = (EnumDataType) type;
 			data = enumDataType.fillData(dimensions, buffer, hdfFc);
