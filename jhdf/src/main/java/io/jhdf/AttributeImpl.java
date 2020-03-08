@@ -69,7 +69,7 @@ public class AttributeImpl implements Attribute {
 		}
 		DataType type = message.getDataType();
 		ByteBuffer bb = message.getDataBuffer();
-		return DatasetReader.readDataset(type, bb, getSize(), getDimensions(), hdfFc);
+		return DatasetReader.readDataset(type, bb, getDimensions(), hdfFc);
 	}
 
 	@Override

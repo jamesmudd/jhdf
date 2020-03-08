@@ -10,9 +10,7 @@
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFileChannel;
-import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.ArrayDataType;
 import io.jhdf.object.datatype.BitField;
 import io.jhdf.object.datatype.CompoundDataType;
@@ -25,18 +23,7 @@ import io.jhdf.object.datatype.StringData;
 import io.jhdf.object.datatype.VariableLength;
 
 import java.lang.reflect.Array;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.LongBuffer;
-import java.nio.ShortBuffer;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-
-import static io.jhdf.Utils.stripLeadingIndex;
 
 /**
  * <p>
@@ -69,12 +56,11 @@ public final class DatasetReader {
 	 *
 	 * @param type The data type of this dataset
 	 * @param buffer The buffer containing the dataset
-	 * @param size The number of elements in this dataset
 	 * @param dimensions The dimensions of this dataset
-	 * @param hdfFc The file channel of the file containing this dataset
+	 * @param hdfFc
 	 * @return A Java object representation of this dataset
 	 */
-	public static Object readDataset(DataType type, ByteBuffer buffer, long size, int[] dimensions, HdfFileChannel hdfFc) {
+	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
 		// Make the array to hold the data
 		Class<?> javaType = type.getJavaType();
 
@@ -115,15 +101,18 @@ public final class DatasetReader {
 			for (int i = 0; i < dimensions[0]; i++) {
 				// Need to position the buffer ready for the read
 				buffer.position(i * arrayType.getBaseType().getSize() * arrayType.getDimensions()[0]);
-				Object elementDataset = readDataset(arrayType.getBaseType(), buffer, size, arrayType.getDimensions(), hdfFc);
+				Object elementDataset = readDataset(arrayType.getBaseType(), buffer, arrayType.getDimensions(), hdfFc);
 				Array.set(data, i, elementDataset);
 			}
 		} else if (type instanceof EnumDataType) {
-			return EnumDatasetReader.readEnumDataset((EnumDataType) type, buffer, dimensions);
+			EnumDataType enumDataType = (EnumDataType) type;
+			data = enumDataType.fillData(dimensions, buffer, hdfFc);
 		} else if (type instanceof VariableLength) {
-			data = VariableLengthDatasetReader.readDataset((VariableLength) type, buffer, size, dimensions, hdfFc);
+			VariableLength variableLength = (VariableLength) type;
+			data = variableLength.fillData(dimensions, buffer, hdfFc);
 		} else if (type instanceof CompoundDataType) {
-			data = CompoundDatasetReader.readDataset((CompoundDataType) type, buffer, size, dimensions, hdfFc);
+			CompoundDataType compoundDataType = (CompoundDataType) type;
+			data = compoundDataType.fillData(buffer, dimensions, hdfFc);
 		} else {
 			throw new HdfException(
 					"DatasetReader was passed a type it cant fill. Type: " + type.getClass().getCanonicalName());
@@ -135,11 +124,4 @@ public final class DatasetReader {
 			return data;
 		}
 	}
-
-
-
-	// String Data
-
-
-
 }

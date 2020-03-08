@@ -9,7 +9,9 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
+import io.jhdf.dataset.CompoundDatasetReader;
 import io.jhdf.exceptions.UnsupportedHdfException;
 
 import java.nio.ByteBuffer;
@@ -92,7 +94,11 @@ public class CompoundDataType extends DataType {
 		return members;
 	}
 
-	public static class CompoundDataMember {
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+		return CompoundDatasetReader.readDataset(this, buffer, dimensions, hdfFc);
+	}
+
+    public static class CompoundDataMember {
 		private final String name;
 		private final int[] dimensionSize;
 		private final int offset;
