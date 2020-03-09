@@ -9,7 +9,6 @@
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 
 import java.lang.reflect.Array;
