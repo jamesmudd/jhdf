@@ -1,10 +1,12 @@
 package io.jhdf.object.datatype;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
+import org.mockito.Mockito;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -16,6 +18,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.powermock.reflect.Whitebox.newInstance;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
@@ -118,21 +121,27 @@ class FixedPointTest {
     private Executable createTest(ByteBuffer buffer, FixedPoint dataType, int[] dims, Object expected) {
 		return () -> {
 			buffer.rewind(); // For shared buffers
-			Object actual = dataType.fillData(dims, buffer);
+            HdfFileChannel hdfFc = mock(HdfFileChannel.class);
+            Object actual = dataType.fillData(buffer, dims, hdfFc);
             assertThat(actual, is(expected));
+            verifyNoInteractions(hdfFc);
 		};
 	}
 
     @Test
 	void testUnsupportedFixedPointLengthThrows() {
 		FixedPoint invalidDataType = mockFixedPoint(true, 11); // 11 byte data is not supported
-		assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(dims, longBuffer));
+        HdfFileChannel hdfFc = mock(HdfFileChannel.class);
+        assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(longBuffer, dims, hdfFc));
+        verifyNoInteractions(hdfFc);
 	}
 
 	@Test
 	void testUnsupportedUnsignedFixedPointLengthThrows() {
 		FixedPoint invalidDataType = mockFixedPoint(false, 11); // 11 byte data is not supported
-		assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(dims, longBuffer));
+        HdfFileChannel hdfFc = mock(HdfFileChannel.class);
+        assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(longBuffer, dims, hdfFc));
+        verifyNoInteractions(hdfFc);
 	}
 
 }

@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
 
 import java.lang.reflect.Array;
@@ -101,7 +102,8 @@ public class FixedPoint extends DataType implements OrderedDataType {
 		}
 	}
 
-	public Object fillData(int[] dimensions, ByteBuffer buffer) {
+	@Override
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
 		final Object data = Array.newInstance(getJavaType(), dimensions);
 		final ByteOrder byteOrder = getByteOrder();
 		if (isSigned()) {

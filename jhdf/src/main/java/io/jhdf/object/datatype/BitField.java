@@ -9,6 +9,8 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.HdfFileChannel;
+
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -64,7 +66,8 @@ public class BitField extends DataType implements OrderedDataType {
         return boolean.class;
     }
 
-    public Object fillData(int[] dimensions, ByteBuffer buffer) {
+    @Override
+    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
         final Object data = Array.newInstance(getJavaType(), dimensions);
         fillBitfieldData(data, dimensions, buffer.order(getByteOrder()));
         return data;

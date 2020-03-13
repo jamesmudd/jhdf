@@ -80,7 +80,8 @@ public class EnumDataType extends DataType {
         return ordinalToName;
     }
 
-    public Object fillData(int[] dimensions, ByteBuffer buffer, HdfFileChannel hdfFc) {
+    @Override
+    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
         return EnumDatasetReader.readEnumDataset(this, buffer, dimensions);
     }
 }

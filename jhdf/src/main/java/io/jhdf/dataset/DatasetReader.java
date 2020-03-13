@@ -62,7 +62,7 @@ public final class DatasetReader {
 	 */
 	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
 		// If the data is scalar make a fake one element array then remove it at the end
-		Object data;
+
 		final boolean isScalar;
 		if (dimensions.length == 0) {
 			// Scalar dataset
@@ -72,37 +72,7 @@ public final class DatasetReader {
 			isScalar = false;
 		}
 
-		if (type instanceof FixedPoint) {
-			FixedPoint fixedPoint = (FixedPoint) type;
-			data = fixedPoint.fillData(dimensions, buffer);
-		} else if (type instanceof FloatingPoint) {
-			FloatingPoint floatingPoint = (FloatingPoint) type;
-			data = floatingPoint.fillData(dimensions, buffer);
-		} else if (type instanceof StringData) {
-			final StringData stringData = (StringData) type;
-			data = stringData.fillData(dimensions, buffer);
-		} else if (type instanceof BitField) {
-			final BitField bitField = (BitField) type;
-			data = bitField.fillData(dimensions, buffer);
-		} else if (type instanceof Reference) {
-			Reference reference = (Reference) type;
-			data = reference.fillData(dimensions, buffer);
-		} else if (type instanceof ArrayDataType) {
-			final ArrayDataType arrayType = (ArrayDataType) type;
-			data = arrayType.fillData(dimensions, buffer, hdfFc);
-		} else if (type instanceof EnumDataType) {
-			EnumDataType enumDataType = (EnumDataType) type;
-			data = enumDataType.fillData(dimensions, buffer, hdfFc);
-		} else if (type instanceof VariableLength) {
-			VariableLength variableLength = (VariableLength) type;
-			data = variableLength.fillData(dimensions, buffer, hdfFc);
-		} else if (type instanceof CompoundDataType) {
-			CompoundDataType compoundDataType = (CompoundDataType) type;
-			data = compoundDataType.fillData(buffer, dimensions, hdfFc);
-		} else {
-			throw new HdfException(
-					"DatasetReader was passed a type it cant fill. Type: " + type.getClass().getCanonicalName());
-		}
+		final Object data = type.fillData(buffer, dimensions, hdfFc);
 
 		if (isScalar) {
 			return Array.get(data, 0);

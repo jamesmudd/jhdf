@@ -1,5 +1,6 @@
 package io.jhdf.object.datatype;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.powermock.reflect.Whitebox.newInstance;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
@@ -69,14 +72,18 @@ public class FloatingPointTest {
     private Executable createTest(ByteBuffer buffer, FloatingPoint dataType, int[] dims, Object expected) {
         return () -> {
             buffer.rewind(); // For shared buffers
-            Object actual = dataType.fillData(dims, buffer);
+            HdfFileChannel hdfFc = mock(HdfFileChannel.class);
+            Object actual = dataType.fillData(buffer, dims, hdfFc);
             assertThat(actual, is(expected));
+            verifyNoInteractions(hdfFc);
         };
     }
 
     @Test
 	void testUnsupportedFloatingPointLengthThrows() {
 		FloatingPoint invalidDataType = mockFloatingPoint(11); // 11 byte data is not supported
-		assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(dims, floatBuffer));
+        HdfFileChannel hdfFc = mock(HdfFileChannel.class);
+        assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(floatBuffer, dims, hdfFc));
+        verifyNoInteractions(hdfFc);
 	}
 }

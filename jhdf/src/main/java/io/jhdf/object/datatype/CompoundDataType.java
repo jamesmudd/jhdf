@@ -94,6 +94,7 @@ public class CompoundDataType extends DataType {
 		return members;
 	}
 
+	@Override
 	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
 		return CompoundDatasetReader.readDataset(this, buffer, dimensions, hdfFc);
 	}

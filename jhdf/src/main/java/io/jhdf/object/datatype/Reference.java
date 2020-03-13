@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfTypeException;
@@ -17,9 +18,6 @@ import io.jhdf.exceptions.UnsupportedHdfException;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
-import java.nio.LongBuffer;
-import java.util.Arrays;
 
 import static io.jhdf.Utils.readBytesAsUnsignedLong;
 import static io.jhdf.Utils.stripLeadingIndex;
@@ -78,7 +76,8 @@ public class Reference extends DataType {
 		return long.class;
 	}
 
-	public Object fillData(int[] dimensions, ByteBuffer buffer) {
+	@Override
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
 		final Object data = Array.newInstance(getJavaType(), dimensions);
 		fillData(data, dimensions, buffer.order(ByteOrder.LITTLE_ENDIAN));
 		return data;

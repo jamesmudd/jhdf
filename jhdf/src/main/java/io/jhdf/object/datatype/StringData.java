@@ -9,12 +9,12 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -33,7 +33,8 @@ public class StringData extends DataType {
 
 	private final Charset charset;
 
-	public Object fillData(int[] dimensions, ByteBuffer buffer) {
+	@Override
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
 		final Object data = Array.newInstance(getJavaType(), dimensions);
 		fillFixedLengthStringData(data, dimensions, buffer, getSize(), getCharset(), getStringPaddingHandler());
 		return data;
