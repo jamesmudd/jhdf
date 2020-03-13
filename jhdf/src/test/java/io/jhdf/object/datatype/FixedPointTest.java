@@ -82,7 +82,7 @@ class FixedPointTest {
         return buffer;
     }
 
-    private ByteBuffer createIntBuffer(int[] array) {
+    static ByteBuffer createIntBuffer(int[] array) {
         ByteBuffer buffer = ByteBuffer.allocate(array.length * Integer.BYTES);
         buffer.order(ByteOrder.nativeOrder());
         for (int i : array) {
@@ -92,7 +92,7 @@ class FixedPointTest {
         return buffer;
     }
 
-    private ByteBuffer createLongBuffer(long[] array) {
+    static ByteBuffer createLongBuffer(long[] array) {
         ByteBuffer buffer = ByteBuffer.allocate(array.length * Long.BYTES);
         buffer.order(ByteOrder.nativeOrder());
         for (long i : array) {
