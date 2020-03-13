@@ -1,4 +1,8 @@
 # File for Azure Piplelines CI Builds
+trigger:
+- master
+pr:
+- master
     
 jobs:
 - job: Linux
