@@ -1,6 +1,5 @@
 package io.jhdf.object.datatype;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
@@ -26,37 +25,35 @@ class FixedPointTest {
 
     // Byte
     private final ByteBuffer byteBuffer = createByteBuffer(new byte[] { 1, -2, 3, -4, 5, -6 });
-    private final FixedPoint byteDataType = mockFixedPoint(byte.class, true, Byte.BYTES);
-    private final FixedPoint unsignedByteDataType = mockFixedPoint(int.class, false, Byte.BYTES);
+    private final FixedPoint byteDataType = mockFixedPoint(true, Byte.BYTES);
+    private final FixedPoint unsignedByteDataType = mockFixedPoint(false, Byte.BYTES);
     private final byte[][] byteResult = new byte[][] { { 1, -2, 3 }, { -4, 5, -6 } };
     private final int[][] unsignedByteResult = new int[][] { { 1, 254, 3 }, { 252, 5, 250 } };
 
     // Short
     private final ByteBuffer shortBuffer = createShortBuffer(new short[] { 1, -2, 3, -4, 5, -6 });
-    private final FixedPoint shortDataType = mockFixedPoint(short.class, true, Short.BYTES);
-    private final FixedPoint unsignedShortDataType = mockFixedPoint(int.class, false, Short.BYTES);
+    private final FixedPoint shortDataType = mockFixedPoint(true, Short.BYTES);
+    private final FixedPoint unsignedShortDataType = mockFixedPoint(false, Short.BYTES);
     private final short[][] shortResult = new short[][] { { 1, -2, 3 }, { -4, 5, -6 } };
     private final int[][] unsignedShortResult = new int[][] { { 1, 65534, 3 }, { 65532, 5, 65530 } };
 
     // Int
     private final ByteBuffer intBuffer = createIntBuffer(new int[] { 1, -2, 3, -4, 5, -6 });
-    private final FixedPoint intDataType = mockFixedPoint(int.class, true, Integer.BYTES);
-    private final FixedPoint unsignedIntDataType = mockFixedPoint(long.class, false, Integer.BYTES);
+    private final FixedPoint intDataType = mockFixedPoint(true, Integer.BYTES);
+    private final FixedPoint unsignedIntDataType = mockFixedPoint(false, Integer.BYTES);
     private final int[][] intResult = new int[][] { { 1, -2, 3 }, { -4, 5, -6 } };
     private final long[][] unsignedIntResult = new long[][] { { 1L, 4294967294L, 3L }, { 4294967292L, 5L, 4294967290L } };
 
     // Long
     private final ByteBuffer longBuffer = createLongBuffer(new long[] { 1L, 2L, 3L, 4L, 5L, 6L });
-    private final FixedPoint longDataType = mockFixedPoint(long.class, true, Long.BYTES);
-    private final FixedPoint unsignedLongDataType = mockFixedPoint(BigInteger.class, false, Long.BYTES);
+    private final FixedPoint longDataType = mockFixedPoint(true, Long.BYTES);
+    private final FixedPoint unsignedLongDataType = mockFixedPoint(false, Long.BYTES);
     private final long[][] longResult = new long[][] { { 1L, 2L, 3L }, { 4L, 5L, 6L } };
 	private final BigInteger[][] unsignedLongResult = new BigInteger[][] {
 	        { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3) },
             { BigInteger.valueOf(4), BigInteger.valueOf(5), BigInteger.valueOf(6) } };
 
-	private final HdfFileChannel hdfFc = mock(HdfFileChannel.class);
-
-    private FixedPoint mockFixedPoint(Class<?> clazz, boolean signed, int sizeInBytes) {
+    private FixedPoint mockFixedPoint(boolean signed, int sizeInBytes) {
         FixedPoint fixedPoint = newInstance(FixedPoint.class);
         setInternalState(fixedPoint, "order", ByteOrder.nativeOrder());
         setInternalState(fixedPoint, "signed", signed);
@@ -128,13 +125,13 @@ class FixedPointTest {
 
     @Test
 	void testUnsupportedFixedPointLengthThrows() {
-		FixedPoint invalidDataType = mockFixedPoint(int.class, true, 11); // 11 byte data is not supported
+		FixedPoint invalidDataType = mockFixedPoint(true, 11); // 11 byte data is not supported
 		assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(dims, longBuffer));
 	}
 
 	@Test
 	void testUnsupportedUnsignedFixedPointLengthThrows() {
-		FixedPoint invalidDataType = mockFixedPoint(int.class, false, 11); // 11 byte data is not supported
+		FixedPoint invalidDataType = mockFixedPoint(false, 11); // 11 byte data is not supported
 		assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(dims, longBuffer));
 	}
 

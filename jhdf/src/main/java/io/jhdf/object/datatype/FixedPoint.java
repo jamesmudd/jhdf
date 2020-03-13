@@ -144,15 +144,6 @@ public class FixedPoint extends DataType implements OrderedDataType {
 		return data;
 	}
 
-//	private Object makeDataArray(int[] dimensions) {
-//		if (dimensions.length == 0) {
-//			// Scalar dataset
-//			return Array.newInstance(getJavaType(), 1);
-//		} else {
-//			return
-//		}
-//	}
-
 		// Signed Fixed Point
 
 		private static void fillData(Object data, int[] dims, ByteBuffer buffer) {
@@ -198,20 +189,6 @@ public class FixedPoint extends DataType implements OrderedDataType {
 				buffer.get((long[]) data);
 			}
 		}
-
-//		private static void fillLongData(Object data, int[] dims, ByteBuffer buffer, int size) {
-//			if (dims.length > 1) {
-//				for (int i = 0; i < dims[0]; i++) {
-//					Object newArray = Array.get(data, i);
-//					fillLongData(newArray, stripLeadingIndex(dims), buffer, size);
-//				}
-//			} else {
-//				long[] longData = (long[]) data;
-//				for (int i = 0; i < longData.length; i++) {
-//					longData[i] = Utils.readBytesAsUnsignedLong(buffer, size);
-//				}
-//			}
-//		}
 
 		// Unsigned Fixed Point
 
