@@ -10,17 +10,7 @@
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFileChannel;
-import io.jhdf.exceptions.HdfException;
-import io.jhdf.object.datatype.ArrayDataType;
-import io.jhdf.object.datatype.BitField;
-import io.jhdf.object.datatype.CompoundDataType;
 import io.jhdf.object.datatype.DataType;
-import io.jhdf.object.datatype.EnumDataType;
-import io.jhdf.object.datatype.FixedPoint;
-import io.jhdf.object.datatype.FloatingPoint;
-import io.jhdf.object.datatype.Reference;
-import io.jhdf.object.datatype.StringData;
-import io.jhdf.object.datatype.VariableLength;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
