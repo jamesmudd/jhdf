@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
@@ -101,5 +102,7 @@ public abstract class DataType {
 	}
 
 	public abstract Class<?> getJavaType();
+
+	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc);
 
 }

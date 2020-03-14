@@ -9,7 +9,9 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
+import io.jhdf.dataset.VariableLengthDatasetReader;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.datatype.StringData.PaddingType;
 
@@ -94,4 +96,8 @@ public class VariableLength extends DataType {
 		}
 	}
 
+	@Override
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+		return  VariableLengthDatasetReader.readDataset(this, buffer, dimensions, hdfFc);
+	}
 }

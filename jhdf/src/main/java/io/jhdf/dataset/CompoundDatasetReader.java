@@ -14,11 +14,10 @@ import io.jhdf.object.datatype.CompoundDataType;
 import io.jhdf.object.datatype.CompoundDataType.CompoundDataMember;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import static java.lang.Math.toIntExact;
 
 public final class CompoundDatasetReader {
 
@@ -26,8 +25,8 @@ public final class CompoundDatasetReader {
 	private CompoundDatasetReader() {
 	}
 
-	public static Map<String, Object> readDataset(CompoundDataType type, ByteBuffer buffer, long size, int[] dimensions, HdfFileChannel hdfFc) {
-		final int sizeAsInt = toIntExact(size);
+	public static Map<String, Object> readDataset(CompoundDataType type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+		final int sizeAsInt = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
 
 		final List<CompoundDataMember> members = type.getMembers();
 
@@ -47,7 +46,7 @@ public final class CompoundDatasetReader {
 			// Now read this member
 			memberBuffer.rewind();
 
-			final Object memberData = DatasetReader.readDataset(member.getDataType(), memberBuffer, size, dimensions, hdfFc);
+			final Object memberData = DatasetReader.readDataset(member.getDataType(), memberBuffer, dimensions, hdfFc);
 			data.put(member.getName(), memberData);
 		}
 

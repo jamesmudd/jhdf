@@ -9,11 +9,18 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
 
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.nio.ShortBuffer;
+
+import static io.jhdf.Utils.stripLeadingIndex;
 
 public class FixedPoint extends DataType implements OrderedDataType {
 	private final ByteOrder order;
@@ -95,4 +102,164 @@ public class FixedPoint extends DataType implements OrderedDataType {
 		}
 	}
 
+	@Override
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+		final Object data = Array.newInstance(getJavaType(), dimensions);
+		final ByteOrder byteOrder = getByteOrder();
+		if (isSigned()) {
+			switch (getSize()) {
+				case 1:
+					fillData(data, dimensions, buffer.order(byteOrder));
+					break;
+				case 2:
+					fillData(data, dimensions, buffer.order(byteOrder).asShortBuffer());
+					break;
+				case 4:
+					fillData(data, dimensions, buffer.order(byteOrder).asIntBuffer());
+					break;
+				case 8:
+					fillData(data, dimensions, buffer.order(byteOrder).asLongBuffer());
+					break;
+				default:
+					throw new HdfTypeException(
+							"Unsupported signed integer type size " + getSize() + " bytes");
+			}
+		} else { // Unsigned
+			switch (getSize()) {
+				case 1:
+					fillDataUnsigned(data, dimensions, buffer.order(byteOrder));
+					break;
+				case 2:
+					fillDataUnsigned(data, dimensions, buffer.order(byteOrder).asShortBuffer());
+					break;
+				case 4:
+					fillDataUnsigned(data, dimensions, buffer.order(byteOrder).asIntBuffer());
+					break;
+				case 8:
+					fillDataUnsigned(data, dimensions, buffer.order(byteOrder).asLongBuffer());
+					break;
+				default:
+					throw new HdfTypeException(
+							"Unsupported unsigned integer type size " + getSize() + " bytes");
+			}
+		}
+		return data;
+	}
+
+		// Signed Fixed Point
+
+		private static void fillData(Object data, int[] dims, ByteBuffer buffer) {
+			if (dims.length > 1) {
+				for (int i = 0; i < dims[0]; i++) {
+					Object newArray = Array.get(data, i);
+					fillData(newArray, stripLeadingIndex(dims), buffer);
+				}
+			} else {
+				buffer.get((byte[]) data);
+			}
+		}
+
+		private static void fillData(Object data, int[] dims, ShortBuffer buffer) {
+			if (dims.length > 1) {
+				for (int i = 0; i < dims[0]; i++) {
+					Object newArray = Array.get(data, i);
+					fillData(newArray, stripLeadingIndex(dims), buffer);
+				}
+			} else {
+				buffer.get((short[]) data);
+			}
+		}
+
+		private static void fillData(Object data, int[] dims, IntBuffer buffer) {
+			if (dims.length > 1) {
+				for (int i = 0; i < dims[0]; i++) {
+					Object newArray = Array.get(data, i);
+					fillData(newArray, stripLeadingIndex(dims), buffer);
+				}
+			} else {
+				buffer.get((int[]) data);
+			}
+		}
+
+		private static void fillData(Object data, int[] dims, LongBuffer buffer) {
+			if (dims.length > 1) {
+				for (int i = 0; i < dims[0]; i++) {
+					Object newArray = Array.get(data, i);
+					fillData(newArray, stripLeadingIndex(dims), buffer);
+				}
+			} else {
+				buffer.get((long[]) data);
+			}
+		}
+
+		// Unsigned Fixed Point
+
+		private static void fillDataUnsigned(Object data, int[] dims, ByteBuffer buffer) {
+			if (dims.length > 1) {
+				for (int i = 0; i < dims[0]; i++) {
+					Object newArray = Array.get(data, i);
+					fillDataUnsigned(newArray, stripLeadingIndex(dims), buffer);
+				}
+			} else {
+				final byte[] tempBuffer = new byte[dims[dims.length - 1]];
+				buffer.get(tempBuffer);
+				// Convert to unsigned
+				int[] intData = (int[]) data;
+				for (int i = 0; i < tempBuffer.length; i++) {
+					intData[i] = Byte.toUnsignedInt(tempBuffer[i]);
+				}
+			}
+		}
+
+		private static void fillDataUnsigned(Object data, int[] dims, ShortBuffer buffer) {
+			if (dims.length > 1) {
+				for (int i = 0; i < dims[0]; i++) {
+					Object newArray = Array.get(data, i);
+					fillDataUnsigned(newArray, stripLeadingIndex(dims), buffer);
+				}
+			} else {
+				final short[] tempBuffer = new short[dims[dims.length - 1]];
+				buffer.get(tempBuffer);
+				// Convert to unsigned
+				int[] intData = (int[]) data;
+				for (int i = 0; i < tempBuffer.length; i++) {
+					intData[i] = Short.toUnsignedInt(tempBuffer[i]);
+				}
+			}
+		}
+
+		private static void fillDataUnsigned(Object data, int[] dims, IntBuffer buffer) {
+			if (dims.length > 1) {
+				for (int i = 0; i < dims[0]; i++) {
+					Object newArray = Array.get(data, i);
+					fillDataUnsigned(newArray, stripLeadingIndex(dims), buffer);
+				}
+			} else {
+				final int[] tempBuffer = new int[dims[dims.length - 1]];
+				buffer.get(tempBuffer);
+				// Convert to unsigned
+				long[] longData = (long[]) data;
+				for (int i = 0; i < tempBuffer.length; i++) {
+					longData[i] = Integer.toUnsignedLong(tempBuffer[i]);
+				}
+			}
+		}
+
+		private static void fillDataUnsigned(Object data, int[] dims, LongBuffer buffer) {
+			if (dims.length > 1) {
+				for (int i = 0; i < dims[0]; i++) {
+					Object newArray = Array.get(data, i);
+					fillDataUnsigned(newArray, stripLeadingIndex(dims), buffer);
+				}
+			} else {
+				final long[] tempBuffer = new long[dims[dims.length - 1]];
+				final ByteBuffer tempByteBuffer = ByteBuffer.allocate(8);
+				buffer.get(tempBuffer);
+				BigInteger[] bigIntData = (BigInteger[]) data;
+				for (int i = 0; i < tempBuffer.length; i++) {
+					tempByteBuffer.putLong(0, tempBuffer[i]);
+					bigIntData[i] = new BigInteger(1, tempByteBuffer.array());
+				}
+			}
+		}
 }

@@ -126,7 +126,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 		final DataType type = getDataType();
 
-		return DatasetReader.readDataset(type, bb, getSize(), getDimensions(), hdfFc);
+		return DatasetReader.readDataset(type, bb, getDimensions(), hdfFc);
 	}
 
 	@Override
@@ -156,7 +156,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		if (fillValueMessage.isFillValueDefined()) {
 			ByteBuffer bb = fillValueMessage.getFillValue();
 			// Convert to data pass zero length dims for scalar
-			return DatasetReader.readDataset(getDataType(), bb, getSize(), new int[0], hdfFc);
+			return DatasetReader.readDataset(getDataType(), bb, new int[0], hdfFc);
 		} else {
 			return null;
 		}

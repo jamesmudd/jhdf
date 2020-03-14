@@ -9,7 +9,9 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
+import io.jhdf.dataset.EnumDatasetReader;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -76,5 +78,10 @@ public class EnumDataType extends DataType {
 
     public Map<Integer, String> getEnumMapping() {
         return ordinalToName;
+    }
+
+    @Override
+    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+        return EnumDatasetReader.readEnumDataset(this, buffer, dimensions);
     }
 }

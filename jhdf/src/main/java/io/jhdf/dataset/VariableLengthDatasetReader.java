@@ -18,7 +18,6 @@ import io.jhdf.object.datatype.VariableLength;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +33,7 @@ public final class VariableLengthDatasetReader {
 	private VariableLengthDatasetReader() {
 	}
 
-	public static Object readDataset(VariableLength type, ByteBuffer buffer, long size, int[] dimensions, HdfFileChannel hdfFc) {
+	public static Object readDataset(VariableLength type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
 		// Make the array to hold the data
 		Class<?> javaType = type.getJavaType();
 
@@ -66,7 +65,7 @@ public final class VariableLengthDatasetReader {
 		if(type.isVariableLengthString()) {
 			fillStringData(type, data, dimensions, elements.iterator());
 		} else {
-			fillData(type.getParent(), data, size, dimensions, elements.iterator(), hdfFc);
+			fillData(type.getParent(), data, dimensions, elements.iterator(), hdfFc);
 		}
 
 		if (isScalar) {
@@ -76,17 +75,17 @@ public final class VariableLengthDatasetReader {
 		}
 	}
 
-	private static void fillData(DataType dataType, Object data, long size, int[] dims, Iterator<ByteBuffer> elements, HdfFileChannel hdfFc) {
+	private static void fillData(DataType dataType, Object data, int[] dims, Iterator<ByteBuffer> elements, HdfFileChannel hdfFc) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillData(dataType, newArray, size, stripLeadingIndex(dims), elements, hdfFc);
+				fillData(dataType, newArray, stripLeadingIndex(dims), elements, hdfFc);
 			}
 		} else {
 			for (int i = 0; i < dims[0]; i++) {
 				ByteBuffer buffer = elements.next();
 				int[] elementDims = new int[]{ buffer.limit() / dataType.getSize()};
-				Object elementData = DatasetReader.readDataset(dataType, buffer, size, elementDims, hdfFc);
+				Object elementData = DatasetReader.readDataset(dataType, buffer, elementDims, hdfFc);
 				Array.set(data, i, elementData);
 			}
 		}

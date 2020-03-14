@@ -9,12 +9,18 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+
+import static io.jhdf.Utils.stripLeadingIndex;
 
 public class FloatingPoint extends DataType implements OrderedDataType {
 
@@ -128,6 +134,46 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 			return double.class;
 		default:
 			throw new HdfTypeException("Unsupported signed fixed point data type");
+		}
+	}
+
+	@Override
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+		final Object data = Array.newInstance(getJavaType(), dimensions);
+		final ByteOrder byteOrder = getByteOrder();
+		switch (getSize()) {
+			case 4:
+				fillData(data, dimensions, buffer.order(byteOrder).asFloatBuffer());
+				break;
+			case 8:
+				fillData(data, dimensions, buffer.order(byteOrder).asDoubleBuffer());
+				break;
+			default:
+				throw new HdfTypeException(
+						"Unsupported floating point type size " + getSize() + " bytes");
+		}
+		return data;
+	}
+
+	private static void fillData(Object data, int[] dims, FloatBuffer buffer) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				fillData(newArray, stripLeadingIndex(dims), buffer);
+			}
+		} else {
+			buffer.get((float[]) data);
+		}
+	}
+
+	private static void fillData(Object data, int[] dims, DoubleBuffer buffer) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				fillData(newArray, stripLeadingIndex(dims), buffer);
+			}
+		} else {
+			buffer.get((double[]) data);
 		}
 	}
 
