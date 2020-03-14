@@ -201,7 +201,7 @@ public class FixedPoint extends DataType implements OrderedDataType {
 					fillDataUnsigned(newArray, stripLeadingIndex(dims), buffer);
 				}
 			} else {
-				final byte[] tempBuffer = new byte[dims[dims.length - 1]];
+				final byte[] tempBuffer = new byte[dims[0]];
 				buffer.get(tempBuffer);
 				// Convert to unsigned
 				int[] intData = (int[]) data;
@@ -218,7 +218,7 @@ public class FixedPoint extends DataType implements OrderedDataType {
 					fillDataUnsigned(newArray, stripLeadingIndex(dims), buffer);
 				}
 			} else {
-				final short[] tempBuffer = new short[dims[dims.length - 1]];
+				final short[] tempBuffer = new short[dims[0]];
 				buffer.get(tempBuffer);
 				// Convert to unsigned
 				int[] intData = (int[]) data;
@@ -235,7 +235,7 @@ public class FixedPoint extends DataType implements OrderedDataType {
 					fillDataUnsigned(newArray, stripLeadingIndex(dims), buffer);
 				}
 			} else {
-				final int[] tempBuffer = new int[dims[dims.length - 1]];
+				final int[] tempBuffer = new int[dims[0]];
 				buffer.get(tempBuffer);
 				// Convert to unsigned
 				long[] longData = (long[]) data;
@@ -252,7 +252,7 @@ public class FixedPoint extends DataType implements OrderedDataType {
 					fillDataUnsigned(newArray, stripLeadingIndex(dims), buffer);
 				}
 			} else {
-				final long[] tempBuffer = new long[dims[dims.length - 1]];
+				final long[] tempBuffer = new long[dims[0]];
 				final ByteBuffer tempByteBuffer = ByteBuffer.allocate(8);
 				buffer.get(tempBuffer);
 				BigInteger[] bigIntData = (BigInteger[]) data;
