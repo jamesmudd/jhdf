@@ -1,5 +1,12 @@
 # jHDF Change Log
 
+## v0.5.6
+- Add support for reading half precision (16 bit) floats
+- Add support for getting the ByteBuffer backing contiguous datasets and attributes
+- Memory usage and performance improvements
+- Test coverage improvements
+- CI and build improvements
+
 ## v0.5.5
 - Add support for bitfield datasets https://github.com/jamesmudd/jhdf/issues/84
 - Fix https://github.com/jamesmudd/jhdf/issues/157 support nested compound datasets
