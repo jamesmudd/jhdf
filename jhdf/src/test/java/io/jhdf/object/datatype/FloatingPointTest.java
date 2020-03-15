@@ -11,10 +11,15 @@ package io.jhdf.object.datatype;
 
 import io.jhdf.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -95,4 +100,35 @@ public class FloatingPointTest {
         assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(floatBuffer, dims, hdfFc));
         verifyNoInteractions(hdfFc);
 	}
+
+    /**
+     * Examples from https://en.wikipedia.org/wiki/Half-precision_floating-point_format
+     *
+     * @return inputs to #testHalfPrecisionFloats
+     */
+    static Stream<Arguments> testHalfPrecisionFloats() {
+        return Stream.of(
+                Arguments.of((short) 0x1400, 9.765625E-4f),
+                Arguments.of((short) 0x1000, 4.8828125E-4f),
+                Arguments.of((short) 0x0001, 5.9604645E-8f), // smallest positive subnormal number
+                Arguments.of((short) 0x03FF, 6.097555E-5f), // largest subnormal number
+                Arguments.of((short) 0x3BFF, 0.9995117f), // largest number less than one
+                Arguments.of((short) 0x3C00, 1.0f), // one
+                Arguments.of((short) 0x3C01, 1.0009766f), // smallest number larger than one
+                Arguments.of((short) 0xFBFF, -65504.0f), // largest negative normal number
+                Arguments.of((short) 0x7BFF, 65504.0f), // largest normal number
+                Arguments.of((short) 0xC000, -2.0f), // -2
+                Arguments.of((short) 0x0000, 0.0f), // zero
+                Arguments.of((short) 0x8000, -0.0f), // -ve zero
+                Arguments.of((short) 0xFFFF, Float.NaN), // NaN
+                Arguments.of((short) 0x7C00, Float.POSITIVE_INFINITY), // inf
+                Arguments.of((short) 0xFC00, Float.NEGATIVE_INFINITY) // -ve inf
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void testHalfPrecisionFloats(short input, float expected) {
+        assertThat(FloatingPoint.toFloat(input), is(expected));
+    }
 }

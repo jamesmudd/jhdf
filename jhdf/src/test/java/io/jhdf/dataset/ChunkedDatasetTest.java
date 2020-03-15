@@ -54,6 +54,7 @@ class ChunkedDatasetTest {
 		// List of all the datasetPaths
 		return Arrays.asList(
 				dynamicContainer(HDF5_TEST_EARLIEST_FILE_NAME, Arrays.asList(
+						dynamicTest("float16", createTest(earliestHdfFile, "/float/float16")),
 						dynamicTest("float32", createTest(earliestHdfFile, "/float/float32")),
 						dynamicTest("float64", createTest(earliestHdfFile, "/float/float64")),
 						dynamicTest("int8", createTest(earliestHdfFile, "/int/int8")),
@@ -61,6 +62,7 @@ class ChunkedDatasetTest {
 						dynamicTest("int32", createTest(earliestHdfFile, "/int/int32")))),
 
 				dynamicContainer(HDF5_TEST_EARLIEST_FILE_NAME, Arrays.asList(
+						dynamicTest("float16", createTest(latestHdfFile, "/float/float16")),
 						dynamicTest("float32", createTest(latestHdfFile, "/float/float32")),
 						dynamicTest("float64", createTest(latestHdfFile, "/float/float64")),
 						dynamicTest("int8", createTest(latestHdfFile, "/int/int8")),
