@@ -100,4 +100,40 @@ class StringDataTest {
         assertThat(US_ASCII.decode(byteBuffer).toString(), is("hello again"));
 
     }
+
+    @Test
+    void testNullPaddedEmptyString() {
+        StringPaddingHandler nullPadded = new NullPadded();
+
+        ByteBuffer byteBuffer = ByteBuffer.allocate(4);
+        // consists of nulls
+        for (int i = 0; i < byteBuffer.capacity(); i++) {
+            byteBuffer.put(Constants.NULL);
+        }
+        byteBuffer.rewind();
+
+        assertThat(byteBuffer.limit(), is(4)); // length of buffer
+        nullPadded.setBufferLimit(byteBuffer);
+        assertThat(byteBuffer.limit(), is(0)); // string is empty
+
+        // Read the string back and check the value
+        assertThat(US_ASCII.decode(byteBuffer).toString(), is(""));
+    }
+
+    @Test
+    void testSpacePaddedEmptyString() {
+        StringPaddingHandler spacePadded = new SpacePadded();
+
+        ByteBuffer byteBuffer = ByteBuffer.allocate(4);
+
+        byteBuffer.put("    ".getBytes(US_ASCII)); // only spaces
+        byteBuffer.rewind();
+
+        assertThat(byteBuffer.limit(), is(4)); // length of buffer
+        spacePadded.setBufferLimit(byteBuffer);
+        assertThat(byteBuffer.limit(), is(0)); // string is empty
+
+        // Read the string back and check the value
+        assertThat(US_ASCII.decode(byteBuffer).toString(), is(""));
+    }
 }

@@ -136,7 +136,7 @@ public class StringData extends DataType {
 		@Override
 		public void setBufferLimit(ByteBuffer byteBuffer) {
 			int i = byteBuffer.limit() - 1;
-			while (byteBuffer.get(i) == NULL) {
+			while (i >= 0 && byteBuffer.get(i) == NULL) {
 				i--;
 			}
 			// Set the limit to terminate before the nulls
@@ -148,7 +148,7 @@ public class StringData extends DataType {
 		@Override
 		public void setBufferLimit(ByteBuffer byteBuffer) {
 			int i = byteBuffer.limit() - 1;
-			while (byteBuffer.get(i) == SPACE) {
+			while (i >= 0 && byteBuffer.get(i) == SPACE) {
 				i--;
 			}
 			// Set the limit to terminate before the spaces
