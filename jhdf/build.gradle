@@ -1,5 +1,3 @@
-import com.github.spotbugs.SpotBugsTask
-
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
@@ -22,9 +20,9 @@ plugins {
     id 'checkstyle' // Code style checks
     
     // Community plugins (need versions)
-    id 'com.jfrog.bintray' version '1.8.4' // For publishing to Bintray
+    id 'com.jfrog.bintray' version '1.8.5' // For publishing to Bintray
     id 'org.sonarqube' version '2.8' // Code quality
-    id "com.github.spotbugs" version "3.0.0" // Static analysis
+    id "com.github.spotbugs" version "4.0.5" // Static analysis
 }
 
 // Variables
@@ -201,13 +199,8 @@ spotbugs {
     ignoreFailures = true // Allow build to continue with errors
     effort = "max"
     reportLevel = "low" // Report all issues even low priority
+    reportsDir = file("$buildDir/reports/spotbugs")
 }
-tasks.withType(SpotBugsTask) {
-    reports {
-        xml.withMessages true
-    }
-}
-
 
 sonarqube {
     properties {
