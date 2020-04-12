@@ -26,7 +26,7 @@ Mostly it's a challenge, HDF5 is a fairly complex file format with lots of flexi
 - The API design intends to be familiar to Java programmers, so hopefully it works as you might expect. (If this is not the case, open an issue with suggestions for improvement)
 - No use of JNI, so you avoid all the issues associated with calling native code from the JVM.
 - Fully debug-able you can step fully through the library with a Java debugger.
-- Provides access to datasets `ByteBuffer`s to allow for custom reading or integration with other libraries 
+- Provides access to datasets `ByteBuffer`s to allow for custom reading logic, or integration with other libraries. 
 - Performance? Maybe, the library uses Java NIO `MappedByteBuffer`s which should provide fast file access. In addition, when accessing chunked datasets the library is parallelized to take advantage of modern CPUs. `jHDF` will also allow parallel reading of multiple datasets or multiple files. I have seen cases where `jHDF` is significantly faster than the C libraries, but as with all performance issues it is case specific so you will need to do your own tests on the cases you care about. If you do tests please post the results so everyone can benefit.
 
 ## Why should I not use jHDF?
