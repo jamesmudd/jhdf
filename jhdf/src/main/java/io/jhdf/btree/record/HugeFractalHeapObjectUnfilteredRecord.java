@@ -34,8 +34,12 @@ public class HugeFractalHeapObjectUnfilteredRecord extends BTreeRecord {
         return this.hugeObjectAddress;
     }
 
-    public long getLength( ) {
+    public long getLength() {
         return this.hugeObjectLength;
+    }
+
+    public long getId() {
+        return this.hugeObjectID;
     }
 }
 
