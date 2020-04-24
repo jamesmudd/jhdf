@@ -27,7 +27,7 @@ class LargeAttributesTest {
 	private static final String HDF5_TEST_FILE_NAME = "test_large_attribute.hdf5";
 	private static final String ATTRIBUTE_NAME = "large_attribute";
 	private static final int EXPECTED_DATA_LENGTH = 8200;
-	
+
 	private static HdfFile largeAttrHdfFile;
 
 	@BeforeAll
@@ -45,17 +45,17 @@ class LargeAttributesTest {
 		Attribute lattr = largeAttrHdfFile.getAttribute(ATTRIBUTE_NAME);
 		assertThat(lattr, notNullValue());
 		assertThat(lattr.getJavaType(), is(double.class));
-		
+
 		ByteBuffer bb = lattr.getBuffer();
 		DoubleBuffer db = bb.asDoubleBuffer();
 		assertThat(db.limit(), is(equalTo(EXPECTED_DATA_LENGTH)));
-		
+
 		double referenceData[] = new double[EXPECTED_DATA_LENGTH];
 		for (int i=0; i < EXPECTED_DATA_LENGTH; i++) referenceData[i] = (double)i;
-		
+
 		double obtainedData[] = new double[EXPECTED_DATA_LENGTH];
 		db.get(obtainedData);
-		
+
 		assertThat(obtainedData, is(equalTo(referenceData)));
 	}
 }
