@@ -20,7 +20,6 @@ class BTreeRecordTest {
     @Test
     void testUnsupportedRecordTypesThrow() {
         assertThrows(HdfException.class, () -> BTreeRecord.readRecord(0, null, null));
-        assertThrows(UnsupportedHdfException.class, () -> BTreeRecord.readRecord(1, null, null));
         assertThrows(UnsupportedHdfException.class, () -> BTreeRecord.readRecord(2, null, null));
         assertThrows(UnsupportedHdfException.class, () -> BTreeRecord.readRecord(3, null, null));
         assertThrows(UnsupportedHdfException.class, () -> BTreeRecord.readRecord(4, null, null));

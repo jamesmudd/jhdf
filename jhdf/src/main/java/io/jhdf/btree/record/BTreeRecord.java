@@ -23,7 +23,7 @@ public abstract class BTreeRecord {
 			case 0:
 				throw new HdfException("b-tree record type 0. Should only be used for testing");
 			case 1:
-				throw new UnsupportedHdfException("b-tree record type 1. Currently not supported");
+				return (T) new HugeFractalHeapObjectUnfilteredRecord(buffer);
 			case 2:
 				throw new UnsupportedHdfException("b-tree record type 2. Currently not supported");
 			case 3:
