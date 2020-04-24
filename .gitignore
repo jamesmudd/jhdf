@@ -26,3 +26,15 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+# Eclipse
+/.settings
+.classpath
+.project
+.pydevproject
+
+# IDEA
+/.idea
+*.iml
+*.ipr
+*.iws

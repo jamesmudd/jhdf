@@ -1,5 +1,3 @@
-import com.github.spotbugs.SpotBugsTask
-
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
@@ -15,16 +13,16 @@ import com.github.spotbugs.SpotBugsTask
  */
 plugins {
     // Core plugins
-	id 'java-library'
+    id 'java-library'
     id 'jacoco' // Code coverage
     id 'maven-publish' // For the artifact collections to publish
     id 'signing' // For GPG signing artifacts
     id 'checkstyle' // Code style checks
-    
+
     // Community plugins (need versions)
-    id 'com.jfrog.bintray' version '1.8.4' // For publishing to Bintray
+    id 'com.jfrog.bintray' version '1.8.5' // For publishing to Bintray
     id 'org.sonarqube' version '2.8' // Code quality
-    id "com.github.spotbugs" version "3.0.0" // Static analysis
+    id "com.github.spotbugs" version "4.0.5" // Static analysis
 }
 
 // Variables
@@ -49,32 +47,32 @@ repositories {
 
 ext {
     slf4jVersion = '1.7.30'
-    junitVersion = '5.6.0'
+    junitVersion = '5.6.2'
 }
 
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
 
     // Use JUnit 5 test framework
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion
-	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junitVersion
-	testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junitVersion
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion
     testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
-    
+
     // Mocking
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.0'
-    testImplementation group: 'org.powermock', name:'powermock-core', version:'2.0.5'
-	// Matchers
-	testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
+    testImplementation group: 'org.powermock', name: 'powermock-core', version: '2.0.7'
+    // Matchers
+    testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
 }
 
 test {
-	useJUnitPlatform()
-	testLogging {
-		events "passed", "skipped", "failed"
-	}
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
 
 def getGitHash = { ->
@@ -95,20 +93,20 @@ def getGitHash = { ->
 jar {
     manifest {
         attributes('Implementation-Title': project.name,
-                   'Implementation-Version': project.version,
-                   'Automatic-Module-Name': 'io.jhdf',
-                   // OSGi headers
-                   'Bundle-ManifestVersion': '2',
-                   'Bundle-SymbolicName': 'io.jhdf',
-                   'Bundle-Name': project.name,
-                   'Bundle-Vendor': 'James Mudd',
-                   'Export-Package': 'io.jhdf.*',
-                   // Build data
-                   'Build-Time': new Date().toTimestamp(),
-                   'Build-JDK': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
-                   'Build-OS': System.getProperty('os.name') + ' ' + System.getProperty('os.version'),
-                   'Git-Commit': getGitHash()
-                   )
+                'Implementation-Version': project.version,
+                'Automatic-Module-Name': 'io.jhdf',
+                // OSGi headers
+                'Bundle-ManifestVersion': '2',
+                'Bundle-SymbolicName': 'io.jhdf',
+                'Bundle-Name': project.name,
+                'Bundle-Vendor': 'James Mudd',
+                'Export-Package': 'io.jhdf.*',
+                // Build data
+                'Build-Time': new Date().toTimestamp(),
+                'Build-JDK': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
+                'Build-OS': System.getProperty('os.name') + ' ' + System.getProperty('os.version'),
+                'Git-Commit': getGitHash()
+        )
         exclude('io/jhdf/examples')
     }
     from('../CHANGES.md')
@@ -135,10 +133,10 @@ task javadocJar(type: Jar) {
 publishing {
     publications {
         maven(MavenPublication) {
-            from components.java 
+            from components.java
             artifact sourcesJar
             artifact javadocJar
-                        
+
             pom {
                 name = 'jhdf'
                 description = 'A pure Java HDF5 library'
@@ -182,32 +180,27 @@ bintray {
         version {
             name = project.version
             desc = 'jHDF'
-            released  = new Date()
+            released = new Date()
         }
     }
     // Upload the 'maven' publication i.e jar, sourcesJar, javadocJar, POM
     publications = ['maven']
     // Use filesSpec to copy the signatures not sure this is the best way but it works
     filesSpec {
-    	from "$buildDir/libs", "$buildDir/publications/maven/pom-default.xml.asc"
-    	include "*.asc" // Signature files
-    	into "io/jhdf/jhdf/${project.version}"
-    	rename 'pom-default.xml.asc', "jhdf-${project.version}.pom.asc"
+        from "$buildDir/libs", "$buildDir/publications/maven/pom-default.xml.asc"
+        include "*.asc" // Signature files
+        into "io/jhdf/jhdf/${project.version}"
+        rename 'pom-default.xml.asc', "jhdf-${project.version}.pom.asc"
     }
-    
+
 }
 
 spotbugs {
     ignoreFailures = true // Allow build to continue with errors
     effort = "max"
     reportLevel = "low" // Report all issues even low priority
+    reportsDir = file("$buildDir/reports/spotbugs")
 }
-tasks.withType(SpotBugsTask) {
-    reports {
-        xml.withMessages true
-    }
-}
-
 
 sonarqube {
     properties {
