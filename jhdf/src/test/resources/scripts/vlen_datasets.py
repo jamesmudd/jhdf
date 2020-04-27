@@ -93,7 +93,7 @@ def write_vlen_datasets(f):
 
 
 if __name__ == '__main__':
-    print('Making variable lentgh dataset test files...')
+    print('Making variable length dataset test files...')
 
     f = h5py.File('test_vlen_datasets_earliest.hdf5', 'w', libver='earliest')
     write_vlen_datasets(f)

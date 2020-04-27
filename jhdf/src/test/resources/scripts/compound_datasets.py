@@ -17,7 +17,7 @@ def write_compound_datasets(f):
     utf8 = h5py.special_dtype(vlen=str)
     gender_enum_dtype = h5py.enum_dtype({"MALE": 0, "FEMALE": 1}, basetype=np.uint8)
     dt = np.dtype([
-        ('firstName', utf8), # variable lentgh utf8
+        ('firstName', utf8), # variable length utf8
         ('surname', 'S20'), # fixed length ASCII
         ('gender', gender_enum_dtype), # enum type
         ('age', np.uint8), # uint
