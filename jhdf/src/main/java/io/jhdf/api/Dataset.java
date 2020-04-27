@@ -69,7 +69,7 @@ public interface Dataset extends Node {
 	 *
 	 * @return <code>true</code> if this is a variable length dataset, <code>false</code> otherwise
 	 */
-	boolean isVariableLentgh();
+	boolean isVariableLength();
 
 	/**
 	 * Gets the max size of this dataset. If not specified this will be equal to
