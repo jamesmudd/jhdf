@@ -33,6 +33,9 @@ import static io.jhdf.Utils.readBytesAsUnsignedInt;
 import static io.jhdf.Utils.readBytesAsUnsignedLong;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
+import io.jhdf.btree.BTreeV2;
+import io.jhdf.btree.record.HugeFractalHeapObjectUnfilteredRecord;
+
 /**
  * Fractal heap implementation. Used for storing data which can be looked up via
  * an ID.
@@ -215,7 +218,20 @@ public class FractalHeap {
 			return createSubBuffer(bb, length);
 
 		case 1: // Huge objects
-			throw new UnsupportedHdfException("Huge objects are currently not supported");
+            if (this.bTreeAddressOfHugeObjects <= 0) {
+			    throw new UnsupportedHdfException("Huge objects without BTreev2 are currently not supported");
+			}
+
+			BTreeV2<HugeFractalHeapObjectUnfilteredRecord> hugeObjectBTree =
+			    new BTreeV2<HugeFractalHeapObjectUnfilteredRecord>(this.hdfFc, this.bTreeAddressOfHugeObjects);
+
+			if (hugeObjectBTree.getRecords().size() != 1) {
+			    throw new UnsupportedHdfException("Only Huge objects BTrees with 1 record are currently supported");
+			}
+
+			HugeFractalHeapObjectUnfilteredRecord ho = hugeObjectBTree.getRecords().get(0);
+
+			return this.hdfFc.readBufferFromAddress(ho.getAddress(), (int) ho.getLength());
 		case 2: // Tiny objects
 			throw new UnsupportedHdfException("Tiny objects are currently not supported");
 		default:
