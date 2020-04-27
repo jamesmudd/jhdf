@@ -86,7 +86,7 @@ class VariableLengthDatasetTest {
 		return () -> {
 			Dataset dataset = hdfFile.getDatasetByPath(datasetPath);
 
-			assertThat(dataset.isVariableLentgh(), is(true));
+			assertThat(dataset.isVariableLength(), is(true));
 			assertThat(dataset.getDimensions(), is(new int[] {3}));
 			assertThat(dataset.getJavaType(), is(Object.class));
 

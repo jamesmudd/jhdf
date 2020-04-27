@@ -168,7 +168,7 @@ class TestAllFiles {
 			assertThat(data, is(instanceOf(Map.class)));
 			assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
 			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
-		} else if (dataset.isVariableLentgh()) {
+		} else if (dataset.isVariableLength()) {
 			assertThat(getDimensions(data)[0], is(equalTo(dims[0])));
 			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
 		} else {
