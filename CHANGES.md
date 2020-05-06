@@ -1,5 +1,12 @@
 # jHDF Change Log
 
+## v0.5.7
+- Fix https://github.com/jamesmudd/jhdf/issues/177 Reading null or padded strings of zero length
+- Fix https://github.com/jamesmudd/jhdf/issues/182 Typo in `Dataset.isVariableLength`. *This is an breaking API change* replace calls to `isVariableLentgh()` with `isVariableLength()`
+- Add initial support for reading large attributes https://github.com/jamesmudd/jhdf/pull/183
+- Dependency updates
+- CI and build improvements
+
 ## v0.5.6
 - Add support for reading half precision (16 bit) floats
 - Add support for getting the ByteBuffer backing contiguous datasets and attributes
