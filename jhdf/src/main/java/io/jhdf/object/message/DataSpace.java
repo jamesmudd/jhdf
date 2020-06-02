@@ -12,6 +12,7 @@ package io.jhdf.object.message;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
@@ -100,11 +101,11 @@ public class DataSpace {
 	}
 
 	public int[] getDimensions() {
-		return dimensions;
+		return ArrayUtils.clone(dimensions);
 	}
 
 	public int[] getMaxSizes() {
-		return maxSizes;
+		return ArrayUtils.clone(maxSizes);
 	}
 
 	public boolean isMaxSizesPresent() {

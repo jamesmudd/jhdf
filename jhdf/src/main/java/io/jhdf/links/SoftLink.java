@@ -10,7 +10,6 @@
 package io.jhdf.links;
 
 import io.jhdf.api.Group;
-import io.jhdf.api.Link;
 import io.jhdf.api.Node;
 import io.jhdf.exceptions.HdfBrokenLinkException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
@@ -20,7 +19,7 @@ import org.apache.commons.lang3.concurrent.LazyInitializer;
  *
  * @author James Mudd
  */
-public class SoftLink extends AbstractLink implements Link {
+public class SoftLink extends AbstractLink {
 
 	private final String target;
 

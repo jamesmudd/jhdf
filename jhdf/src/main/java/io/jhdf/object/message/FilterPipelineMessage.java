@@ -11,6 +11,7 @@ package io.jhdf.object.message;
 
 import io.jhdf.Utils;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -126,7 +127,7 @@ public class FilterPipelineMessage extends Message {
 		}
 
 		public int[] getData() {
-			return data;
+			return ArrayUtils.clone(data);
 		}
 
 		@Override

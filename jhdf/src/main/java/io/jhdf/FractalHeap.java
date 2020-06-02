@@ -223,7 +223,7 @@ public class FractalHeap {
 			}
 
 			BTreeV2<HugeFractalHeapObjectUnfilteredRecord> hugeObjectBTree =
-			    new BTreeV2<HugeFractalHeapObjectUnfilteredRecord>(this.hdfFc, this.bTreeAddressOfHugeObjects);
+			    new BTreeV2<>(this.hdfFc, this.bTreeAddressOfHugeObjects);
 
 			if (hugeObjectBTree.getRecords().size() != 1) {
 			    throw new UnsupportedHdfException("Only Huge objects BTrees with 1 record are currently supported");
