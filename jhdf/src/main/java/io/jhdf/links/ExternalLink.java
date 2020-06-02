@@ -11,7 +11,6 @@ package io.jhdf.links;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Group;
-import io.jhdf.api.Link;
 import io.jhdf.api.Node;
 import io.jhdf.exceptions.HdfBrokenLinkException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
@@ -25,7 +24,7 @@ import java.nio.file.Paths;
  *
  * @author James Mudd
  */
-public class ExternalLink extends AbstractLink implements Link {
+public class ExternalLink extends AbstractLink {
 
 	private final String targetFile;
 	private final String targetPath;

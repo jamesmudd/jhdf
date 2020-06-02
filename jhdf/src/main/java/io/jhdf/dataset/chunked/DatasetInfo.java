@@ -9,6 +9,8 @@
  */
 package io.jhdf.dataset.chunked;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 /**
  * Data class for passing dataset information
  *
@@ -31,10 +33,10 @@ public class DatasetInfo {
     }
 
     public int[] getDatasetDimensions() {
-        return datasetDimensions;
+        return ArrayUtils.clone(datasetDimensions);
     }
 
     public int[] getChunkDimensions() {
-        return chunkDimensions;
+        return ArrayUtils.clone(chunkDimensions);
     }
 }

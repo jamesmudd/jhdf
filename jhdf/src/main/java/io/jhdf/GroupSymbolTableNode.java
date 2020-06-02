@@ -10,6 +10,7 @@
 package io.jhdf;
 
 import io.jhdf.exceptions.HdfException;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +80,7 @@ public class GroupSymbolTableNode {
 	}
 
 	public SymbolTableEntry[] getSymbolTableEntries() {
-		return symbolTableEntries;
+		return ArrayUtils.clone(symbolTableEntries);
 	}
 
 	@Override

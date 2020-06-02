@@ -13,6 +13,7 @@ import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.dataset.DatasetReader;
 import io.jhdf.exceptions.HdfException;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -61,7 +62,7 @@ public class ArrayDataType extends DataType {
     }
 
     public int[] getDimensions() {
-        return dimensions;
+        return ArrayUtils.clone(dimensions);
     }
 
     @Override
