@@ -22,7 +22,7 @@ plugins {
     // Community plugins (need versions)
     id 'com.jfrog.bintray' version '1.8.5' // For publishing to Bintray
     id 'org.sonarqube' version '3.0' // Code quality
-    id "com.github.spotbugs" version "4.4.2" // Static analysis
+    id "com.github.spotbugs" version "4.4.3" // Static analysis
 }
 
 // Variables
