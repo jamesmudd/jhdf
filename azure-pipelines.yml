@@ -51,7 +51,7 @@ jobs:
   # SonarQube
   - task: Gradle@2
     # Only run for Java 1.8 and not for PR
-    condition: and(eq(variables['java.version'], '1.8'), ne(variables['Build.Reason'], 'PullRequest'))
+    condition: and(eq(variables['java.version'], '1.11'), ne(variables['Build.Reason'], 'PullRequest'))
     displayName: SonarQube
     inputs:
       gradleWrapperFile: 'jhdf/gradlew'
@@ -64,7 +64,7 @@ jobs:
   # SonarQube for Pull requests
   - task: Gradle@2
     # Only run for Java 1.8 and PR
-    condition: and(eq(variables['java.version'], '1.8'), eq(variables['Build.Reason'], 'PullRequest'))
+    condition: and(eq(variables['java.version'], '1.11'), eq(variables['Build.Reason'], 'PullRequest'))
     displayName: SonarQube PR
     inputs:
       gradleWrapperFile: 'jhdf/gradlew'
