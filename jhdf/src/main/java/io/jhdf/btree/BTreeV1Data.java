@@ -51,7 +51,7 @@ public abstract class BTreeV1Data extends BTreeV1 {
 			final int childPointerBytes = entriesUsed * hdfFc.getSizeOfOffsets();
 			final int keysAndPointersBytes = keyBytes + childPointerBytes;
 
-			final long keysAddress = address + 8 + 2 * hdfFc.getSizeOfOffsets();
+			final long keysAddress = address + 8L + 2L * hdfFc.getSizeOfOffsets();
 			final ByteBuffer bb = hdfFc.readBufferFromAddress(keysAddress, keysAndPointersBytes);
 
 			chunks = new ArrayList<>(entriesUsed);
@@ -102,7 +102,7 @@ public abstract class BTreeV1Data extends BTreeV1 {
 			final int childPointerBytes = entriesUsed * hdfFc.getSizeOfOffsets();
 			final int keysAndPointersBytes = keyBytes + childPointerBytes;
 
-			final long keysAddress = address + 8 + 2 * hdfFc.getSizeOfOffsets();
+			final long keysAddress = address + 8L + 2L * hdfFc.getSizeOfOffsets();
 			final ByteBuffer keysAndPointersBuffer = hdfFc.readBufferFromAddress(keysAddress, keysAndPointersBytes);
 
 			childNodes = new ArrayList<>(entriesUsed);

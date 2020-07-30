@@ -58,7 +58,7 @@ public class GroupSymbolTableNode {
 			numberOfEntries = ByteBuffer.wrap(twoBytes).order(LITTLE_ENDIAN).getShort();
 			logger.trace("numberOfSymbols = {}", numberOfEntries);
 
-			final int symbolTableEntryBytes = hdfFc.getSizeOfOffsets() * 2 + 8 + 16;
+			final long symbolTableEntryBytes = hdfFc.getSizeOfOffsets() * 2L + 8L + 16L;
 
 			symbolTableEntries = new SymbolTableEntry[numberOfEntries];
 			for (int i = 0; i < numberOfEntries; i++) {
