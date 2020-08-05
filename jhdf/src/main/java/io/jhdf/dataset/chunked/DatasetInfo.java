@@ -24,8 +24,8 @@ public class DatasetInfo {
 
     public DatasetInfo(int chunkSizeInBytes, int[] datasetDimensions, int[] chunkDimensions) {
         this.chunkSizeInBytes = chunkSizeInBytes;
-        this.datasetDimensions = datasetDimensions;
-        this.chunkDimensions = chunkDimensions;
+        this.datasetDimensions = ArrayUtils.clone(datasetDimensions);
+        this.chunkDimensions = ArrayUtils.clone(chunkDimensions);
     }
 
     public int getChunkSizeInBytes() {

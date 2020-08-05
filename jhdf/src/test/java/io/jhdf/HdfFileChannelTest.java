@@ -23,6 +23,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.StandardCharsets;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -48,7 +49,7 @@ class HdfFileChannelTest {
 	@BeforeEach
 	void before() {
 		// Setup mocks
-		MockitoAnnotations.initMocks(this);
+		MockitoAnnotations.openMocks(this);
 		Mockito.when(sb.getBaseAddressByte()).thenReturn(0L);
 
 		// Setup test object
@@ -62,14 +63,14 @@ class HdfFileChannelTest {
 		Mockito.doAnswer(invocation -> {
 			ByteBuffer bb = invocation.getArgument(0);
 			bb.rewind();
-			bb.put("TEST".getBytes()); // Put test data in buffer
+			bb.put("TEST".getBytes(US_ASCII)); // Put test data in buffer
 			return null;
 		}).when(fc).read(any(ByteBuffer.class), eq(3L));
 
 		// Read 4 bytes
 		ByteBuffer bb = hdfFc.readBufferFromAddress(3, 4);
 		assertThat(bb.capacity(), is(equalTo(4)));
-		assertThat(StandardCharsets.US_ASCII.decode(bb).toString(), is(equalTo("TEST")));
+		assertThat(US_ASCII.decode(bb).toString(), is(equalTo("TEST")));
 
 	}
 

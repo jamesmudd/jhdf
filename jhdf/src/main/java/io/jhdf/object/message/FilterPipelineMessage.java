@@ -111,7 +111,7 @@ public class FilterPipelineMessage extends Message {
 			this.id = id;
 			this.name = name;
 			this.optional = optional;
-			this.data = data;
+			this.data = ArrayUtils.clone(data);
 		}
 
 		public int getId() {

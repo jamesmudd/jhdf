@@ -13,6 +13,7 @@ import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
@@ -129,7 +130,7 @@ public abstract class DataLayoutMessage extends Message {
 		}
 
 		public int[] getChunkDimensions() {
-			return chunkDimensions;
+			return ArrayUtils.clone(chunkDimensions);
 		}
 	}
 
@@ -253,7 +254,7 @@ public abstract class DataLayoutMessage extends Message {
 		}
 
 		public int[] getChunkDimensions() {
-			return chunkDimensions;
+			return ArrayUtils.clone(chunkDimensions);
 		}
 
 		public int getSizeOfFilteredSingleChunk() {
