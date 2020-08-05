@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.equalTo;
@@ -58,7 +59,7 @@ class GlobalHeapTest {
 
 		assertThat(bb.limit(), is(equalTo(19)));
 		//  Decode the data
-		String data = StandardCharsets.US_ASCII.decode(bb).toString();
+		String data = US_ASCII.decode(bb).toString();
 		assertThat(data, is(equalTo("my string attribute")));
 
 	}
@@ -96,7 +97,7 @@ class GlobalHeapTest {
 		Mockito.doAnswer(invocation -> {
 			ByteBuffer bb = invocation.getArgument(0);
 			bb.rewind();
-			bb.put("GCOL".getBytes()); // Match signature
+			bb.put("GCOL".getBytes(US_ASCII)); // Match signature
 			bb.put((byte) 4); // mismatch version
 			return null;
 		}).when(mockFc).read(ArgumentMatchers.any(ByteBuffer.class), ArgumentMatchers.anyLong());

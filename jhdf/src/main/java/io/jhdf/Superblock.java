@@ -116,7 +116,6 @@ public abstract class Superblock {
 
 		private SuperblockV0V1(FileChannel fc, long address) {
 			try {
-
 				ByteBuffer header = ByteBuffer.allocate(12);
 				fc.read(header, address);
 				address += 12;
@@ -203,7 +202,7 @@ public abstract class Superblock {
 				rootGroupSymbolTableAddress = address;
 				logger.trace("rootGroupSymbolTableAddress= {}", rootGroupSymbolTableAddress);
 
-			} catch (Exception e) {
+			} catch (IOException e) {
 				throw new HdfException("Failed to read superblock from address " + toHex(address), e);
 			}
 
@@ -369,10 +368,9 @@ public abstract class Superblock {
 
 				// TODO Superblock checksum
 
-			} catch (Exception e) {
+			} catch (IOException e) {
 				throw new HdfException("Failed to read superblock from address " + toHex(address), e);
 			}
-
 		}
 
 		/**

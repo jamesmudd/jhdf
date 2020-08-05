@@ -14,8 +14,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -28,7 +30,7 @@ class ObjectCommentMessageTest {
 
 	@BeforeEach
     void createBuffer() {
-		byte[] bytes = COMMENT.getBytes();
+		byte[] bytes = COMMENT.getBytes(US_ASCII);
 		buffer = ByteBuffer.allocate(bytes.length + 1);
 		buffer.rewind();
 		buffer.put(bytes);

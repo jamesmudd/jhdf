@@ -14,7 +14,6 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Objects;
 
 public class ChunkImpl implements Chunk {
 
@@ -32,7 +31,7 @@ public class ChunkImpl implements Chunk {
     public ChunkImpl(long address, int size, int[] chunkOffset, BitSet filterMask) {
         this.address = address;
         this.size = size;
-        this.chunkOffset = chunkOffset;
+        this.chunkOffset = ArrayUtils.clone(chunkOffset);
         this.filterMask = filterMask;
     }
 
@@ -54,19 +53,6 @@ public class ChunkImpl implements Chunk {
     @Override
     public long getAddress() {
         return address;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ChunkImpl chunk = (ChunkImpl) o;
-        return address == chunk.address;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(address);
     }
 
     @Override
