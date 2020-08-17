@@ -158,7 +158,7 @@ class TestAllFiles {
 		if (dataset.isEmpty()) {
 			assertThrows(HdfEmptyDatasetException.class, dataset::getData);
 			// Empty so should have 0 size
-			assertThat(dataset.getDiskSize(), is(equalTo(0L)));
+			assertThat(dataset.getStorageInBytes(), is(equalTo(0L)));
 		} else {
 			// Call getData twice to check cases of lazy initialisation are working correctly
 			dataset.getData();
@@ -167,20 +167,20 @@ class TestAllFiles {
 			if (dataset.isScalar()) {
 				assertThat(data.getClass(), is(equalTo(dataset.getJavaType())));
 				// Should have some size
-				assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+				assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 			} else if (dataset.isCompound()) {
 				// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future..
 				assertThat(data, is(instanceOf(Map.class)));
 				assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
-				assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+				assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 			} else if (dataset.isVariableLength()) {
 				assertThat(getDimensions(data)[0], is(equalTo(dims[0])));
-				assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+				assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 			} else {
 				assertThat(getDimensions(data), is(equalTo(dims)));
 				assertThat(getType(data), is(equalTo(dataset.getJavaType())));
 				// Should have some size
-				assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+				assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 			}
 		}
 

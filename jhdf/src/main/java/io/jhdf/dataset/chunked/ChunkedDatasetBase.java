@@ -143,7 +143,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
         logger.trace("Getting data buffer for {}", getPath());
 
         // Need to load the full buffer into memory so create the array
-        final byte[] dataArray = new byte[toIntExact(getDiskSize())];
+        final byte[] dataArray = new byte[toIntExact(getSizeInBytes())];
         logger.trace("Created data buffer for '{}' of size {} bytes", getPath(), dataArray.length);
 
         final int elementSize = getDataType().getSize();
@@ -296,4 +296,13 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 
     protected abstract Map<ChunkOffset, Chunk> getChunkLookup();
 
+    @Override
+    public boolean isEmpty() {
+        return getChunkLookup().isEmpty();
+    }
+
+    @Override
+    public long getStorageInBytes() {
+        return getChunkLookup().values().stream().mapToLong(Chunk::getSize).sum();
+    }
 }

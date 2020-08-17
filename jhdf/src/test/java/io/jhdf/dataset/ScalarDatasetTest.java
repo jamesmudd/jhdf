@@ -109,7 +109,7 @@ class ScalarDatasetTest {
 			assertThat(dataset.getDimensions(), is(equalTo(new int[0])));
 			assertThat(dataset.isScalar(), is(true));
 			assertThat(dataset.getData(), is(equalTo(expected)));
-			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 		};
 	}
 

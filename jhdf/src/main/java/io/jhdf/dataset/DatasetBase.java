@@ -76,7 +76,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	}
 
 	@Override
-	public long getDiskSize() {
+	public long getSizeInBytes() {
 		return getSize() * dataType.getSize();
 	}
 
@@ -119,12 +119,11 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	public Object getData() {
 		logger.debug("Getting data for '{}'...", getPath());
 
-		final ByteBuffer bb = getDataBuffer();
-		if (bb == null) {
-			// Empty
+		if (isEmpty()) {
 			throw new HdfEmptyDatasetException("[" + getPath() +"] is an empty dataset");
 		}
 
+		final ByteBuffer bb = getDataBuffer();
 		final DataType type = getDataType();
 
 		return DatasetReader.readDataset(type, bb, getDimensions(), hdfFc);
@@ -137,7 +136,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 	@Override
 	public boolean isEmpty() {
-		return getDiskSize() == 0;
+		return getSizeInBytes() == 0;
 	}
 
 	@Override
@@ -171,5 +170,10 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	@Override
 	public boolean isVariableLength() {
 		return getDataType() instanceof VariableLength;
+	}
+
+	@Override
+	public long getStorageInBytes() {
+		return getSizeInBytes();
 	}
 }
