@@ -53,21 +53,21 @@ class CompressedChunkedDatasetTest {
 		// List of all the datasetPaths
 		return Arrays.asList(
 				dynamicContainer(HDF5_TEST_EARLIEST_FILE_NAME, Arrays.asList(
-						dynamicTest("float32", createTest(earliestHdfFile,"/float/float32")),
-						dynamicTest("float64", createTest(earliestHdfFile,"/float/float64")),
-						dynamicTest("int8", createTest(earliestHdfFile,"/int/int8")),
-						dynamicTest("int16", createTest(earliestHdfFile,"/int/int16")),
-						dynamicTest("int32", createTest(earliestHdfFile,"/int/int32")))),
+						dynamicTest("float32", createTest(earliestHdfFile,"/float/float32", 0.4560260586319218)),
+						dynamicTest("float64", createTest(earliestHdfFile,"/float/float64", 1.6374269005847952)),
+						dynamicTest("int8", createTest(earliestHdfFile,"/int/int8", 0.45454545454545453)),
+						dynamicTest("int16", createTest(earliestHdfFile,"/int/int16", 0.2)),
+						dynamicTest("int32", createTest(earliestHdfFile,"/int/int32", 0.625)))),
 
 				dynamicContainer(HDF5_TEST_LATEST_FILE_NAME, Arrays.asList(
-						dynamicTest("float32", createTest(latestHdfFile, "/float/float32")),
-						dynamicTest("float64", createTest(latestHdfFile,"/float/float64")),
-						dynamicTest("int8", createTest(latestHdfFile,"/int/int8")),
-						dynamicTest("int16", createTest(latestHdfFile,"/int/int16")),
-						dynamicTest("int32", createTest(latestHdfFile,"/int/int32")))));
+						dynamicTest("float32", createTest(latestHdfFile, "/float/float32", 0.4560260586319218)),
+						dynamicTest("float64", createTest(latestHdfFile,"/float/float64", 1.6374269005847952)),
+						dynamicTest("int8", createTest(latestHdfFile,"/int/int8", 0.45454545454545453)),
+						dynamicTest("int16", createTest(latestHdfFile,"/int/int16", 0.2)),
+						dynamicTest("int32", createTest(latestHdfFile,"/int/int32", 0.625)))));
 	}
 
-	private Executable createTest(HdfFile hdfFile, String datasetPath) {
+	private Executable createTest(HdfFile hdfFile, String datasetPath, double expectedCompressionRatio) {
 		return () -> {
 			Dataset dataset = hdfFile.getDatasetByPath(datasetPath);
 			Object data = dataset.getData();
@@ -78,6 +78,8 @@ class CompressedChunkedDatasetTest {
 				// convert to double
 				assertThat(Double.valueOf(flatData[i].toString()), is(equalTo((double) i)));
 			}
+			double actualCompressionRatio = (double) dataset.getSizeInBytes() / dataset.getStorageInBytes();
+			assertThat(actualCompressionRatio, is(equalTo(expectedCompressionRatio)));
 		};
 	}
 
