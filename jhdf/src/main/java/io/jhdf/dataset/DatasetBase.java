@@ -15,6 +15,7 @@ import io.jhdf.ObjectHeader;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
+import io.jhdf.exceptions.HdfEmptyDatasetException;
 import io.jhdf.object.datatype.CompoundDataType;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.OrderedDataType;
@@ -121,7 +122,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		final ByteBuffer bb = getDataBuffer();
 		if (bb == null) {
 			// Empty
-			return null;
+			throw new HdfEmptyDatasetException("[" + getPath() +"] is an empty dataset");
 		}
 
 		final DataType type = getDataType();

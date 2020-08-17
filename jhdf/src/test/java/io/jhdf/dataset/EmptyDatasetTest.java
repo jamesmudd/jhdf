@@ -11,6 +11,7 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
+import io.jhdf.exceptions.HdfEmptyDatasetException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
@@ -26,6 +27,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -110,10 +112,11 @@ class EmptyDatasetTest {
 			assertThat(dataset.getDiskSize(), is(equalTo(0L)));
 			// Should be empty
 			assertThat(dataset.isEmpty(), is(true));
-			// Empty dataset getData should return null
-			assertThat(dataset.getData(), is(nullValue()));
 
 			assertThat(dataset.getJavaType(), is(equalTo(expectedType)));
+
+			// Empty dataset getData should return throw
+			assertThrows(HdfEmptyDatasetException.class, dataset::getData);
 		};
 	}
 

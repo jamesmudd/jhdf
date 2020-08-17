@@ -18,6 +18,7 @@ import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.dataset.ChunkedDataset;
 import io.jhdf.api.dataset.ContiguousDataset;
+import io.jhdf.exceptions.HdfEmptyDatasetException;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 
@@ -48,6 +49,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 /**
@@ -151,31 +153,35 @@ class TestAllFiles {
 		assertThat(dataset.getType(), is(NodeType.DATASET));
 		assertThat(dataset.getDataLayout(), is(notNullValue()));
 
-		// Call getData twice to check cases of lazy initialisation are working correctly
-		dataset.getData();
-		final Object data = dataset.getData();
+
 
 		if (dataset.isEmpty()) {
-			assertThat(data, is(nullValue()));
+			assertThrows(HdfEmptyDatasetException.class, dataset::getData);
 			// Empty so should have 0 size
 			assertThat(dataset.getDiskSize(), is(equalTo(0L)));
-		} else if (dataset.isScalar()) {
-			assertThat(data.getClass(), is(equalTo(dataset.getJavaType())));
-			// Should have some size
-			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
-		} else if (dataset.isCompound()) {
-			// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future..
-			assertThat(data, is(instanceOf(Map.class)));
-			assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
-			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
-		} else if (dataset.isVariableLength()) {
-			assertThat(getDimensions(data)[0], is(equalTo(dims[0])));
-			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
 		} else {
-			assertThat(getDimensions(data), is(equalTo(dims)));
-			assertThat(getType(data), is(equalTo(dataset.getJavaType())));
-			// Should have some size
-			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+			// Call getData twice to check cases of lazy initialisation are working correctly
+			dataset.getData();
+			final Object data = dataset.getData();
+
+			if (dataset.isScalar()) {
+				assertThat(data.getClass(), is(equalTo(dataset.getJavaType())));
+				// Should have some size
+				assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+			} else if (dataset.isCompound()) {
+				// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future..
+				assertThat(data, is(instanceOf(Map.class)));
+				assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
+				assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+			} else if (dataset.isVariableLength()) {
+				assertThat(getDimensions(data)[0], is(equalTo(dims[0])));
+				assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+			} else {
+				assertThat(getDimensions(data), is(equalTo(dims)));
+				assertThat(getType(data), is(equalTo(dataset.getJavaType())));
+				// Should have some size
+				assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+			}
 		}
 
 		if (dataset instanceof ContiguousDataset && !dataset.isEmpty()) {
