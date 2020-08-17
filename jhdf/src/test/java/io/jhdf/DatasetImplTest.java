@@ -156,7 +156,7 @@ class DatasetImplTest {
 	@Test
 	void testByteDatasetDiskSize() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(INT8_PATH);
-		assertThat(dataset.getDiskSize(), is(equalTo(21L)));
+		assertThat(dataset.getSizeInBytes(), is(equalTo(21L)));
 	}
 
 	@Test
@@ -168,7 +168,7 @@ class DatasetImplTest {
 	@Test
 	void testShortDatasetDiskSize() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(INT16_PATH);
-		assertThat(dataset.getDiskSize(), is(equalTo(42L)));
+		assertThat(dataset.getSizeInBytes(), is(equalTo(42L)));
 	}
 
 	@Test
@@ -180,7 +180,7 @@ class DatasetImplTest {
 	@Test
 	void testInt32DatasetDiskSize() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
-		assertThat(dataset.getDiskSize(), is(equalTo(84L)));
+		assertThat(dataset.getSizeInBytes(), is(equalTo(84L)));
 	}
 
 	@Test
