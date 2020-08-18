@@ -11,6 +11,7 @@ package io.jhdf;
 
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Node;
+import io.jhdf.exceptions.HdfEmptyDatasetException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
@@ -27,6 +28,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -478,27 +480,30 @@ class AttributesTest {
 		return () -> {
 			Node node = file.getByPath(nodePath);
 			Attribute attribute = node.getAttribute(attributeName);
-
-			assertThat(attribute.getData(), is(equalTo(expectedData)));
-			// Call getData again to ensure the is no persisted state after the first read.
-			assertThat(attribute.getData(), is(equalTo(expectedData)));
-
 			assertThat(attribute.getName(), is(equalTo(attributeName)));
 
-			if (expectedData == null) {// Empty attributes
+			if (expectedData == null) { // Empty attributes
 				assertThat(attribute.isEmpty(), is(true));
 				assertThat(attribute.isScalar(), is(false));
 				assertThat(attribute.getSize(), is(0L));
 				assertThat(attribute.getDiskSize(), is(0L));
-			} else if (expectedData.getClass().isArray()) { // Array
-				assertThat(attribute.getJavaType(), is(equalTo(getArrayType(expectedData))));
-				assertThat(attribute.isEmpty(), is(false));
-				assertThat(attribute.isScalar(), is(false));
-			} else { // Scalar
-				assertThat(attribute.getJavaType(), is(equalTo(expectedData.getClass())));
-				assertThat(attribute.isEmpty(), is(false));
-				assertThat(attribute.isScalar(), is(true));
-				assertThat(attribute.getSize(), is(1L));
+				assertThrows(HdfEmptyDatasetException.class, () -> attribute.getData());
+			} else { // Not empty
+
+				assertThat(attribute.getData(), is(equalTo(expectedData)));
+				// Call getData again to ensure the is no persisted state after the first read.
+				assertThat(attribute.getData(), is(equalTo(expectedData)));
+
+				if (expectedData.getClass().isArray()) { // Array
+					assertThat(attribute.getJavaType(), is(equalTo(getArrayType(expectedData))));
+					assertThat(attribute.isEmpty(), is(false));
+					assertThat(attribute.isScalar(), is(false));
+				} else { // Scalar
+					assertThat(attribute.getJavaType(), is(equalTo(expectedData.getClass())));
+					assertThat(attribute.isEmpty(), is(false));
+					assertThat(attribute.isScalar(), is(true));
+					assertThat(attribute.getSize(), is(1L));
+				}
 			}
 
 			if (!node.isLink()) {

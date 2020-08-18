@@ -115,7 +115,7 @@ class TestAllFiles {
 			if (attribute.isEmpty()) {
 				assertThat(attribute.getSize(), is(equalTo(0L)));
 				assertThat(attribute.getDiskSize(), is(equalTo(0L)));
-				assertThat(attribute.getData(), is(nullValue()));
+				assertThrows(HdfEmptyDatasetException.class, () -> attribute.getData());
 			} else if (attribute.isScalar()) {
 				assertThat(attribute.getSize(), is(equalTo(1L)));
 				assertThat(attribute.getDiskSize(), is(greaterThan(0L)));

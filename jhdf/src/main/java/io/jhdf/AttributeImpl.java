@@ -12,6 +12,7 @@ package io.jhdf;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Node;
 import io.jhdf.dataset.DatasetReader;
+import io.jhdf.exceptions.HdfEmptyDatasetException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.AttributeMessage;
 import org.slf4j.Logger;
@@ -65,7 +66,7 @@ public class AttributeImpl implements Attribute {
 	public Object getData() {
 		logger.debug("Getting data for attribute '{}' of '{}'...", name, node.getPath());
 		if (isEmpty()) {
-			return null;
+			throw new HdfEmptyDatasetException("Attribute [" + name + " on " + node.getPath() +"] is empty");
 		}
 		DataType type = message.getDataType();
 		ByteBuffer bb = message.getDataBuffer();
