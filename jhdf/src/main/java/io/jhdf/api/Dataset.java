@@ -9,6 +9,7 @@
  */
 package io.jhdf.api;
 
+import io.jhdf.exceptions.HdfEmptyDatasetException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataLayout;
 
@@ -104,11 +105,11 @@ public interface Dataset extends Node {
 	 * {@link #getDimensions()}. The type of the array will be the return value of
 	 * {@link #getJavaType()}.</li>
 	 * <li>A Java {@link java.util.Map} if {@link #isCompound()} returns <code>true</code></li>
-	 * <li><code>null</code> if the dataset is empty ({@link #isEmpty()}).</li>
 	 * </ul>
 	 *
 	 * @return the data in the dataset as a Java object or <code>null</code> if the
 	 *         dataset is empty.
+	 * @throws HdfEmptyDatasetException if the dataset is empty ({@link #isEmpty()} returns <code>true</code>)
 	 */
 	Object getData();
 
