@@ -15,7 +15,6 @@ import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
 import io.jhdf.btree.BTreeV1;
 import io.jhdf.btree.BTreeV1Data;
-import io.jhdf.exceptions.HdfEmptyDatasetException;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
@@ -27,7 +26,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
