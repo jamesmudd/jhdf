@@ -1,5 +1,13 @@
 # jHDF Change Log
 
+## v0.5.8
+- *Breaking API change* `Dataset#getDiskSize` is renamed `Dataset#getSizeInBytes` and `Attribute#getDiskSize` is renamed `Attribute#getSizeInBytes`
+- New API method `Dataset#getStorageInBytes` which returns the total storage size of the dataset. By comparison with `Dataset#getSizeInBytes` allows the compression ratio to be obtained 
+- Fixes an issue when reading empty datasets with no allocated storage https://github.com/jamesmudd/jhdf/pull/162
+- Code quality improvements and cleanup
+- Dependency updates
+- CI and build improvements
+
 ## v0.5.7
 - Fix https://github.com/jamesmudd/jhdf/issues/177 Reading null or padded strings of zero length
 - Fix https://github.com/jamesmudd/jhdf/issues/182 Typo in `Dataset.isVariableLength`. *This is an breaking API change* replace calls to `isVariableLentgh()` with `isVariableLength()`
