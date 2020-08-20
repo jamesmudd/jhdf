@@ -52,7 +52,7 @@ public class AttributeImpl implements Attribute {
 	}
 
 	@Override
-	public long getDiskSize() {
+	public long getSizeInBytes() {
 		return getSize() * message.getDataType().getSize();
 	}
 

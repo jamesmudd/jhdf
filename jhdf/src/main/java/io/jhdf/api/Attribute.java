@@ -51,13 +51,12 @@ public interface Attribute {
 	long getSize();
 
 	/**
-	 * Gets the disk size used by this attributes dataset. <blockquote>i.e. number
-	 * of elements * size of each element</blockquote>
+	 * Gets the size of this dataset. i.e. <blockquote>number of elements * size of each element</blockquote>
 	 *
-	 * @return the total number of bytes the attributes dataset is using
-	 * @see Dataset#getDiskSize()
+	 * @return the total number of bytes this attributes dataset is using
+	 * @see Dataset#getSizeInBytes()
 	 */
-	long getDiskSize();
+	long getSizeInBytes();
 
 	/**
 	 * Gets the dimensions of this attributes dataset

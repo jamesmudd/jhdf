@@ -107,7 +107,7 @@ class EmptyDatasetTest {
 			Dataset dataset = file.getDatasetByPath(datasetPath);
 			// should have 0 length dimensions
 			assertThat(dataset.getDimensions(), is(equalTo(new int[0])));
-			assertThat(dataset.getDiskSize(), is(equalTo(0L)));
+			assertThat(dataset.getSizeInBytes(), is(equalTo(0L)));
 			// Should be empty
 			assertThat(dataset.isEmpty(), is(true));
 			// Empty dataset getData should return null

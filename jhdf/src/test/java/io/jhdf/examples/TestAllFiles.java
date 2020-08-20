@@ -112,16 +112,16 @@ class TestAllFiles {
 			assertThat(attribute.getJavaType(), is(notNullValue()));
 			if (attribute.isEmpty()) {
 				assertThat(attribute.getSize(), is(equalTo(0L)));
-				assertThat(attribute.getDiskSize(), is(equalTo(0L)));
+				assertThat(attribute.getSizeInBytes(), is(equalTo(0L)));
 				assertThat(attribute.getData(), is(nullValue()));
 			} else if (attribute.isScalar()) {
 				assertThat(attribute.getSize(), is(equalTo(1L)));
-				assertThat(attribute.getDiskSize(), is(greaterThan(0L)));
+				assertThat(attribute.getSizeInBytes(), is(greaterThan(0L)));
 				assertThat(attribute.getData(), is(notNullValue()));
 				assertThat(attribute.getBuffer(), is(notNullValue()));
 			} else {
 				assertThat(attribute.getSize(), is(greaterThan(0L)));
-				assertThat(attribute.getDiskSize(), is(greaterThan(0L)));
+				assertThat(attribute.getSizeInBytes(), is(greaterThan(0L)));
 				assertThat(attribute.getData(), is(notNullValue()));
 				assertThat(attribute.getBuffer(), is(notNullValue()));
 			}
@@ -158,24 +158,24 @@ class TestAllFiles {
 		if (dataset.isEmpty()) {
 			assertThat(data, is(nullValue()));
 			// Empty so should have 0 size
-			assertThat(dataset.getDiskSize(), is(equalTo(0L)));
+			assertThat(dataset.getStorageInBytes(), is(equalTo(0L)));
 		} else if (dataset.isScalar()) {
 			assertThat(data.getClass(), is(equalTo(dataset.getJavaType())));
 			// Should have some size
-			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 		} else if (dataset.isCompound()) {
 			// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future..
 			assertThat(data, is(instanceOf(Map.class)));
 			assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
-			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 		} else if (dataset.isVariableLength()) {
 			assertThat(getDimensions(data)[0], is(equalTo(dims[0])));
-			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 		} else {
 			assertThat(getDimensions(data), is(equalTo(dims)));
 			assertThat(getType(data), is(equalTo(dataset.getJavaType())));
 			// Should have some size
-			assertThat(dataset.getDiskSize(), is(greaterThan(0L)));
+			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 		}
 
 		if (dataset instanceof ContiguousDataset && !dataset.isEmpty()) {

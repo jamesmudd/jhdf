@@ -27,12 +27,19 @@ public interface Dataset extends Node {
 	long getSize();
 
 	/**
-	 * Gets the disk size used by this dataset. <blockquote>i.e. number of elements
-	 * * size of each element</blockquote>
+	 * Gets the size of this dataset. i.e. <blockquote>number of elements * size of each element</blockquote>
 	 *
 	 * @return the total number of bytes the dataset is using
 	 */
-	long getDiskSize();
+	long getSizeInBytes();
+
+	/**
+	 * Gets the size of the storage used for this dataset in bytes. This may differ from
+	 * {@link #getSizeInBytes()} due to the use of compression.
+	 *
+	 * @return the total number of bytes the datasets storage is using
+	 */
+	long getStorageInBytes();
 
 	/**
 	 * Gets the dimensions of this dataset

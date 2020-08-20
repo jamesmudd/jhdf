@@ -9,11 +9,13 @@
  */
 package io.jhdf.dataset.chunked;
 
+import io.jhdf.Constants;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
 import io.jhdf.dataset.chunked.indexing.BTreeIndex;
 import io.jhdf.dataset.chunked.indexing.ChunkIndex;
+import io.jhdf.dataset.chunked.indexing.EmptyChunkIndex;
 import io.jhdf.dataset.chunked.indexing.ExtensibleArrayIndex;
 import io.jhdf.dataset.chunked.indexing.FixedArrayIndex;
 import io.jhdf.dataset.chunked.indexing.SingleChunkIndex;
@@ -71,27 +73,34 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
 
             final DatasetInfo datasetInfo = new DatasetInfo(getChunkSizeInBytes(), getDimensions(), getChunkDimensions());
             final ChunkIndex chunkIndex;
-            switch (layoutMessage.getIndexingType()) {
-                case 1: // Single chunk
-                    logger.debug("Reading single chunk indexed dataset");
-                    chunkIndex = new SingleChunkIndex(layoutMessage, datasetInfo);
-                    break;
-                case 2: // Implicit
-                    throw new UnsupportedHdfException("Implicit indexing is currently not supported");
-                case 3: // Fixed array
-                    logger.debug("Reading fixed array indexed dataset");
-                    chunkIndex = new FixedArrayIndex(hdfFc, layoutMessage.getAddress(), datasetInfo);
-                    break;
-                case 4: // Extensible Array
-                    logger.debug("Reading extensible array indexed dataset");
-                    chunkIndex = new ExtensibleArrayIndex(hdfFc, layoutMessage.getAddress(), datasetInfo);
-                    break;
-                case 5: // B Tree V2
-                    logger.debug("Reading B tree v2 indexed dataset");
-                    chunkIndex = new BTreeIndex(hdfFc, layoutMessage.getAddress(), datasetInfo);
-                    break;
-                default:
-                    throw new HdfException("Unrecognized chunk indexing type = " + layoutMessage.getIndexingType());
+
+            if(layoutMessage.getAddress() == Constants.UNDEFINED_ADDRESS) {
+                logger.debug("No storage allocated for '{}'", getPath());
+                chunkIndex = new EmptyChunkIndex();
+            } else {
+
+                switch (layoutMessage.getIndexingType()) {
+                    case 1: // Single chunk
+                        logger.debug("Reading single chunk indexed dataset");
+                        chunkIndex = new SingleChunkIndex(layoutMessage, datasetInfo);
+                        break;
+                    case 2: // Implicit
+                        throw new UnsupportedHdfException("Implicit indexing is currently not supported");
+                    case 3: // Fixed array
+                        logger.debug("Reading fixed array indexed dataset");
+                        chunkIndex = new FixedArrayIndex(hdfFc, layoutMessage.getAddress(), datasetInfo);
+                        break;
+                    case 4: // Extensible Array
+                        logger.debug("Reading extensible array indexed dataset");
+                        chunkIndex = new ExtensibleArrayIndex(hdfFc, layoutMessage.getAddress(), datasetInfo);
+                        break;
+                    case 5: // B Tree V2
+                        logger.debug("Reading B tree v2 indexed dataset");
+                        chunkIndex = new BTreeIndex(hdfFc, layoutMessage.getAddress(), datasetInfo);
+                        break;
+                    default:
+                        throw new HdfException("Unrecognized chunk indexing type = " + layoutMessage.getIndexingType());
+                }
             }
 
             final Collection<Chunk> allChunks = chunkIndex.getAllChunks();

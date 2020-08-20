@@ -489,7 +489,7 @@ class AttributesTest {
 				assertThat(attribute.isEmpty(), is(true));
 				assertThat(attribute.isScalar(), is(false));
 				assertThat(attribute.getSize(), is(0L));
-				assertThat(attribute.getDiskSize(), is(0L));
+				assertThat(attribute.getSizeInBytes(), is(0L));
 			} else if (expectedData.getClass().isArray()) { // Array
 				assertThat(attribute.getJavaType(), is(equalTo(getArrayType(expectedData))));
 				assertThat(attribute.isEmpty(), is(false));
