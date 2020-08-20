@@ -27,7 +27,7 @@ public interface Dataset extends Node {
 	long getSize();
 
 	/**
-	 * Gets the size of this dataset. <blockquote>i.e. number of elements * size of each element</blockquote>
+	 * Gets the size of this dataset. i.e. <blockquote>number of elements * size of each element</blockquote>
 	 *
 	 * @return the total number of bytes the dataset is using
 	 */
