@@ -162,6 +162,16 @@ publishing {
             }
         }
     }
+    repositories {
+        maven {
+            name = 'GitHub'
+            url = 'https://maven.pkg.github.com/jamesmudd/jhdf'
+            credentials {
+                username = 'jamesmudd'
+                password = System.getenv('GITHUB_TOKEN')
+            }
+        }
+    }
 }
 
 signing {
