@@ -36,8 +36,7 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 		}
 
 		try {
-			ByteBuffer data = hdfFc.map(contiguousDataLayoutMessage.getAddress(),
-					contiguousDataLayoutMessage.getSize());
+			ByteBuffer data = hdfFc.map(contiguousDataLayoutMessage.getAddress(), getSizeInBytes());
 			convertToCorrectEndiness(data);
 			return data;
 		} catch (Exception e) {

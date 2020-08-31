@@ -16,7 +16,7 @@ import io.jhdf.api.Group;
 import io.jhdf.btree.BTreeV1;
 import io.jhdf.btree.BTreeV1Data;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
+import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessage;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
@@ -39,14 +39,14 @@ import static java.util.stream.Collectors.toMap;
 public class ChunkedDatasetV3 extends ChunkedDatasetBase {
     private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetV3.class);
 
-    private final ChunkedDataLayoutMessageV3 layoutMessage;
+    private final ChunkedDataLayoutMessage layoutMessage;
 
     private final ChunkLookupLazyInitializer chunkLookupLazyInitializer;
 
     public ChunkedDatasetV3(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
         super(hdfFc, address, name, parent, oh);
 
-        layoutMessage = oh.getMessageOfType(ChunkedDataLayoutMessageV3.class);
+        layoutMessage = oh.getMessageOfType(ChunkedDataLayoutMessage.class);
 
         chunkLookupLazyInitializer = new ChunkLookupLazyInitializer();
     }

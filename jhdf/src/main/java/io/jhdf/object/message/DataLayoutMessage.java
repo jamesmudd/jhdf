@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.Constants;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
@@ -29,34 +30,89 @@ public abstract class DataLayoutMessage extends Message {
 	public static DataLayoutMessage createDataLayoutMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
 		final byte version = bb.get();
 
-		if (version != 3 && version != 4) {
-			throw new UnsupportedHdfException(
-					"Only v3 and v4 data layout messages are supported. Detected version = " + version);
-		}
+//		if (version != 3 && version != 4) {
+//			throw new UnsupportedHdfException(
+//					"Only v3 and v4 data layout messages are supported. Detected version = " + version);
+//		}
 
-		final byte layoutClass = bb.get();
+		if(version == 1 || version == 2) {
+			byte dimensionality = bb.get(); // for chunked is +1 than actual dims
+			final byte layoutClass = bb.get();
 
-		switch (layoutClass) {
-		case 0: // Compact Storage
-			return new CompactDataLayoutMessage(bb, flags);
-		case 1: // Contiguous Storage
-			return new ContiguousDataLayoutMessage(bb, sb, flags);
-		case 2: // Chunked Storage
-			if (version == 3) {
-				return new ChunkedDataLayoutMessageV3(bb, sb, flags);
-			} else { // v4
-				return new ChunkedDataLayoutMessageV4(bb, sb, flags);
+			bb.position(bb.position() + 5); // skip reserved bytes
+
+			final long dataAddress;
+			if (layoutClass != 0) { // not compact
+				 dataAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+			} else {
+				dataAddress = Constants.UNDEFINED_ADDRESS;
 			}
-		case 3: // Virtual storage
-			throw new UnsupportedHdfException("Virtual storage is not supported");
-		default:
-			throw new UnsupportedHdfException("Unknown storage layout " + layoutClass);
+
+			// Now skip the dims
+//			final int dimFieldBytes = 4 * dimensionality;
+//			bb.position(bb.position() + dimFieldBytes);
+			if (layoutClass == 2) {
+				dimensionality--;
+			}
+
+			int[] dimensions = new int[dimensionality];
+			for (int i = 0; i < dimensions.length; i++) {
+				dimensions[i] = Utils.readBytesAsUnsignedInt(bb, 4);
+			}
+
+			if (layoutClass == 1) { // Contiguous
+				return  new ContiguousDataLayoutMessage(flags, dataAddress, -1);
+
+			} else if (layoutClass == 2) { // Chunked
+				final int dataElementSize = Utils.readBytesAsUnsignedInt(bb, 4);
+				return new ChunkedDataLayoutMessage(flags, dataAddress, dataElementSize, dimensions);
+			}
+
+			return null;
+//			switch (layoutClass) {
+//				case 0: // Compact Storage
+//					return new CompactDataLayoutMessage(bb, flags);
+//				case 1: // Contiguous Storage
+//					return new ContiguousDataLayoutMessage(bb, sb, flags);
+//				case 2: // Chunked Storage
+//					if (version == 3) {
+//						return new ChunkedDataLayoutMessageV3(bb, sb, flags);
+//					} else { // v4
+//						return new ChunkedDataLayoutMessageV4(bb, sb, flags);
+//					}
+//			}
+
+
+		} else {
+			final byte layoutClass = bb.get();
+
+			switch (layoutClass) {
+				case 0: // Compact Storage
+					return new CompactDataLayoutMessage(bb, flags);
+				case 1: // Contiguous Storage
+					return new ContiguousDataLayoutMessage(bb, sb, flags);
+				case 2: // Chunked Storage
+					if (version == 3) {
+						return new ChunkedDataLayoutMessage(bb, sb, flags);
+					} else { // v4
+						return new ChunkedDataLayoutMessageV4(bb, sb, flags);
+					}
+				case 3: // Virtual storage
+					throw new UnsupportedHdfException("Virtual storage is not supported");
+				default:
+					throw new UnsupportedHdfException("Unknown storage layout " + layoutClass);
+			}
 		}
 	}
 
 	public static class CompactDataLayoutMessage extends DataLayoutMessage {
 
 		private final ByteBuffer dataBuffer;
+
+		public CompactDataLayoutMessage(BitSet flags, ByteBuffer dataBuffer) {
+			super(flags);
+			this.dataBuffer = dataBuffer;
+		}
 
 		private CompactDataLayoutMessage(ByteBuffer bb, BitSet flags) {
 			super(flags);
@@ -79,6 +135,12 @@ public abstract class DataLayoutMessage extends Message {
 		private final long address;
 		private final long size;
 
+		public ContiguousDataLayoutMessage(BitSet flags, long address, long size) {
+			super(flags);
+			this.address = address;
+			this.size = size;
+		}
+
 		private ContiguousDataLayoutMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
 			address = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
@@ -99,16 +161,23 @@ public abstract class DataLayoutMessage extends Message {
 		}
 	}
 
-	public static class ChunkedDataLayoutMessageV3 extends DataLayoutMessage {
+	public static class ChunkedDataLayoutMessage extends DataLayoutMessage {
 
-		private final long address;
+		private final long bTreeAddress;
 		private final int size;
 		private final int[] chunkDimensions;
 
-		private ChunkedDataLayoutMessageV3(ByteBuffer bb, Superblock sb, BitSet flags) {
+		public ChunkedDataLayoutMessage(BitSet flags, long bTreeAddress, int size, int[] chunkDimensions) {
+			super(flags);
+			this.bTreeAddress = bTreeAddress;
+			this.size = size;
+			this.chunkDimensions = chunkDimensions;
+		}
+
+		private ChunkedDataLayoutMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
 			final int chunkDimensionality = bb.get() - 1;
-			address = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+			bTreeAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 			chunkDimensions = new int[chunkDimensionality];
 			for (int i = 0; i < chunkDimensions.length; i++) {
 				chunkDimensions[i] = Utils.readBytesAsUnsignedInt(bb, 4);
@@ -122,7 +191,7 @@ public abstract class DataLayoutMessage extends Message {
 		}
 
 		public long getBTreeAddress() {
-			return address;
+			return bTreeAddress;
 		}
 
 		public int getSize() {
