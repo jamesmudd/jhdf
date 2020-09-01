@@ -114,7 +114,7 @@ public abstract class DataLayoutMessage extends Message {
 		private CompactDataLayoutMessage(ByteBuffer bb, BitSet flags) {
 			super(flags);
 			final int compactDataSize = Utils.readBytesAsUnsignedInt(bb, 2);
-			dataBuffer = Utils.createSubBuffer(bb, compactDataSize);
+			this.dataBuffer = Utils.createSubBuffer(bb, compactDataSize);
 		}
 
 		@Override
@@ -123,7 +123,7 @@ public abstract class DataLayoutMessage extends Message {
 		}
 
 		public ByteBuffer getDataBuffer() {
-			return dataBuffer;
+			return dataBuffer.slice();
 		}
 	}
 
