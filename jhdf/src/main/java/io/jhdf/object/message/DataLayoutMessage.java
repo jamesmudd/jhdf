@@ -30,78 +30,75 @@ public abstract class DataLayoutMessage extends Message {
 	public static DataLayoutMessage createDataLayoutMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
 		final byte version = bb.get();
 
-//		if (version != 3 && version != 4) {
-//			throw new UnsupportedHdfException(
-//					"Only v3 and v4 data layout messages are supported. Detected version = " + version);
-//		}
+		switch (version) {
+			case 1:
+			case 2:
+				return readV1V2Message(bb, sb, flags);
+			case 3:
+			case 4:
+				return readV3V4Message(bb, sb, flags, version);
+			default:
+				throw new UnsupportedHdfException("Unsupported data layout message version detected. Detected version = " + version);
+		}
+	}
 
-		if(version == 1 || version == 2) {
-			byte dimensionality = bb.get(); // for chunked is +1 than actual dims
-			final byte layoutClass = bb.get();
+	private static DataLayoutMessage readV1V2Message(ByteBuffer bb, Superblock sb, BitSet flags) {
+		byte dimensionality = bb.get(); // for chunked is +1 than actual dims
 
-			bb.position(bb.position() + 5); // skip reserved bytes
+		final byte layoutClass = bb.get();
 
-			final long dataAddress;
-			if (layoutClass != 0) { // not compact
-				 dataAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
-			} else {
-				dataAddress = Constants.UNDEFINED_ADDRESS;
-			}
+		bb.position(bb.position() + 5); // skip reserved bytes
 
-			// Now skip the dims
-//			final int dimFieldBytes = 4 * dimensionality;
-//			bb.position(bb.position() + dimFieldBytes);
-			if (layoutClass == 2) {
-				dimensionality--;
-			}
+		final long dataAddress;
+		if (layoutClass != 0) { // not compact
+			dataAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+		} else {
+			dataAddress = Constants.UNDEFINED_ADDRESS;
+		}
 
-			int[] dimensions = new int[dimensionality];
-			for (int i = 0; i < dimensions.length; i++) {
-				dimensions[i] = Utils.readBytesAsUnsignedInt(bb, 4);
-			}
+		// If chunked value stored is +1 so correct it here
+		if (layoutClass == 2) {
+			dimensionality--;
+		}
 
-			if (layoutClass == 1) { // Contiguous
-				return  new ContiguousDataLayoutMessage(flags, dataAddress, -1);
+		int[] dimensions = new int[dimensionality];
+		for (int i = 0; i < dimensions.length; i++) {
+			dimensions[i] = Utils.readBytesAsUnsignedInt(bb, 4);
+		}
 
-			} else if (layoutClass == 2) { // Chunked
+		switch (layoutClass) {
+			case 0: // Compact Storage
+				final int compactDataSize = Utils.readBytesAsUnsignedInt(bb, 4);
+				final ByteBuffer compactDataBuffer = Utils.createSubBuffer(bb, compactDataSize);
+				return new CompactDataLayoutMessage(flags, compactDataBuffer);
+			case 1: // Contiguous
+				return new ContiguousDataLayoutMessage(flags, dataAddress, -1L);
+			case 2: // Chunked
 				final int dataElementSize = Utils.readBytesAsUnsignedInt(bb, 4);
 				return new ChunkedDataLayoutMessage(flags, dataAddress, dataElementSize, dimensions);
-			}
+			default:
+				throw new UnsupportedHdfException("Unknown storage layout " + layoutClass);
+		}
+	}
 
-			return null;
-//			switch (layoutClass) {
-//				case 0: // Compact Storage
-//					return new CompactDataLayoutMessage(bb, flags);
-//				case 1: // Contiguous Storage
-//					return new ContiguousDataLayoutMessage(bb, sb, flags);
-//				case 2: // Chunked Storage
-//					if (version == 3) {
-//						return new ChunkedDataLayoutMessageV3(bb, sb, flags);
-//					} else { // v4
-//						return new ChunkedDataLayoutMessageV4(bb, sb, flags);
-//					}
-//			}
+	private static DataLayoutMessage readV3V4Message(ByteBuffer bb, Superblock sb, BitSet flags, byte version) {
+		final byte layoutClass = bb.get();
 
-
-		} else {
-			final byte layoutClass = bb.get();
-
-			switch (layoutClass) {
-				case 0: // Compact Storage
-					return new CompactDataLayoutMessage(bb, flags);
-				case 1: // Contiguous Storage
-					return new ContiguousDataLayoutMessage(bb, sb, flags);
-				case 2: // Chunked Storage
-					if (version == 3) {
-						return new ChunkedDataLayoutMessage(bb, sb, flags);
-					} else { // v4
-						return new ChunkedDataLayoutMessageV4(bb, sb, flags);
-					}
-				case 3: // Virtual storage
-					throw new UnsupportedHdfException("Virtual storage is not supported");
-				default:
-					throw new UnsupportedHdfException("Unknown storage layout " + layoutClass);
-			}
+		switch (layoutClass) {
+			case 0: // Compact Storage
+				return new CompactDataLayoutMessage(bb, flags);
+			case 1: // Contiguous Storage
+				return new ContiguousDataLayoutMessage(bb, sb, flags);
+			case 2: // Chunked Storage
+				if (version == 3) {
+					return new ChunkedDataLayoutMessage(bb, sb, flags);
+				} else { // v4
+					return new ChunkedDataLayoutMessageV4(bb, sb, flags);
+				}
+			case 3: // Virtual storage
+				throw new UnsupportedHdfException("Virtual storage is not supported");
+			default:
+				throw new UnsupportedHdfException("Unknown storage layout " + layoutClass);
 		}
 	}
 
@@ -109,7 +106,7 @@ public abstract class DataLayoutMessage extends Message {
 
 		private final ByteBuffer dataBuffer;
 
-		public CompactDataLayoutMessage(BitSet flags, ByteBuffer dataBuffer) {
+		private CompactDataLayoutMessage(BitSet flags, ByteBuffer dataBuffer) {
 			super(flags);
 			this.dataBuffer = dataBuffer;
 		}
@@ -135,7 +132,7 @@ public abstract class DataLayoutMessage extends Message {
 		private final long address;
 		private final long size;
 
-		public ContiguousDataLayoutMessage(BitSet flags, long address, long size) {
+		private ContiguousDataLayoutMessage(BitSet flags, long address, long size) {
 			super(flags);
 			this.address = address;
 			this.size = size;
@@ -156,6 +153,9 @@ public abstract class DataLayoutMessage extends Message {
 			return address;
 		}
 
+		/**
+		 * @return size in bytes if known or -1 otherwise
+		 */
 		public long getSize() {
 			return size;
 		}
@@ -171,7 +171,7 @@ public abstract class DataLayoutMessage extends Message {
 			super(flags);
 			this.bTreeAddress = bTreeAddress;
 			this.size = size;
-			this.chunkDimensions = chunkDimensions;
+			this.chunkDimensions = ArrayUtils.clone(chunkDimensions);
 		}
 
 		private ChunkedDataLayoutMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
@@ -229,7 +229,7 @@ public abstract class DataLayoutMessage extends Message {
 		private ChunkedDataLayoutMessageV4(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
 
-			final BitSet chunkedFlags = BitSet.valueOf(new byte[] { bb.get() });
+			final BitSet chunkedFlags = BitSet.valueOf(new byte[]{bb.get()});
 			final int chunkDimensionality = bb.get();
 			final int dimSizeBytes = bb.get();
 
@@ -241,37 +241,37 @@ public abstract class DataLayoutMessage extends Message {
 			indexingType = bb.get();
 
 			switch (indexingType) {
-			case 1: // Single Chunk
-				if (chunkedFlags.get(SINGLE_INDEX_WITH_FILTER)) {
-					isFilteredSingleChunk = true;
-					sizeOfFilteredSingleChunk = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
-					filterMaskFilteredSingleChunk = BitSet.valueOf(new byte[] { bb.get(), bb.get(), bb.get(), bb.get() });
-				}
-				break;
+				case 1: // Single Chunk
+					if (chunkedFlags.get(SINGLE_INDEX_WITH_FILTER)) {
+						isFilteredSingleChunk = true;
+						sizeOfFilteredSingleChunk = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
+						filterMaskFilteredSingleChunk = BitSet.valueOf(new byte[]{bb.get(), bb.get(), bb.get(), bb.get()});
+					}
+					break;
 
-			case 2: // Implicit
-				break; // There is nothing for this case
+				case 2: // Implicit
+					break; // There is nothing for this case
 
-			case 3: // Fixed Array
-				pageBits = bb.get();
-				break;
+				case 3: // Fixed Array
+					pageBits = bb.get();
+					break;
 
-			case 4: // Extensible Array
-				maxBits = bb.get();
-				indexElements = bb.get();
-				minPointers = bb.get();
-				minElements = bb.get();
-				pageBits = bb.get(); // This is wrong in the spec says 2 bytes its actually 1
-				break;
+				case 4: // Extensible Array
+					maxBits = bb.get();
+					indexElements = bb.get();
+					minPointers = bb.get();
+					minElements = bb.get();
+					pageBits = bb.get(); // This is wrong in the spec says 2 bytes its actually 1
+					break;
 
-			case 5: // B tree v2
-				nodeSize = bb.getInt();
-				splitPercent = bb.get();
-				mergePercent = bb.get();
-				break;
+				case 5: // B tree v2
+					nodeSize = bb.getInt();
+					splitPercent = bb.get();
+					mergePercent = bb.get();
+					break;
 
-			default:
-				throw new UnsupportedHdfException("Unrecognized chunk indexing type. type=" + indexingType);
+				default:
+					throw new UnsupportedHdfException("Unrecognized chunk indexing type. type=" + indexingType);
 			}
 
 			address = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
@@ -327,14 +327,14 @@ public abstract class DataLayoutMessage extends Message {
 		}
 
 		public int getSizeOfFilteredSingleChunk() {
-			if(!isFilteredSingleChunk) {
+			if (!isFilteredSingleChunk) {
 				throw new HdfException("Requested size of filtered single chunk when its not set.");
 			}
 			return sizeOfFilteredSingleChunk;
 		}
 
 		public BitSet getFilterMaskFilteredSingleChunk() {
-			if(!isFilteredSingleChunk){
+			if (!isFilteredSingleChunk) {
 				throw new HdfException("Requested filter mask of filtered single chunk when its not set.");
 			}
 			return filterMaskFilteredSingleChunk;
