@@ -1,3 +1,12 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright (c) 2020 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFileChannel;
@@ -17,11 +26,6 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.invokeConstructor;
 
 class DatasetLoaderTest {
-
-	@Test
-	void noInstances() {
-		assertThrows(AssertionError.class, () -> invokeConstructor(DatasetLoader.class));
-	}
 
 	@Test
 	void testUnrecognisedDataLayoutMessage() {

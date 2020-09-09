@@ -21,8 +21,8 @@ import java.util.Map;
 
 public final class CompoundDatasetReader {
 
-	/** No instances */
 	private CompoundDatasetReader() {
+		throw new AssertionError("No instances of CompoundDatasetReader");
 	}
 
 	public static Map<String, Object> readDataset(CompoundDataType type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {

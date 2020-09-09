@@ -36,7 +36,6 @@ import java.nio.ByteBuffer;
  */
 public final class DatasetReader {
 
-	/** No instances */
 	private DatasetReader() {
 		throw new AssertionError("No instances of DatasetReader");
 	}
