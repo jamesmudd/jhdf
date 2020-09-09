@@ -16,6 +16,10 @@ package io.jhdf;
  */
 public final class Constants {
 
+	private Constants() {
+		throw new AssertionError("No instances of Constants");
+	}
+
 	public static final byte NULL = '\0';
 
 	public static final byte SPACE = ' ';
@@ -25,6 +29,4 @@ public final class Constants {
 
 	public static final String PATH_SEPARATOR = "/";
 
-	private Constants() {
-	} // No instances
 }

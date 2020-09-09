@@ -29,8 +29,8 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 public final class VariableLengthDatasetReader {
 
-	/** No instances */
 	private VariableLengthDatasetReader() {
+		throw new AssertionError("No instances of VariableLengthDatasetReader");
 	}
 
 	public static Object readDataset(VariableLength type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
