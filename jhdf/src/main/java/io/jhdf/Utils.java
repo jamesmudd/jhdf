@@ -25,7 +25,7 @@ public final class Utils {
 	private static final CharsetEncoder ASCII = StandardCharsets.US_ASCII.newEncoder();
 
 	private Utils() {
-		// No instances
+		throw new AssertionError("No instances of Utils");
 	}
 
 	/**

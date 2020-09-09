@@ -9,6 +9,7 @@
  */
 package io.jhdf;
 
+import io.jhdf.dataset.DatasetLoader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -24,8 +25,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.powermock.reflect.Whitebox.invokeConstructor;
 
 class UtilsTest {
+
+	@Test
+	void noInstances() {
+		assertThrows(AssertionError.class, () -> invokeConstructor(Utils.class));
+	}
 
 	@Test
     void testToHex() {
