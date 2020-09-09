@@ -56,7 +56,8 @@ public class OldObjectModificationTimeMessage extends Message {
 		final ByteBuffer secondBuffer = Utils.createSubBuffer(bb, 2);
 		final int second = parseInt(US_ASCII.decode(secondBuffer).toString());
 
-		final ByteBuffer reservedBuffer = Utils.createSubBuffer(bb, 2);
+		// Skip reserved bytes
+		bb.position(bb.position() + 2);
 
 		this.modificationTime = LocalDateTime.of(year, month, day, hour, minute, second);
 	}
