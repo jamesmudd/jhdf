@@ -115,6 +115,8 @@ public class Message {
 			return new AttributeMessage(bb, sb, flags);
 		case 13: // 0x000D
 			return new ObjectCommentMessage(bb, flags);
+		case 14: // 0x000E
+			return new OldObjectModificationTimeMessage(bb, flags);
 		case 16: // 0x0010
 			return new ObjectHeaderContinuationMessage(bb, sb, flags);
 		case 17: // 0x0011

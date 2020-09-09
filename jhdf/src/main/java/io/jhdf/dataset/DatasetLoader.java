@@ -17,7 +17,7 @@ import io.jhdf.dataset.chunked.ChunkedDatasetV3;
 import io.jhdf.dataset.chunked.ChunkedDatasetV4;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayoutMessage;
-import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV3;
+import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV4;
 import io.jhdf.object.message.DataLayoutMessage.CompactDataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
@@ -42,7 +42,7 @@ public final class DatasetLoader {
 			} else if (dlm instanceof ContiguousDataLayoutMessage) {
 				return new ContiguousDatasetImpl(hdfFc, address, name, parent, oh);
 
-			} else if (dlm instanceof ChunkedDataLayoutMessageV3) {
+			} else if (dlm instanceof ChunkedDataLayoutMessage) {
 				return new ChunkedDatasetV3(hdfFc, address, name, parent, oh);
 
 			} else if (dlm instanceof ChunkedDataLayoutMessageV4) {
