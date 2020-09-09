@@ -1,5 +1,13 @@
 # jHDF Change Log
 
+## v0.5.9
+- Add support for v1 and v2 Data Layout Messages Fix https://github.com/jamesmudd/jhdf/issues/216
+- Add support for Old Object Modification Time Message - Improves compatibility with older files
+- Fix issue if compact datasets are read multiple times
+- Improve handling of empty contiguous datasets
+- Test and coverage improvements
+- Test dependency updates
+
 ## v0.5.8
 - *Breaking API change* `Dataset#getDiskSize` is renamed `Dataset#getSizeInBytes` and `Attribute#getDiskSize` is renamed `Attribute#getSizeInBytes`
 - New API method `Dataset#getStorageInBytes` which returns the total storage size of the dataset. By comparison with `Dataset#getSizeInBytes` allows the compression ratio to be obtained 
