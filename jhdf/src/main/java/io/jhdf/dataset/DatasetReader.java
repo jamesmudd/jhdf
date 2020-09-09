@@ -46,7 +46,7 @@ public final class DatasetReader {
 	 * @param type The data type of this dataset
 	 * @param buffer The buffer containing the dataset
 	 * @param dimensions The dimensions of this dataset
-	 * @param hdfFc
+	 * @param hdfFc The file channel for reading the file
 	 * @return A Java object representation of this dataset
 	 */
 	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
