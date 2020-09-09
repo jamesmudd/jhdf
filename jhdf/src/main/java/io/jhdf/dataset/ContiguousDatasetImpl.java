@@ -31,11 +31,6 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 
 	@Override
 	public ByteBuffer getDataBuffer() {
-		// Check for empty dataset
-		if (isEmpty()) {
-			return null;
-		}
-
 		try {
 			ByteBuffer data = hdfFc.map(contiguousDataLayoutMessage.getAddress(), getSizeInBytes());
 			convertToCorrectEndiness(data);
