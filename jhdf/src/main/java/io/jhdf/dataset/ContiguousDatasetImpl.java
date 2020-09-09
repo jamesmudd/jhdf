@@ -22,19 +22,15 @@ import static io.jhdf.Constants.UNDEFINED_ADDRESS;
 
 public class ContiguousDatasetImpl extends DatasetBase implements ContiguousDataset {
 
+	final ContiguousDataLayoutMessage contiguousDataLayoutMessage;
+
 	public ContiguousDatasetImpl(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
 		super(hdfFc, address, name, parent, oh);
+		this.contiguousDataLayoutMessage = getHeaderMessage(ContiguousDataLayoutMessage.class);
 	}
 
 	@Override
 	public ByteBuffer getDataBuffer() {
-		ContiguousDataLayoutMessage contiguousDataLayoutMessage = getHeaderMessage(ContiguousDataLayoutMessage.class);
-
-		// Check for empty dataset
-		if (contiguousDataLayoutMessage.getAddress() == UNDEFINED_ADDRESS) {
-			return null;
-		}
-
 		try {
 			ByteBuffer data = hdfFc.map(contiguousDataLayoutMessage.getAddress(), getSizeInBytes());
 			convertToCorrectEndiness(data);
@@ -51,8 +47,11 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 
 	@Override
 	public long getDataAddress() {
-		ContiguousDataLayoutMessage contiguousDataLayoutMessage = getHeaderMessage(ContiguousDataLayoutMessage.class);
 		return contiguousDataLayoutMessage.getAddress();
 	}
 
+	@Override
+	public boolean isEmpty() {
+		return contiguousDataLayoutMessage.getAddress() == UNDEFINED_ADDRESS;
+	}
 }
