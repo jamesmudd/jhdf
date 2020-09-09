@@ -25,7 +25,7 @@ import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
 public final class DatasetLoader {
 
 	private DatasetLoader() {
-		// No instances
+		throw new AssertionError("No instances of DatasetLoader");
 	}
 
 	public static Dataset createDataset(HdfFileChannel hdfFc, ObjectHeader oh, String name,
