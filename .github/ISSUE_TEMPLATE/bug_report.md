@@ -14,7 +14,7 @@ A clear and concise description of what the bug is.
 **To Reproduce**
 
 Steps to reproduce the behaviour:
-- Please attach the HDF5 file which demonstrates the issue. `.h5` and `.hdf5` are not supported by Github so zip them first. Or use [Firefox Send](https://send.firefox.com/) and paste the link here.
+- Please attach a HDF5 file which demonstrates the issue. `.h5` and `.hdf5` extensions are not supported by Github so zip them first. Or provide a link to download the file here. *Note: Files provided maybe incorporated into tests.*
 - Please describe the steps to reproduce the incorrect behaviour.
 
 **Expected behaviour**

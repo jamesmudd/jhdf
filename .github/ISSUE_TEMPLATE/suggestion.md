@@ -17,4 +17,4 @@ Describe how this suggestion would benefit you.
 
 **Additional context**
 
-If the suggestion is in relation to a example file please attach it. `.h5` and `.hdf5` are not supported by Github so zip them first. Or use [Firefox Send](https://send.firefox.com/) and paste the link here.
+If the suggestion is in relation to a example file please attach it. `.h5` and `.hdf5` are not supported by Github so zip them first. Or provide a link to download the file here. *Note: Files provided maybe incorporated into tests.*
