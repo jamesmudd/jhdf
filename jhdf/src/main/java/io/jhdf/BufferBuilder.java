@@ -26,6 +26,15 @@ public class BufferBuilder {
 		}
 	}
 
+	public BufferBuilder writeBytes(byte[] bytes) {
+		try {
+			dataOutputStream.write(bytes);
+			return this;
+		} catch (IOException e) {
+			throw new BufferBuilderException(e);
+		}
+	}
+
 	public ByteBuffer build() {
 		try {
 			ByteBuffer byteBuffer = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
