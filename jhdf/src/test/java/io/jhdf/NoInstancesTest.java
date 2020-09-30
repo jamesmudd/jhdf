@@ -9,6 +9,7 @@
  */
 package io.jhdf;
 
+import io.jhdf.checksum.JenkinsLookup3HashLittle;
 import io.jhdf.dataset.CompoundDatasetReader;
 import io.jhdf.dataset.DatasetLoader;
 import io.jhdf.dataset.DatasetReader;
@@ -33,7 +34,8 @@ class NoInstancesTest {
 				Arguments.of(EnumDatasetReader.class),
 				Arguments.of(VariableLengthDatasetReader.class),
 				Arguments.of(Constants.class),
-				Arguments.of(Utils.class)
+				Arguments.of(Utils.class),
+				Arguments.of(JenkinsLookup3HashLittle.class)
 		);
 	}
 
