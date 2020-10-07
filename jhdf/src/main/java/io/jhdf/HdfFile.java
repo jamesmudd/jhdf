@@ -36,7 +36,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * The HDF file class this object represents a HDF5 file on disk and provides

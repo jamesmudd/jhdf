@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
@@ -76,14 +75,15 @@ class HdfFileTest {
 
 	@Test
 	void testOpeningInvalidFile() {
-		HdfException ex = assertThrows(HdfException.class, () -> new HdfFile(new File(nonHdfFile)));
+		File file = new File(nonHdfFile);
+		HdfException ex = assertThrows(HdfException.class, () -> new HdfFile(file));
 		assertThat(ex.getMessage(), is(equalTo("No valid HDF5 signature found")));
 	}
 
 	@Test
 	void testOpeningMissingFile() {
-		HdfException ex = assertThrows(HdfException.class,
-				() -> new HdfFile(new File("madeUpFileNameThatDoesntExist.hello")));
+		File file = new File("madeUpFileNameThatDoesntExist.hello");
+		HdfException ex = assertThrows(HdfException.class, () -> new HdfFile(file));
 		assertThat(ex.getMessage(), is(startsWith("Failed to open file")));
 		assertThat(ex.getCause(), is(instanceOf(IOException.class)));
 	}
