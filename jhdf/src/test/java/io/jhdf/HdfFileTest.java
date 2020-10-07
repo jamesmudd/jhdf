@@ -19,6 +19,7 @@ import io.jhdf.exceptions.HdfInvalidPathException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
@@ -282,23 +283,18 @@ class HdfFileTest {
 
 	@Test
 	void testReadingFromStream() throws IOException {
-		InputStream inputStream = Files.newInputStream(Paths.get(testFileUrl));
-		try (HdfFile hdfFile = HdfFile.fromInputStream(inputStream)) {
+		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_PATH).openStream();
+			 HdfFile hdfFile = HdfFile.fromInputStream(inputStream)) {
+
 			assertThat(hdfFile.getUserBlockSize(), is(equalTo(0L)));
 			assertThat(hdfFile.getAddress(), is(equalTo(96L)));
-
-			hdfFile.getUserBlockBuffer();
 		}
 	}
 
 	@Test
-	void testReadingFromStreamThrowsWhenStreamCantBeRead() {
-		InputStream inputStream = new InputStream() {
-			@Override
-			public int read() throws IOException {
-				throw new IOException("Faulty test stream");
-			}
-		};
+	void testReadingFromStreamThrowsWhenStreamCantBeRead() throws IOException {
+		InputStream inputStream = Mockito.mock(InputStream.class);
+		Mockito.when(inputStream.read(Mockito.any())).thenThrow(new RuntimeException("Broken test stream"));
 		assertThrows(HdfException.class, () -> HdfFile.fromInputStream(inputStream));
 	}
 }

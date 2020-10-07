@@ -73,7 +73,8 @@ public class HdfFile implements Group, AutoCloseable {
 
 	public static HdfFile fromInputStream(InputStream inputStream) {
 		try {
-			Path tempFile = Files.createTempFile(null, ".hdf5");
+			Path tempFile = Files.createTempFile(null, "-stream.hdf5"); // null random file name
+			tempFile.toFile().deleteOnExit(); // Auto cleanup
 			Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
 			return new HdfFile(tempFile);
 		} catch (IOException e) {
