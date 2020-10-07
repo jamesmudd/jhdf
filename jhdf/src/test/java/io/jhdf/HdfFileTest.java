@@ -290,4 +290,15 @@ class HdfFileTest {
 			hdfFile.getUserBlockBuffer();
 		}
 	}
+
+	@Test
+	void testReadingFromStreamThrowsWhenStreamCantBeRead() {
+		InputStream inputStream = new InputStream() {
+			@Override
+			public int read() throws IOException {
+				throw new IOException("Faulty test stream");
+			}
+		};
+		assertThrows(HdfException.class, () -> HdfFile.fromInputStream(inputStream));
+	}
 }
