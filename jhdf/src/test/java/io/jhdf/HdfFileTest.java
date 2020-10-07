@@ -22,8 +22,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
@@ -278,4 +280,14 @@ class HdfFileTest {
 		hdfFile.close();
 	}
 
+	@Test
+	void testReadingFromStream() throws IOException {
+		InputStream inputStream = Files.newInputStream(Paths.get(testFileUrl));
+		try (HdfFile hdfFile = HdfFile.fromInputStream(inputStream)) {
+			assertThat(hdfFile.getUserBlockSize(), is(equalTo(0L)));
+			assertThat(hdfFile.getAddress(), is(equalTo(96L)));
+
+			hdfFile.getUserBlockBuffer();
+		}
+	}
 }

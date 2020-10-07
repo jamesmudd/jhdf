@@ -23,16 +23,20 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * The HDF file class this object represents a HDF5 file on disk and provides
@@ -65,6 +69,16 @@ public class HdfFile implements Group, AutoCloseable {
 
 	public HdfFile(URI uri) {
 		this(Paths.get(uri).toFile());
+	}
+
+	public static HdfFile fromInputStream(InputStream inputStream) {
+		try {
+			Path tempFile = Files.createTempFile(null, ".hdf5");
+			Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+			return new HdfFile(tempFile);
+		} catch (IOException e) {
+			throw new HdfException("Failed to open input stream", e);
+		}
 	}
 
 	public HdfFile(File hdfFile) {
