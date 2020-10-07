@@ -13,7 +13,11 @@ import io.jhdf.exceptions.HdfChecksumMismatch;
 
 import java.nio.ByteBuffer;
 
-public class ChecksumUtils {
+public final class ChecksumUtils {
+
+	private ChecksumUtils() {
+		throw new AssertionError("No instances of ChecksumUtils");
+	}
 
 	public static void validateChecksum(ByteBuffer buffer) {
 		byte[] bytes = new byte[buffer.limit() - 4];
