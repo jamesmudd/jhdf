@@ -294,7 +294,7 @@ class HdfFileTest {
 	@Test
 	void testReadingFromStreamThrowsWhenStreamCantBeRead() throws IOException {
 		InputStream inputStream = Mockito.mock(InputStream.class);
-		Mockito.when(inputStream.read(Mockito.any())).thenThrow(new RuntimeException("Broken test stream"));
+		Mockito.when(inputStream.read(Mockito.any())).thenThrow(new IOException("Broken test stream"));
 		assertThrows(HdfException.class, () -> HdfFile.fromInputStream(inputStream));
 	}
 }
