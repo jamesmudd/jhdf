@@ -9,6 +9,7 @@
  */
 package io.jhdf;
 
+import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import org.slf4j.Logger;
@@ -315,13 +316,11 @@ public abstract class Superblock {
 		private final long endOfFileAddress;
 		private final long rootGroupObjectHeaderAddress;
 
-		private SuperblockV2V3(FileChannel fc, long address) {
+		private SuperblockV2V3(FileChannel fc, final long address) {
 			try {
 
 				ByteBuffer header = ByteBuffer.allocate(4);
 				fc.read(header, address);
-				address += 4;
-
 				header.order(LITTLE_ENDIAN);
 				header.rewind();
 
@@ -341,8 +340,7 @@ public abstract class Superblock {
 
 				int nextSectionSize = 4 * sizeOfOffsets + 4;
 				header = ByteBuffer.allocate(nextSectionSize);
-				fc.read(header, address);
-				address += nextSectionSize;
+				fc.read(header, address + 4);
 				header.order(LITTLE_ENDIAN);
 				header.rewind();
 
@@ -366,7 +364,13 @@ public abstract class Superblock {
 				rootGroupObjectHeaderAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
 				logger.trace("rootGroupObjectHeaderAddress= {}", rootGroupObjectHeaderAddress);
 
-				// TODO Superblock checksum
+				// Validate checksum
+				// 12 = 8 bytes for signature + 4 for first part of superblock
+				ByteBuffer superblockBuffer = ByteBuffer.allocate(nextSectionSize + 12);
+				fc.read(superblockBuffer, address - 8); // -8 for signature
+				superblockBuffer.order(LITTLE_ENDIAN);
+				superblockBuffer.rewind();
+				ChecksumUtils.validateChecksum(superblockBuffer);
 
 			} catch (IOException e) {
 				throw new HdfException("Failed to read superblock from address " + toHex(address), e);
