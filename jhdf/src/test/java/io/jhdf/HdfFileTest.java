@@ -19,9 +19,11 @@ import io.jhdf.exceptions.HdfInvalidPathException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -73,14 +75,15 @@ class HdfFileTest {
 
 	@Test
 	void testOpeningInvalidFile() {
-		HdfException ex = assertThrows(HdfException.class, () -> new HdfFile(new File(nonHdfFile)));
+		File file = new File(nonHdfFile);
+		HdfException ex = assertThrows(HdfException.class, () -> new HdfFile(file));
 		assertThat(ex.getMessage(), is(equalTo("No valid HDF5 signature found")));
 	}
 
 	@Test
 	void testOpeningMissingFile() {
-		HdfException ex = assertThrows(HdfException.class,
-				() -> new HdfFile(new File("madeUpFileNameThatDoesntExist.hello")));
+		File file = new File("madeUpFileNameThatDoesntExist.hello");
+		HdfException ex = assertThrows(HdfException.class, () -> new HdfFile(file));
 		assertThat(ex.getMessage(), is(startsWith("Failed to open file")));
 		assertThat(ex.getCause(), is(instanceOf(IOException.class)));
 	}
@@ -278,4 +281,20 @@ class HdfFileTest {
 		hdfFile.close();
 	}
 
+	@Test
+	void testReadingFromStream() throws IOException {
+		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_PATH).openStream();
+			 HdfFile hdfFile = HdfFile.fromInputStream(inputStream)) {
+
+			assertThat(hdfFile.getUserBlockSize(), is(equalTo(0L)));
+			assertThat(hdfFile.getAddress(), is(equalTo(96L)));
+		}
+	}
+
+	@Test
+	void testReadingFromStreamThrowsWhenStreamCantBeRead() throws IOException {
+		InputStream inputStream = Mockito.mock(InputStream.class);
+		Mockito.when(inputStream.read(Mockito.any())).thenThrow(new IOException("Broken test stream"));
+		assertThrows(HdfException.class, () -> HdfFile.fromInputStream(inputStream));
+	}
 }
