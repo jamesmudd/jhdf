@@ -9,6 +9,7 @@
  */
 package io.jhdf;
 
+import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import org.slf4j.Logger;
@@ -282,7 +283,9 @@ public class FractalHeap {
 				}
 			}
 
-			// TODO Checksum
+			// Validate checksum
+			bb.rewind();
+			ChecksumUtils.validateChecksum(bb);
 		}
 
 		private boolean isIoFilters() {
@@ -335,11 +338,11 @@ public class FractalHeap {
 
 			blockOffset = readBytesAsUnsignedLong(bb, bytesToStoreOffset);
 
+			data = hdfFc.readBufferFromAddress(address, getSizeOfDirectBlock(blockIndex));
 			if (checksumPresent()) {
 				// TODO Checksum for now skip over
 				bb.position(bb.position() + 4);
 			}
-			data = hdfFc.map(address, getSizeOfDirectBlock(blockIndex));
 		}
 
 		private boolean checksumPresent() {
