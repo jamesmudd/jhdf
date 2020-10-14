@@ -11,6 +11,7 @@ package io.jhdf.dataset.chunked.indexing;
 
 import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
+import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.DatasetInfo;
 import io.jhdf.exceptions.HdfException;
@@ -121,6 +122,8 @@ public class ExtensibleArrayIndex implements ChunkIndex {
         new ExtensibleArrayIndexBlock(hdfFc, indexBlockAddress);
 
         // Checksum
+        bb.rewind();
+        ChecksumUtils.validateChecksum(bb);
     }
 
     private class ExtensibleArrayIndexBlock {
@@ -181,7 +184,10 @@ public class ExtensibleArrayIndex implements ChunkIndex {
             }
 
             // Checksum
-
+//            int sc = bb.getInt();
+//            bb.limit(bb.position() + 4);
+//            bb.rewind();
+//            ChecksumUtils.validateChecksum(bb);
         }
 
         private class ExtensibleArrayDataBlock {
@@ -224,6 +230,10 @@ public class ExtensibleArrayIndex implements ChunkIndex {
                 }
 
                 // Checksum
+//                bb.limit(bb.position() + 4);
+                int sc = bb.getInt();
+                bb.rewind();
+                ChecksumUtils.validateChecksum(bb);
             }
 
         }
@@ -273,6 +283,11 @@ public class ExtensibleArrayIndex implements ChunkIndex {
                     new ExtensibleArrayDataBlock(hdfFc, dataBlockAddress);
                 }
 
+                // TODO Checksum
+//                bb.limit(bb.position() + 4);
+//                int sc = bb.getInt();
+//                bb.rewind();
+//                ChecksumUtils.validateChecksum(bb);
             }
 
         }

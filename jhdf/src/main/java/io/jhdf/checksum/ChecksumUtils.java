@@ -31,7 +31,7 @@ public final class ChecksumUtils {
 	}
 
 	public static int checksum(ByteBuffer buffer) {
-		return JenkinsLookup3HashLittle.hash(buffer.array());
+		return JenkinsLookup3HashLittle.hash(buffer);
 	}
 
 	public static int checksum(byte[] bytes) {
