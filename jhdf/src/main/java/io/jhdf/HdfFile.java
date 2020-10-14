@@ -70,11 +70,20 @@ public class HdfFile implements Group, AutoCloseable {
 		this(Paths.get(uri).toFile());
 	}
 
+	/**
+	 * Opens an {@link HdfFile} from an {@link InputStream}. The stream will be read fully into a temporary file. The
+	 * file will be cleaned up at application exit.
+	 *
+	 * @param inputStream the {@link InputStream} to read
+	 * @return HdfFile instance
+	 */
 	public static HdfFile fromInputStream(InputStream inputStream) {
 		try {
 			Path tempFile = Files.createTempFile(null, "-stream.hdf5"); // null random file name
+			logger.info("Creating temp file [{}]", tempFile.toAbsolutePath());
 			tempFile.toFile().deleteOnExit(); // Auto cleanup
 			Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+			logger.debug("Read stream to temp file [{}]", tempFile.toAbsolutePath());
 			return new HdfFile(tempFile);
 		} catch (IOException e) {
 			throw new HdfException("Failed to open input stream", e);
