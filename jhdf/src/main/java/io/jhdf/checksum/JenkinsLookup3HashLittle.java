@@ -9,6 +9,8 @@
  */
 package io.jhdf.checksum;
 
+import java.nio.ByteBuffer;
+
 import static java.lang.Byte.toUnsignedInt;
 import static java.lang.Integer.rotateLeft;
 
@@ -34,13 +36,23 @@ public final class JenkinsLookup3HashLittle {
 	}
 
 	/**
-	 * Equivalent to {@link #hash(byte[], int)} with initialValue = 0
+	 * Equivalent to {@link #hash(byte[] bytes, int initialValue)} with initialValue = 0
 	 *
 	 * @param key bytes to hash
 	 * @return hash value
 	 */
 	public static int hash(final byte[] key) {
 		return hash(key, 0);
+	}
+
+	/**
+	 * Equivalent to {@link #hash(ByteBuffer byteBuffer, int initialValue)} with initialValue = 0
+	 *
+	 * @param byteBuffer bytes to hash
+	 * @return hash value
+	 */
+	public static int hash(final ByteBuffer byteBuffer) {
+		return hash(byteBuffer, 0);
 	}
 
 	/**
@@ -65,36 +77,105 @@ public final class JenkinsLookup3HashLittle {
 	 * acceptable.  Do NOT use for cryptographic purposes.
 	 * </p>
 	 *
-	 * @param key          bytes to hash
+	 * @param bytes bytes to hash
+	 * @param initialValue can be any integer value
+	 * @return hash value.
+	 */
+	public static int hash(final byte[] bytes, final int initialValue) {
+		return hash(ByteBuffer.wrap(bytes), initialValue);
+	}
+
+	/*
+	 * Final mixing of 3 32-bit values (a,b,c) into c
+	 *
+	 * Pairs of (a,b,c) values differing in only a few bits will usually
+	 * produce values of c that look totally different.  This was tested for
+	 * - pairs that differed by one bit, by two bits, in any combination
+	 *   of top bits of (a,b,c), or in any combination of bottom bits of
+	 *   (a,b,c).
+	 *
+	 * - "differ" is defined as +, -, ^, or ~^.  For + and -, I transformed
+	 *   the output delta to a Gray code (a^(a>>1)) so a string of 1's (as
+	 *   is commonly produced by subtraction) look like a single 1-bit
+	 *   difference.
+	 *
+	 * - the base values were pseudorandom, all zero but one bit set, or
+	 *   all zero plus a counter that starts at zero.
+	 *
+	 * These constants passed:
+	 *   14 11 25 16 4 14 24
+	 *   12 14 25 16 4 14 24
+	 * and these came close:
+	 *    4  8 15 26 3 22 24
+	 *   10  8 15 26 3 22 24
+	 *   11  8 15 26 3 22 24
+	 */
+	private static int finalMix(int a, int b, int c) {
+		c ^= b;
+		c -= rotateLeft(b, 14);
+		a ^= c;
+		a -= rotateLeft(c, 11);
+		b ^= a;
+		b -= rotateLeft(a, 25);
+		c ^= b;
+		c -= rotateLeft(b, 16);
+		a ^= c;
+		a -= rotateLeft(c, 4);
+		b ^= a;
+		b -= rotateLeft(a, 14);
+		c ^= b;
+		c -= rotateLeft(b, 24);
+
+		return c;
+	}
+
+	/**
+	 * <p>
+	 * The best hash table sizes are powers of 2.  There is no need to do mod
+	 * a prime (mod is sooo slow!).  If you need less than 32 bits, use a bitmask.
+	 * For example, if you need only 10 bits, do
+	 * <code>h = (h {@literal &} hashmask(10));</code>
+	 * In which case, the hash table should have hashsize(10) elements.
+	 * </p>
+	 *
+	 * <p>If you are hashing n strings byte[][] k, do it like this:
+	 * for (int i = 0, h = 0; i {@literal <} n; ++i) h = hash(k[i], h);
+	 * </p>
+	 *
+	 * <p>By Bob Jenkins, 2006.  bob_jenkins@burtleburtle.net.  You may use this
+	 * code any way you wish, private, educational, or commercial.  It's free.
+	 * </p>
+	 *
+	 * <p>
+	 * Use for hash table lookup, or anything where one collision in 2^^32 is
+	 * acceptable.  Do NOT use for cryptographic purposes.
+	 * </p>
+	 *
+	 * @param byteBuffer to hash
 	 * @param initialValue can be any integer value
 	 * @return hash value.
 	 */
 	@SuppressWarnings({"squid:S128"}) // fallthrough
-	public static int hash(final byte[] key, final int initialValue) {
+	public static int hash(final ByteBuffer byteBuffer, final int initialValue) {
 
 		// Initialise a, b and c
-		int a = INITIALISATION_CONSTANT + key.length + initialValue;
+		int a = INITIALISATION_CONSTANT + byteBuffer.remaining() + initialValue;
 		int b = a;
 		int c = b;
 
-		int offset = 0;
-		int i;
-
-
-
-		for (i = key.length; i > 12; offset += 12, i -= 12) {
-			a += toUnsignedInt(key[offset]);
-			a += toUnsignedInt(key[offset + 1]) << 8;
-			a += toUnsignedInt(key[offset + 2]) << 16;
-			a += toUnsignedInt(key[offset + 3]) << 24;
-			b += toUnsignedInt(key[offset + 4]);
-			b += toUnsignedInt(key[offset + 5]) << 8;
-			b += toUnsignedInt(key[offset + 6]) << 16;
-			b += toUnsignedInt(key[offset + 7]) << 24;
-			c += toUnsignedInt(key[offset + 8]);
-			c += toUnsignedInt(key[offset + 9]) << 8;
-			c += toUnsignedInt(key[offset + 10]) << 16;
-			c += toUnsignedInt(key[offset + 11]) << 24;
+		while (byteBuffer.remaining() > 12) {
+			a += toUnsignedInt(byteBuffer.get());
+			a += toUnsignedInt(byteBuffer.get()) << 8;
+			a += toUnsignedInt(byteBuffer.get()) << 16;
+			a += toUnsignedInt(byteBuffer.get()) << 24;
+			b += toUnsignedInt(byteBuffer.get());
+			b += toUnsignedInt(byteBuffer.get()) << 8;
+			b += toUnsignedInt(byteBuffer.get()) << 16;
+			b += toUnsignedInt(byteBuffer.get()) << 24;
+			c += toUnsignedInt(byteBuffer.get());
+			c += toUnsignedInt(byteBuffer.get()) << 8;
+			c += toUnsignedInt(byteBuffer.get()) << 16;
+			c += toUnsignedInt(byteBuffer.get()) << 24;
 
 			/*
 			 * mix -- mix 3 32-bit values reversibly.
@@ -164,84 +245,42 @@ public final class JenkinsLookup3HashLittle {
 		}
 
 		// last block: affect all 32 bits of (c)
+		byte[] remainingBytes = new byte[byteBuffer.remaining()];
+		byteBuffer.get(remainingBytes);
 		// Intentional fall-through
-		switch (i) {
+		switch (remainingBytes.length) {
 			case 12:
-				c += toUnsignedInt(key[offset + 11]) << 24;
+				c += toUnsignedInt(remainingBytes[11]) << 24;
 			case 11:
-				c += toUnsignedInt(key[offset + 10]) << 16;
+				c += toUnsignedInt(remainingBytes[10]) << 16;
 			case 10:
-				c += toUnsignedInt(key[offset + 9]) << 8;
+				c += toUnsignedInt(remainingBytes[9]) << 8;
 			case 9:
-				c += toUnsignedInt(key[offset + 8]);
+				c += toUnsignedInt(remainingBytes[8]);
 			case 8:
-				b += toUnsignedInt(key[offset + 7]) << 24;
+				b += toUnsignedInt(remainingBytes[7]) << 24;
 			case 7:
-				b += toUnsignedInt(key[offset + 6]) << 16;
+				b += toUnsignedInt(remainingBytes[6]) << 16;
 			case 6:
-				b += toUnsignedInt(key[offset + 5]) << 8;
+				b += toUnsignedInt(remainingBytes[5]) << 8;
 			case 5:
-				b += toUnsignedInt(key[offset + 4]);
+				b += toUnsignedInt(remainingBytes[4]);
 			case 4:
-				a += toUnsignedInt(key[offset + 3]) << 24;
+				a += toUnsignedInt(remainingBytes[3]) << 24;
 			case 3:
-				a += toUnsignedInt(key[offset + 2]) << 16;
+				a += toUnsignedInt(remainingBytes[2]) << 16;
 			case 2:
-				a += toUnsignedInt(key[offset + 1]) << 8;
+				a += toUnsignedInt(remainingBytes[1]) << 8;
 			case 1:
-				a += toUnsignedInt(key[offset]);
+				a += toUnsignedInt(remainingBytes[0]);
 				break;
 			case 0:
 				return c;
 			default:
-				throw new AssertionError("invalid i value i=" + i);
+				throw new AssertionError("Invalid remaining bytes length");
 		}
 
 		return finalMix(a, b, c);
-	}
-
-	/*
-	 * Final mixing of 3 32-bit values (a,b,c) into c
-	 *
-	 * Pairs of (a,b,c) values differing in only a few bits will usually
-	 * produce values of c that look totally different.  This was tested for
-	 * - pairs that differed by one bit, by two bits, in any combination
-	 *   of top bits of (a,b,c), or in any combination of bottom bits of
-	 *   (a,b,c).
-	 *
-	 * - "differ" is defined as +, -, ^, or ~^.  For + and -, I transformed
-	 *   the output delta to a Gray code (a^(a>>1)) so a string of 1's (as
-	 *   is commonly produced by subtraction) look like a single 1-bit
-	 *   difference.
-	 *
-	 * - the base values were pseudorandom, all zero but one bit set, or
-	 *   all zero plus a counter that starts at zero.
-	 *
-	 * These constants passed:
-	 *   14 11 25 16 4 14 24
-	 *   12 14 25 16 4 14 24
-	 * and these came close:
-	 *    4  8 15 26 3 22 24
-	 *   10  8 15 26 3 22 24
-	 *   11  8 15 26 3 22 24
-	 */
-	private static int finalMix(int a, int b, int c) {
-		c ^= b;
-		c -= rotateLeft(b, 14);
-		a ^= c;
-		a -= rotateLeft(c, 11);
-		b ^= a;
-		b -= rotateLeft(a, 25);
-		c ^= b;
-		c -= rotateLeft(b, 16);
-		a ^= c;
-		a -= rotateLeft(c, 4);
-		b ^= a;
-		b -= rotateLeft(a, 14);
-		c ^= b;
-		c -= rotateLeft(b, 24);
-
-		return c;
 	}
 
 }
