@@ -100,7 +100,7 @@ public class FractalHeap {
 		this.address = address;
 
 		final int headerSize = 4 + 1 + 2 + 2 + 1 + 4 + 12 * sb.getSizeOfLengths() + 3 * sb.getSizeOfOffsets() + 2
-				+ 2 + 2 + 2;
+				+ 2 + 2 + 2 + 4;
 
 		ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
@@ -184,6 +184,9 @@ public class FractalHeap {
 				}
 			}
 		}
+
+		bb.rewind();
+		ChecksumUtils.validateChecksum(bb);
 
 		logger.debug("Read fractal heap at address {}, loaded {} direct blocks", address, directBlocks.size());
 	}
