@@ -9,6 +9,7 @@
  */
 package io.jhdf;
 
+import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.Message;
 import io.jhdf.object.message.ObjectHeaderContinuationMessage;
@@ -183,10 +184,12 @@ public abstract class ObjectHeader {
 
 		private ObjectHeaderV2(HdfFileChannel hdfFc, long address) {
 			super(address);
+			int headerSize = 0; // Keep track of the size for checksum
 
 			try {
 				ByteBuffer bb = hdfFc.readBufferFromAddress(address, 6);
 				address += 6;
+				headerSize += 6;
 
 				byte[] formatSignatureBytes = new byte[OBJECT_HEADER_V2_SIGNATURE.length];
 				bb.get(formatSignatureBytes);
@@ -226,6 +229,7 @@ public abstract class ObjectHeader {
 				if (flags.get(TIMESTAMPS_PRESENT)) {
 					bb = hdfFc.readBufferFromAddress(address, 16);
 					address += 16;
+					headerSize += 16;
 
 					accessTime = Utils.readBytesAsUnsignedLong(bb, 4);
 					modificationTime = Utils.readBytesAsUnsignedLong(bb, 4);
@@ -242,6 +246,7 @@ public abstract class ObjectHeader {
 				if (flags.get(NUMBER_OF_ATTRIBUTES_PRESENT)) {
 					bb = hdfFc.readBufferFromAddress(address, 4);
 					address += 4;
+					headerSize += 4;
 
 					maximumNumberOfCompactAttributes = readBytesAsUnsignedInt(bb, 2);
 					maximumNumberOfDenseAttributes = readBytesAsUnsignedInt(bb, 2);
@@ -252,14 +257,21 @@ public abstract class ObjectHeader {
 
 				bb = hdfFc.readBufferFromAddress(address, sizeOfChunk0);
 				address += sizeOfChunk0;
+				headerSize += sizeOfChunk0;
 
 				int sizeOfMessages = readBytesAsUnsignedInt(bb, sizeOfChunk0);
 
 				bb = hdfFc.readBufferFromAddress(address, sizeOfMessages);
+				headerSize += sizeOfMessages;
 
 				// There might be a gap at the end of the header of up to 4 bytes
 				// message type (1_byte) + message size (2 bytes) + message flags (1 byte)
 				readMessages(hdfFc, bb);
+
+				// Checksum
+				headerSize += 4;
+				ByteBuffer fullHeaderBuffer = hdfFc.readBufferFromAddress(super.getAddress(), headerSize);
+				ChecksumUtils.validateChecksum(fullHeaderBuffer);
 
 				logger.debug("Read object header from address: {}", address);
 
@@ -287,6 +299,9 @@ public abstract class ObjectHeader {
 
 					// Recursively read messages
 					readMessages(hdfFc, continuationBuffer);
+
+					continuationBuffer.rewind();
+					ChecksumUtils.validateChecksum(continuationBuffer);
 				}
 			}
 		}
