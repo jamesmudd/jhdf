@@ -9,7 +9,7 @@
  */
 package io.jhdf.checksum;
 
-import io.jhdf.exceptions.HdfChecksumMismatch;
+import io.jhdf.exceptions.HdfChecksumMismatchException;
 
 import java.nio.ByteBuffer;
 
@@ -19,13 +19,19 @@ public final class ChecksumUtils {
 		throw new AssertionError("No instances of ChecksumUtils");
 	}
 
+	/**
+	 * Checks the last 4 bytes of the buffer ate the the Jenkins Lookup 3 Checksum of the rest of the buffer.
+	 *
+	 * @param buffer
+	 * @throws HdfChecksumMismatchException if the checksum is incorrect.
+	 */
 	public static void validateChecksum(ByteBuffer buffer) {
 		byte[] bytes = new byte[buffer.limit() - 4];
 		buffer.get(bytes);
 		int calculatedChecksum = checksum(bytes);
 		int storedChecksum = buffer.getInt();
 		if(calculatedChecksum != storedChecksum) {
-			throw new HdfChecksumMismatch(storedChecksum, calculatedChecksum);
+			throw new HdfChecksumMismatchException(storedChecksum, calculatedChecksum);
 		}
 
 	}

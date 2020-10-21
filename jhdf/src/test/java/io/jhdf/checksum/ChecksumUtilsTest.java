@@ -9,7 +9,7 @@
  */
 package io.jhdf.checksum;
 
-import io.jhdf.exceptions.HdfChecksumMismatch;
+import io.jhdf.exceptions.HdfChecksumMismatchException;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -46,6 +46,6 @@ class ChecksumUtilsTest {
 		byteBuffer.put(TEST_BYTES);
 		byteBuffer.putInt(INCORRECT_CHECKSUM);
 		byteBuffer.rewind();
-		assertThrows(HdfChecksumMismatch.class, () -> ChecksumUtils.validateChecksum(byteBuffer));
+		assertThrows(HdfChecksumMismatchException.class, () -> ChecksumUtils.validateChecksum(byteBuffer));
 	}
 }
