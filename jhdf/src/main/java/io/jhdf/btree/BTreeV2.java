@@ -147,7 +147,9 @@ public class BTreeV2<T extends BTreeRecord> {
 				readRecords(hdfFc, childAddress, depth - 1, numberOfChildRecords, totalNumberOfChildRecords, datasetInfo);
 			}
 		}
-		// TODO Checksum
+		bb.limit(bb.position() + 4);
+		bb.rewind();
+		ChecksumUtils.validateChecksum(bb);
 	}
 
 	private int getSizeOfNumberOfRecords(int nodeSize, int depth, int totalRecords, int recordSize, int sizeOfOffsets) {
