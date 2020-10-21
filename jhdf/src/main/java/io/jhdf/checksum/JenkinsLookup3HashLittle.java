@@ -29,7 +29,7 @@ import static java.lang.Integer.rotateLeft;
  */
 public final class JenkinsLookup3HashLittle {
 
-	private static final int INITIALISATION_CONSTANT = 0xdeadbeef;
+	private static final int INITIALISATION_CONSTANT = 0xDEADBEEF;
 
 	private JenkinsLookup3HashLittle() {
 		throw new AssertionError("No instances of JenkinsLookup3HashLittle");
