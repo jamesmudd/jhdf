@@ -341,11 +341,12 @@ public class FractalHeap {
 
 			blockOffset = readBytesAsUnsignedLong(bb, bytesToStoreOffset);
 
-			if (checksumPresent()) {
-				// TODO Checksum for now skip over
-				bb.position(bb.position() + 4);
-			}
 			data = hdfFc.map(address, getSizeOfDirectBlock(blockIndex));
+
+			if (checksumPresent()) {
+				int storedChecksum = bb.getInt();
+				// TODO Validate checksum
+			}
 		}
 
 		private boolean checksumPresent() {
