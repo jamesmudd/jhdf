@@ -155,7 +155,6 @@ public final class JenkinsLookup3HashLittle {
 	 * @param initialValue can be any integer value
 	 * @return hash value.
 	 */
-	@SuppressWarnings({"squid:S128"}) // fallthrough
 	public static int hash(final ByteBuffer byteBuffer, final int initialValue) {
 
 		// Initialise a, b and c
@@ -249,29 +248,29 @@ public final class JenkinsLookup3HashLittle {
 		byteBuffer.get(remainingBytes);
 		// Intentional fall-through
 		switch (remainingBytes.length) {
-			case 12:
+			case 12: // NOSONAR Intentional fall-through
 				c += toUnsignedInt(remainingBytes[11]) << 24;
-			case 11:
+			case 11: // NOSONAR Intentional fall-through
 				c += toUnsignedInt(remainingBytes[10]) << 16;
-			case 10:
+			case 10: // NOSONAR Intentional fall-through
 				c += toUnsignedInt(remainingBytes[9]) << 8;
-			case 9:
+			case 9: // NOSONAR Intentional fall-through
 				c += toUnsignedInt(remainingBytes[8]);
-			case 8:
+			case 8: // NOSONAR Intentional fall-through
 				b += toUnsignedInt(remainingBytes[7]) << 24;
-			case 7:
+			case 7: // NOSONAR Intentional fall-through
 				b += toUnsignedInt(remainingBytes[6]) << 16;
-			case 6:
+			case 6: // NOSONAR Intentional fall-through
 				b += toUnsignedInt(remainingBytes[5]) << 8;
-			case 5:
+			case 5: // NOSONAR Intentional fall-through
 				b += toUnsignedInt(remainingBytes[4]);
-			case 4:
+			case 4: // NOSONAR Intentional fall-through
 				a += toUnsignedInt(remainingBytes[3]) << 24;
-			case 3:
+			case 3: // NOSONAR Intentional fall-through
 				a += toUnsignedInt(remainingBytes[2]) << 16;
-			case 2:
+			case 2: // NOSONAR Intentional fall-through
 				a += toUnsignedInt(remainingBytes[1]) << 8;
-			case 1:
+			case 1: // NOSONAR Intentional fall-through
 				a += toUnsignedInt(remainingBytes[0]);
 				break;
 			case 0:
