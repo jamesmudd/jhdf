@@ -1,5 +1,6 @@
 package io.jhdf;
 
+import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
 
 import java.io.ByteArrayOutputStream;
@@ -88,6 +89,11 @@ public class BufferBuilder {
 		} catch (IOException e) {
 			throw new BufferBuilderException(e);
 		}
+	}
+
+	public BufferBuilder appendChecksum() {
+		writeInt(ChecksumUtils.checksum(byteArrayOutputStream.toByteArray()));
+		return this;
 	}
 
 	public static final class BufferBuilderException extends HdfException {

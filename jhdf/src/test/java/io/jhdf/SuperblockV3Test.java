@@ -87,6 +87,5 @@ class SuperblockV3Test {
 		fc.read(originalSuperblockBuffer);
 
 		assertThat(buffer.array(), is(originalSuperblockBuffer.array()));
-
 	}
 }
