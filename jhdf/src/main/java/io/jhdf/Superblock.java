@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
@@ -443,18 +442,20 @@ public abstract class Superblock {
 		}
 
 		public ByteBuffer toBuffer() {
-			ByteBuffer buffer = ByteBuffer.allocate(20);
 
-			buffer.put(HDF5_FILE_SIGNATURE);
+			BufferBuilder bufferBuilder = new BufferBuilder()
+					.writeBytes(HDF5_FILE_SIGNATURE)
+					.writeByte(versionOfSuperblock)
+					.writeByte(sizeOfOffsets)
+					.writeByte(sizeOfLengths)
+					.writeByte(0) // file consistency flags
+					.writeLong(baseAddressByte)
+					.writeLong(superblockExtensionAddress)
+					.writeLong(endOfFileAddress)
+					.writeLong(rootGroupObjectHeaderAddress)
+					.appendChecksum();
 
-			buffer.put((byte) versionOfSuperblock);
-			buffer.put((byte) sizeOfOffsets);
-			buffer.put((byte) sizeOfLengths);
-			buffer.put((byte) 0); // TODO File consistency flags
-
-
-
-			return buffer;
+			return bufferBuilder.build();
 		}
 	}
 }
