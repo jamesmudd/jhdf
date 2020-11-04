@@ -11,6 +11,7 @@ package io.jhdf.dataset.chunked.indexing;
 
 import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
+import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.DatasetInfo;
 import io.jhdf.exceptions.HdfException;
@@ -75,6 +76,8 @@ public class FixedArrayIndex implements ChunkIndex {
         chunks = new ArrayList<>(maxNumberOfEntries);
 
         // Checksum
+        bb.rewind();
+        ChecksumUtils.validateChecksum(bb);
 
         // Building the object fills the chunks. Probably shoudld be changed
         new FixedArrayDataBlock(this, hdfFc, dataBlockAddress);
@@ -85,7 +88,7 @@ public class FixedArrayIndex implements ChunkIndex {
         private FixedArrayDataBlock(FixedArrayIndex fixedArrayIndex, HdfFileChannel hdfFc, long address) {
 
             // TODO header size ignoring paging
-            final int headerSize = 6 + hdfFc.getSizeOfOffsets() + fixedArrayIndex.entrySize * fixedArrayIndex.maxNumberOfEntries;
+            final int headerSize = 6 + hdfFc.getSizeOfOffsets() + fixedArrayIndex.entrySize * fixedArrayIndex.maxNumberOfEntries + 4;
             final ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
 
             byte[] formatSignatureBytes = new byte[4];
@@ -133,6 +136,8 @@ public class FixedArrayIndex implements ChunkIndex {
                 throw new HdfException("Unrecognized client ID  = " + clientId);
             }
 
+            bb.rewind();
+            ChecksumUtils.validateChecksum(bb);
         }
     }
 

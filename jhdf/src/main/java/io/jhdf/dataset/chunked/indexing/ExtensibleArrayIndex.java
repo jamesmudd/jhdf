@@ -9,8 +9,10 @@
  */
 package io.jhdf.dataset.chunked.indexing;
 
+import io.jhdf.Constants;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
+import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.DatasetInfo;
 import io.jhdf.exceptions.HdfException;
@@ -121,6 +123,8 @@ public class ExtensibleArrayIndex implements ChunkIndex {
         new ExtensibleArrayIndexBlock(hdfFc, indexBlockAddress);
 
         // Checksum
+        bb.rewind();
+        ChecksumUtils.validateChecksum(bb);
     }
 
     private class ExtensibleArrayIndexBlock {
@@ -181,7 +185,8 @@ public class ExtensibleArrayIndex implements ChunkIndex {
             }
 
             // Checksum
-
+            int checksum = bb.getInt();
+            // TODO checksums always seem to be 0 or -1?
         }
 
         private class ExtensibleArrayDataBlock {
@@ -224,6 +229,8 @@ public class ExtensibleArrayIndex implements ChunkIndex {
                 }
 
                 // Checksum
+                bb.rewind();
+                ChecksumUtils.validateChecksum(bb);
             }
 
         }
@@ -273,6 +280,13 @@ public class ExtensibleArrayIndex implements ChunkIndex {
                     new ExtensibleArrayDataBlock(hdfFc, dataBlockAddress);
                 }
 
+                // Checksum
+                int checksum = bb.getInt();
+                if(checksum != UNDEFINED_ADDRESS) {
+                    bb.limit(bb.position());
+                    bb.rewind();
+                    ChecksumUtils.validateChecksum(bb);
+                }
             }
 
         }

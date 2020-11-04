@@ -12,6 +12,7 @@ package io.jhdf.btree;
 import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.btree.record.BTreeRecord;
+import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.dataset.chunked.DatasetInfo;
 import io.jhdf.exceptions.HdfException;
 
@@ -90,7 +91,8 @@ public class BTreeV2<T extends BTreeRecord> {
 			final int numberOfRecordsInRoot = Utils.readBytesAsUnsignedInt(bb, 2);
 			final int totalNumberOfRecordsInTree = Utils.readBytesAsUnsignedInt(bb, hdfFc.getSizeOfLengths());
 
-			final long checksum = readBytesAsUnsignedLong(bb, 4);
+			bb.rewind();
+			ChecksumUtils.validateChecksum(bb);
 
 			records = new ArrayList<>(totalNumberOfRecordsInTree);
 
@@ -145,7 +147,9 @@ public class BTreeV2<T extends BTreeRecord> {
 				readRecords(hdfFc, childAddress, depth - 1, numberOfChildRecords, totalNumberOfChildRecords, datasetInfo);
 			}
 		}
-		// TODO Checksum
+		bb.limit(bb.position() + 4);
+		bb.rewind();
+		ChecksumUtils.validateChecksum(bb);
 	}
 
 	private int getSizeOfNumberOfRecords(int nodeSize, int depth, int totalRecords, int recordSize, int sizeOfOffsets) {

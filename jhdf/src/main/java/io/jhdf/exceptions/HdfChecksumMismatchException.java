@@ -14,9 +14,9 @@ package io.jhdf.exceptions;
  *
  * @author James Mudd
  */
-public class HdfChecksumMismatch extends HdfException {
+public class HdfChecksumMismatchException extends HdfException {
 
-	public HdfChecksumMismatch(int storedChecksum, int calculatedChecksum) {
+	public HdfChecksumMismatchException(int storedChecksum, int calculatedChecksum) {
 		super("Checksum mismatch, possible file corruption. stored checksum = [" + storedChecksum + "] != calculated checksum = [" + calculatedChecksum + "]");
 	}
 }
