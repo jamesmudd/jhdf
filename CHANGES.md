@@ -1,5 +1,11 @@
 # jHDF Change Log
 
+## v0.5.10
+- Add checksum validation, with "Jenkins Lookup 3 Hash". Will help to detect file corruption.
+- Add support for opening a HDF5 file from an InputStream. Many Java API provide InputStreams so this improves integration possibilities.
+- Test and coverage improvements
+- Test and build dependency updates
+
 ## v0.5.9
 - Add support for v1 and v2 Data Layout Messages Fix https://github.com/jamesmudd/jhdf/issues/216
 - Add support for Old Object Modification Time Message - Improves compatibility with older files
