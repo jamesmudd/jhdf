@@ -20,7 +20,7 @@ def write_chunked_datasets(f):
     data = np.arange(35).reshape(7, 5)
 
     # Compress with lzf which jhdf doesn't include by default
-    f.create_dataset('float32', data=data, dtype='f4', chunks=(2, 1), shuffle=True, compression="lzf")
+    f.create_dataset('float32', data=data, dtype='f4', compression="szip")
 
     f.flush()
     f.close()

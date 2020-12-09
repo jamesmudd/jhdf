@@ -46,8 +46,8 @@ class MissingFilterTest {
 		HdfFilterException exception = assertThrows(HdfFilterException.class, dataset::getData);
 
 		// The missing filter name
-		assertThat(exception.getMessage(), containsString("lzf"));
+		assertThat(exception.getMessage(), containsString("szip"));
 		// The missing filter id
-		assertThat(exception.getMessage(), containsString("32000"));
+		assertThat(exception.getMessage(), containsString("4"));
 	}
 }
