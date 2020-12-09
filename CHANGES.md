@@ -1,5 +1,9 @@
 # jHDF Change Log
 
+## v0.5.11
+- Add LZF compression support allowing LZF datasets to be read. https://github.com/jamesmudd/jhdf/issues/239
+- Test dependency updates
+
 ## v0.5.10
 - Add checksum validation, with "Jenkins Lookup 3 Hash". Will help to detect file corruption.
 - Add support for opening a HDF5 file from an InputStream. Many Java API provide InputStreams so this improves integration possibilities.
