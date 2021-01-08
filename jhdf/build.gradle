@@ -55,7 +55,7 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
     // lzf compression support
-    implementation group: 'com.ning', name: 'compress-lzf', version: '1.0.4'
+    implementation group: 'com.ning', name: 'compress-lzf', version: '1.1'
 
     // Use JUnit 5 test framework
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion
