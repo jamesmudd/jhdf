@@ -29,6 +29,8 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 public final class VariableLengthDatasetReader {
 
+	private static final ByteBuffer EMPTY_BYTE_BUFFER = ByteBuffer.allocate(0);
+
 	private VariableLengthDatasetReader() {
 		throw new AssertionError("No instances of VariableLengthDatasetReader");
 	}
@@ -54,11 +56,17 @@ public final class VariableLengthDatasetReader {
 
 		List<ByteBuffer> elements = new ArrayList<>();
 		for (GlobalHeapId globalHeapId : getGlobalHeapIds(buffer, type.getSize(), hdfFc, getTotalPoints(dimensions))) {
-			GlobalHeap heap = heaps.computeIfAbsent(globalHeapId.getHeapAddress(),
-					address -> new GlobalHeap(hdfFc, address));
+			if(globalHeapId.getIndex() == 0) {
+				// https://github.com/jamesmudd/jhdf/issues/247
+				// Empty arrays have index=0 and address=0
+				elements.add(EMPTY_BYTE_BUFFER);
+			} else {
+				GlobalHeap heap = heaps.computeIfAbsent(globalHeapId.getHeapAddress(),
+						address -> new GlobalHeap(hdfFc, address));
 
-			ByteBuffer bb = heap.getObjectData(globalHeapId.getIndex());
-			elements.add(bb);
+				ByteBuffer bb = heap.getObjectData(globalHeapId.getIndex());
+				elements.add(bb);
+			}
 		}
 
 		// Make the output array
