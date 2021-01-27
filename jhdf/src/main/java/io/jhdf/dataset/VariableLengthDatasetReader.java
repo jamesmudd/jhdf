@@ -58,6 +58,7 @@ public final class VariableLengthDatasetReader {
 		for (GlobalHeapId globalHeapId : getGlobalHeapIds(buffer, type.getSize(), hdfFc, getTotalPoints(dimensions))) {
 			if(globalHeapId.getIndex() == 0) {
 				// https://github.com/jamesmudd/jhdf/issues/247
+				// Empty arrays have index=0 and address=0
 				elements.add(EMPTY_BYTE_BUFFER);
 			} else {
 				GlobalHeap heap = heaps.computeIfAbsent(globalHeapId.getHeapAddress(),
