@@ -10,6 +10,8 @@
 package io.jhdf;
 
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +37,7 @@ class FractalHeapTest {
 		try (RandomAccessFile raf = new RandomAccessFile(new File(testFile), "r")) {
 			FileChannel fc = raf.getChannel();
 			Superblock sb = Superblock.readSuperblock(fc, 0);
-			HdfFileChannel hdfFc = new HdfFileChannel(fc, sb);
+			HdfBackingStorage hdfFc = new HdfFileChannel(fc, sb);
 
 			fractalHeap = new FractalHeap(hdfFc, 1870);
 		}

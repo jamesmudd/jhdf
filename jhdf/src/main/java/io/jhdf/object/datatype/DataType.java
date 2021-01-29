@@ -9,10 +9,10 @@
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
@@ -103,6 +103,6 @@ public abstract class DataType {
 
 	public abstract Class<?> getJavaType();
 
-	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc);
+	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc);
 
 }

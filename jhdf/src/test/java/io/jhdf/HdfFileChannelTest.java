@@ -10,6 +10,8 @@
 package io.jhdf;
 
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -21,7 +23,6 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
-import java.nio.charset.StandardCharsets;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -44,7 +45,7 @@ class HdfFileChannelTest {
 	Superblock sb;
 
 	// Under test
-    private HdfFileChannel hdfFc;
+    private HdfBackingStorage hdfFc;
 
 	@BeforeEach
 	void before() {

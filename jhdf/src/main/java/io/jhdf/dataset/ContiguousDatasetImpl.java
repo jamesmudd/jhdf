@@ -9,12 +9,12 @@
  */
 package io.jhdf.dataset;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
 import io.jhdf.api.dataset.ContiguousDataset;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 
@@ -24,7 +24,7 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 
 	final ContiguousDataLayoutMessage contiguousDataLayoutMessage;
 
-	public ContiguousDatasetImpl(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
+	public ContiguousDatasetImpl(HdfBackingStorage hdfFc, long address, String name, Group parent, ObjectHeader oh) {
 		super(hdfFc, address, name, parent, oh);
 		this.contiguousDataLayoutMessage = getHeaderMessage(ContiguousDataLayoutMessage.class);
 	}

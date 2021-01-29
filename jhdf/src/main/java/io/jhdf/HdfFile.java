@@ -17,6 +17,8 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +58,7 @@ public class HdfFile implements Group, AutoCloseable {
 	}
 
 	private final File file;
-	private final HdfFileChannel hdfFc;
+	private final HdfBackingStorage hdfBackingStorage;
 
     private final Group rootGroup;
 
@@ -122,16 +124,16 @@ public class HdfFile implements Group, AutoCloseable {
 				throw new HdfException("Invalid superblock base address detected");
 			}
 
-			hdfFc = new HdfFileChannel(fc, superblock);
+			hdfBackingStorage = new HdfFileChannel(fc, superblock);
 
 			if (superblock instanceof SuperblockV0V1) {
 				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
-				SymbolTableEntry ste = new SymbolTableEntry(hdfFc,
+				SymbolTableEntry ste = new SymbolTableEntry(hdfBackingStorage,
 						sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
-				rootGroup = GroupImpl.createRootGroup(hdfFc, ste.getObjectHeaderAddress(), this);
+				rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, ste.getObjectHeaderAddress(), this);
 			} else if (superblock instanceof SuperblockV2V3) {
 				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
-				rootGroup = GroupImpl.createRootGroup(hdfFc, sb.getRootGroupObjectHeaderAddress(), this);
+				rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, sb.getRootGroupObjectHeaderAddress(), this);
 			} else {
 				throw new HdfException("Unrecognized superblock version = " + superblock.getVersionOfSuperblock());
 			}
@@ -155,7 +157,7 @@ public class HdfFile implements Group, AutoCloseable {
 	 * @return the size of the user block
 	 */
 	public long getUserBlockSize() {
-		return hdfFc.getUserBlockSize();
+		return hdfBackingStorage.getUserBlockSize();
 	}
 
 	/**
@@ -164,7 +166,7 @@ public class HdfFile implements Group, AutoCloseable {
 	 * @return the buffer containing the user block data
 	 */
 	public ByteBuffer getUserBlockBuffer() {
-		return hdfFc.mapNoOffset(0, hdfFc.getUserBlockSize());
+		return hdfBackingStorage.mapNoOffset(0, hdfBackingStorage.getUserBlockSize());
 	}
 
 	/**
@@ -178,7 +180,7 @@ public class HdfFile implements Group, AutoCloseable {
 			logger.info("Closed external file '{}'", externalHdfFile.getFile().getAbsolutePath());
 		}
 
-		hdfFc.close();
+		hdfBackingStorage.close();
 		logger.info("Closed HDF file '{}'", getFile().getAbsolutePath());
 	}
 
@@ -188,7 +190,7 @@ public class HdfFile implements Group, AutoCloseable {
 	 * @return the size of this file in bytes
 	 */
 	public long size() {
-		return hdfFc.size();
+		return hdfBackingStorage.size();
 	}
 
 	@Override
@@ -306,8 +308,8 @@ public class HdfFile implements Group, AutoCloseable {
 	/**
 	 * @return the underlying {@link HdfFileChannel}
 	 */
-	public HdfFileChannel getHdfChannel() {
-		return hdfFc;
+	public HdfBackingStorage getHdfChannel() {
+		return hdfBackingStorage;
 	}
 
 }

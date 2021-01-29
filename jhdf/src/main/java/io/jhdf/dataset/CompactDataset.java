@@ -9,16 +9,16 @@
  */
 package io.jhdf.dataset;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
 import io.jhdf.object.message.DataLayoutMessage.CompactDataLayoutMessage;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 
 public class CompactDataset extends DatasetBase {
 
-	public CompactDataset(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
+	public CompactDataset(HdfBackingStorage hdfFc, long address, String name, Group parent, ObjectHeader oh) {
 		super(hdfFc, address, name, parent, oh);
 	}
 

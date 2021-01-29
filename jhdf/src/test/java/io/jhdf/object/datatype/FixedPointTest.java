@@ -9,13 +9,13 @@
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.HdfFileChannel;
+import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
+import io.jhdf.storage.HdfBackingStorage;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
-import org.mockito.Mockito;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -130,7 +130,7 @@ class FixedPointTest {
     private Executable createTest(ByteBuffer buffer, FixedPoint dataType, int[] dims, Object expected) {
 		return () -> {
 			buffer.rewind(); // For shared buffers
-            HdfFileChannel hdfFc = mock(HdfFileChannel.class);
+            HdfBackingStorage hdfFc = mock(HdfFileChannel.class);
             Object actual = dataType.fillData(buffer, dims, hdfFc);
             assertThat(actual, is(expected));
             verifyNoInteractions(hdfFc);
@@ -140,7 +140,7 @@ class FixedPointTest {
     @Test
 	void testUnsupportedFixedPointLengthThrows() {
 		FixedPoint invalidDataType = mockFixedPoint(true, 11); // 11 byte data is not supported
-        HdfFileChannel hdfFc = mock(HdfFileChannel.class);
+        HdfBackingStorage hdfFc = mock(HdfFileChannel.class);
         assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(longBuffer, dims, hdfFc));
         verifyNoInteractions(hdfFc);
 	}
@@ -148,7 +148,7 @@ class FixedPointTest {
 	@Test
 	void testUnsupportedUnsignedFixedPointLengthThrows() {
 		FixedPoint invalidDataType = mockFixedPoint(false, 11); // 11 byte data is not supported
-        HdfFileChannel hdfFc = mock(HdfFileChannel.class);
+        HdfBackingStorage hdfFc = mock(HdfFileChannel.class);
         assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(longBuffer, dims, hdfFc));
         verifyNoInteractions(hdfFc);
 	}

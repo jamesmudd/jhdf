@@ -27,6 +27,7 @@ import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.SymbolTableMessage;
+import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
@@ -41,10 +42,10 @@ import java.util.Map;
 
 public class GroupImpl extends AbstractNode implements Group {
 	private final class ChildrenLazyInitializer extends LazyInitializer<Map<String, Node>> {
-		private final HdfFileChannel hdfFc;
+		private final HdfBackingStorage hdfFc;
 		private final Group parent;
 
-		private ChildrenLazyInitializer(HdfFileChannel hdfFc, Group parent) {
+		private ChildrenLazyInitializer(HdfBackingStorage hdfFc, Group parent) {
 			this.hdfFc = hdfFc;
 			this.parent = parent;
 		}
@@ -186,7 +187,7 @@ public class GroupImpl extends AbstractNode implements Group {
 
 	private final LazyInitializer<Map<String, Node>> children;
 
-	private GroupImpl(HdfFileChannel hdfFc, long address, String name, Group parent) {
+	private GroupImpl(HdfBackingStorage hdfFc, long address, String name, Group parent) {
 		super(hdfFc, address, name, parent);
 		logger.trace("Creating group '{}'...", name);
 
@@ -203,7 +204,7 @@ public class GroupImpl extends AbstractNode implements Group {
 	 *                            this group
 	 * @param parent              For the root group the parent is the file itself.
 	 */
-	private GroupImpl(HdfFileChannel hdfFc, long objectHeaderAddress, HdfFile parent) {
+	private GroupImpl(HdfBackingStorage hdfFc, long objectHeaderAddress, HdfFile parent) {
 		super(hdfFc, objectHeaderAddress, "", parent); // No name special case for root group no name
 		logger.trace("Creating root group...");
 
@@ -224,12 +225,12 @@ public class GroupImpl extends AbstractNode implements Group {
 	 * @param parent              For the root group the parent is the file itself.
 	 * @return The newly read group
 	 */
-	/* package */ static Group createGroup(HdfFileChannel hdfFc, long objectHeaderAddress, String name,
-			Group parent) {
+	/* package */ static Group createGroup(HdfBackingStorage hdfFc, long objectHeaderAddress, String name,
+										   Group parent) {
 		return new GroupImpl(hdfFc, objectHeaderAddress, name, parent);
 	}
 
-	/* package */ static Group createRootGroup(HdfFileChannel hdfFc, long objectHeaderAddress, HdfFile file) {
+	/* package */ static Group createRootGroup(HdfBackingStorage hdfFc, long objectHeaderAddress, HdfFile file) {
 		// Call the special root group constructor
 		return new GroupImpl(hdfFc, objectHeaderAddress, file);
 	}

@@ -9,8 +9,8 @@
  */
 package io.jhdf.dataset;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.object.datatype.DataType;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -49,7 +49,7 @@ public final class DatasetReader {
 	 * @param hdfFc The file channel for reading the file
 	 * @return A Java object representation of this dataset
 	 */
-	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
 		// If the data is scalar make a fake one element array then remove it at the end
 
 		final boolean isScalar;

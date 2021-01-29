@@ -9,9 +9,10 @@
  */
 package io.jhdf.btree;
 
-import io.jhdf.HdfFileChannel;
+import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.Superblock;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BTreeV1Test {
-	private HdfFileChannel hdfFc;
+	private HdfBackingStorage hdfFc;
 
 	@BeforeEach
     void setUp() throws URISyntaxException, IOException {

@@ -9,9 +9,9 @@
  */
 package io.jhdf.dataset;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.object.datatype.CompoundDataType;
 import io.jhdf.object.datatype.CompoundDataType.CompoundDataMember;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -25,7 +25,7 @@ public final class CompoundDatasetReader {
 		throw new AssertionError("No instances of CompoundDatasetReader");
 	}
 
-	public static Map<String, Object> readDataset(CompoundDataType type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+	public static Map<String, Object> readDataset(CompoundDataType type, ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
 		final int sizeAsInt = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
 
 		final List<CompoundDataMember> members = type.getMembers();

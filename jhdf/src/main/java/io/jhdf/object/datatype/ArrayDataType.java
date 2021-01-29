@@ -9,10 +9,10 @@
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.dataset.DatasetReader;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
@@ -66,7 +66,7 @@ public class ArrayDataType extends DataType {
     }
 
     @Override
-    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
         if (dimensions.length !=1) {
             throw new HdfException("Multi dimension array data types are not supported");
         }

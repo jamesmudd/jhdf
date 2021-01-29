@@ -10,6 +10,7 @@
 package io.jhdf;
 
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ public class GroupSymbolTableNode {
 	private final short numberOfEntries;
 	private final SymbolTableEntry[] symbolTableEntries;
 
-	public GroupSymbolTableNode(HdfFileChannel hdfFc, long address) {
+	public GroupSymbolTableNode(HdfBackingStorage hdfFc, long address) {
 		this.address = address;
 		try {
 			int headerSize = 8;

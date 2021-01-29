@@ -10,7 +10,6 @@
 package io.jhdf.dataset;
 
 import io.jhdf.AbstractNode;
-import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -25,6 +24,7 @@ import io.jhdf.object.message.DataSpace;
 import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.DataTypeMessage;
 import io.jhdf.object.message.FillValueMessage;
+import io.jhdf.storage.HdfBackingStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +37,13 @@ import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 public abstract class DatasetBase extends AbstractNode implements Dataset {
 	private static final Logger logger = LoggerFactory.getLogger(DatasetBase.class);
 
-	protected final HdfFileChannel hdfFc;
+	protected final HdfBackingStorage hdfFc;
 	protected final ObjectHeader oh;
 
 	private final DataType dataType;
 	private final DataSpace dataSpace;
 
-	public DatasetBase(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
+	public DatasetBase(HdfBackingStorage hdfFc, long address, String name, Group parent, ObjectHeader oh) {
 		super(hdfFc, address, name, parent);
 		this.hdfFc = hdfFc;
 		this.oh = oh;

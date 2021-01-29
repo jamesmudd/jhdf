@@ -10,9 +10,9 @@
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
-import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Dataset;
+import io.jhdf.storage.HdfBackingStorage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
@@ -67,7 +67,7 @@ class DatasetByAddressTest {
 
 	private Executable createTest(HdfFile file, long address) {
 		return () -> {
-			HdfFileChannel hdfFc = file.getHdfChannel();
+			HdfBackingStorage hdfFc = file.getHdfChannel();
 			ObjectHeader header = ObjectHeader.readObjectHeader(hdfFc, address);
 			Dataset dataset = DatasetLoader.createDataset(hdfFc, header, "unknown dataset", NoParent.INSTANCE);
 			Object data = dataset.getData();

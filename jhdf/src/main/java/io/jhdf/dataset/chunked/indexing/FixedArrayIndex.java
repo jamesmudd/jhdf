@@ -9,12 +9,12 @@
  */
 package io.jhdf.dataset.chunked.indexing;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.DatasetInfo;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -43,7 +43,7 @@ public class FixedArrayIndex implements ChunkIndex {
 
     private final List<Chunk> chunks;
 
-    public FixedArrayIndex(HdfFileChannel hdfFc, long address, DatasetInfo datasetInfo) {
+    public FixedArrayIndex(HdfBackingStorage hdfFc, long address, DatasetInfo datasetInfo) {
         this.address = address;
         this.unfilteredChunkSize = datasetInfo.getChunkSizeInBytes();
         this.datasetDimensions = datasetInfo.getDatasetDimensions();
@@ -85,7 +85,7 @@ public class FixedArrayIndex implements ChunkIndex {
 
     private static class FixedArrayDataBlock {
 
-        private FixedArrayDataBlock(FixedArrayIndex fixedArrayIndex, HdfFileChannel hdfFc, long address) {
+        private FixedArrayDataBlock(FixedArrayIndex fixedArrayIndex, HdfBackingStorage hdfFc, long address) {
 
             // TODO header size ignoring paging
             final int headerSize = 6 + hdfFc.getSizeOfOffsets() + fixedArrayIndex.entrySize * fixedArrayIndex.maxNumberOfEntries + 4;

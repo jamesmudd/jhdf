@@ -9,8 +9,9 @@
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.HdfFileChannel;
+import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
+import io.jhdf.storage.HdfBackingStorage;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -57,7 +58,7 @@ public class ReferenceTest {
     private Executable createTest(ByteBuffer buffer, Reference dataType, int[] dims, Object expected) {
         return () -> {
             buffer.rewind(); // For shared buffers
-            HdfFileChannel hdfFc = mock(HdfFileChannel.class);
+            HdfBackingStorage hdfFc = mock(HdfFileChannel.class);
             Object actual = dataType.fillData(buffer, dims, hdfFc);
             assertThat(actual, is(expected));
             verifyNoInteractions(hdfFc);
@@ -68,7 +69,7 @@ public class ReferenceTest {
     @Test
 	void testUnsupportedReferenceLengthThrows() {
 		Reference invalidDataType = mockReference(11); // 11 byte data is not supported
-        HdfFileChannel hdfFc = mock(HdfFileChannel.class);
+        HdfBackingStorage hdfFc = mock(HdfFileChannel.class);
 		assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(referenceIntBuffer, dims, hdfFc));
         verifyNoInteractions(hdfFc);
 

@@ -10,6 +10,8 @@
 package io.jhdf;
 
 import io.jhdf.ObjectHeader.ObjectHeaderV2;
+import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,7 @@ class ObjectHeaderV2Test {
 	/** This will need to be updated each time the test files are regenerated */
 	private static final long TIMESTAMP = 1553279213L;
 
-	private HdfFileChannel hdfFc;
+	private HdfBackingStorage hdfFc;
 
 	@BeforeEach
     void setUp() throws IOException, URISyntaxException {
@@ -171,7 +173,7 @@ class ObjectHeaderV2Test {
 		final URI testFileUri = this.getClass().getResource("/hdf5/test_attribute_with_creation_order.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
-		HdfFileChannel hdfFc = new HdfFileChannel(fc, sb);
+		HdfBackingStorage hdfFc = new HdfFileChannel(fc, sb);
 
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 48);
 

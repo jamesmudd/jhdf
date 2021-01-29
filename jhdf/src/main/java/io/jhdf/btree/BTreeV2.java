@@ -9,12 +9,12 @@
  */
 package io.jhdf.btree;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.btree.record.BTreeRecord;
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.dataset.chunked.DatasetInfo;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -51,11 +51,11 @@ public class BTreeV2<T extends BTreeRecord> {
 		return records;
 	}
 
-	public BTreeV2(HdfFileChannel hdfFc, long address) {
+	public BTreeV2(HdfBackingStorage hdfFc, long address) {
 		this(hdfFc, address, null);
 	}
 
-	public BTreeV2(HdfFileChannel hdfFc, long address, DatasetInfo datasetInfo) {
+	public BTreeV2(HdfBackingStorage hdfFc, long address, DatasetInfo datasetInfo) {
 		this.address = address;
 		try {
 			// B Tree V2 Header
@@ -104,7 +104,7 @@ public class BTreeV2<T extends BTreeRecord> {
 
 	}
 
-	private void readRecords(HdfFileChannel hdfFc, long address, int depth, int numberOfRecords, int totalRecords, DatasetInfo datasetInfo) {
+	private void readRecords(HdfBackingStorage hdfFc, long address, int depth, int numberOfRecords, int totalRecords, DatasetInfo datasetInfo) {
 
 		ByteBuffer bb = hdfFc.readBufferFromAddress(address, nodeSize);
 

@@ -9,14 +9,13 @@
  */
 package io.jhdf.dataset.chunked.indexing;
 
-import io.jhdf.Constants;
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.DatasetInfo;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -71,7 +70,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
     private int elementCounter = 0;
 
-    public ExtensibleArrayIndex(HdfFileChannel hdfFc, long address, DatasetInfo datasetInfo) {
+    public ExtensibleArrayIndex(HdfBackingStorage hdfFc, long address, DatasetInfo datasetInfo) {
         this.headerAddress = address;
         this.unfilteredChunkSize = datasetInfo.getChunkSizeInBytes();
         this.datasetDimensions = datasetInfo.getDatasetDimensions();
@@ -129,7 +128,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
     private class ExtensibleArrayIndexBlock {
 
-        private ExtensibleArrayIndexBlock(HdfFileChannel hdfFc, long address) {
+        private ExtensibleArrayIndexBlock(HdfBackingStorage hdfFc, long address) {
 
             // Figure out the size of the index block
             final int headerSize = 6 + hdfFc.getSizeOfOffsets()
@@ -191,7 +190,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
         private class ExtensibleArrayDataBlock {
 
-            private ExtensibleArrayDataBlock(HdfFileChannel hdfFc, long address) {
+            private ExtensibleArrayDataBlock(HdfBackingStorage hdfFc, long address) {
 
                 final int numberOfElementsInDataBlock = dataBlockElementCounter.getNextNumberOfChunks();
                 final int headerSize = 6 + hdfFc.getSizeOfOffsets() + blockOffsetSize
@@ -237,7 +236,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
         private class ExtensibleArraySecondaryBlock {
 
-            private ExtensibleArraySecondaryBlock(HdfFileChannel hdfFc, long address) {
+            private ExtensibleArraySecondaryBlock(HdfBackingStorage hdfFc, long address) {
 
                 final int numberOfPointers = secondaryBlockPointerCounter.getNextNumberOfPointers();
                 final int secondaryBlockSize = 6 + hdfFc.getSizeOfOffsets() +
@@ -299,7 +298,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
          * @param hdfFc the HDF file channel
          * @return true if element was read false otherwise
          */
-        private boolean readElement(ByteBuffer bb, HdfFileChannel hdfFc) {
+        private boolean readElement(ByteBuffer bb, HdfBackingStorage hdfFc) {
             final long chunkAddress = readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
             if (chunkAddress != UNDEFINED_ADDRESS) {
                 final int[] chunkOffset = Utils.chunkIndexToChunkOffset(elementCounter, chunkDimensions, datasetDimensions);

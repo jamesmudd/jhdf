@@ -12,6 +12,7 @@ package io.jhdf;
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.storage.HdfBackingStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,7 @@ public class FractalHeap {
 	private static final BigInteger TWO = BigInteger.valueOf(2L);
 
 	private final long address;
-	private final HdfFileChannel hdfFc;
+	private final HdfBackingStorage hdfFc;
 	private final Superblock sb;
 
 	private final int maxDirectBlockSize;
@@ -94,7 +95,7 @@ public class FractalHeap {
 	private final int bytesToStoreOffset;
 	private final int bytesToStoreLength;
 
-	public FractalHeap(HdfFileChannel hdfFc, long address) {
+	public FractalHeap(HdfBackingStorage hdfFc, long address) {
 		this.hdfFc = hdfFc;
 		this.sb = hdfFc.getSuperblock();
 		this.address = address;

@@ -9,12 +9,12 @@
  */
 package io.jhdf.btree;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.indexing.ChunkImpl;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class BTreeV1Data extends BTreeV1 {
 
-	private BTreeV1Data(HdfFileChannel hdfFc, long address) {
+	private BTreeV1Data(HdfBackingStorage hdfFc, long address) {
 		super(hdfFc, address);
 	}
 
@@ -43,7 +43,7 @@ public abstract class BTreeV1Data extends BTreeV1 {
 
 		private final ArrayList<Chunk> chunks;
 
-		/* package */ BTreeV1DataLeafNode(HdfFileChannel hdfFc, long address, int dataDimensions) {
+		/* package */ BTreeV1DataLeafNode(HdfBackingStorage hdfFc, long address, int dataDimensions) {
 			super(hdfFc, address);
 
 			final int keySize = 4 + 4 + (dataDimensions + 1) * 8;
@@ -94,7 +94,7 @@ public abstract class BTreeV1Data extends BTreeV1 {
 
 		private final List<BTreeV1Data> childNodes;
 
-		/* package */ BTreeV1DataNonLeafNode(HdfFileChannel hdfFc, long address, int dataDimensions) {
+		/* package */ BTreeV1DataNonLeafNode(HdfBackingStorage hdfFc, long address, int dataDimensions) {
 			super(hdfFc, address);
 
 			final int keySize = 4 + 4 + (dataDimensions + 1) * 8;
