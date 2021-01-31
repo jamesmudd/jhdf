@@ -63,6 +63,16 @@ public abstract class Superblock {
 		return Arrays.equals(HDF5_FILE_SIGNATURE, signatureBuffer.array());
 	}
 
+	static boolean verifySignature(ByteBuffer byteBuffer, int offset) {
+		byte[] signatureBytes = new byte[HDF5_FILE_SIGNATURE_LENGTH];
+		byteBuffer.position(offset);
+		byteBuffer.get(signatureBytes);
+
+		// Verify signature
+		return Arrays.equals(HDF5_FILE_SIGNATURE, signatureBytes);
+	}
+
+
 	public static Superblock readSuperblock(FileChannel fc, long address) {
 
 		final boolean verifiedSignature = verifySignature(fc, address);
@@ -96,6 +106,32 @@ public abstract class Superblock {
 		default:
 			throw new UnsupportedHdfException(
 					"Superblock version is not supported. Detected version = " + versionOfSuperblock);
+		}
+	}
+
+	public static Superblock readSuperblock(ByteBuffer byteBuffer) {
+		final boolean verifiedSignature = verifySignature(byteBuffer, 0);
+		if (!verifiedSignature) {
+			throw new HdfException("Superblock didn't contain valid signature");
+		}
+		logger.trace("Verified superblock signature");
+
+		// Signature is ok read rest of Superblock
+		byte versionOfSuperblock = byteBuffer.get();
+
+		// Version # of Superblock
+		logger.debug("Version of superblock is = {}", versionOfSuperblock);
+
+		switch (versionOfSuperblock) {
+			case 0:
+			case 1:
+				return new SuperblockV0V1(byteBuffer, versionOfSuperblock);
+			case 2:
+			case 3:
+//				return new SuperblockV2V3(fc, fileLocation);
+			default:
+				throw new UnsupportedHdfException(
+						"Superblock version is not supported. Detected version = " + versionOfSuperblock);
 		}
 	}
 
@@ -206,6 +242,82 @@ public abstract class Superblock {
 			} catch (IOException e) {
 				throw new HdfException("Failed to read superblock from address " + toHex(address), e);
 			}
+
+		}
+
+		private SuperblockV0V1(ByteBuffer byteBuffer, byte versionOfSuperblock) {
+			this.versionOfSuperblock = versionOfSuperblock;
+
+			// Version # of File Free-space Storage
+			versionNumberOfTheFileFreeSpaceInformation = byteBuffer.get();
+			logger.trace("Version Number of the File Free-Space Information: {}",
+					versionNumberOfTheFileFreeSpaceInformation);
+
+			// Version # of Root Group Symbol Table Entry
+			versionOfRootGroupSymbolTableEntry = byteBuffer.get();
+			logger.trace("Version # of Root Group Symbol Table Entry: {}", versionOfRootGroupSymbolTableEntry);
+
+			// Skip reserved byte
+			byteBuffer.position(byteBuffer.position() + 1);
+
+			// Version # of Shared Header Message Format
+			versionOfSharedHeaderMessageFormat = byteBuffer.get();
+			logger.trace("Version # of Shared Header Message Format: {}", versionOfSharedHeaderMessageFormat);
+
+			// Size of Offsets
+			sizeOfOffsets = Byte.toUnsignedInt(byteBuffer.get());
+			logger.trace("Size of Offsets: {}", sizeOfOffsets);
+
+			// Size of Lengths
+			sizeOfLengths = Byte.toUnsignedInt(byteBuffer.get());
+			logger.trace("Size of Lengths: {}", sizeOfLengths);
+
+			// Skip reserved byte
+			byteBuffer.position(byteBuffer.position() + 1);
+
+			// Group Leaf Node K
+			groupLeafNodeK = Short.toUnsignedInt(byteBuffer.getShort());
+			logger.trace("groupLeafNodeK = {}", groupLeafNodeK);
+
+			// Group Internal Node K
+			groupInternalNodeK = Short.toUnsignedInt(byteBuffer.getShort());
+			logger.trace("groupInternalNodeK = {}", groupInternalNodeK);
+
+			// File Consistency Flags (skip)
+			byteBuffer.position(byteBuffer.position() + 4);
+
+			// Version 1
+			if (versionOfSuperblock == 1) {
+				// Skip Indexed Storage Internal Node K and zeros
+				byteBuffer.position(byteBuffer.position() + 4);
+			}
+
+//				int nextSectionSize = 4 * sizeOfOffsets;
+//				header = ByteBuffer.allocate(nextSectionSize);
+//				fc.read(header, address);
+//				address += nextSectionSize;
+//				header.order(LITTLE_ENDIAN);
+//				header.rewind();
+
+			// Base Address
+			baseAddressByte = Utils.readBytesAsUnsignedLong(byteBuffer, sizeOfOffsets);
+			logger.trace("baseAddressByte = {}", baseAddressByte);
+
+			// Address of Global Free-space Index
+			addressOfGlobalFreeSpaceIndex = Utils.readBytesAsUnsignedLong(byteBuffer, sizeOfOffsets);
+			logger.trace("addressOfGlobalFreeSpaceIndex = {}", addressOfGlobalFreeSpaceIndex);
+
+			// End of File Address
+			endOfFileAddress = Utils.readBytesAsUnsignedLong(byteBuffer, sizeOfOffsets);
+			logger.trace("endOfFileAddress = {}", endOfFileAddress);
+
+			// Driver Information Block Address
+			driverInformationBlockAddress = Utils.readBytesAsUnsignedLong(byteBuffer, sizeOfOffsets);
+			logger.trace("driverInformationBlockAddress = {}", driverInformationBlockAddress);
+
+			// Root Group Symbol Table Entry Address
+			rootGroupSymbolTableAddress = byteBuffer.position();
+			logger.trace("rootGroupSymbolTableAddress= {}", rootGroupSymbolTableAddress);
 
 		}
 

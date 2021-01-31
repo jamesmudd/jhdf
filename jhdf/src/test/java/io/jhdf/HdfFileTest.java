@@ -26,6 +26,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
@@ -296,5 +300,18 @@ class HdfFileTest {
 		InputStream inputStream = Mockito.mock(InputStream.class);
 		Mockito.when(inputStream.read(Mockito.any())).thenThrow(new IOException("Broken test stream"));
 		assertThrows(HdfException.class, () -> HdfFile.fromInputStream(inputStream));
+	}
+
+	@Test
+	void testLoadingInMemoryFile() throws IOException {
+		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_PATH).openStream()) {
+			ByteBuffer buffer = ByteBuffer.allocate(inputStream.available());
+			Channels.newChannel(inputStream).read(buffer);
+			buffer.flip();
+			buffer.order(ByteOrder.LITTLE_ENDIAN);
+			HdfFile hdfFile = HdfFile.fromByteBuffer(buffer);
+			assertThat(hdfFile, is(notNullValue()));
+			assertThat(hdfFile.getName(), is("In-Memory no backing file"));
+		}
 	}
 }

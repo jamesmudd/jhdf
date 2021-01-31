@@ -19,6 +19,7 @@ import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
+import io.jhdf.storage.HdfInMemoryByteBuffer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -57,7 +59,7 @@ public class HdfFile implements Group, AutoCloseable {
 		}
 	}
 
-	private final File file;
+	private final Optional<File> file; // TODO make Optional
 	private final HdfBackingStorage hdfBackingStorage;
 
     private final Group rootGroup;
@@ -70,6 +72,60 @@ public class HdfFile implements Group, AutoCloseable {
 
 	public HdfFile(URI uri) {
 		this(Paths.get(uri).toFile());
+	}
+
+	public static HdfFile fromBytes(byte[] bytes) {
+		return fromByteBuffer(ByteBuffer.wrap(bytes));
+	}
+
+	public static HdfFile fromByteBuffer(ByteBuffer byteBuffer) {
+		// Find out if the buffer is a HDF5 file
+		boolean validSignature = false;
+		int offset;
+		for (offset = 0; offset < byteBuffer.capacity(); offset = Math.toIntExact(nextOffset(offset))) {
+			logger.trace("Checking for signature at offset = {}", offset);
+			validSignature = Superblock.verifySignature(byteBuffer, offset);
+			if (validSignature) {
+				logger.debug("Found valid signature at offset = {}", offset);
+				break;
+			}
+		}
+		if (!validSignature) {
+			throw new HdfException("No valid HDF5 signature found");
+		}
+
+		byteBuffer.position(offset);
+
+		// We have a valid HDF5 file so read the full superblock
+		final Superblock superblock = Superblock.readSuperblock(byteBuffer);
+
+		// Validate the superblock
+		if (superblock.getBaseAddressByte() != offset) {
+			throw new HdfException("Invalid superblock base address detected");
+		}
+
+		HdfBackingStorage hdfBackingStorage = new HdfInMemoryByteBuffer(byteBuffer, superblock);
+
+		return new HdfFile(hdfBackingStorage);
+	}
+
+	public HdfFile(HdfBackingStorage hdfBackingStorage) {
+		this.hdfBackingStorage = hdfBackingStorage;
+		this.file = Optional.empty(); // No file its in memory
+
+		Superblock superblock = hdfBackingStorage.getSuperblock();
+		if (superblock instanceof SuperblockV0V1) {
+			SuperblockV0V1 sb = (SuperblockV0V1) superblock;
+			SymbolTableEntry ste = new SymbolTableEntry(hdfBackingStorage,
+					sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
+			this.rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, ste.getObjectHeaderAddress(), this);
+		} else if (superblock instanceof SuperblockV2V3) {
+			SuperblockV2V3 sb = (SuperblockV2V3) superblock;
+			this.rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, sb.getRootGroupObjectHeaderAddress(), this);
+		} else {
+			throw new HdfException("Unrecognized superblock version = " + superblock.getVersionOfSuperblock());
+		}
+
 	}
 
 	/**
@@ -94,7 +150,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	public HdfFile(File hdfFile) {
 		logger.info("Opening HDF5 file '{}'...", hdfFile.getAbsolutePath());
-		this.file = hdfFile;
+		this.file = Optional.of(hdfFile);
 
 		try {
 			// Sonar would like this closed but we are implementing a file object which
@@ -139,12 +195,12 @@ public class HdfFile implements Group, AutoCloseable {
 			}
 
 		} catch (IOException e) {
-			throw new HdfException("Failed to open file '" + file.getAbsolutePath() + "' . Is it a HDF5 file?", e);
+			throw new HdfException("Failed to open file '" + file.get().getAbsolutePath() + "' . Is it a HDF5 file?", e);
 		}
 		logger.info("Opened HDF5 file '{}'", hdfFile.getAbsolutePath());
 	}
 
-	private long nextOffset(long offset) {
+	private static long nextOffset(long offset) {
 		if (offset == 0) {
 			return 512L;
 		}
@@ -205,7 +261,11 @@ public class HdfFile implements Group, AutoCloseable {
 
 	@Override
 	public String getName() {
-		return file.getName();
+		if (file.isPresent()){
+			return file.get().getName();
+		} else {
+			return "In-Memory no backing file";
+		}
 	}
 
 	@Override
@@ -225,7 +285,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	@Override
 	public String toString() {
-		return "HdfFile [file=" + file.getName() + "]";
+		return "HdfFile [file=" + getName() + "]";
 	}
 
 	@Override
@@ -241,7 +301,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	@Override
 	public File getFile() {
-		return file;
+		return file.orElseThrow(() -> new HdfException("No backing file. In-memory"));
 	}
 
 	@Override
