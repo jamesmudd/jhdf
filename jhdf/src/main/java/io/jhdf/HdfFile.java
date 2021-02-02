@@ -62,7 +62,7 @@ public class HdfFile implements Group, AutoCloseable {
 		}
 	}
 
-	private final Optional<File> file; // TODO make Optional
+	private final Optional<File> file;
 	private final HdfBackingStorage hdfBackingStorage;
 
     private final Group rootGroup;
@@ -78,10 +78,12 @@ public class HdfFile implements Group, AutoCloseable {
 	}
 
 	public static HdfFile fromBytes(byte[] bytes) {
+		logger.info("Reading HDF5 file from byte[]");
 		return fromByteBuffer(ByteBuffer.wrap(bytes));
 	}
 
 	public static HdfFile fromByteBuffer(ByteBuffer byteBuffer) {
+		logger.info("Reading HDF5 file from ByteBuffer");
 		byteBuffer.order(LITTLE_ENDIAN); // HDF5 metadata is always stored LE
 		// Find out if the buffer is a HDF5 file
 		boolean validSignature = false;
