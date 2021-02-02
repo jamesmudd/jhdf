@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,6 +41,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 /**
  * The HDF file class this object represents a HDF5 file on disk and provides
@@ -79,6 +82,7 @@ public class HdfFile implements Group, AutoCloseable {
 	}
 
 	public static HdfFile fromByteBuffer(ByteBuffer byteBuffer) {
+		byteBuffer.order(LITTLE_ENDIAN); // HDF5 metadata is always stored LE
 		// Find out if the buffer is a HDF5 file
 		boolean validSignature = false;
 		int offset;

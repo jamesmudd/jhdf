@@ -6,15 +6,15 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
+
 public class HdfInMemoryByteBuffer implements HdfBackingStorage {
 
 	private final ByteBuffer byteBuffer;
-	private final ByteOrder byteOrder;
 	private final Superblock superblock;
 
 	public HdfInMemoryByteBuffer(ByteBuffer byteBuffer, Superblock superblock) {
 		this.byteBuffer = byteBuffer.asReadOnlyBuffer();
-		this.byteOrder = byteBuffer.order();
 		this.superblock = superblock;
 	}
 
@@ -32,8 +32,8 @@ public class HdfInMemoryByteBuffer implements HdfBackingStorage {
 	public ByteBuffer mapNoOffset(long address, long length) {
 		byteBuffer.position(Math.toIntExact(address));
 		byteBuffer.limit(Math.toIntExact(address + length));
-		// Set order on sliced buffer
-		return byteBuffer.slice().order(byteOrder);
+		// Set order on sliced buffer always LE
+		return byteBuffer.slice().order(LITTLE_ENDIAN);
 	}
 
 	@Override

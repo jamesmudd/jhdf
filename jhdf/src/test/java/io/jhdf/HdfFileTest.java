@@ -308,7 +308,6 @@ class HdfFileTest {
 			ByteBuffer buffer = ByteBuffer.allocate(inputStream.available());
 			Channels.newChannel(inputStream).read(buffer);
 			buffer.flip();
-			buffer.order(ByteOrder.LITTLE_ENDIAN);
 			HdfFile hdfFile = HdfFile.fromByteBuffer(buffer);
 			assertThat(hdfFile, is(notNullValue()));
 			assertThat(hdfFile.getName(), is("In-Memory no backing file"));
