@@ -67,7 +67,7 @@ class DatasetByAddressTest {
 
 	private Executable createTest(HdfFile file, long address) {
 		return () -> {
-			HdfBackingStorage hdfFc = file.getHdfChannel();
+			HdfBackingStorage hdfFc = file.getHdfBackingStorage();
 			ObjectHeader header = ObjectHeader.readObjectHeader(hdfFc, address);
 			Dataset dataset = DatasetLoader.createDataset(hdfFc, header, "unknown dataset", NoParent.INSTANCE);
 			Object data = dataset.getData();

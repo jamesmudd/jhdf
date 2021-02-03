@@ -17,6 +17,7 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.InMemoryHdfException;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.storage.HdfInMemoryByteBuffer;
@@ -29,7 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,7 +62,7 @@ public class HdfFile implements Group, AutoCloseable {
 		}
 	}
 
-	private final Optional<File> file;
+	private final Optional<File> optionalFile;
 	private final HdfBackingStorage hdfBackingStorage;
 
     private final Group rootGroup;
@@ -117,7 +117,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	public HdfFile(HdfBackingStorage hdfBackingStorage) {
 		this.hdfBackingStorage = hdfBackingStorage;
-		this.file = Optional.empty(); // No file its in memory
+		this.optionalFile = Optional.empty(); // No file its in memory
 
 		Superblock superblock = hdfBackingStorage.getSuperblock();
 		if (superblock instanceof SuperblockV0V1) {
@@ -156,7 +156,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	public HdfFile(File hdfFile) {
 		logger.info("Opening HDF5 file '{}'...", hdfFile.getAbsolutePath());
-		this.file = Optional.of(hdfFile);
+		this.optionalFile = Optional.of(hdfFile);
 
 		try {
 			// Sonar would like this closed but we are implementing a file object which
@@ -201,7 +201,7 @@ public class HdfFile implements Group, AutoCloseable {
 			}
 
 		} catch (IOException e) {
-			throw new HdfException("Failed to open file '" + file.get().getAbsolutePath() + "' . Is it a HDF5 file?", e);
+			throw new HdfException("Failed to open file '" + optionalFile.get().getAbsolutePath() + "' . Is it a HDF5 file?", e);
 		}
 		logger.info("Opened HDF5 file '{}'", hdfFile.getAbsolutePath());
 	}
@@ -237,13 +237,15 @@ public class HdfFile implements Group, AutoCloseable {
 	 */
 	@Override
 	public void close() {
-		for (HdfFile externalHdfFile : openExternalFiles) {
-			externalHdfFile.close();
-			logger.info("Closed external file '{}'", externalHdfFile.getFile().getAbsolutePath());
-		}
+		if(!inMemory()) {
+			for (HdfFile externalHdfFile : openExternalFiles) {
+				externalHdfFile.close();
+				logger.info("Closed external file '{}'", externalHdfFile.getFile().getAbsolutePath());
+			}
 
-		hdfBackingStorage.close();
-		logger.info("Closed HDF file '{}'", getFile().getAbsolutePath());
+			hdfBackingStorage.close();
+			logger.info("Closed HDF file '{}'", getFile().getAbsolutePath());
+		}
 	}
 
 	/**
@@ -267,11 +269,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	@Override
 	public String getName() {
-		if (file.isPresent()){
-			return file.get().getName();
-		} else {
-			return "In-Memory no backing file";
-		}
+		return optionalFile.map(File::getName).orElse("In-Memory no backing file");
 	}
 
 	@Override
@@ -307,7 +305,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	@Override
 	public File getFile() {
-		return file.orElseThrow(() -> new HdfException("No backing file. In-memory"));
+		return optionalFile.orElseThrow(() -> new HdfException("No backing file. In-memory"));
 	}
 
 	@Override
@@ -353,6 +351,9 @@ public class HdfFile implements Group, AutoCloseable {
 	 * @param hdfFile an open external file linked from this file
 	 */
 	public void addExternalFile(HdfFile hdfFile) {
+		if(inMemory()) {
+			throw new InMemoryHdfException();
+		}
 		openExternalFiles.add(hdfFile);
 	}
 
@@ -372,10 +373,16 @@ public class HdfFile implements Group, AutoCloseable {
 	}
 
 	/**
-	 * @return the underlying {@link HdfFileChannel}
+	 * @return the underlying {@link HdfBackingStorage}
 	 */
-	public HdfBackingStorage getHdfChannel() {
+	public HdfBackingStorage getHdfBackingStorage() {
 		return hdfBackingStorage;
 	}
 
+	/**
+	 * @return true if the file is in memory
+	 */
+	public boolean inMemory() {
+		return hdfBackingStorage.inMemory();
+	}
 }

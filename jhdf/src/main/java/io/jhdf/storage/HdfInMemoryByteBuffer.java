@@ -10,6 +10,7 @@
 package io.jhdf.storage;
 
 import io.jhdf.Superblock;
+import io.jhdf.exceptions.InMemoryHdfException;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -56,7 +57,7 @@ public class HdfInMemoryByteBuffer implements HdfBackingStorage {
 
 	@Override
 	public FileChannel getFileChannel(){
-		return null; //TODO
+		throw new InMemoryHdfException();
 	}
 
 	@Override
@@ -77,5 +78,10 @@ public class HdfInMemoryByteBuffer implements HdfBackingStorage {
 	@Override
 	public long size() {
 		return byteBuffer.capacity();
+	}
+
+	@Override
+	public boolean inMemory() {
+		return true;
 	}
 }

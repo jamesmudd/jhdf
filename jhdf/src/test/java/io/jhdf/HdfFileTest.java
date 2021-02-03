@@ -16,6 +16,8 @@ import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
+import io.jhdf.exceptions.InMemoryHdfException;
+import io.jhdf.storage.HdfBackingStorage;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -310,7 +312,9 @@ class HdfFileTest {
 			buffer.flip();
 			HdfFile hdfFile = HdfFile.fromByteBuffer(buffer);
 			assertThat(hdfFile, is(notNullValue()));
+			assertThat(hdfFile.inMemory(), is(true));
 			assertThat(hdfFile.getName(), is("In-Memory no backing file"));
+			hdfFile.close();
 		}
 	}
 
@@ -321,7 +325,9 @@ class HdfFileTest {
 			inputStream.read(bytes);
 			HdfFile hdfFile = HdfFile.fromBytes(bytes);
 			assertThat(hdfFile, is(notNullValue()));
+			assertThat(hdfFile.inMemory(), is(true));
 			assertThat(hdfFile.getName(), is("In-Memory no backing file"));
+			hdfFile.close();
 		}
 	}
 
@@ -332,7 +338,9 @@ class HdfFileTest {
 			inputStream.read(bytes);
 			HdfFile hdfFile = HdfFile.fromBytes(bytes);
 			assertThat(hdfFile, is(notNullValue()));
+			assertThat(hdfFile.inMemory(), is(true));
 			assertThat(hdfFile.getName(), is("In-Memory no backing file"));
+			hdfFile.close();
 		}
 	}
 
@@ -340,5 +348,26 @@ class HdfFileTest {
 	void testReadingFromEmptyByteArrayFails() {
 		byte[] bytes = new byte[0];
 		assertThrows(HdfException.class, () -> HdfFile.fromBytes(bytes));
+	}
+
+	@Test
+	void testExternalFilesOnInMemoryThrows() throws IOException {
+		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_PATH).openStream()) {
+			byte[] bytes = new byte[inputStream.available()];
+			inputStream.read(bytes);
+			HdfFile hdfFile = HdfFile.fromBytes(bytes);
+			assertThrows(InMemoryHdfException.class, () -> hdfFile.addExternalFile(Mockito.mock(HdfFile.class)));
+		}
+	}
+
+	@Test
+	void testGettingFileChannelFromInMemoryFileThrows() throws IOException {
+		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_PATH).openStream()) {
+			byte[] bytes = new byte[inputStream.available()];
+			inputStream.read(bytes);
+			HdfFile hdfFile = HdfFile.fromBytes(bytes);
+			HdfBackingStorage hdfBackingStorage = hdfFile.getHdfBackingStorage();
+			assertThrows(InMemoryHdfException.class, () -> hdfBackingStorage.getFileChannel());
+		}
 	}
 }

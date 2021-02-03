@@ -14,6 +14,11 @@ import io.jhdf.Superblock;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+/**
+ * Interface to underlying storage maybe an on disk file or an in memory file.
+ *
+ * @author James Mudd
+ */
 public interface HdfBackingStorage {
 	ByteBuffer readBufferFromAddress(long address, int length);
 
@@ -34,4 +39,9 @@ public interface HdfBackingStorage {
 	void close();
 
 	long size();
+
+	/**
+	 * @return true if the file is in memory
+	 */
+	boolean inMemory();
 }

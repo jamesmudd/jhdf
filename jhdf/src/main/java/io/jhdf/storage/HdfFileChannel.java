@@ -12,7 +12,6 @@ package io.jhdf.storage;
 import io.jhdf.HdfFile;
 import io.jhdf.Superblock;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.storage.HdfBackingStorage;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -124,4 +123,8 @@ public class HdfFileChannel implements HdfBackingStorage {
 		}
 	}
 
+	@Override
+	public boolean inMemory() {
+		return false;
+	}
 }
