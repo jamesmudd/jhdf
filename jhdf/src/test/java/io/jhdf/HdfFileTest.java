@@ -326,6 +326,17 @@ class HdfFileTest {
 	}
 
 	@Test
+	void testLoadingInMemoryFileFromByteArrayTwo() throws IOException {
+		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_TWO_PATH).openStream()) {
+			byte[] bytes = new byte[inputStream.available()];
+			inputStream.read(bytes);
+			HdfFile hdfFile = HdfFile.fromBytes(bytes);
+			assertThat(hdfFile, is(notNullValue()));
+			assertThat(hdfFile.getName(), is("In-Memory no backing file"));
+		}
+	}
+
+	@Test
 	void testReadingFromEmptyByteArrayFails() {
 		byte[] bytes = new byte[0];
 		assertThrows(HdfException.class, () -> HdfFile.fromBytes(bytes));

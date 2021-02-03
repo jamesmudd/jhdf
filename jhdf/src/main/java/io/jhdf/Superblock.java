@@ -128,7 +128,7 @@ public abstract class Superblock {
 				return new SuperblockV0V1(byteBuffer, versionOfSuperblock);
 			case 2:
 			case 3:
-//				return new SuperblockV2V3(fc, fileLocation);
+				return new SuperblockV2V3(byteBuffer, versionOfSuperblock);
 			default:
 				throw new UnsupportedHdfException(
 						"Superblock version is not supported. Detected version = " + versionOfSuperblock);
@@ -292,13 +292,6 @@ public abstract class Superblock {
 				byteBuffer.position(byteBuffer.position() + 4);
 			}
 
-//				int nextSectionSize = 4 * sizeOfOffsets;
-//				header = ByteBuffer.allocate(nextSectionSize);
-//				fc.read(header, address);
-//				address += nextSectionSize;
-//				header.order(LITTLE_ENDIAN);
-//				header.rewind();
-
 			// Base Address
 			baseAddressByte = Utils.readBytesAsUnsignedLong(byteBuffer, sizeOfOffsets);
 			logger.trace("baseAddressByte = {}", baseAddressByte);
@@ -319,6 +312,7 @@ public abstract class Superblock {
 			rootGroupSymbolTableAddress = byteBuffer.position();
 			logger.trace("rootGroupSymbolTableAddress= {}", rootGroupSymbolTableAddress);
 
+			logger.debug("Finished reading Superblock");
 		}
 
 		/**
@@ -487,6 +481,51 @@ public abstract class Superblock {
 			} catch (IOException e) {
 				throw new HdfException("Failed to read superblock from address " + toHex(address), e);
 			}
+		}
+
+		public SuperblockV2V3(ByteBuffer byteBuffer, byte versionOfSuperblock) {
+			this.versionOfSuperblock = versionOfSuperblock;
+
+			// 9 = 8 format sig + 1 for version
+			int superblockStartPosition = byteBuffer.position() - 9;
+
+			// Size of Offsets
+			sizeOfOffsets = Byte.toUnsignedInt(byteBuffer.get());
+			logger.trace("Size of Offsets: {}", sizeOfOffsets);
+
+			// Size of Lengths
+			sizeOfLengths = Byte.toUnsignedInt(byteBuffer.get());
+			logger.trace("Size of Lengths: {}", sizeOfLengths);
+
+			// File Consistency Flags (skip)
+			byteBuffer.position(byteBuffer.position() + 1);
+
+			// Base Address
+			baseAddressByte = Utils.readBytesAsUnsignedLong(byteBuffer, sizeOfOffsets);
+			logger.trace("baseAddressByte = {}", baseAddressByte);
+
+			// Superblock Extension Address
+			superblockExtensionAddress = Utils.readBytesAsUnsignedLong(byteBuffer, sizeOfOffsets);
+			logger.trace("addressOfGlobalFreeSpaceIndex = {}", superblockExtensionAddress);
+
+			if (superblockExtensionAddress != Constants.UNDEFINED_ADDRESS) {
+				throw new UnsupportedHdfException("Superblock extension is not supported");
+			}
+
+			// End of File Address
+			endOfFileAddress = Utils.readBytesAsUnsignedLong(byteBuffer, sizeOfOffsets);
+			logger.trace("endOfFileAddress = {}", endOfFileAddress);
+
+			// Root Group Object Header Address
+			rootGroupObjectHeaderAddress = Utils.readBytesAsUnsignedLong(byteBuffer, sizeOfOffsets);
+			logger.trace("rootGroupObjectHeaderAddress= {}", rootGroupObjectHeaderAddress);
+
+			// Validate checksum
+			byteBuffer.limit(byteBuffer.position() + 4); // 4 for checksum
+			byteBuffer.position(superblockStartPosition);
+			ChecksumUtils.validateChecksum(byteBuffer);
+
+			logger.debug("Finished reading Superblock");
 		}
 
 		/**
