@@ -26,7 +26,8 @@ public final class ChecksumUtils {
 	 * @throws HdfChecksumMismatchException if the checksum is incorrect.
 	 */
 	public static void validateChecksum(ByteBuffer buffer) {
-		byte[] bytes = new byte[buffer.limit() - 4];
+		int bytesToRead = buffer.limit() - 4 - buffer.position();
+		byte[] bytes = new byte[bytesToRead];
 		buffer.get(bytes);
 		int calculatedChecksum = checksum(bytes);
 		int storedChecksum = buffer.getInt();

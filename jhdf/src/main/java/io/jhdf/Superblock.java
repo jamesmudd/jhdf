@@ -64,14 +64,17 @@ public abstract class Superblock {
 	}
 
 	static boolean verifySignature(ByteBuffer byteBuffer, int offset) {
-		byte[] signatureBytes = new byte[HDF5_FILE_SIGNATURE_LENGTH];
 		byteBuffer.position(offset);
+		return verifySignature(byteBuffer);
+	}
+
+	static boolean verifySignature(ByteBuffer byteBuffer) {
+		byte[] signatureBytes = new byte[HDF5_FILE_SIGNATURE_LENGTH];
 		byteBuffer.get(signatureBytes);
 
 		// Verify signature
 		return Arrays.equals(HDF5_FILE_SIGNATURE, signatureBytes);
 	}
-
 
 	public static Superblock readSuperblock(FileChannel fc, long address) {
 
@@ -110,7 +113,7 @@ public abstract class Superblock {
 	}
 
 	public static Superblock readSuperblock(ByteBuffer byteBuffer) {
-		final boolean verifiedSignature = verifySignature(byteBuffer, 0);
+		final boolean verifiedSignature = verifySignature(byteBuffer);
 		if (!verifiedSignature) {
 			throw new HdfException("Superblock didn't contain valid signature");
 		}
