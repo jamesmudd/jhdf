@@ -1,9 +1,17 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright (c) 2020 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
 package io.jhdf.storage;
 
 import io.jhdf.Superblock;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
