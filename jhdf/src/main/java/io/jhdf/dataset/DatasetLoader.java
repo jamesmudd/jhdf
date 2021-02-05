@@ -9,7 +9,6 @@
  */
 package io.jhdf.dataset;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -21,6 +20,7 @@ import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV4;
 import io.jhdf.object.message.DataLayoutMessage.CompactDataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
+import io.jhdf.storage.HdfBackingStorage;
 
 public final class DatasetLoader {
 
@@ -28,8 +28,8 @@ public final class DatasetLoader {
 		throw new AssertionError("No instances of DatasetLoader");
 	}
 
-	public static Dataset createDataset(HdfFileChannel hdfFc, ObjectHeader oh, String name,
-			Group parent) {
+	public static Dataset createDataset(HdfBackingStorage hdfFc, ObjectHeader oh, String name,
+										Group parent) {
 
 		final long address = oh.getAddress();
 		try {

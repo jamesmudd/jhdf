@@ -9,11 +9,11 @@
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.dataset.VariableLengthDatasetReader;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.datatype.StringData.PaddingType;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -97,7 +97,7 @@ public class VariableLength extends DataType {
 	}
 
 	@Override
-	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
 		return  VariableLengthDatasetReader.readDataset(this, buffer, dimensions, hdfFc);
 	}
 }

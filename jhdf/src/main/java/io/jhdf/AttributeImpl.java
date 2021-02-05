@@ -14,6 +14,7 @@ import io.jhdf.api.Node;
 import io.jhdf.dataset.DatasetReader;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.AttributeMessage;
+import io.jhdf.storage.HdfBackingStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +25,12 @@ import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 public class AttributeImpl implements Attribute {
 	private static final Logger logger = LoggerFactory.getLogger(AttributeImpl.class);
 
-	private final HdfFileChannel hdfFc;
+	private final HdfBackingStorage hdfFc;
 	private final Node node;
 	private final String name;
 	private final AttributeMessage message;
 
-	public AttributeImpl(HdfFileChannel hdfFc, Node node, AttributeMessage message) {
+	public AttributeImpl(HdfBackingStorage hdfFc, Node node, AttributeMessage message) {
 		this.hdfFc = hdfFc;
 		this.node = node;
 		this.name = message.getName();

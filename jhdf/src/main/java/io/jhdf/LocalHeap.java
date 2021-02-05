@@ -10,6 +10,7 @@
 package io.jhdf;
 
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ public class LocalHeap {
 	private final long addressOfDataSegment;
 	private final ByteBuffer dataBuffer;
 
-	public LocalHeap(HdfFileChannel hdfFc, long address) {
+	public LocalHeap(HdfBackingStorage hdfFc, long address) {
 		this.address = address;
 		try {
 			// Header

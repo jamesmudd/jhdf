@@ -9,11 +9,11 @@
  */
 package io.jhdf.dataset.chunked.indexing;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.btree.BTreeV2;
 import io.jhdf.btree.record.BTreeDatasetChunkRecord;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.DatasetInfo;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.util.Collection;
 
@@ -28,7 +28,7 @@ public class BTreeIndex implements ChunkIndex {
 
     private final BTreeV2<BTreeDatasetChunkRecord> bTreeV2;
 
-    public BTreeIndex(HdfFileChannel hdfFc, long address, DatasetInfo datasetInfo) {
+    public BTreeIndex(HdfBackingStorage hdfFc, long address, DatasetInfo datasetInfo) {
         bTreeV2 = new BTreeV2<>(hdfFc, address, datasetInfo);
     }
 

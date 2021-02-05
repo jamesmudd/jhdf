@@ -10,6 +10,7 @@
 package io.jhdf;
 
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -25,12 +26,12 @@ public class GlobalHeap {
 
 	private static final byte[] GLOBAL_HEAP_SIGNATURE = "GCOL".getBytes(StandardCharsets.US_ASCII);
 
-	private final HdfFileChannel hdfFc;
+	private final HdfBackingStorage hdfFc;
 	private final long address;
 
 	private final Map<Integer, GlobalHeapObject> objects = new HashMap<>();
 
-	public GlobalHeap(HdfFileChannel hdfFc, long address) {
+	public GlobalHeap(HdfBackingStorage hdfFc, long address) {
 		this.hdfFc = hdfFc;
 		this.address = address;
 

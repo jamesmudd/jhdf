@@ -9,7 +9,6 @@
  */
 package io.jhdf.dataset.chunked;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.Utils;
 import io.jhdf.api.Group;
@@ -19,6 +18,7 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.filter.FilterManager;
 import io.jhdf.filter.FilterPipeline;
 import io.jhdf.object.message.FilterPipelineMessage;
+import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 
     protected final FilterPipelineLazyInitializer lazyPipeline;
 
-    public ChunkedDatasetBase(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
+    public ChunkedDatasetBase(HdfBackingStorage hdfFc, long address, String name, Group parent, ObjectHeader oh) {
         super(hdfFc, address, name, parent, oh);
         lazyPipeline = new FilterPipelineLazyInitializer();
     }

@@ -9,8 +9,8 @@
  */
 package io.jhdf.btree;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.List;
  */
 public abstract class BTreeV1Group extends BTreeV1 {
 
-	private BTreeV1Group(HdfFileChannel hdfFc, long address) {
+	private BTreeV1Group(HdfBackingStorage hdfFc, long address) {
 		super(hdfFc, address);
 	}
 
@@ -31,7 +31,7 @@ public abstract class BTreeV1Group extends BTreeV1 {
 
 		private final List<Long> childAddresses;
 
-		/* package */ BTreeV1GroupLeafNode(HdfFileChannel hdfFc, long address) {
+		/* package */ BTreeV1GroupLeafNode(HdfBackingStorage hdfFc, long address) {
 			super(hdfFc, address);
 
 			final int keyBytes = (2 * entriesUsed + 1) * hdfFc.getSizeOfLengths();
@@ -60,7 +60,7 @@ public abstract class BTreeV1Group extends BTreeV1 {
 
 		private final List<BTreeV1> childNodes;
 
-		/* package */ BTreeV1GroupNonLeafNode(HdfFileChannel hdfFc, long address) {
+		/* package */ BTreeV1GroupNonLeafNode(HdfBackingStorage hdfFc, long address) {
 			super(hdfFc, address);
 
 			final int keyBytes = (2 * entriesUsed + 1) * hdfFc.getSizeOfLengths();

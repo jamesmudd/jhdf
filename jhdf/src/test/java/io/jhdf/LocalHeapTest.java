@@ -9,6 +9,8 @@
  */
 package io.jhdf;
 
+import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +28,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 class LocalHeapTest {
-	private HdfFileChannel hdfFc;
+	private HdfBackingStorage hdfFc;
 
 	@BeforeEach
 	void setUp() throws IOException, URISyntaxException {

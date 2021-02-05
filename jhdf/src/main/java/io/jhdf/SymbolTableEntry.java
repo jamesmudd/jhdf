@@ -9,6 +9,7 @@
  */
 package io.jhdf;
 
+import io.jhdf.storage.HdfBackingStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ public class SymbolTableEntry {
 	private long nameHeapAddress = -1;
 	private int linkValueOffset = -1;
 
-	public SymbolTableEntry(HdfFileChannel fc, long address) {
+	public SymbolTableEntry(HdfBackingStorage fc, long address) {
 		this.address = address;
 
 		final int size = fc.getSizeOfOffsets() * 2 + 4 + 4 + 16;

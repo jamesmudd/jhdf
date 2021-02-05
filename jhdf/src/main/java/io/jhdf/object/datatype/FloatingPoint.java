@@ -9,10 +9,10 @@
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -139,7 +139,7 @@ public class FloatingPoint extends DataType implements OrderedDataType {
     }
 
     @Override
-    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
         final Object data = Array.newInstance(getJavaType(), dimensions);
         final ByteOrder byteOrder = getByteOrder();
         switch (getSize()) {

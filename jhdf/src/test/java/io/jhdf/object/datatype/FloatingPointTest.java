@@ -9,10 +9,9 @@
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.HdfFileChannel;
+import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DisplayNameGeneration;
+import io.jhdf.storage.HdfBackingStorage;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -86,7 +85,7 @@ public class FloatingPointTest {
     private Executable createTest(ByteBuffer buffer, FloatingPoint dataType, int[] dims, Object expected) {
         return () -> {
             buffer.rewind(); // For shared buffers
-            HdfFileChannel hdfFc = mock(HdfFileChannel.class);
+            HdfBackingStorage hdfFc = mock(HdfFileChannel.class);
             Object actual = dataType.fillData(buffer, dims, hdfFc);
             assertThat(actual, is(expected));
             verifyNoInteractions(hdfFc);
@@ -96,7 +95,7 @@ public class FloatingPointTest {
     @Test
 	void testUnsupportedFloatingPointLengthThrows() {
 		FloatingPoint invalidDataType = mockFloatingPoint(11); // 11 byte data is not supported
-        HdfFileChannel hdfFc = mock(HdfFileChannel.class);
+        HdfBackingStorage hdfFc = mock(HdfFileChannel.class);
         assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(floatBuffer, dims, hdfFc));
         verifyNoInteractions(hdfFc);
 	}

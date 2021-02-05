@@ -10,13 +10,13 @@
 package io.jhdf.dataset.chunked;
 
 import io.jhdf.Constants;
-import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
 import io.jhdf.btree.BTreeV1;
 import io.jhdf.btree.BTreeV1Data;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessage;
+import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class ChunkedDatasetV3 extends ChunkedDatasetBase {
 
     private final ChunkLookupLazyInitializer chunkLookupLazyInitializer;
 
-    public ChunkedDatasetV3(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
+    public ChunkedDatasetV3(HdfBackingStorage hdfFc, long address, String name, Group parent, ObjectHeader oh) {
         super(hdfFc, address, name, parent, oh);
 
         layoutMessage = oh.getMessageOfType(ChunkedDataLayoutMessage.class);

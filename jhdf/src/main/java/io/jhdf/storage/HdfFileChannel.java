@@ -7,8 +7,10 @@
  *
  * MIT License see 'LICENSE' file
  */
-package io.jhdf;
+package io.jhdf.storage;
 
+import io.jhdf.HdfFile;
+import io.jhdf.Superblock;
 import io.jhdf.exceptions.HdfException;
 
 import java.io.IOException;
@@ -26,7 +28,7 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
  *
  * @author James Mudd
  */
-public class HdfFileChannel {
+public class HdfFileChannel implements HdfBackingStorage {
 
 	private final FileChannel fc;
 	private final Superblock sb;
@@ -47,6 +49,7 @@ public class HdfFileChannel {
 	 * @return the buffer
 	 * @throws HdfException if an error occurs during the read
 	 */
+	@Override
 	public ByteBuffer readBufferFromAddress(long address, int length) {
 		ByteBuffer bb = ByteBuffer.allocate(length);
 		try {
@@ -62,10 +65,12 @@ public class HdfFileChannel {
 		return bb;
 	}
 
+	@Override
 	public ByteBuffer map(long address, long length) {
 		return mapNoOffset(address + sb.getBaseAddressByte(), length);
 	}
 
+	@Override
 	public ByteBuffer mapNoOffset(long address, long length) {
 		try {
 			return fc.map(MapMode.READ_ONLY, address, length);
@@ -75,26 +80,32 @@ public class HdfFileChannel {
 		}
 	}
 
+	@Override
 	public long getUserBlockSize() {
 		return sb.getBaseAddressByte();
 	}
 
+	@Override
 	public Superblock getSuperblock() {
 		return sb;
 	}
 
+	@Override
 	public FileChannel getFileChannel(){
 		return fc;
 	}
 
+	@Override
 	public int getSizeOfOffsets() {
 		return sb.getSizeOfOffsets();
 	}
 
+	@Override
 	public int getSizeOfLengths() {
 		return sb.getSizeOfLengths();
 	}
 
+	@Override
 	public final void close() {
 		try {
 			fc.close();
@@ -103,6 +114,7 @@ public class HdfFileChannel {
 		}
 	}
 
+	@Override
 	public long size() {
 		try {
 			return fc.size();
@@ -111,4 +123,8 @@ public class HdfFileChannel {
 		}
 	}
 
+	@Override
+	public boolean inMemory() {
+		return false;
+	}
 }

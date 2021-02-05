@@ -57,11 +57,11 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
  *
  * @author James Mudd
  */
-class TestAllFiles extends TestAllFilesBase {
+class TestAllFilesInMemory extends TestAllFilesBase {
 
 	protected DynamicNode createTest(Path path) {
 		return dynamicTest(path.getFileName().toString(), () -> {
-			try (HdfFile hdfFile = new HdfFile(path.toFile())) {
+			try (HdfFile hdfFile = HdfFile.fromBytes(Files.readAllBytes(path))) {
 				verifyAttributes(hdfFile);
 				recurseGroup(hdfFile);
 			}

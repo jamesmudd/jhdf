@@ -10,10 +10,10 @@
 package io.jhdf.dataset;
 
 import io.jhdf.GlobalHeap;
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.VariableLength;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -35,7 +35,7 @@ public final class VariableLengthDatasetReader {
 		throw new AssertionError("No instances of VariableLengthDatasetReader");
 	}
 
-	public static Object readDataset(VariableLength type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+	public static Object readDataset(VariableLength type, ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
 		// Make the array to hold the data
 		Class<?> javaType = type.getJavaType();
 
@@ -83,7 +83,7 @@ public final class VariableLengthDatasetReader {
 		}
 	}
 
-	private static void fillData(DataType dataType, Object data, int[] dims, Iterator<ByteBuffer> elements, HdfFileChannel hdfFc) {
+	private static void fillData(DataType dataType, Object data, int[] dims, Iterator<ByteBuffer> elements, HdfBackingStorage hdfFc) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
@@ -114,7 +114,7 @@ public final class VariableLengthDatasetReader {
 		}
 	}
 
-	private static List<GlobalHeapId> getGlobalHeapIds(ByteBuffer bb, int length, HdfFileChannel hdfFc,
+	private static List<GlobalHeapId> getGlobalHeapIds(ByteBuffer bb, int length, HdfBackingStorage hdfFc,
 			int datasetTotalSize) {
 		// For variable length datasets the actual data is in the global heap so need to
 		// resolve that then build the buffer.

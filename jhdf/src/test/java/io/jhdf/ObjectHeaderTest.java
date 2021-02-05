@@ -10,6 +10,8 @@
 package io.jhdf;
 
 import io.jhdf.ObjectHeader.ObjectHeaderV1;
+import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.junit.jupiter.api.AfterEach;
@@ -33,7 +35,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 
 class ObjectHeaderTest {
-	private HdfFileChannel hdfFc;
+	private HdfBackingStorage hdfFc;
 	private Superblock sb;
 	private FileChannel fc;
 
@@ -115,8 +117,8 @@ class ObjectHeaderTest {
 	@Test
 	void testLazyObjectHeader() throws ConcurrentException, IOException {
 		FileChannel spyFc = Mockito.spy(fc);
-		HdfFileChannel hdfFileChannel = new HdfFileChannel(spyFc, sb);
-		LazyInitializer<ObjectHeader> lazyObjectHeader = ObjectHeader.lazyReadObjectHeader(hdfFileChannel, 10904); // int8
+		HdfBackingStorage hdfBackingStorage = new HdfFileChannel(spyFc, sb);
+		LazyInitializer<ObjectHeader> lazyObjectHeader = ObjectHeader.lazyReadObjectHeader(hdfBackingStorage, 10904); // int8
 		// header
 		// Creating the lazy object header should not touch the file
 		Mockito.verifyNoInteractions(spyFc);

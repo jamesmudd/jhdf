@@ -9,9 +9,9 @@
  */
 package io.jhdf.btree;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public abstract class BTreeV1 {
 	private final long leftSiblingAddress;
 	private final long rightSiblingAddress;
 
-	public static BTreeV1Group createGroupBTree(HdfFileChannel hdfFc, long address) {
+	public static BTreeV1Group createGroupBTree(HdfBackingStorage hdfFc, long address) {
 		ByteBuffer header = readHeaderAndValidateSignature(hdfFc, address);
 
 		final byte nodeType = header.get();
@@ -61,7 +61,7 @@ public abstract class BTreeV1 {
 
 	}
 
-	public static BTreeV1Data createDataBTree(HdfFileChannel hdfFc, long address, int dataDimensions) {
+	public static BTreeV1Data createDataBTree(HdfBackingStorage hdfFc, long address, int dataDimensions) {
 		ByteBuffer header = readHeaderAndValidateSignature(hdfFc, address);
 
 		final byte nodeType = header.get();
@@ -78,7 +78,7 @@ public abstract class BTreeV1 {
 		}
 	}
 
-	public static ByteBuffer readHeaderAndValidateSignature(HdfFileChannel fc, long address) {
+	public static ByteBuffer readHeaderAndValidateSignature(HdfBackingStorage fc, long address) {
 		ByteBuffer header = fc.readBufferFromAddress(address, HEADER_BYTES);
 
 		// Verify signature
@@ -90,7 +90,7 @@ public abstract class BTreeV1 {
 		return header;
 	}
 
-	/* package */ BTreeV1(HdfFileChannel hdfFc, long address) {
+	/* package */ BTreeV1(HdfBackingStorage hdfFc, long address) {
 		this.address = address;
 
 		int headerSize = 8 * hdfFc.getSizeOfOffsets();

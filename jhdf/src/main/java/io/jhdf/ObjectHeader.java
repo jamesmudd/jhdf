@@ -13,6 +13,7 @@ import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.Message;
 import io.jhdf.object.message.ObjectHeaderContinuationMessage;
+import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +82,7 @@ public abstract class ObjectHeader {
 		/** Level of the node 0 = leaf */
 		private final int referenceCount;
 
-		private ObjectHeaderV1(HdfFileChannel hdfFc, long address) {
+		private ObjectHeaderV1(HdfBackingStorage hdfFc, long address) {
 			super(address);
 
 			try {
@@ -118,7 +119,7 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private void readMessages(HdfFileChannel hdfFc, ByteBuffer bb, int numberOfMessages) {
+		private void readMessages(HdfBackingStorage hdfFc, ByteBuffer bb, int numberOfMessages) {
 			while (bb.remaining() > 4 && messages.size() < numberOfMessages) {
 				Message m = Message.readObjectHeaderV1Message(bb, hdfFc.getSuperblock());
 				messages.add(m);
@@ -182,7 +183,7 @@ public abstract class ObjectHeader {
 		private final int maximumNumberOfDenseAttributes;
 		private final BitSet flags;
 
-		private ObjectHeaderV2(HdfFileChannel hdfFc, long address) {
+		private ObjectHeaderV2(HdfBackingStorage hdfFc, long address) {
 			super(address);
 			int headerSize = 0; // Keep track of the size for checksum
 
@@ -280,7 +281,7 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private void readMessages(HdfFileChannel hdfFc, ByteBuffer bb) {
+		private void readMessages(HdfBackingStorage hdfFc, ByteBuffer bb) {
 			while (bb.remaining() >= 8) {
 				Message m = Message.readObjectHeaderV2Message(bb, hdfFc.getSuperblock(), this.isAttributeCreationOrderTracked());
 				messages.add(m);
@@ -347,7 +348,7 @@ public abstract class ObjectHeader {
 
 	}
 
-	public static ObjectHeader readObjectHeader(HdfFileChannel hdfFc, long address) {
+	public static ObjectHeader readObjectHeader(HdfBackingStorage hdfFc, long address) {
 		ByteBuffer bb = hdfFc.readBufferFromAddress(address, 1);
 		byte version = bb.get();
 		if (version == 1) {
@@ -357,7 +358,7 @@ public abstract class ObjectHeader {
 		}
 	}
 
-	public static LazyInitializer<ObjectHeader> lazyReadObjectHeader(HdfFileChannel hdfFc, long address) {
+	public static LazyInitializer<ObjectHeader> lazyReadObjectHeader(HdfBackingStorage hdfFc, long address) {
 		logger.debug("Creating lazy object header at address: {}", address);
 		return new LazyInitializer<ObjectHeader>() {
 

@@ -19,6 +19,7 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.AttributeInfoMessage;
 import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.Message;
+import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
@@ -80,14 +81,14 @@ public abstract class AbstractNode implements Node {
 		}
 	}
 
-	private final HdfFileChannel hdfFc;
+	private final HdfBackingStorage hdfFc;
 	protected final long address;
 	protected final String name;
 	protected final Group parent;
 	protected final LazyInitializer<ObjectHeader> header;
 	protected final AttributesLazyInitializer attributes;
 
-	public AbstractNode(HdfFileChannel hdfFc, long address, String name, Group parent) {
+	public AbstractNode(HdfBackingStorage hdfFc, long address, String name, Group parent) {
 		this.hdfFc = hdfFc;
 		this.address = address;
 		this.name = name;
