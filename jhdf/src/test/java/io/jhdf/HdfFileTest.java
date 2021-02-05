@@ -29,9 +29,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
@@ -305,43 +303,36 @@ class HdfFileTest {
 	}
 
 	@Test
-	void testLoadingInMemoryFile() throws IOException {
-		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_PATH).openStream()) {
-			ByteBuffer buffer = ByteBuffer.allocate(inputStream.available());
-			Channels.newChannel(inputStream).read(buffer);
-			buffer.flip();
-			HdfFile hdfFile = HdfFile.fromByteBuffer(buffer);
-			assertThat(hdfFile, is(notNullValue()));
-			assertThat(hdfFile.inMemory(), is(true));
-			assertThat(hdfFile.getName(), is("In-Memory no backing file"));
-			hdfFile.close();
-		}
+	void testLoadingInMemoryFile() throws IOException, URISyntaxException {
+		Path path = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI());
+		ByteBuffer byteBuffer = ByteBuffer.wrap(Files.readAllBytes(path));
+		HdfFile hdfFile = HdfFile.fromByteBuffer(byteBuffer);
+		assertThat(hdfFile, is(notNullValue()));
+		assertThat(hdfFile.inMemory(), is(true));
+		assertThat(hdfFile.getName(), is("In-Memory no backing file"));
+		hdfFile.close();
 	}
 
 	@Test
-	void testLoadingInMemoryFileFromByteArray() throws IOException {
-		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_PATH).openStream()) {
-			byte[] bytes = new byte[inputStream.available()];
-			inputStream.read(bytes);
-			HdfFile hdfFile = HdfFile.fromBytes(bytes);
-			assertThat(hdfFile, is(notNullValue()));
-			assertThat(hdfFile.inMemory(), is(true));
-			assertThat(hdfFile.getName(), is("In-Memory no backing file"));
-			hdfFile.close();
-		}
+	void testLoadingInMemoryFileFromByteArray() throws IOException, URISyntaxException {
+		Path path = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI());
+		byte[] bytes = Files.readAllBytes(path);
+		HdfFile hdfFile = HdfFile.fromBytes(bytes);
+		assertThat(hdfFile, is(notNullValue()));
+		assertThat(hdfFile.inMemory(), is(true));
+		assertThat(hdfFile.getName(), is("In-Memory no backing file"));
+		hdfFile.close();
 	}
 
 	@Test
-	void testLoadingInMemoryFileFromByteArrayTwo() throws IOException {
-		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_TWO_PATH).openStream()) {
-			byte[] bytes = new byte[inputStream.available()];
-			inputStream.read(bytes);
-			HdfFile hdfFile = HdfFile.fromBytes(bytes);
-			assertThat(hdfFile, is(notNullValue()));
-			assertThat(hdfFile.inMemory(), is(true));
-			assertThat(hdfFile.getName(), is("In-Memory no backing file"));
-			hdfFile.close();
-		}
+	void testLoadingInMemoryFileFromByteArrayTwo() throws IOException, URISyntaxException {
+		Path path = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI());
+		byte[] bytes = Files.readAllBytes(path);
+		HdfFile hdfFile = HdfFile.fromBytes(bytes);
+		assertThat(hdfFile, is(notNullValue()));
+		assertThat(hdfFile.inMemory(), is(true));
+		assertThat(hdfFile.getName(), is("In-Memory no backing file"));
+		hdfFile.close();
 	}
 
 	@Test
@@ -351,23 +342,19 @@ class HdfFileTest {
 	}
 
 	@Test
-	void testExternalFilesOnInMemoryThrows() throws IOException {
-		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_PATH).openStream()) {
-			byte[] bytes = new byte[inputStream.available()];
-			inputStream.read(bytes);
-			HdfFile hdfFile = HdfFile.fromBytes(bytes);
-			assertThrows(InMemoryHdfException.class, () -> hdfFile.addExternalFile(Mockito.mock(HdfFile.class)));
-		}
+	void testExternalFilesOnInMemoryThrows() throws IOException, URISyntaxException {
+		Path path = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI());
+		byte[] bytes = Files.readAllBytes(path);
+		HdfFile hdfFile = HdfFile.fromBytes(bytes);
+		assertThrows(InMemoryHdfException.class, () -> hdfFile.addExternalFile(Mockito.mock(HdfFile.class)));
 	}
 
 	@Test
-	void testGettingFileChannelFromInMemoryFileThrows() throws IOException {
-		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_PATH).openStream()) {
-			byte[] bytes = new byte[inputStream.available()];
-			inputStream.read(bytes);
-			HdfFile hdfFile = HdfFile.fromBytes(bytes);
-			HdfBackingStorage hdfBackingStorage = hdfFile.getHdfBackingStorage();
-			assertThrows(InMemoryHdfException.class, () -> hdfBackingStorage.getFileChannel());
-		}
+	void testGettingFileChannelFromInMemoryFileThrows() throws IOException, URISyntaxException {
+		Path path = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI());
+		byte[] bytes = Files.readAllBytes(path);
+		HdfFile hdfFile = HdfFile.fromBytes(bytes);
+		HdfBackingStorage hdfBackingStorage = hdfFile.getHdfBackingStorage();
+		assertThrows(InMemoryHdfException.class, () -> hdfBackingStorage.getFileChannel());
 	}
 }
