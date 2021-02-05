@@ -320,6 +320,8 @@ class HdfFileTest {
 		HdfFile hdfFile = HdfFile.fromBytes(bytes);
 		assertThat(hdfFile, is(notNullValue()));
 		assertThat(hdfFile.inMemory(), is(true));
+		assertThat(hdfFile.size(), is(equalTo(Integer.toUnsignedLong(bytes.length))));
+		assertThat(hdfFile.getUserBlockSize(), is(equalTo(0L)));
 		assertThat(hdfFile.getName(), is("In-Memory no backing file"));
 		hdfFile.close();
 	}
@@ -331,6 +333,8 @@ class HdfFileTest {
 		HdfFile hdfFile = HdfFile.fromBytes(bytes);
 		assertThat(hdfFile, is(notNullValue()));
 		assertThat(hdfFile.inMemory(), is(true));
+		assertThat(hdfFile.size(), is(equalTo(Integer.toUnsignedLong(bytes.length))));
+		assertThat(hdfFile.getUserBlockSize(), is(equalTo(0L)));
 		assertThat(hdfFile.getName(), is("In-Memory no backing file"));
 		hdfFile.close();
 	}
@@ -355,6 +359,6 @@ class HdfFileTest {
 		byte[] bytes = Files.readAllBytes(path);
 		HdfFile hdfFile = HdfFile.fromBytes(bytes);
 		HdfBackingStorage hdfBackingStorage = hdfFile.getHdfBackingStorage();
-		assertThrows(InMemoryHdfException.class, () -> hdfBackingStorage.getFileChannel());
+		assertThrows(InMemoryHdfException.class, hdfBackingStorage::getFileChannel);
 	}
 }
