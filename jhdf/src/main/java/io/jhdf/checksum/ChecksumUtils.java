@@ -20,9 +20,9 @@ public final class ChecksumUtils {
 	}
 
 	/**
-	 * Checks the last 4 bytes of the buffer ate the the Jenkins Lookup 3 Checksum of the rest of the buffer.
+	 * Checks the last 4 bytes of the buffer are the the Jenkins Lookup 3 Checksum of the rest of the buffer.
 	 *
-	 * @param buffer
+	 * @param buffer the buffer to check
 	 * @throws HdfChecksumMismatchException if the checksum is incorrect.
 	 */
 	public static void validateChecksum(ByteBuffer buffer) {
