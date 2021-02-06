@@ -1,5 +1,12 @@
 # jHDF Change Log
 
+## v0.6.0
+- Adds support for reading in-memory files from `byte[]` or `ByteBuffers` https://github.com/jamesmudd/jhdf/issues/245
+- *Breaking API change* To support in-memory files `HdfFile#getHdfChannel` is replaced by `HdfFile#getHdfBackingStorage` which now returns a `HdfBackingStorage`. Internally the new interface replaces the use of `HdfFileChannel`  
+- Fix https://github.com/jamesmudd/jhdf/issues/247 reading empty arrays in variable length datasets
+- Dependency updates
+- Update Gradle
+
 ## v0.5.11
 - Add LZF compression support allowing LZF datasets to be read. https://github.com/jamesmudd/jhdf/issues/239
 - Test dependency updates
