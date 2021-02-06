@@ -77,11 +77,27 @@ public class HdfFile implements Group, AutoCloseable {
 		this(Paths.get(uri).toFile());
 	}
 
+	/**
+	 * Opens an HDF5 contained in an in-memory byte array.
+	 *
+	 * @see HdfFile#fromByteBuffer(ByteBuffer)
+	 * @see HdfFile#fromInputStream(InputStream)
+	 * @param bytes The byte array containing an HDF5 file
+	 * @return an open HdfFile object
+	 */
 	public static HdfFile fromBytes(byte[] bytes) {
 		logger.info("Reading HDF5 file from byte[]");
 		return fromByteBuffer(ByteBuffer.wrap(bytes));
 	}
 
+	/**
+	 * Opens an HDF5 contained in {@link ByteBuffer}
+	 *
+	 * @see HdfFile#fromBytes(byte[])
+	 * @see HdfFile#fromInputStream(InputStream)
+	 * @param byteBuffer The buffer containing an HDF5 file
+	 * @return an open HdfFile object
+	 */
 	public static HdfFile fromByteBuffer(ByteBuffer byteBuffer) {
 		logger.info("Reading HDF5 file from ByteBuffer");
 		byteBuffer.order(LITTLE_ENDIAN); // HDF5 metadata is always stored LE
@@ -115,7 +131,7 @@ public class HdfFile implements Group, AutoCloseable {
 		return new HdfFile(hdfBackingStorage);
 	}
 
-	public HdfFile(HdfBackingStorage hdfBackingStorage) {
+	private HdfFile(HdfBackingStorage hdfBackingStorage) {
 		this.hdfBackingStorage = hdfBackingStorage;
 		this.optionalFile = Optional.empty(); // No file its in memory
 
@@ -138,6 +154,8 @@ public class HdfFile implements Group, AutoCloseable {
 	 * Opens an {@link HdfFile} from an {@link InputStream}. The stream will be read fully into a temporary file. The
 	 * file will be cleaned up at application exit.
 	 *
+	 * @see HdfFile#fromBytes(byte[])
+	 * @see HdfFile#fromByteBuffer(ByteBuffer)
 	 * @param inputStream the {@link InputStream} to read
 	 * @return HdfFile instance
 	 */
