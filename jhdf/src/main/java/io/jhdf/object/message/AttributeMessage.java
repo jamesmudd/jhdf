@@ -9,10 +9,11 @@
  */
 package io.jhdf.object.message;
 
-import io.jhdf.Superblock;
+import io.jhdf.ObjectHeader;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.datatype.DataType;
+import io.jhdf.storage.HdfBackingStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ public class AttributeMessage extends Message {
 	private static final Logger logger = LoggerFactory.getLogger(AttributeMessage.class);
 
 	private static final int DATA_TYPE_SHARED = 0;
-	private static final int DATA_SPACE_SHARED = 0;
+	private static final int DATA_SPACE_SHARED = 1;
 
 	private final byte version;
 	private final String name;
@@ -33,7 +34,7 @@ public class AttributeMessage extends Message {
 	private final DataSpace dataSpace;
 	private final ByteBuffer data;
 
-	public AttributeMessage(ByteBuffer bb, Superblock sb, BitSet messageFlags) {
+	public AttributeMessage(ByteBuffer bb, HdfBackingStorage hdfBackingStorage, BitSet messageFlags) {
 		super(messageFlags);
 
 		version = bb.get();
@@ -48,15 +49,12 @@ public class AttributeMessage extends Message {
 			final int dataSpaceSize = Utils.readBytesAsUnsignedInt(bb, 2);
 
 			name = Utils.readUntilNull(Utils.createSubBuffer(bb, nameSize));
-			logger.trace("Name: {}", name);
 			Utils.seekBufferToNextMultipleOfEight(bb);
 
 			dataType = DataType.readDataType(Utils.createSubBuffer(bb, dataTypeSize));
-			logger.trace("Datatype: {}", dataType);
 			Utils.seekBufferToNextMultipleOfEight(bb);
 
-			dataSpace = DataSpace.readDataSpace(Utils.createSubBuffer(bb, dataSpaceSize), sb);
-			logger.trace("Dataspace: {}", dataSpace);
+			dataSpace = DataSpace.readDataSpace(Utils.createSubBuffer(bb, dataSpaceSize), hdfBackingStorage.getSuperblock());
 			Utils.seekBufferToNextMultipleOfEight(bb);
 
 			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
@@ -66,6 +64,7 @@ public class AttributeMessage extends Message {
 				data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
 			}
 
+
 		} else if (version == 2) {
 			final BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
 
@@ -74,20 +73,19 @@ public class AttributeMessage extends Message {
 			final int dataSpaceSize = Utils.readBytesAsUnsignedInt(bb, 2);
 
 			name = Utils.readUntilNull(Utils.createSubBuffer(bb, nameSize));
-			logger.trace("Name: {}", name);
 
 			if (flags.get(DATA_TYPE_SHARED)) {
-				throw new UnsupportedHdfException("Attribute [" + name + "] contains shared data type");
+				final ByteBuffer sharedMessageBuffer = Utils.createSubBuffer(bb, dataTypeSize);
+				dataType = readSharedMessage(sharedMessageBuffer, hdfBackingStorage, DataTypeMessage.class).getDataType();
 			} else {
 				dataType = DataType.readDataType(Utils.createSubBuffer(bb, dataTypeSize));
-				logger.trace("Datatype: {}", dataType);
 			}
 
 			if (flags.get(DATA_SPACE_SHARED)) {
-				throw new UnsupportedHdfException("Attribute [" + name + "]  contains shared data space");
+				final ByteBuffer sharedMessageBuffer = Utils.createSubBuffer(bb, dataSpaceSize);
+				dataSpace = readSharedMessage(sharedMessageBuffer, hdfBackingStorage, DataSpaceMessage.class).getDataSpace();
 			} else {
-				dataSpace = DataSpace.readDataSpace(Utils.createSubBuffer(bb, dataSpaceSize), sb);
-				logger.trace("Dataspace: {}", dataSpace);
+				dataSpace = DataSpace.readDataSpace(Utils.createSubBuffer(bb, dataSpaceSize), hdfBackingStorage.getSuperblock());
 			}
 
 			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
@@ -119,20 +117,19 @@ public class AttributeMessage extends Message {
 
 			ByteBuffer nameBuffer = Utils.createSubBuffer(bb, nameSize);
 			name = charset.decode(nameBuffer).toString().trim();
-			logger.trace("Name: {}", name);
 
 			if (flags.get(DATA_TYPE_SHARED)) {
-				throw new UnsupportedHdfException("Attribute [" + name + "] contains shared data type");
+				final ByteBuffer sharedMessageBuffer = Utils.createSubBuffer(bb, dataTypeSize);
+				dataType = readSharedMessage(sharedMessageBuffer, hdfBackingStorage, DataTypeMessage.class).getDataType();
 			} else {
 				dataType = DataType.readDataType(Utils.createSubBuffer(bb, dataTypeSize));
-				logger.trace("Datatype: {}", dataType);
 			}
 
 			if (flags.get(DATA_SPACE_SHARED)) {
-				throw new UnsupportedHdfException("Attribute [" + name + "]  contains shared data space");
+				final ByteBuffer sharedMessageBuffer = Utils.createSubBuffer(bb, dataSpaceSize);
+				dataSpace = readSharedMessage(sharedMessageBuffer, hdfBackingStorage, DataSpaceMessage.class).getDataSpace();
 			} else {
-				dataSpace = DataSpace.readDataSpace(Utils.createSubBuffer(bb, dataSpaceSize), sb);
-				logger.trace("Dataspace: {}", dataSpace);
+				dataSpace = DataSpace.readDataSpace(Utils.createSubBuffer(bb, dataSpaceSize), hdfBackingStorage.getSuperblock());
 			}
 
 			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
@@ -146,7 +143,13 @@ public class AttributeMessage extends Message {
 			throw new UnsupportedHdfException("Unsupported Attribute message version. Detected version: " + version);
 		}
 
-		logger.debug("Read attribute: {}", name);
+		logger.debug("Read attribute: Name=[{}] Datatype=[{}], Dataspace[{}]", name, dataType, dataSpace);
+	}
+
+	private <T extends Message> T readSharedMessage(ByteBuffer sharedMessageBuffer, HdfBackingStorage hdfBackingStorage, Class<T> messageType) {
+		final SharedMessage sharedMessage = new SharedMessage(sharedMessageBuffer, hdfBackingStorage.getSuperblock());
+		final ObjectHeader objectHeader = ObjectHeader.readObjectHeader(hdfBackingStorage, sharedMessage.getObjectHeaderAddress());
+		return objectHeader.getMessageOfType(messageType);
 	}
 
 	public int getVersion() {

@@ -22,7 +22,6 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
 import io.jhdf.links.ExternalLink;
 import io.jhdf.links.SoftLink;
-import io.jhdf.object.message.DataLayoutMessage;
 import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.DataTypeMessage;
 import io.jhdf.object.message.LinkInfoMessage;
