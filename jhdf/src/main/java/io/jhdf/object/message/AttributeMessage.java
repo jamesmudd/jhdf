@@ -40,107 +40,82 @@ public class AttributeMessage extends Message {
 		version = bb.get();
 		logger.trace("Version: {}", version);
 
+		final BitSet flags;
 		if (version == 1) {
-			// Reserved byte
+			// Skip reserved byte
 			bb.position(bb.position() + 1);
+			flags = BitSet.valueOf(new byte[0]); // No flags in v1
+		} else {
+			flags = BitSet.valueOf(new byte[] { bb.get() });
+		}
 
-			final int nameSize = Utils.readBytesAsUnsignedInt(bb, 2);
-			final int dataTypeSize = Utils.readBytesAsUnsignedInt(bb, 2);
-			final int dataSpaceSize = Utils.readBytesAsUnsignedInt(bb, 2);
+		final int nameSize = Utils.readBytesAsUnsignedInt(bb, 2);
+		final int dataTypeSize = Utils.readBytesAsUnsignedInt(bb, 2);
+		final int dataSpaceSize = Utils.readBytesAsUnsignedInt(bb, 2);
 
-			name = Utils.readUntilNull(Utils.createSubBuffer(bb, nameSize));
-			Utils.seekBufferToNextMultipleOfEight(bb);
-
-			dataType = DataType.readDataType(Utils.createSubBuffer(bb, dataTypeSize));
-			Utils.seekBufferToNextMultipleOfEight(bb);
-
-			dataSpace = DataSpace.readDataSpace(Utils.createSubBuffer(bb, dataSpaceSize), hdfBackingStorage.getSuperblock());
-			Utils.seekBufferToNextMultipleOfEight(bb);
-
-			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
-			if (dataSize == 0) {
-				data = null;
-			} else {
-				data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
-			}
-
-
-		} else if (version == 2) {
-			final BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
-
-			final int nameSize = Utils.readBytesAsUnsignedInt(bb, 2);
-			final int dataTypeSize = Utils.readBytesAsUnsignedInt(bb, 2);
-			final int dataSpaceSize = Utils.readBytesAsUnsignedInt(bb, 2);
-
-			name = Utils.readUntilNull(Utils.createSubBuffer(bb, nameSize));
-
-			if (flags.get(DATA_TYPE_SHARED)) {
-				final ByteBuffer sharedMessageBuffer = Utils.createSubBuffer(bb, dataTypeSize);
-				dataType = readSharedMessage(sharedMessageBuffer, hdfBackingStorage, DataTypeMessage.class).getDataType();
-			} else {
-				dataType = DataType.readDataType(Utils.createSubBuffer(bb, dataTypeSize));
-			}
-
-			if (flags.get(DATA_SPACE_SHARED)) {
-				final ByteBuffer sharedMessageBuffer = Utils.createSubBuffer(bb, dataSpaceSize);
-				dataSpace = readSharedMessage(sharedMessageBuffer, hdfBackingStorage, DataSpaceMessage.class).getDataSpace();
-			} else {
-				dataSpace = DataSpace.readDataSpace(Utils.createSubBuffer(bb, dataSpaceSize), hdfBackingStorage.getSuperblock());
-			}
-
-			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
-			if (dataSize == 0) {
-				data = null;
-			} else {
-				data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
-			}
-
-		} else if (version == 3) {
-			final BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
-
-			final int nameSize = Utils.readBytesAsUnsignedInt(bb, 2);
-			final int dataTypeSize = Utils.readBytesAsUnsignedInt(bb, 2);
-			final int dataSpaceSize = Utils.readBytesAsUnsignedInt(bb, 2);
-
-			final byte characterEncoding = bb.get();
-			final Charset charset;
-			switch (characterEncoding) {
-			case 0:
-				charset = StandardCharsets.US_ASCII;
-				break;
+		// Read name
+		switch (version) {
 			case 1:
-				charset = StandardCharsets.UTF_8;
+				this.name = Utils.readUntilNull(Utils.createSubBuffer(bb, nameSize));
+				Utils.seekBufferToNextMultipleOfEight(bb);
+				break;
+			case 2:
+				this.name = Utils.readUntilNull(Utils.createSubBuffer(bb, nameSize));
+				break;
+			case 3:
+				final byte characterEncoding = bb.get();
+				final Charset charset;
+				switch (characterEncoding) {
+					case 0:
+						charset = StandardCharsets.US_ASCII;
+						break;
+					case 1:
+						charset = StandardCharsets.UTF_8;
+						break;
+					default:
+						throw new UnsupportedHdfException("Unrecognized character set detected: " + characterEncoding);
+				}
+				ByteBuffer nameBuffer = Utils.createSubBuffer(bb, nameSize);
+				name = charset.decode(nameBuffer).toString().trim();
 				break;
 			default:
-				throw new UnsupportedHdfException("Unrecognized character set detected: " + characterEncoding);
-			}
+				throw new UnsupportedHdfException("Unsupported Attribute message version. Detected version: " + version);
+		}
 
-			ByteBuffer nameBuffer = Utils.createSubBuffer(bb, nameSize);
-			name = charset.decode(nameBuffer).toString().trim();
-
-			if (flags.get(DATA_TYPE_SHARED)) {
-				final ByteBuffer sharedMessageBuffer = Utils.createSubBuffer(bb, dataTypeSize);
-				dataType = readSharedMessage(sharedMessageBuffer, hdfBackingStorage, DataTypeMessage.class).getDataType();
-			} else {
+		// Read data type and space
+		switch (version) {
+			case 1:
 				dataType = DataType.readDataType(Utils.createSubBuffer(bb, dataTypeSize));
-			}
+				Utils.seekBufferToNextMultipleOfEight(bb);
 
-			if (flags.get(DATA_SPACE_SHARED)) {
-				final ByteBuffer sharedMessageBuffer = Utils.createSubBuffer(bb, dataSpaceSize);
-				dataSpace = readSharedMessage(sharedMessageBuffer, hdfBackingStorage, DataSpaceMessage.class).getDataSpace();
-			} else {
 				dataSpace = DataSpace.readDataSpace(Utils.createSubBuffer(bb, dataSpaceSize), hdfBackingStorage.getSuperblock());
-			}
+				Utils.seekBufferToNextMultipleOfEight(bb);
+				break;
+			case 2:
+			case 3:
+				if (flags.get(DATA_TYPE_SHARED)) {
+					final ByteBuffer sharedMessageBuffer = Utils.createSubBuffer(bb, dataTypeSize);
+					dataType = readSharedMessage(sharedMessageBuffer, hdfBackingStorage, DataTypeMessage.class).getDataType();
+				} else {
+					dataType = DataType.readDataType(Utils.createSubBuffer(bb, dataTypeSize));
+				}
 
-			final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
-			if (dataSize == 0) {
-				data = null;
-			} else {
-				data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
-			}
+				if (flags.get(DATA_SPACE_SHARED)) {
+					final ByteBuffer sharedMessageBuffer = Utils.createSubBuffer(bb, dataSpaceSize);
+					dataSpace = readSharedMessage(sharedMessageBuffer, hdfBackingStorage, DataSpaceMessage.class).getDataSpace();
+				} else {
+					dataSpace = DataSpace.readDataSpace(Utils.createSubBuffer(bb, dataSpaceSize), hdfBackingStorage.getSuperblock());
+				}
+				break;
+			default:
+				throw new UnsupportedHdfException("Unsupported Attribute message version. Detected version: " + version);
+		}
 
+		final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
+		if (dataSize == 0) {
+			data = null;
 		} else {
-			throw new UnsupportedHdfException("Unsupported Attribute message version. Detected version: " + version);
+			data = Utils.createSubBuffer(bb, dataSize); // Create a new buffer starting at the current pos
 		}
 
 		logger.debug("Read attribute: Name=[{}] Datatype=[{}], Dataspace[{}]", name, dataType, dataSpace);
