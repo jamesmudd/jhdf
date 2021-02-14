@@ -19,8 +19,8 @@ import org.apache.commons.lang3.concurrent.ConcurrentException;
 
 public class CommittedDatatype extends AbstractNode {
 
-	public CommittedDatatype(HdfBackingStorage hdfFc, long address, String name, Group parent) {
-		super(hdfFc, address, name, parent);
+	public CommittedDatatype(HdfBackingStorage hdfBackingStorage, long address, String name, Group parent) {
+		super(hdfBackingStorage, address, name, parent);
 	}
 
 	@Override

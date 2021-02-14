@@ -67,7 +67,7 @@ public class BitField extends DataType implements OrderedDataType {
     }
 
     @Override
-    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
+    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
         final Object data = Array.newInstance(getJavaType(), dimensions);
         fillBitfieldData(data, dimensions, buffer.order(getByteOrder()));
         return data;

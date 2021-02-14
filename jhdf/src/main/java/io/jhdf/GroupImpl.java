@@ -42,11 +42,11 @@ import java.util.Map;
 
 public class GroupImpl extends AbstractNode implements Group {
 	private final class ChildrenLazyInitializer extends LazyInitializer<Map<String, Node>> {
-		private final HdfBackingStorage hdfFc;
+		private final HdfBackingStorage hdfBackingStorage;
 		private final Group parent;
 
-		private ChildrenLazyInitializer(HdfBackingStorage hdfFc, Group parent) {
-			this.hdfFc = hdfFc;
+		private ChildrenLazyInitializer(HdfBackingStorage hdfBackingStorage, Group parent) {
+			this.hdfBackingStorage = hdfBackingStorage;
 			this.parent = parent;
 		}
 
@@ -74,9 +74,9 @@ public class GroupImpl extends AbstractNode implements Group {
 				logger.debug("Loaded group links from object header");
 			} else {
 				// Links are not stored compactly i.e in the fractal heap
-				final BTreeV2<LinkNameForIndexedGroupRecord> bTreeNode = new BTreeV2<>(hdfFc,
+				final BTreeV2<LinkNameForIndexedGroupRecord> bTreeNode = new BTreeV2<>(hdfBackingStorage,
 						linkInfoMessage.getBTreeNameIndexAddress());
-				final FractalHeap fractalHeap = new FractalHeap(hdfFc, linkInfoMessage.getFractalHeapAddress());
+				final FractalHeap fractalHeap = new FractalHeap(hdfBackingStorage, linkInfoMessage.getFractalHeapAddress());
 
 				List<LinkNameForIndexedGroupRecord> records = bTreeNode.getRecords();
 				links = new ArrayList<>(records.size());
@@ -84,7 +84,7 @@ public class GroupImpl extends AbstractNode implements Group {
 					ByteBuffer id = linkName.getId();
 					// Get the name data from the fractal heap
 					ByteBuffer bb = fractalHeap.getId(id);
-					links.add(LinkMessage.fromBuffer(bb, hdfFc.getSuperblock()));
+					links.add(LinkMessage.fromBuffer(bb, hdfBackingStorage.getSuperblock()));
 				}
 				logger.debug("Loaded group links from fractal heap");
 			}
@@ -114,15 +114,15 @@ public class GroupImpl extends AbstractNode implements Group {
 		private Map<String, Node> createOldStyleGroup(final ObjectHeader oh) {
 			logger.debug("Loading 'old' style group");
 			final SymbolTableMessage stm = oh.getMessageOfType(SymbolTableMessage.class);
-			final BTreeV1 rootBTreeNode = BTreeV1.createGroupBTree(hdfFc, stm.getBTreeAddress());
-			final LocalHeap rootNameHeap = new LocalHeap(hdfFc, stm.getLocalHeapAddress());
+			final BTreeV1 rootBTreeNode = BTreeV1.createGroupBTree(hdfBackingStorage, stm.getBTreeAddress());
+			final LocalHeap rootNameHeap = new LocalHeap(hdfBackingStorage, stm.getLocalHeapAddress());
 			final ByteBuffer nameBuffer = rootNameHeap.getDataBuffer();
 
 			final List<Long> childAddresses = rootBTreeNode.getChildAddresses();
 			final Map<String, Node> lazyChildren = new LinkedHashMap<>(childAddresses.size());
 
 			for (long child : childAddresses) {
-				GroupSymbolTableNode groupSTE = new GroupSymbolTableNode(hdfFc, child);
+				GroupSymbolTableNode groupSTE = new GroupSymbolTableNode(hdfBackingStorage, child);
 				for (SymbolTableEntry ste : groupSTE.getSymbolTableEntries()) {
 					String childName = readName(nameBuffer, ste.getLinkNameOffset());
 					final Node node;
@@ -132,7 +132,7 @@ public class GroupImpl extends AbstractNode implements Group {
 						break;
 					case 1: // Cached group
 						logger.trace("Creating group '{}'", childName);
-						node = createGroup(hdfFc, ste.getObjectHeaderAddress(), childName, parent);
+						node = createGroup(hdfBackingStorage, ste.getObjectHeaderAddress(), childName, parent);
 						break;
 					case 2: // Soft Link
 						logger.trace("Creating soft link '{}'", childName);
@@ -150,20 +150,20 @@ public class GroupImpl extends AbstractNode implements Group {
 		}
 
 		private Node createNode(String name, long address) {
-			final ObjectHeader linkHeader = ObjectHeader.readObjectHeader(hdfFc, address);
+			final ObjectHeader linkHeader = ObjectHeader.readObjectHeader(hdfBackingStorage, address);
 			final Node node;
 			if (linkHeader.hasMessageOfType(DataSpaceMessage.class)) {
 				// Its a a Dataset
 				logger.trace("Creating dataset [{}]", name);
-				node = DatasetLoader.createDataset(hdfFc, linkHeader, name, parent);
+				node = DatasetLoader.createDataset(hdfBackingStorage, linkHeader, name, parent);
 			} else if (linkHeader.hasMessageOfType(DataTypeMessage.class)) {
 				// Has a datatype but no dataspace so its a committed datatype
 				logger.trace("Creating committed data type [{}]", name);
-				node = new CommittedDatatype(hdfFc, address, name, parent);
+				node = new CommittedDatatype(hdfBackingStorage, address, name, parent);
 			} else {
 				// Its a group
 				logger.trace("Creating group [{}]", name);
-				node = createGroup(hdfFc, address, name, parent);
+				node = createGroup(hdfBackingStorage, address, name, parent);
 			}
 			return node;
 		}
@@ -178,11 +178,11 @@ public class GroupImpl extends AbstractNode implements Group {
 
 	private final LazyInitializer<Map<String, Node>> children;
 
-	private GroupImpl(HdfBackingStorage hdfFc, long address, String name, Group parent) {
-		super(hdfFc, address, name, parent);
+	private GroupImpl(HdfBackingStorage hdfBackingStorage, long address, String name, Group parent) {
+		super(hdfBackingStorage, address, name, parent);
 		logger.trace("Creating group '{}'...", name);
 
-		children = new ChildrenLazyInitializer(hdfFc, this);
+		children = new ChildrenLazyInitializer(hdfBackingStorage, this);
 
 		logger.debug("Created group '{}'", getPath());
 	}
@@ -190,17 +190,17 @@ public class GroupImpl extends AbstractNode implements Group {
 	/**
 	 * This is a special case constructor for the root group.
 	 *
-	 * @param hdfFc               The file channel for reading the file
+	 * @param hdfBackingStorage               The file channel for reading the file
 	 * @param objectHeaderAddress The offset into the file of the object header for
 	 *                            this group
 	 * @param parent              For the root group the parent is the file itself.
 	 */
-	private GroupImpl(HdfBackingStorage hdfFc, long objectHeaderAddress, HdfFile parent) {
-		super(hdfFc, objectHeaderAddress, "", parent); // No name special case for root group no name
+	private GroupImpl(HdfBackingStorage hdfBackingStorage, long objectHeaderAddress, HdfFile parent) {
+		super(hdfBackingStorage, objectHeaderAddress, "", parent); // No name special case for root group no name
 		logger.trace("Creating root group...");
 
 		// Special case for root group pass parent instead of this
-		children = new ChildrenLazyInitializer(hdfFc, parent);
+		children = new ChildrenLazyInitializer(hdfBackingStorage, parent);
 
 		logger.debug("Created root group of file '{}'", parent.getName());
 	}
@@ -209,21 +209,21 @@ public class GroupImpl extends AbstractNode implements Group {
 	 * Creates a group for the specified object header with the given name by
 	 * reading from the file channel.
 	 *
-	 * @param hdfFc               The file channel for reading the file
+	 * @param hdfBackingStorage               The file channel for reading the file
 	 * @param objectHeaderAddress The offset into the file of the object header for
 	 *                            this group
 	 * @param name                The name of this group
 	 * @param parent              For the root group the parent is the file itself.
 	 * @return The newly read group
 	 */
-	/* package */ static Group createGroup(HdfBackingStorage hdfFc, long objectHeaderAddress, String name,
+	/* package */ static Group createGroup(HdfBackingStorage hdfBackingStorage, long objectHeaderAddress, String name,
 										   Group parent) {
-		return new GroupImpl(hdfFc, objectHeaderAddress, name, parent);
+		return new GroupImpl(hdfBackingStorage, objectHeaderAddress, name, parent);
 	}
 
-	/* package */ static Group createRootGroup(HdfBackingStorage hdfFc, long objectHeaderAddress, HdfFile file) {
+	/* package */ static Group createRootGroup(HdfBackingStorage hdfBackingStorage, long objectHeaderAddress, HdfFile file) {
 		// Call the special root group constructor
-		return new GroupImpl(hdfFc, objectHeaderAddress, file);
+		return new GroupImpl(hdfBackingStorage, objectHeaderAddress, file);
 	}
 
 	@Override

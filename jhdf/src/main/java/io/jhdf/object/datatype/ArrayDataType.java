@@ -66,14 +66,14 @@ public class ArrayDataType extends DataType {
     }
 
     @Override
-    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
+    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
         if (dimensions.length !=1) {
             throw new HdfException("Multi dimension array data types are not supported");
         }
         final Object data = Array.newInstance(getJavaType(), dimensions);
         for (int i = 0; i < dimensions[0]; i++) {
             final ByteBuffer elementBuffer = Utils.createSubBuffer(buffer, getBaseType().getSize() * getDimensions()[0]);
-            final Object elementDataset = DatasetReader.readDataset(getBaseType(), elementBuffer, getDimensions(), hdfFc);
+            final Object elementDataset = DatasetReader.readDataset(getBaseType(), elementBuffer, getDimensions(), hdfBackingStorage);
             Array.set(data, i, elementDataset);
         }
         return data;

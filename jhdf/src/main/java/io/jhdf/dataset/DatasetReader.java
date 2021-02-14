@@ -46,10 +46,10 @@ public final class DatasetReader {
 	 * @param type The data type of this dataset
 	 * @param buffer The buffer containing the dataset
 	 * @param dimensions The dimensions of this dataset
-	 * @param hdfFc The file channel for reading the file
+	 * @param hdfBackingStorage The file channel for reading the file
 	 * @return A Java object representation of this dataset
 	 */
-	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
+	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
 		// If the data is scalar make a fake one element array then remove it at the end
 
 		final boolean isScalar;
@@ -61,7 +61,7 @@ public final class DatasetReader {
 			isScalar = false;
 		}
 
-		final Object data = type.fillData(buffer, dimensions, hdfFc);
+		final Object data = type.fillData(buffer, dimensions, hdfBackingStorage);
 
 		if (isScalar) {
 			return Array.get(data, 0);

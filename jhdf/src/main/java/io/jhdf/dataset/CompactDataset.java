@@ -18,8 +18,8 @@ import java.nio.ByteBuffer;
 
 public class CompactDataset extends DatasetBase {
 
-	public CompactDataset(HdfBackingStorage hdfFc, long address, String name, Group parent, ObjectHeader oh) {
-		super(hdfFc, address, name, parent, oh);
+	public CompactDataset(HdfBackingStorage hdfBackingStorage, long address, String name, Group parent, ObjectHeader oh) {
+		super(hdfBackingStorage, address, name, parent, oh);
 	}
 
 	@Override

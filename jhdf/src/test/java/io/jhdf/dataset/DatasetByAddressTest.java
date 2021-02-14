@@ -67,9 +67,9 @@ class DatasetByAddressTest {
 
 	private Executable createTest(HdfFile file, long address) {
 		return () -> {
-			HdfBackingStorage hdfFc = file.getHdfBackingStorage();
-			ObjectHeader header = ObjectHeader.readObjectHeader(hdfFc, address);
-			Dataset dataset = DatasetLoader.createDataset(hdfFc, header, "unknown dataset", NoParent.INSTANCE);
+			HdfBackingStorage hdfBackingStorage = file.getHdfBackingStorage();
+			ObjectHeader header = ObjectHeader.readObjectHeader(hdfBackingStorage, address);
+			Dataset dataset = DatasetLoader.createDataset(hdfBackingStorage, header, "unknown dataset", NoParent.INSTANCE);
 			Object data = dataset.getData();
 			assertThat(getDimensions(data), is(equalTo(new int[]{10})));
 			Object[] flatData = flatten(data);

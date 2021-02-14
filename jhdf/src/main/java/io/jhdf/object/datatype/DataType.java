@@ -103,6 +103,6 @@ public abstract class DataType {
 
 	public abstract Class<?> getJavaType();
 
-	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc);
+	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage);
 
 }

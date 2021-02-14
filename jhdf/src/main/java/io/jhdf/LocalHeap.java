@@ -31,12 +31,12 @@ public class LocalHeap {
 	private final long addressOfDataSegment;
 	private final ByteBuffer dataBuffer;
 
-	public LocalHeap(HdfBackingStorage hdfFc, long address) {
+	public LocalHeap(HdfBackingStorage hdfBackingStorage, long address) {
 		this.address = address;
 		try {
 			// Header
-			int headerSize = 8 + hdfFc.getSizeOfLengths() + hdfFc.getSizeOfLengths() + hdfFc.getSizeOfOffsets();
-			ByteBuffer header = hdfFc.readBufferFromAddress(address, headerSize);
+			int headerSize = 8 + hdfBackingStorage.getSizeOfLengths() + hdfBackingStorage.getSizeOfLengths() + hdfBackingStorage.getSizeOfOffsets();
+			ByteBuffer header = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
 			byte[] formatSignatureBytes = new byte[4];
 			header.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -53,18 +53,18 @@ public class LocalHeap {
 			header.position(8);
 
 			// Data Segment Size
-			dataSegmentSize = Utils.readBytesAsUnsignedLong(header, hdfFc.getSizeOfLengths());
+			dataSegmentSize = Utils.readBytesAsUnsignedLong(header, hdfBackingStorage.getSizeOfLengths());
 			logger.trace("dataSegmentSize = {}", dataSegmentSize);
 
 			// Offset to Head of Free-list
-			offsetToHeadOfFreeList = Utils.readBytesAsUnsignedLong(header, hdfFc.getSizeOfLengths());
+			offsetToHeadOfFreeList = Utils.readBytesAsUnsignedLong(header, hdfBackingStorage.getSizeOfLengths());
 			logger.trace("offsetToHeadOfFreeList = {}", offsetToHeadOfFreeList);
 
 			// Address of Data Segment
-			addressOfDataSegment = Utils.readBytesAsUnsignedLong(header, hdfFc.getSizeOfOffsets());
+			addressOfDataSegment = Utils.readBytesAsUnsignedLong(header, hdfBackingStorage.getSizeOfOffsets());
 			logger.trace("addressOfDataSegment = {}", addressOfDataSegment);
 
-			dataBuffer = hdfFc.map(addressOfDataSegment, dataSegmentSize);
+			dataBuffer = hdfBackingStorage.map(addressOfDataSegment, dataSegmentSize);
 		} catch (Exception e) {
 			throw new HdfException("Error reading local heap", e);
 		}

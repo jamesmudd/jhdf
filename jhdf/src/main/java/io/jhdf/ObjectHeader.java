@@ -82,11 +82,11 @@ public abstract class ObjectHeader {
 		/** Level of the node 0 = leaf */
 		private final int referenceCount;
 
-		private ObjectHeaderV1(HdfBackingStorage hdfFc, long address) {
+		private ObjectHeaderV1(HdfBackingStorage hdfBackingStorage, long address) {
 			super(address);
 
 			try {
-				ByteBuffer header = hdfFc.readBufferFromAddress(address, 12);
+				ByteBuffer header = hdfBackingStorage.readBufferFromAddress(address, 12);
 
 				// Version
 				version = header.get();
@@ -108,9 +108,9 @@ public abstract class ObjectHeader {
 
 				// 12 up to this point + 4 missed in format spec = 16
 				address += 16;
-				header = hdfFc.readBufferFromAddress(address, headerSize);
+				header = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
-				readMessages(hdfFc, header, numberOfMessages);
+				readMessages(hdfBackingStorage, header, numberOfMessages);
 
 				logger.debug("Read object header from address: {}", address);
 
@@ -183,12 +183,12 @@ public abstract class ObjectHeader {
 		private final int maximumNumberOfDenseAttributes;
 		private final BitSet flags;
 
-		private ObjectHeaderV2(HdfBackingStorage hdfFc, long address) {
+		private ObjectHeaderV2(HdfBackingStorage hdfBackingStorage, long address) {
 			super(address);
 			int headerSize = 0; // Keep track of the size for checksum
 
 			try {
-				ByteBuffer bb = hdfFc.readBufferFromAddress(address, 6);
+				ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, 6);
 				address += 6;
 				headerSize += 6;
 
@@ -228,7 +228,7 @@ public abstract class ObjectHeader {
 
 				// Timestamps
 				if (flags.get(TIMESTAMPS_PRESENT)) {
-					bb = hdfFc.readBufferFromAddress(address, 16);
+					bb = hdfBackingStorage.readBufferFromAddress(address, 16);
 					address += 16;
 					headerSize += 16;
 
@@ -245,7 +245,7 @@ public abstract class ObjectHeader {
 
 				// Number of attributes
 				if (flags.get(NUMBER_OF_ATTRIBUTES_PRESENT)) {
-					bb = hdfFc.readBufferFromAddress(address, 4);
+					bb = hdfBackingStorage.readBufferFromAddress(address, 4);
 					address += 4;
 					headerSize += 4;
 
@@ -256,22 +256,22 @@ public abstract class ObjectHeader {
 					maximumNumberOfDenseAttributes = -1;
 				}
 
-				bb = hdfFc.readBufferFromAddress(address, sizeOfChunk0);
+				bb = hdfBackingStorage.readBufferFromAddress(address, sizeOfChunk0);
 				address += sizeOfChunk0;
 				headerSize += sizeOfChunk0;
 
 				int sizeOfMessages = readBytesAsUnsignedInt(bb, sizeOfChunk0);
 
-				bb = hdfFc.readBufferFromAddress(address, sizeOfMessages);
+				bb = hdfBackingStorage.readBufferFromAddress(address, sizeOfMessages);
 				headerSize += sizeOfMessages;
 
 				// There might be a gap at the end of the header of up to 4 bytes
 				// message type (1_byte) + message size (2 bytes) + message flags (1 byte)
-				readMessages(hdfFc, bb);
+				readMessages(hdfBackingStorage, bb);
 
 				// Checksum
 				headerSize += 4;
-				ByteBuffer fullHeaderBuffer = hdfFc.readBufferFromAddress(super.getAddress(), headerSize);
+				ByteBuffer fullHeaderBuffer = hdfBackingStorage.readBufferFromAddress(super.getAddress(), headerSize);
 				ChecksumUtils.validateChecksum(fullHeaderBuffer);
 
 				logger.debug("Read object header from address: {}", address);
@@ -348,24 +348,24 @@ public abstract class ObjectHeader {
 
 	}
 
-	public static ObjectHeader readObjectHeader(HdfBackingStorage hdfFc, long address) {
-		ByteBuffer bb = hdfFc.readBufferFromAddress(address, 1);
+	public static ObjectHeader readObjectHeader(HdfBackingStorage hdfBackingStorage, long address) {
+		ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, 1);
 		byte version = bb.get();
 		if (version == 1) {
-			return new ObjectHeaderV1(hdfFc, address);
+			return new ObjectHeaderV1(hdfBackingStorage, address);
 		} else {
-			return new ObjectHeaderV2(hdfFc, address);
+			return new ObjectHeaderV2(hdfBackingStorage, address);
 		}
 	}
 
-	public static LazyInitializer<ObjectHeader> lazyReadObjectHeader(HdfBackingStorage hdfFc, long address) {
+	public static LazyInitializer<ObjectHeader> lazyReadObjectHeader(HdfBackingStorage hdfBackingStorage, long address) {
 		logger.debug("Creating lazy object header at address: {}", address);
 		return new LazyInitializer<ObjectHeader>() {
 
 			@Override
 			protected ObjectHeader initialize() {
 				logger.debug("Lazy initializing object header at address: {}", address);
-				return readObjectHeader(hdfFc, address);
+				return readObjectHeader(hdfBackingStorage, address);
 			}
 
 		};

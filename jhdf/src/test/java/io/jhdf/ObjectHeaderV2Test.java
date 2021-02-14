@@ -32,24 +32,24 @@ class ObjectHeaderV2Test {
 	/** This will need to be updated each time the test files are regenerated */
 	private static final long TIMESTAMP = 1553279213L;
 
-	private HdfBackingStorage hdfFc;
+	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
     void setUp() throws IOException, URISyntaxException {
 		final URI testFileUri = this.getClass().getResource("/hdf5/test_file2.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
-		hdfFc = new HdfFileChannel(fc, sb);
+		hdfBackingStorage = new HdfFileChannel(fc, sb);
 	}
 
 	@AfterEach
     void after() {
-		hdfFc.close();
+		hdfBackingStorage.close();
 	}
 
 	@Test
     void testRootGroupObjectHeaderV2() {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 48); // Root group header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 48); // Root group header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(48L)));
@@ -69,7 +69,7 @@ class ObjectHeaderV2Test {
 
 	@Test
     void testDatasetsGroupObjectHeaderV2() {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 195); // Root group header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 195); // Root group header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(195L)));
@@ -89,7 +89,7 @@ class ObjectHeaderV2Test {
 
 	@Test
     void testObjectHeaderOnFloat16Dataset() {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 608); // float16 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 608); // float16 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(608L)));
@@ -109,7 +109,7 @@ class ObjectHeaderV2Test {
 
 	@Test
     void testObjectHeaderOnFloat32Dataset() {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 892); // float32 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 892); // float32 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(892L)));
@@ -129,7 +129,7 @@ class ObjectHeaderV2Test {
 
 	@Test
     void testObjectHeaderOnFloat64Dataset() {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 1176); // float64 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 1176); // float64 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(1176L)));
@@ -149,7 +149,7 @@ class ObjectHeaderV2Test {
 
 	@Test
     void testObjectHeaderOnInt8Dataset() {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 1655); // int8 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 1655); // int8 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(1655L)));
@@ -173,9 +173,9 @@ class ObjectHeaderV2Test {
 		final URI testFileUri = this.getClass().getResource("/hdf5/test_attribute_with_creation_order.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
-		HdfBackingStorage hdfFc = new HdfFileChannel(fc, sb);
+		HdfBackingStorage hdfBackingStorage = new HdfFileChannel(fc, sb);
 
-		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 48);
+		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 48);
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
 		assertThat(oh.getAddress(), is(equalTo(48L)));
@@ -183,7 +183,7 @@ class ObjectHeaderV2Test {
 		assertThat(oh.isAttributeCreationOrderIndexed(), is(true));
 		assertThat(oh.isAttributeCreationOrderTracked(), is(true));
 
-		hdfFc.close();
+		hdfBackingStorage.close();
 	}
 
 }

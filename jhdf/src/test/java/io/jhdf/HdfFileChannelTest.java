@@ -10,7 +10,6 @@
 package io.jhdf;
 
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +44,7 @@ class HdfFileChannelTest {
 	Superblock sb;
 
 	// Under test
-    private HdfBackingStorage hdfFc;
+    private HdfFileChannel hdfFc;
 
 	@BeforeEach
 	void before() {

@@ -27,24 +27,24 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 class GroupSymbolTableNodeTest {
-	private HdfBackingStorage hdfFc;
+	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
 	void setUp() throws IOException, URISyntaxException {
 		final URI testFileUri = this.getClass().getResource("/hdf5/test_file.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
-		hdfFc = new HdfFileChannel(fc, sb);
+		hdfBackingStorage = new HdfFileChannel(fc, sb);
 	}
 
 	@AfterEach
 	void after() {
-		hdfFc.close();
+		hdfBackingStorage.close();
 	}
 
 	@Test
 	void testGroupSymbolTableNode() {
-		GroupSymbolTableNode node = new GroupSymbolTableNode(hdfFc, 1504);
+		GroupSymbolTableNode node = new GroupSymbolTableNode(hdfBackingStorage, 1504);
 
 		assertThat(node.getVersion(), is(equalTo((short) 1)));
 		assertThat(node.getNumberOfEntries(), is(equalTo((short) 3)));

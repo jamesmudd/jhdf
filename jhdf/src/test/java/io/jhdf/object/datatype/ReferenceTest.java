@@ -58,10 +58,10 @@ public class ReferenceTest {
     private Executable createTest(ByteBuffer buffer, Reference dataType, int[] dims, Object expected) {
         return () -> {
             buffer.rewind(); // For shared buffers
-            HdfBackingStorage hdfFc = mock(HdfFileChannel.class);
-            Object actual = dataType.fillData(buffer, dims, hdfFc);
+            HdfBackingStorage hdfBackingStorage = mock(HdfFileChannel.class);
+            Object actual = dataType.fillData(buffer, dims, hdfBackingStorage);
             assertThat(actual, is(expected));
-            verifyNoInteractions(hdfFc);
+            verifyNoInteractions(hdfBackingStorage);
 
         };
     }
@@ -69,9 +69,9 @@ public class ReferenceTest {
     @Test
 	void testUnsupportedReferenceLengthThrows() {
 		Reference invalidDataType = mockReference(11); // 11 byte data is not supported
-        HdfBackingStorage hdfFc = mock(HdfFileChannel.class);
-		assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(referenceIntBuffer, dims, hdfFc));
-        verifyNoInteractions(hdfFc);
+        HdfBackingStorage hdfBackingStorage = mock(HdfFileChannel.class);
+		assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(referenceIntBuffer, dims, hdfBackingStorage));
+        verifyNoInteractions(hdfBackingStorage);
 
     }
 }

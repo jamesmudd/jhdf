@@ -28,8 +28,8 @@ public class BTreeIndex implements ChunkIndex {
 
     private final BTreeV2<BTreeDatasetChunkRecord> bTreeV2;
 
-    public BTreeIndex(HdfBackingStorage hdfFc, long address, DatasetInfo datasetInfo) {
-        bTreeV2 = new BTreeV2<>(hdfFc, address, datasetInfo);
+    public BTreeIndex(HdfBackingStorage hdfBackingStorage, long address, DatasetInfo datasetInfo) {
+        bTreeV2 = new BTreeV2<>(hdfBackingStorage, address, datasetInfo);
     }
 
     @Override

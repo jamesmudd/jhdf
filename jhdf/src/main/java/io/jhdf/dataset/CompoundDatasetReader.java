@@ -25,7 +25,7 @@ public final class CompoundDatasetReader {
 		throw new AssertionError("No instances of CompoundDatasetReader");
 	}
 
-	public static Map<String, Object> readDataset(CompoundDataType type, ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
+	public static Map<String, Object> readDataset(CompoundDataType type, ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
 		final int sizeAsInt = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
 
 		final List<CompoundDataMember> members = type.getMembers();
@@ -46,7 +46,7 @@ public final class CompoundDatasetReader {
 			// Now read this member
 			memberBuffer.rewind();
 
-			final Object memberData = DatasetReader.readDataset(member.getDataType(), memberBuffer, dimensions, hdfFc);
+			final Object memberData = DatasetReader.readDataset(member.getDataType(), memberBuffer, dimensions, hdfBackingStorage);
 			data.put(member.getName(), memberData);
 		}
 

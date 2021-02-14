@@ -51,16 +51,16 @@ public class BTreeV2<T extends BTreeRecord> {
 		return records;
 	}
 
-	public BTreeV2(HdfBackingStorage hdfFc, long address) {
-		this(hdfFc, address, null);
+	public BTreeV2(HdfBackingStorage hdfBackingStorage, long address) {
+		this(hdfBackingStorage, address, null);
 	}
 
-	public BTreeV2(HdfBackingStorage hdfFc, long address, DatasetInfo datasetInfo) {
+	public BTreeV2(HdfBackingStorage hdfBackingStorage, long address, DatasetInfo datasetInfo) {
 		this.address = address;
 		try {
 			// B Tree V2 Header
-			int headerSize = 16 + hdfFc.getSizeOfOffsets() + 2 + hdfFc.getSizeOfLengths() + 4;
-			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
+			int headerSize = 16 + hdfBackingStorage.getSizeOfOffsets() + 2 + hdfBackingStorage.getSizeOfLengths() + 4;
+			ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
 			// Verify signature
 			byte[] formatSignatureBytes = new byte[4];
@@ -86,17 +86,17 @@ public class BTreeV2<T extends BTreeRecord> {
 			final int splitPercent = Utils.readBytesAsUnsignedInt(bb, 1);
 			final int mergePercent = Utils.readBytesAsUnsignedInt(bb, 1);
 
-			final long rootNodeAddress = readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
+			final long rootNodeAddress = readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
 
 			final int numberOfRecordsInRoot = Utils.readBytesAsUnsignedInt(bb, 2);
-			final int totalNumberOfRecordsInTree = Utils.readBytesAsUnsignedInt(bb, hdfFc.getSizeOfLengths());
+			final int totalNumberOfRecordsInTree = Utils.readBytesAsUnsignedInt(bb, hdfBackingStorage.getSizeOfLengths());
 
 			bb.rewind();
 			ChecksumUtils.validateChecksum(bb);
 
 			records = new ArrayList<>(totalNumberOfRecordsInTree);
 
-			readRecords(hdfFc, rootNodeAddress, depth, numberOfRecordsInRoot, totalNumberOfRecordsInTree, datasetInfo);
+			readRecords(hdfBackingStorage, rootNodeAddress, depth, numberOfRecordsInRoot, totalNumberOfRecordsInTree, datasetInfo);
 
 		} catch (HdfException e) {
 			throw new HdfException("Error reading B Tree node", e);
@@ -104,9 +104,9 @@ public class BTreeV2<T extends BTreeRecord> {
 
 	}
 
-	private void readRecords(HdfBackingStorage hdfFc, long address, int depth, int numberOfRecords, int totalRecords, DatasetInfo datasetInfo) {
+	private void readRecords(HdfBackingStorage hdfBackingStorage, long address, int depth, int numberOfRecords, int totalRecords, DatasetInfo datasetInfo) {
 
-		ByteBuffer bb = hdfFc.readBufferFromAddress(address, nodeSize);
+		ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, nodeSize);
 
 		byte[] nodeSignatureBytes = new byte[4];
 		bb.get(nodeSignatureBytes, 0, nodeSignatureBytes.length);
@@ -133,9 +133,9 @@ public class BTreeV2<T extends BTreeRecord> {
 
 		if (!leafNode) {
 			for (int i = 0; i < numberOfRecords + 1; i++) {
-				final long childAddress = readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
+				final long childAddress = readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
 				int sizeOfNumberOfRecords = getSizeOfNumberOfRecords(nodeSize, depth, totalRecords, recordSize,
-						hdfFc.getSizeOfOffsets());
+						hdfBackingStorage.getSizeOfOffsets());
 				final int numberOfChildRecords = readBytesAsUnsignedInt(bb, sizeOfNumberOfRecords);
 				final int totalNumberOfChildRecords;
 				if (depth > 1) {
@@ -144,7 +144,7 @@ public class BTreeV2<T extends BTreeRecord> {
 				} else {
 					totalNumberOfChildRecords = -1;
 				}
-				readRecords(hdfFc, childAddress, depth - 1, numberOfChildRecords, totalNumberOfChildRecords, datasetInfo);
+				readRecords(hdfBackingStorage, childAddress, depth - 1, numberOfChildRecords, totalNumberOfChildRecords, datasetInfo);
 			}
 		}
 		bb.limit(bb.position() + 4);

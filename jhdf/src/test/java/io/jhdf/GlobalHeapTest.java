@@ -37,7 +37,7 @@ class GlobalHeapTest {
 
 	private GlobalHeap globalHeap;
 	private Superblock sb;
-	private HdfBackingStorage hdfFc;
+	private HdfFileChannel hdfFc;
 
 	@BeforeEach
 	void setup() throws IOException, URISyntaxException {

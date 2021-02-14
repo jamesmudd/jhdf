@@ -43,8 +43,8 @@ public abstract class BTreeV1 {
 	private final long leftSiblingAddress;
 	private final long rightSiblingAddress;
 
-	public static BTreeV1Group createGroupBTree(HdfBackingStorage hdfFc, long address) {
-		ByteBuffer header = readHeaderAndValidateSignature(hdfFc, address);
+	public static BTreeV1Group createGroupBTree(HdfBackingStorage hdfBackingStorage, long address) {
+		ByteBuffer header = readHeaderAndValidateSignature(hdfBackingStorage, address);
 
 		final byte nodeType = header.get();
 		if (nodeType != 0) {
@@ -54,15 +54,15 @@ public abstract class BTreeV1 {
 		final byte nodeLevel = header.get();
 
 		if (nodeLevel > 0) {
-			return new BTreeV1Group.BTreeV1GroupNonLeafNode(hdfFc, address);
+			return new BTreeV1Group.BTreeV1GroupNonLeafNode(hdfBackingStorage, address);
 		} else {
-			return new BTreeV1Group.BTreeV1GroupLeafNode(hdfFc, address);
+			return new BTreeV1Group.BTreeV1GroupLeafNode(hdfBackingStorage, address);
 		}
 
 	}
 
-	public static BTreeV1Data createDataBTree(HdfBackingStorage hdfFc, long address, int dataDimensions) {
-		ByteBuffer header = readHeaderAndValidateSignature(hdfFc, address);
+	public static BTreeV1Data createDataBTree(HdfBackingStorage hdfBackingStorage, long address, int dataDimensions) {
+		ByteBuffer header = readHeaderAndValidateSignature(hdfBackingStorage, address);
 
 		final byte nodeType = header.get();
 		if (nodeType != 1) {
@@ -72,9 +72,9 @@ public abstract class BTreeV1 {
 		final byte nodeLevel = header.get();
 
 		if (nodeLevel > 0) {
-			return new BTreeV1Data.BTreeV1DataNonLeafNode(hdfFc, address, dataDimensions);
+			return new BTreeV1Data.BTreeV1DataNonLeafNode(hdfBackingStorage, address, dataDimensions);
 		} else {
-			return new BTreeV1Data.BTreeV1DataLeafNode(hdfFc, address, dataDimensions);
+			return new BTreeV1Data.BTreeV1DataLeafNode(hdfBackingStorage, address, dataDimensions);
 		}
 	}
 
@@ -90,19 +90,19 @@ public abstract class BTreeV1 {
 		return header;
 	}
 
-	/* package */ BTreeV1(HdfBackingStorage hdfFc, long address) {
+	/* package */ BTreeV1(HdfBackingStorage hdfBackingStorage, long address) {
 		this.address = address;
 
-		int headerSize = 8 * hdfFc.getSizeOfOffsets();
-		ByteBuffer header = hdfFc.readBufferFromAddress(address + 6, headerSize);
+		int headerSize = 8 * hdfBackingStorage.getSizeOfOffsets();
+		ByteBuffer header = hdfBackingStorage.readBufferFromAddress(address + 6, headerSize);
 
 		entriesUsed = Utils.readBytesAsUnsignedInt(header, 2);
 		logger.trace("Entries = {}", entriesUsed);
 
-		leftSiblingAddress = Utils.readBytesAsUnsignedLong(header, hdfFc.getSizeOfOffsets());
+		leftSiblingAddress = Utils.readBytesAsUnsignedLong(header, hdfBackingStorage.getSizeOfOffsets());
 		logger.trace("left address = {}", leftSiblingAddress);
 
-		rightSiblingAddress = Utils.readBytesAsUnsignedLong(header, hdfFc.getSizeOfOffsets());
+		rightSiblingAddress = Utils.readBytesAsUnsignedLong(header, hdfBackingStorage.getSizeOfOffsets());
 		logger.trace("right address = {}", rightSiblingAddress);
 
 	}

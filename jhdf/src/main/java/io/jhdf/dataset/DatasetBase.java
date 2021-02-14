@@ -37,15 +37,15 @@ import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 public abstract class DatasetBase extends AbstractNode implements Dataset {
 	private static final Logger logger = LoggerFactory.getLogger(DatasetBase.class);
 
-	protected final HdfBackingStorage hdfFc;
+	protected final HdfBackingStorage hdfBackingStorage;
 	protected final ObjectHeader oh;
 
 	private final DataType dataType;
 	private final DataSpace dataSpace;
 
-	public DatasetBase(HdfBackingStorage hdfFc, long address, String name, Group parent, ObjectHeader oh) {
-		super(hdfFc, address, name, parent);
-		this.hdfFc = hdfFc;
+	public DatasetBase(HdfBackingStorage hdfBackingStorage, long address, String name, Group parent, ObjectHeader oh) {
+		super(hdfBackingStorage, address, name, parent);
+		this.hdfBackingStorage = hdfBackingStorage;
 		this.oh = oh;
 
 		dataType = getHeaderMessage(DataTypeMessage.class).getDataType();
@@ -125,7 +125,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		final ByteBuffer bb = getDataBuffer();
 		final DataType type = getDataType();
 
-		return DatasetReader.readDataset(type, bb, getDimensions(), hdfFc);
+		return DatasetReader.readDataset(type, bb, getDimensions(), hdfBackingStorage);
 	}
 
 	@Override
@@ -155,7 +155,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		if (fillValueMessage.isFillValueDefined()) {
 			ByteBuffer bb = fillValueMessage.getFillValue();
 			// Convert to data pass zero length dims for scalar
-			return DatasetReader.readDataset(getDataType(), bb, new int[0], hdfFc);
+			return DatasetReader.readDataset(getDataType(), bb, new int[0], hdfBackingStorage);
 		} else {
 			return null;
 		}

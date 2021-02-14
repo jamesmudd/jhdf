@@ -35,7 +35,7 @@ public final class VariableLengthDatasetReader {
 		throw new AssertionError("No instances of VariableLengthDatasetReader");
 	}
 
-	public static Object readDataset(VariableLength type, ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
+	public static Object readDataset(VariableLength type, ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
 		// Make the array to hold the data
 		Class<?> javaType = type.getJavaType();
 
@@ -55,14 +55,14 @@ public final class VariableLengthDatasetReader {
 		final Map<Long, GlobalHeap> heaps = new HashMap<>();
 
 		List<ByteBuffer> elements = new ArrayList<>();
-		for (GlobalHeapId globalHeapId : getGlobalHeapIds(buffer, type.getSize(), hdfFc, getTotalPoints(dimensions))) {
+		for (GlobalHeapId globalHeapId : getGlobalHeapIds(buffer, type.getSize(), hdfBackingStorage, getTotalPoints(dimensions))) {
 			if(globalHeapId.getIndex() == 0) {
 				// https://github.com/jamesmudd/jhdf/issues/247
 				// Empty arrays have index=0 and address=0
 				elements.add(EMPTY_BYTE_BUFFER);
 			} else {
 				GlobalHeap heap = heaps.computeIfAbsent(globalHeapId.getHeapAddress(),
-						address -> new GlobalHeap(hdfFc, address));
+						address -> new GlobalHeap(hdfBackingStorage, address));
 
 				ByteBuffer bb = heap.getObjectData(globalHeapId.getIndex());
 				elements.add(bb);
@@ -73,7 +73,7 @@ public final class VariableLengthDatasetReader {
 		if(type.isVariableLengthString()) {
 			fillStringData(type, data, dimensions, elements.iterator());
 		} else {
-			fillData(type.getParent(), data, dimensions, elements.iterator(), hdfFc);
+			fillData(type.getParent(), data, dimensions, elements.iterator(), hdfBackingStorage);
 		}
 
 		if (isScalar) {
@@ -83,17 +83,17 @@ public final class VariableLengthDatasetReader {
 		}
 	}
 
-	private static void fillData(DataType dataType, Object data, int[] dims, Iterator<ByteBuffer> elements, HdfBackingStorage hdfFc) {
+	private static void fillData(DataType dataType, Object data, int[] dims, Iterator<ByteBuffer> elements, HdfBackingStorage hdfBackingStorage) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillData(dataType, newArray, stripLeadingIndex(dims), elements, hdfFc);
+				fillData(dataType, newArray, stripLeadingIndex(dims), elements, hdfBackingStorage);
 			}
 		} else {
 			for (int i = 0; i < dims[0]; i++) {
 				ByteBuffer buffer = elements.next();
 				int[] elementDims = new int[]{ buffer.limit() / dataType.getSize()};
-				Object elementData = DatasetReader.readDataset(dataType, buffer, elementDims, hdfFc);
+				Object elementData = DatasetReader.readDataset(dataType, buffer, elementDims, hdfBackingStorage);
 				Array.set(data, i, elementData);
 			}
 		}
@@ -114,13 +114,13 @@ public final class VariableLengthDatasetReader {
 		}
 	}
 
-	private static List<GlobalHeapId> getGlobalHeapIds(ByteBuffer bb, int length, HdfBackingStorage hdfFc,
+	private static List<GlobalHeapId> getGlobalHeapIds(ByteBuffer bb, int length, HdfBackingStorage hdfBackingStorage,
 			int datasetTotalSize) {
 		// For variable length datasets the actual data is in the global heap so need to
 		// resolve that then build the buffer.
 		List<GlobalHeapId> ids = new ArrayList<>(datasetTotalSize);
 
-		final int skipBytes = length - hdfFc.getSizeOfOffsets() - 4; // id=4
+		final int skipBytes = length - hdfBackingStorage.getSizeOfOffsets() - 4; // id=4
 
 		// Assume all global heap buffers are little endian
 		bb.order(LITTLE_ENDIAN);
@@ -128,7 +128,7 @@ public final class VariableLengthDatasetReader {
 		while (bb.remaining() >= length) {
 			// Move past the skipped bytes. TODO figure out what this is for
 			bb.position(bb.position() + skipBytes);
-			long heapAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
+			long heapAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
 			int index = Utils.readBytesAsUnsignedInt(bb, 4);
 			GlobalHeapId globalHeapId = new GlobalHeapId(heapAddress, index);
 			ids.add(globalHeapId);
