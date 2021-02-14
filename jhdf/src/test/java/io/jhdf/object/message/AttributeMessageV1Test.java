@@ -10,9 +10,11 @@
 package io.jhdf.object.message;
 
 import io.jhdf.Superblock;
+import io.jhdf.storage.HdfBackingStorage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +34,7 @@ class AttributeMessageV1Test {
 	private RandomAccessFile raf;
 	private Superblock sb;
 	private ByteBuffer bb;
+	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
     void setUp() throws IOException {
@@ -41,6 +44,8 @@ class AttributeMessageV1Test {
 		sb = Superblock.readSuperblock(fc, 0);
 		bb = fc.map(READ_ONLY, 1864, 80);
 		bb.order(LITTLE_ENDIAN);
+		hdfBackingStorage = Mockito.mock(HdfBackingStorage.class);
+		Mockito.when(hdfBackingStorage.getSuperblock()).thenReturn(sb);
 	}
 
 	@AfterEach
@@ -51,7 +56,7 @@ class AttributeMessageV1Test {
 
 	@Test
     void test() {
-		AttributeMessage am = new AttributeMessage(bb, sb, BitSet.valueOf(new byte[1]));
+		AttributeMessage am = new AttributeMessage(bb, hdfBackingStorage, BitSet.valueOf(new byte[1]));
 		assertThat(am.getName(), is(equalTo("string_attr")));
 		assertThat(am.getDataType().getDataClass(), is(equalTo(9)));
 		assertThat(am.getDataSpace().getTotalLength(), is(equalTo(1L)));

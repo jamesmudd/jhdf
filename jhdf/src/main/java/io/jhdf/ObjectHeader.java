@@ -50,7 +50,7 @@ public abstract class ObjectHeader {
 		return messages;
 	}
 
-	public ObjectHeader(long address) {
+	protected ObjectHeader(long address) {
 		this.address = address;
 	}
 
@@ -119,17 +119,17 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private void readMessages(HdfBackingStorage hdfFc, ByteBuffer bb, int numberOfMessages) {
+		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb, int numberOfMessages) {
 			while (bb.remaining() > 4 && messages.size() < numberOfMessages) {
-				Message m = Message.readObjectHeaderV1Message(bb, hdfFc.getSuperblock());
+				Message m = Message.readObjectHeaderV1Message(bb, hdfBackingStorage);
 				messages.add(m);
 
 				if (m instanceof ObjectHeaderContinuationMessage) {
 					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
 
-					ByteBuffer continuationBuffer = hdfFc.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
+					ByteBuffer continuationBuffer = hdfBackingStorage.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
 
-					readMessages(hdfFc, continuationBuffer, numberOfMessages);
+					readMessages(hdfBackingStorage, continuationBuffer, numberOfMessages);
 				}
 			}
 		}
@@ -281,14 +281,14 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private void readMessages(HdfBackingStorage hdfFc, ByteBuffer bb) {
+		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb) {
 			while (bb.remaining() >= 8) {
-				Message m = Message.readObjectHeaderV2Message(bb, hdfFc.getSuperblock(), this.isAttributeCreationOrderTracked());
+				Message m = Message.readObjectHeaderV2Message(bb, hdfBackingStorage, this.isAttributeCreationOrderTracked());
 				messages.add(m);
 
 				if (m instanceof ObjectHeaderContinuationMessage) {
 					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
-					ByteBuffer continuationBuffer = hdfFc.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
+					ByteBuffer continuationBuffer = hdfBackingStorage.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
 
 					// Verify continuation block signature
 					byte[] continuationSignatureBytes = new byte[OBJECT_HEADER_V2_CONTINUATION_SIGNATURE.length];
@@ -299,7 +299,7 @@ public abstract class ObjectHeader {
 					}
 
 					// Recursively read messages
-					readMessages(hdfFc, continuationBuffer);
+					readMessages(hdfBackingStorage, continuationBuffer);
 
 					continuationBuffer.rewind();
 					ChecksumUtils.validateChecksum(continuationBuffer);
