@@ -1,5 +1,11 @@
 # jHDF Change Log
 
+## v0.6.1
+- Add support for committed datatypes https://github.com/jamesmudd/jhdf/issues/255
+- Add support for attributes with shared datatype
+- Switch dependencies repository to Maven Central https://github.com/jamesmudd/jhdf/issues/250  
+- Code cleanup
+
 ## v0.6.0
 - Adds support for reading in-memory files from `byte[]` or `ByteBuffers` https://github.com/jamesmudd/jhdf/issues/245
 - *Breaking API change* To support in-memory files `HdfFile#getHdfChannel` is replaced by `HdfFile#getHdfBackingStorage` which now returns a `HdfBackingStorage`. Internally the new interface replaces the use of `HdfFileChannel`  
