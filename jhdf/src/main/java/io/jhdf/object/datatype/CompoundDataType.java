@@ -96,8 +96,8 @@ public class CompoundDataType extends DataType {
 	}
 
 	@Override
-	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
-		return CompoundDatasetReader.readDataset(this, buffer, dimensions, hdfFc);
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
+		return CompoundDatasetReader.readDataset(this, buffer, dimensions, hdfBackingStorage);
 	}
 
     public static class CompoundDataMember {

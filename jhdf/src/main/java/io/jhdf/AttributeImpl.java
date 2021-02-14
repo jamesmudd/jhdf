@@ -25,13 +25,13 @@ import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 public class AttributeImpl implements Attribute {
 	private static final Logger logger = LoggerFactory.getLogger(AttributeImpl.class);
 
-	private final HdfBackingStorage hdfFc;
+	private final HdfBackingStorage hdfBackingStorage;
 	private final Node node;
 	private final String name;
 	private final AttributeMessage message;
 
-	public AttributeImpl(HdfBackingStorage hdfFc, Node node, AttributeMessage message) {
-		this.hdfFc = hdfFc;
+	public AttributeImpl(HdfBackingStorage hdfBackingStorage, Node node, AttributeMessage message) {
+		this.hdfBackingStorage = hdfBackingStorage;
 		this.node = node;
 		this.name = message.getName();
 		this.message = message;
@@ -70,7 +70,7 @@ public class AttributeImpl implements Attribute {
 		}
 		DataType type = message.getDataType();
 		ByteBuffer bb = message.getDataBuffer();
-		return DatasetReader.readDataset(type, bb, getDimensions(), hdfFc);
+		return DatasetReader.readDataset(type, bb, getDimensions(), hdfBackingStorage);
 	}
 
 	@Override

@@ -28,24 +28,24 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 class LocalHeapTest {
-	private HdfBackingStorage hdfFc;
+	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
 	void setUp() throws IOException, URISyntaxException {
 		final URI testFileUri = this.getClass().getResource("/hdf5/test_file.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
-		hdfFc = new HdfFileChannel(fc, sb);
+		hdfBackingStorage = new HdfFileChannel(fc, sb);
 	}
 
 	@AfterEach
 	void after() {
-		hdfFc.close();
+		hdfBackingStorage.close();
 	}
 
 	@Test
 	void testLocalHeap() {
-		LocalHeap heap = new LocalHeap(hdfFc, 680);
+		LocalHeap heap = new LocalHeap(hdfBackingStorage, 680);
 
 		assertThat(heap.getVersion(), is(equalTo((short) 0)));
 		assertThat(heap.getDataSegmentSize(), is(equalTo(88L)));
@@ -57,7 +57,7 @@ class LocalHeapTest {
 
 	@Test
 	void testAccessingData() {
-		LocalHeap heap = new LocalHeap(hdfFc, 680);
+		LocalHeap heap = new LocalHeap(hdfBackingStorage, 680);
 		ByteBuffer bb = heap.getDataBuffer();
 		assertThat(bb.capacity(), is(equalTo(88)));
 		// Test reading a name from the heap

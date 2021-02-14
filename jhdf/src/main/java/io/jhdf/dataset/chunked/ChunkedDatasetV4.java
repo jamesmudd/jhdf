@@ -41,8 +41,8 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
     private final ChunkedDataLayoutMessageV4 layoutMessage;
     private final ChunkLookupLazyInitializer chunkLookupLazyInitializer;
 
-    public ChunkedDatasetV4(HdfBackingStorage hdfFc, long address, String name, Group parent, ObjectHeader oh) {
-        super(hdfFc, address, name, parent, oh);
+    public ChunkedDatasetV4(HdfBackingStorage hdfBackingStorage, long address, String name, Group parent, ObjectHeader oh) {
+        super(hdfBackingStorage, address, name, parent, oh);
 
         layoutMessage = oh.getMessageOfType(ChunkedDataLayoutMessageV4.class);
         chunkLookupLazyInitializer = new ChunkLookupLazyInitializer();
@@ -88,15 +88,15 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
                         throw new UnsupportedHdfException("Implicit indexing is currently not supported");
                     case 3: // Fixed array
                         logger.debug("Reading fixed array indexed dataset");
-                        chunkIndex = new FixedArrayIndex(hdfFc, layoutMessage.getAddress(), datasetInfo);
+                        chunkIndex = new FixedArrayIndex(hdfBackingStorage, layoutMessage.getAddress(), datasetInfo);
                         break;
                     case 4: // Extensible Array
                         logger.debug("Reading extensible array indexed dataset");
-                        chunkIndex = new ExtensibleArrayIndex(hdfFc, layoutMessage.getAddress(), datasetInfo);
+                        chunkIndex = new ExtensibleArrayIndex(hdfBackingStorage, layoutMessage.getAddress(), datasetInfo);
                         break;
                     case 5: // B Tree V2
                         logger.debug("Reading B tree v2 indexed dataset");
-                        chunkIndex = new BTreeIndex(hdfFc, layoutMessage.getAddress(), datasetInfo);
+                        chunkIndex = new BTreeIndex(hdfBackingStorage, layoutMessage.getAddress(), datasetInfo);
                         break;
                     default:
                         throw new HdfException("Unrecognized chunk indexing type = " + layoutMessage.getIndexingType());

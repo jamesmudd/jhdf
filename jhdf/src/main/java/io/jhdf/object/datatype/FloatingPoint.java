@@ -139,7 +139,7 @@ public class FloatingPoint extends DataType implements OrderedDataType {
     }
 
     @Override
-    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
+    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
         final Object data = Array.newInstance(getJavaType(), dimensions);
         final ByteOrder byteOrder = getByteOrder();
         switch (getSize()) {

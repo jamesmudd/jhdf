@@ -130,27 +130,27 @@ class FixedPointTest {
     private Executable createTest(ByteBuffer buffer, FixedPoint dataType, int[] dims, Object expected) {
 		return () -> {
 			buffer.rewind(); // For shared buffers
-            HdfBackingStorage hdfFc = mock(HdfFileChannel.class);
-            Object actual = dataType.fillData(buffer, dims, hdfFc);
+            HdfBackingStorage hdfBackingStorage = mock(HdfFileChannel.class);
+            Object actual = dataType.fillData(buffer, dims, hdfBackingStorage);
             assertThat(actual, is(expected));
-            verifyNoInteractions(hdfFc);
+            verifyNoInteractions(hdfBackingStorage);
 		};
 	}
 
     @Test
 	void testUnsupportedFixedPointLengthThrows() {
 		FixedPoint invalidDataType = mockFixedPoint(true, 11); // 11 byte data is not supported
-        HdfBackingStorage hdfFc = mock(HdfFileChannel.class);
-        assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(longBuffer, dims, hdfFc));
-        verifyNoInteractions(hdfFc);
+        HdfBackingStorage hdfBackingStorage = mock(HdfBackingStorage.class);
+        assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(longBuffer, dims, hdfBackingStorage));
+        verifyNoInteractions(hdfBackingStorage);
 	}
 
 	@Test
 	void testUnsupportedUnsignedFixedPointLengthThrows() {
 		FixedPoint invalidDataType = mockFixedPoint(false, 11); // 11 byte data is not supported
-        HdfBackingStorage hdfFc = mock(HdfFileChannel.class);
-        assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(longBuffer, dims, hdfFc));
-        verifyNoInteractions(hdfFc);
+        HdfBackingStorage hdfBackingStorage = mock(HdfBackingStorage.class);
+        assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(longBuffer, dims, hdfBackingStorage));
+        verifyNoInteractions(hdfBackingStorage);
 	}
 
 }

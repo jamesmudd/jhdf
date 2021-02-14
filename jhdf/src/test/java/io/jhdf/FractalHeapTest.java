@@ -37,9 +37,9 @@ class FractalHeapTest {
 		try (RandomAccessFile raf = new RandomAccessFile(new File(testFile), "r")) {
 			FileChannel fc = raf.getChannel();
 			Superblock sb = Superblock.readSuperblock(fc, 0);
-			HdfBackingStorage hdfFc = new HdfFileChannel(fc, sb);
+			HdfBackingStorage hdfBackingStorage = new HdfFileChannel(fc, sb);
 
-			fractalHeap = new FractalHeap(hdfFc, 1870);
+			fractalHeap = new FractalHeap(hdfBackingStorage, 1870);
 		}
 	}
 

@@ -24,15 +24,15 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 
 	final ContiguousDataLayoutMessage contiguousDataLayoutMessage;
 
-	public ContiguousDatasetImpl(HdfBackingStorage hdfFc, long address, String name, Group parent, ObjectHeader oh) {
-		super(hdfFc, address, name, parent, oh);
+	public ContiguousDatasetImpl(HdfBackingStorage hdfBackingStorage, long address, String name, Group parent, ObjectHeader oh) {
+		super(hdfBackingStorage, address, name, parent, oh);
 		this.contiguousDataLayoutMessage = getHeaderMessage(ContiguousDataLayoutMessage.class);
 	}
 
 	@Override
 	public ByteBuffer getDataBuffer() {
 		try {
-			ByteBuffer data = hdfFc.map(contiguousDataLayoutMessage.getAddress(), getSizeInBytes());
+			ByteBuffer data = hdfBackingStorage.map(contiguousDataLayoutMessage.getAddress(), getSizeInBytes());
 			convertToCorrectEndiness(data);
 			return data;
 		} catch (Exception e) {

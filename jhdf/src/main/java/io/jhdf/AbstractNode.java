@@ -56,14 +56,14 @@ public abstract class AbstractNode implements Node {
 
 				if (attributeInfoMessage.getFractalHeapAddress() != Constants.UNDEFINED_ADDRESS) {
 					// Create the heap and btree
-					FractalHeap fractalHeap = new FractalHeap(hdfFc, attributeInfoMessage.getFractalHeapAddress());
-					BTreeV2<AttributeNameForIndexedAttributesRecord> btree = new BTreeV2<>(hdfFc,
+					FractalHeap fractalHeap = new FractalHeap(hdfBackingStorage, attributeInfoMessage.getFractalHeapAddress());
+					BTreeV2<AttributeNameForIndexedAttributesRecord> btree = new BTreeV2<>(hdfBackingStorage,
 							attributeInfoMessage.getAttributeNameBTreeAddress());
 
 					// Read the attribute messages from the btree+heap
 					for (AttributeNameForIndexedAttributesRecord attributeRecord : btree.getRecords()) {
 						ByteBuffer bb = fractalHeap.getId(attributeRecord.getHeapId());
-						AttributeMessage attributeMessage = new AttributeMessage(bb, hdfFc,
+						AttributeMessage attributeMessage = new AttributeMessage(bb, hdfBackingStorage,
 								attributeRecord.getFlags());
 						logger.trace("Read attribute message '{}'", attributeMessage);
 						attributeMessages.add(attributeMessage);
@@ -77,25 +77,25 @@ public abstract class AbstractNode implements Node {
 			return attributeMessages.stream()
 					.collect(
 							toMap(AttributeMessage::getName,
-									message -> new AttributeImpl(hdfFc, AbstractNode.this, message)));
+									message -> new AttributeImpl(hdfBackingStorage, AbstractNode.this, message)));
 		}
 	}
 
-	private final HdfBackingStorage hdfFc;
+	private final HdfBackingStorage hdfBackingStorage;
 	protected final long address;
 	protected final String name;
 	protected final Group parent;
 	protected final LazyInitializer<ObjectHeader> header;
 	protected final AttributesLazyInitializer attributes;
 
-	protected AbstractNode(HdfBackingStorage hdfFc, long address, String name, Group parent) {
-		this.hdfFc = hdfFc;
+	protected AbstractNode(HdfBackingStorage hdfBackingStorage, long address, String name, Group parent) {
+		this.hdfBackingStorage = hdfBackingStorage;
 		this.address = address;
 		this.name = name;
 		this.parent = parent;
 
 		try {
-			header = ObjectHeader.lazyReadObjectHeader(hdfFc, address);
+			header = ObjectHeader.lazyReadObjectHeader(hdfBackingStorage, address);
 
 			// Attributes
 			attributes = new AttributesLazyInitializer(header);

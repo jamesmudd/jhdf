@@ -26,19 +26,19 @@ public class GlobalHeap {
 
 	private static final byte[] GLOBAL_HEAP_SIGNATURE = "GCOL".getBytes(StandardCharsets.US_ASCII);
 
-	private final HdfBackingStorage hdfFc;
+	private final HdfBackingStorage hdfBackingStorage;
 	private final long address;
 
 	private final Map<Integer, GlobalHeapObject> objects = new HashMap<>();
 
-	public GlobalHeap(HdfBackingStorage hdfFc, long address) {
-		this.hdfFc = hdfFc;
+	public GlobalHeap(HdfBackingStorage hdfBackingStorage, long address) {
+		this.hdfBackingStorage = hdfBackingStorage;
 		this.address = address;
 
 		try {
-			int headerSize = 4 + 1 + 3 + hdfFc.getSizeOfLengths();
+			int headerSize = 4 + 1 + 3 + hdfBackingStorage.getSizeOfLengths();
 
-			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
+			ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
 			byte[] signatureBytes = new byte[4];
 			bb.get(signatureBytes, 0, signatureBytes.length);
@@ -56,12 +56,12 @@ public class GlobalHeap {
 
 			bb.position(8); // Skip past 3 reserved bytes
 
-			int collectionSize = readBytesAsUnsignedInt(bb, hdfFc.getSizeOfLengths());
+			int collectionSize = readBytesAsUnsignedInt(bb, hdfBackingStorage.getSizeOfLengths());
 
 			// Collection size contains size of whole collection, so substract already read bytes
-			int remainingCollectionSize = collectionSize - 8 - hdfFc.getSizeOfLengths();
+			int remainingCollectionSize = collectionSize - 8 - hdfBackingStorage.getSizeOfLengths();
 			// Now start reading the heap into memory
-			bb = hdfFc.readBufferFromAddress(address + headerSize, remainingCollectionSize);
+			bb = hdfBackingStorage.readBufferFromAddress(address + headerSize, remainingCollectionSize);
 
 			// minimal global heap object is 16 bytes
 			while (bb.remaining() >= 16) {
@@ -94,10 +94,10 @@ public class GlobalHeap {
 			index = readBytesAsUnsignedInt(bb, 2);
 			referenceCount = readBytesAsUnsignedInt(bb, 2);
 			bb.position(bb.position() + 4); // Skip 4 reserved bytes
-			int size = readBytesAsUnsignedInt(bb, globalHeap.hdfFc.getSizeOfOffsets());
+			int size = readBytesAsUnsignedInt(bb, globalHeap.hdfBackingStorage.getSizeOfOffsets());
 			if (index == 0) {
 				//the size in global heap object 0 is the free space without counting object 0
-				size = size - 2 - 2 - 4 - globalHeap.hdfFc.getSizeOfOffsets();
+				size = size - 2 - 2 - 4 - globalHeap.hdfBackingStorage.getSizeOfOffsets();
 			}
 			data = createSubBuffer(bb, size);
 			seekBufferToNextMultipleOfEight(bb);

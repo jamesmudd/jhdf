@@ -32,11 +32,11 @@ public class GroupSymbolTableNode {
 	private final short numberOfEntries;
 	private final SymbolTableEntry[] symbolTableEntries;
 
-	public GroupSymbolTableNode(HdfBackingStorage hdfFc, long address) {
+	public GroupSymbolTableNode(HdfBackingStorage hdfBackingStorage, long address) {
 		this.address = address;
 		try {
 			int headerSize = 8;
-			ByteBuffer header = hdfFc.readBufferFromAddress(address, headerSize);
+			ByteBuffer header = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
 			byte[] formatSignatureBytes = new byte[4];
 			header.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -59,12 +59,12 @@ public class GroupSymbolTableNode {
 			numberOfEntries = ByteBuffer.wrap(twoBytes).order(LITTLE_ENDIAN).getShort();
 			logger.trace("numberOfSymbols = {}", numberOfEntries);
 
-			final long symbolTableEntryBytes = hdfFc.getSizeOfOffsets() * 2L + 8L + 16L;
+			final long symbolTableEntryBytes = hdfBackingStorage.getSizeOfOffsets() * 2L + 8L + 16L;
 
 			symbolTableEntries = new SymbolTableEntry[numberOfEntries];
 			for (int i = 0; i < numberOfEntries; i++) {
 				long offset = address + headerSize + i * symbolTableEntryBytes;
-				symbolTableEntries[i] = new SymbolTableEntry(hdfFc, offset);
+				symbolTableEntries[i] = new SymbolTableEntry(hdfBackingStorage, offset);
 			}
 		} catch (Exception e) {
 			// TODO improve message

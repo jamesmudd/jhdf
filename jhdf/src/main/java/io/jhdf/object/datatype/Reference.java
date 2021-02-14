@@ -77,7 +77,7 @@ public class Reference extends DataType {
 	}
 
 	@Override
-	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
 		final Object data = Array.newInstance(getJavaType(), dimensions);
 		fillData(data, dimensions, buffer.order(ByteOrder.LITTLE_ENDIAN));
 		return data;

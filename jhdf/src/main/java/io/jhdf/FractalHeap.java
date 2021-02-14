@@ -59,7 +59,7 @@ public class FractalHeap {
 	private static final BigInteger TWO = BigInteger.valueOf(2L);
 
 	private final long address;
-	private final HdfBackingStorage hdfFc;
+	private final HdfBackingStorage hdfBackingStorage;
 	private final Superblock sb;
 
 	private final int maxDirectBlockSize;
@@ -95,15 +95,15 @@ public class FractalHeap {
 	private final int bytesToStoreOffset;
 	private final int bytesToStoreLength;
 
-	public FractalHeap(HdfBackingStorage hdfFc, long address) {
-		this.hdfFc = hdfFc;
-		this.sb = hdfFc.getSuperblock();
+	public FractalHeap(HdfBackingStorage hdfBackingStorage, long address) {
+		this.hdfBackingStorage = hdfBackingStorage;
+		this.sb = hdfBackingStorage.getSuperblock();
 		this.address = address;
 
 		final int headerSize = 4 + 1 + 2 + 2 + 1 + 4 + 12 * sb.getSizeOfLengths() + 3 * sb.getSizeOfOffsets() + 2
 				+ 2 + 2 + 2 + 4;
 
-		ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
+		ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
 		byte[] formatSignatureBytes = new byte[4];
 		bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -228,7 +228,7 @@ public class FractalHeap {
 			}
 
 			BTreeV2<HugeFractalHeapObjectUnfilteredRecord> hugeObjectBTree =
-			    new BTreeV2<>(this.hdfFc, this.bTreeAddressOfHugeObjects);
+			    new BTreeV2<>(this.hdfBackingStorage, this.bTreeAddressOfHugeObjects);
 
 			if (hugeObjectBTree.getRecords().size() != 1) {
 			    throw new UnsupportedHdfException("Only Huge objects BTrees with 1 record are currently supported");
@@ -236,7 +236,7 @@ public class FractalHeap {
 
 			HugeFractalHeapObjectUnfilteredRecord ho = hugeObjectBTree.getRecords().get(0);
 
-			return this.hdfFc.readBufferFromAddress(ho.getAddress(), (int) ho.getLength());
+			return this.hdfBackingStorage.readBufferFromAddress(ho.getAddress(), (int) ho.getLength());
 		case 2: // Tiny objects
 			throw new UnsupportedHdfException("Tiny objects are currently not supported");
 		default:
@@ -252,7 +252,7 @@ public class FractalHeap {
 			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset
 					+ currentRowsInRootIndirectBlock * tableWidth * getRowSize() + 4;
 
-			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
+			ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
 			byte[] formatSignatureBytes = new byte[4];
 			bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -319,7 +319,7 @@ public class FractalHeap {
 
 			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset + 4;
 
-			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
+			ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
 			byte[] formatSignatureBytes = new byte[4];
 			bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -342,7 +342,7 @@ public class FractalHeap {
 
 			blockOffset = readBytesAsUnsignedLong(bb, bytesToStoreOffset);
 
-			data = hdfFc.map(address, getSizeOfDirectBlock(blockIndex));
+			data = hdfBackingStorage.map(address, getSizeOfDirectBlock(blockIndex));
 
 			if (checksumPresent()) {
 				int storedChecksum = bb.getInt();

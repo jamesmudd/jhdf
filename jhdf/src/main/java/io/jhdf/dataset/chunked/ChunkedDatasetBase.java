@@ -36,8 +36,8 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 
     protected final FilterPipelineLazyInitializer lazyPipeline;
 
-    public ChunkedDatasetBase(HdfBackingStorage hdfFc, long address, String name, Group parent, ObjectHeader oh) {
-        super(hdfFc, address, name, parent, oh);
+    public ChunkedDatasetBase(HdfBackingStorage hdfBackingStorage, long address, String name, Group parent, ObjectHeader oh) {
+        super(hdfBackingStorage, address, name, parent, oh);
         lazyPipeline = new FilterPipelineLazyInitializer();
     }
 
@@ -252,7 +252,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 
     private ByteBuffer getDataBuffer(Chunk chunk) {
         try {
-            return hdfFc.map(chunk.getAddress(), chunk.getSize());
+            return hdfBackingStorage.map(chunk.getAddress(), chunk.getSize());
         } catch (Exception e) {
             throw new HdfException(
                     "Failed to read chunk for dataset '" + getPath() + "' at address " + chunk.getAddress());

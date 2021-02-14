@@ -97,7 +97,7 @@ public class VariableLength extends DataType {
 	}
 
 	@Override
-	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
-		return  VariableLengthDatasetReader.readDataset(this, buffer, dimensions, hdfFc);
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
+		return  VariableLengthDatasetReader.readDataset(this, buffer, dimensions, hdfBackingStorage);
 	}
 }

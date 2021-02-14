@@ -43,14 +43,14 @@ public class FixedArrayIndex implements ChunkIndex {
 
     private final List<Chunk> chunks;
 
-    public FixedArrayIndex(HdfBackingStorage hdfFc, long address, DatasetInfo datasetInfo) {
+    public FixedArrayIndex(HdfBackingStorage hdfBackingStorage, long address, DatasetInfo datasetInfo) {
         this.address = address;
         this.unfilteredChunkSize = datasetInfo.getChunkSizeInBytes();
         this.datasetDimensions = datasetInfo.getDatasetDimensions();
         this.chunkDimensions = datasetInfo.getChunkDimensions();
 
-        final int headerSize = 12 + hdfFc.getSizeOfOffsets() + hdfFc.getSizeOfLengths();
-        final ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
+        final int headerSize = 12 + hdfBackingStorage.getSizeOfOffsets() + hdfBackingStorage.getSizeOfLengths();
+        final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
         byte[] formatSignatureBytes = new byte[4];
         bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -70,8 +70,8 @@ public class FixedArrayIndex implements ChunkIndex {
         entrySize = bb.get();
         pageBits = bb.get();
 
-        maxNumberOfEntries = Utils.readBytesAsUnsignedInt(bb, hdfFc.getSizeOfLengths());
-        dataBlockAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
+        maxNumberOfEntries = Utils.readBytesAsUnsignedInt(bb, hdfBackingStorage.getSizeOfLengths());
+        dataBlockAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
 
         chunks = new ArrayList<>(maxNumberOfEntries);
 
@@ -80,16 +80,16 @@ public class FixedArrayIndex implements ChunkIndex {
         ChecksumUtils.validateChecksum(bb);
 
         // Building the object fills the chunks. Probably shoudld be changed
-        new FixedArrayDataBlock(this, hdfFc, dataBlockAddress);
+        new FixedArrayDataBlock(this, hdfBackingStorage, dataBlockAddress);
     }
 
     private static class FixedArrayDataBlock {
 
-        private FixedArrayDataBlock(FixedArrayIndex fixedArrayIndex, HdfBackingStorage hdfFc, long address) {
+        private FixedArrayDataBlock(FixedArrayIndex fixedArrayIndex, HdfBackingStorage hdfBackingStorage, long address) {
 
             // TODO header size ignoring paging
-            final int headerSize = 6 + hdfFc.getSizeOfOffsets() + fixedArrayIndex.entrySize * fixedArrayIndex.maxNumberOfEntries + 4;
-            final ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
+            final int headerSize = 6 + hdfBackingStorage.getSizeOfOffsets() + fixedArrayIndex.entrySize * fixedArrayIndex.maxNumberOfEntries + 4;
+            final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
             byte[] formatSignatureBytes = new byte[4];
             bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -110,7 +110,7 @@ public class FixedArrayIndex implements ChunkIndex {
                 throw new HdfException("Fixed array client ID mismatch. Possible file corruption detected");
             }
 
-            final long headerAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
+            final long headerAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
             if (headerAddress != fixedArrayIndex.address) {
                 throw new HdfException("Fixed array data block header address missmatch");
             }
@@ -119,14 +119,14 @@ public class FixedArrayIndex implements ChunkIndex {
 
             if (clientId == 0) { // Not filtered
                 for (int i = 0; i < fixedArrayIndex.maxNumberOfEntries; i++) {
-                    final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
+                    final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
                     final int[] chunkOffset = Utils.chunkIndexToChunkOffset(i, fixedArrayIndex.chunkDimensions, fixedArrayIndex.datasetDimensions);
                     fixedArrayIndex.chunks.add(new ChunkImpl(chunkAddress, fixedArrayIndex.unfilteredChunkSize, chunkOffset));
                 }
             } else  if (clientId == 1) { // Filtered
                 for (int i = 0; i < fixedArrayIndex.maxNumberOfEntries; i++) {
-                    final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, hdfFc.getSizeOfOffsets());
-                    final int chunkSizeInBytes = Utils.readBytesAsUnsignedInt(bb, fixedArrayIndex.entrySize - hdfFc.getSizeOfOffsets() - 4);
+                    final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
+                    final int chunkSizeInBytes = Utils.readBytesAsUnsignedInt(bb, fixedArrayIndex.entrySize - hdfBackingStorage.getSizeOfOffsets() - 4);
                     final BitSet filterMask = BitSet.valueOf(new byte[] { bb.get(), bb.get(), bb.get(), bb.get() });
                     final int[] chunkOffset = Utils.chunkIndexToChunkOffset(i,  fixedArrayIndex.chunkDimensions, fixedArrayIndex.datasetDimensions);
 

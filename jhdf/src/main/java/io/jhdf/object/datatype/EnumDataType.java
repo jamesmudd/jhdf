@@ -81,7 +81,7 @@ public class EnumDataType extends DataType {
     }
 
     @Override
-    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfFc) {
+    public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
         return EnumDatasetReader.readEnumDataset(this, buffer, dimensions);
     }
 }

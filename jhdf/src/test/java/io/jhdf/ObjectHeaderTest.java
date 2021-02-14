@@ -35,7 +35,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 
 class ObjectHeaderTest {
-	private HdfBackingStorage hdfFc;
+	private HdfBackingStorage hdfBackingStorage;
 	private Superblock sb;
 	private FileChannel fc;
 
@@ -44,18 +44,18 @@ class ObjectHeaderTest {
 		final URI testFileUri = this.getClass().getResource("/hdf5/test_file.hdf5").toURI();
 		fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		sb = Superblock.readSuperblock(fc, 0);
-		hdfFc = new HdfFileChannel(fc, sb);
+		hdfBackingStorage = new HdfFileChannel(fc, sb);
 	}
 
 	@AfterEach
 	void after() throws IOException {
-		hdfFc.close();
+		hdfBackingStorage.close();
 		fc.close();
 	}
 
 	@Test
 	void testObjectHeaderOnGroup() {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 800); // dataset_group header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 800); // dataset_group header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(800L)));
@@ -70,7 +70,7 @@ class ObjectHeaderTest {
 
 	@Test
 	void testObjectHeaderOnFloat32Dataset() {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 7272); // float32 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 7272); // float32 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(7272L)));
@@ -85,7 +85,7 @@ class ObjectHeaderTest {
 
 	@Test
 	void testObjectHeaderOnFloat64Dataset() {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 7872); // float64 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 7872); // float64 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(7872L)));
@@ -100,7 +100,7 @@ class ObjectHeaderTest {
 
 	@Test
 	void testObjectHeaderOnInt8Dataset() {
-		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfFc, 10904); // int8 header
+		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 10904); // int8 header
 
 		assertThat(oh.getVersion(), is(equalTo(1)));
 		assertThat(oh.getAddress(), is(equalTo(10904L)));
