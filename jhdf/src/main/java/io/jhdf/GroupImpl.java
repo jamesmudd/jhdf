@@ -22,8 +22,8 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
 import io.jhdf.links.ExternalLink;
 import io.jhdf.links.SoftLink;
-import io.jhdf.object.message.DataLayoutMessage;
 import io.jhdf.object.message.DataSpaceMessage;
+import io.jhdf.object.message.DataTypeMessage;
 import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.SymbolTableMessage;
@@ -128,22 +128,7 @@ public class GroupImpl extends AbstractNode implements Group {
 					final Node node;
 					switch (ste.getCacheType()) {
 					case 0: // No cache
-						// Not cached so need to look at header
-						final ObjectHeader header;
-						try {
-							header = ObjectHeader.readObjectHeader(hdfFc, ste.getObjectHeaderAddress());
-						} catch (HdfException e) {
-							// Add context here we know the child name that failed
-							throw new HdfException("Failed to read '" + getPath() + childName + "'", e);
-						}
-
-						if (header.hasMessageOfType(DataLayoutMessage.class)) {
-							logger.trace("Creating dataset '{}'", childName);
-							node = DatasetLoader.createDataset(hdfFc, header, childName, parent);
-						} else {
-							logger.trace("Creating group '{}'", childName);
-							node = createGroup(hdfFc, ste.getObjectHeaderAddress(), childName, parent);
-						}
+						node = createNode(childName, ste.getObjectHeaderAddress());
 						break;
 					case 1: // Cached group
 						logger.trace("Creating group '{}'", childName);
@@ -169,9 +154,15 @@ public class GroupImpl extends AbstractNode implements Group {
 			final Node node;
 			if (linkHeader.hasMessageOfType(DataSpaceMessage.class)) {
 				// Its a a Dataset
+				logger.trace("Creating dataset [{}]", name);
 				node = DatasetLoader.createDataset(hdfFc, linkHeader, name, parent);
+			} else if (linkHeader.hasMessageOfType(DataTypeMessage.class)) {
+				// Has a datatype but no dataspace so its a committed datatype
+				logger.trace("Creating committed data type [{}]", name);
+				node = new CommittedDatatype(hdfFc, address, name, parent);
 			} else {
 				// Its a group
+				logger.trace("Creating group [{}]", name);
 				node = createGroup(hdfFc, address, name, parent);
 			}
 			return node;

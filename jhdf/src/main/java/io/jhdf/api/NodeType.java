@@ -10,5 +10,5 @@
 package io.jhdf.api;
 
 public enum NodeType {
-	FILE, GROUP, DATASET
+	FILE, GROUP, DATASET, COMMITTED_DATATYPE
 }

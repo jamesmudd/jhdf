@@ -63,7 +63,7 @@ public abstract class AbstractNode implements Node {
 					// Read the attribute messages from the btree+heap
 					for (AttributeNameForIndexedAttributesRecord attributeRecord : btree.getRecords()) {
 						ByteBuffer bb = fractalHeap.getId(attributeRecord.getHeapId());
-						AttributeMessage attributeMessage = new AttributeMessage(bb, hdfFc.getSuperblock(),
+						AttributeMessage attributeMessage = new AttributeMessage(bb, hdfFc,
 								attributeRecord.getFlags());
 						logger.trace("Read attribute message '{}'", attributeMessage);
 						attributeMessages.add(attributeMessage);
@@ -88,7 +88,7 @@ public abstract class AbstractNode implements Node {
 	protected final LazyInitializer<ObjectHeader> header;
 	protected final AttributesLazyInitializer attributes;
 
-	public AbstractNode(HdfBackingStorage hdfFc, long address, String name, Group parent) {
+	protected AbstractNode(HdfBackingStorage hdfFc, long address, String name, Group parent) {
 		this.hdfFc = hdfFc;
 		this.address = address;
 		this.name = name;
