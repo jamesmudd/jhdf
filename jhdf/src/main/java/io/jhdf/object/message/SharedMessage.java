@@ -16,6 +16,19 @@ import io.jhdf.exceptions.UnsupportedHdfException;
 
 import java.nio.ByteBuffer;
 
+/**
+ * <p>
+ * Shared Message
+ * </p>
+ *
+ * <p>
+ * <a href=
+ * "https://support.hdfgroup.org/HDF5/doc/H5.format.html#ObjectHeaderMessages">Format
+ * Spec</a>
+ * </p>
+ *
+ * @author James Mudd
+ */
 public class SharedMessage {
 	/** Address of the object header containing the shared message */
 	private final long objectHeaderAddress;
