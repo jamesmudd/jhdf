@@ -42,7 +42,7 @@ compileTestJava {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 ext {
