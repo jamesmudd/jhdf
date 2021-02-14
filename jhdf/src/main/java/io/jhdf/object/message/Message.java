@@ -38,10 +38,6 @@ public class Message {
 		this.flags = flags;
 	}
 
-	public Message() {
-		this.flags = BitSet.valueOf(new byte[0]);
-	}
-
 	public static Message readObjectHeaderV1Message(ByteBuffer bb, HdfBackingStorage hdfBackingStorage) {
 		Utils.seekBufferToNextMultipleOfEight(bb);
 

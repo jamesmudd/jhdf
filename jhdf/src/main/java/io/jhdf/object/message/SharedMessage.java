@@ -16,7 +16,7 @@ import io.jhdf.exceptions.UnsupportedHdfException;
 
 import java.nio.ByteBuffer;
 
-public class SharedMessage extends Message {
+public class SharedMessage {
 	/** Address of the object header containing the shared message */
 	private final long objectHeaderAddress;
 
