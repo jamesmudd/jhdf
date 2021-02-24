@@ -64,7 +64,7 @@ dependencies {
     testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
 
     // Mocking
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.7.7'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.8.0'
     testImplementation group: 'org.powermock', name: 'powermock-core', version: '2.0.9'
     // Matchers
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
