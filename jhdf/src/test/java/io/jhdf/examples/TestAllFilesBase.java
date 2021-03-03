@@ -10,6 +10,7 @@
 package io.jhdf.examples;
 
 import io.jhdf.HdfFile;
+import io.jhdf.Utils;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -18,6 +19,7 @@ import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.dataset.ChunkedDataset;
 import io.jhdf.api.dataset.ContiguousDataset;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 
@@ -31,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,6 +43,7 @@ import java.util.stream.Stream;
 import static io.jhdf.TestUtils.getDimensions;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.instanceOf;
@@ -163,6 +167,11 @@ abstract class TestAllFilesBase {
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 		} else if (dataset.isVariableLength()) {
 			assertThat(getDimensions(data)[0], is(equalTo(dims[0])));
+			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
+		} else if(dataset.getJavaType().isArray()) {
+			// e.g. Opaque dataset
+			assertThat(getType(data), is(equalTo(dataset.getJavaType().getComponentType())));
+			// Should have some size
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 		} else {
 			assertThat(getDimensions(data), is(equalTo(dims)));
