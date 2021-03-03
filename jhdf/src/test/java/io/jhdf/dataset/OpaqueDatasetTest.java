@@ -17,10 +17,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -95,7 +97,7 @@ class OpaqueDatasetTest {
 		int counter = 0;
 		for (int i = 0; i < 5; i++) {
 			for (int j = 0; j < 7; j++) {
-				assertThat(new String(data[i][j]).trim(), is(Integer.toString(counter)));
+				assertThat(new String(data[i][j], UTF_8).trim(), is(Integer.toString(counter)));
 				counter++;
 			}
 		}
@@ -114,7 +116,7 @@ class OpaqueDatasetTest {
 		int counter = 0;
 		for (int i = 0; i < 5; i++) {
 			for (int j = 0; j < 7; j++) {
-				assertThat(new String(data[i][j]).trim(), is(Integer.toString(counter)));
+				assertThat(new String(data[i][j], UTF_8).trim(), is(Integer.toString(counter)));
 				counter++;
 			}
 		}
