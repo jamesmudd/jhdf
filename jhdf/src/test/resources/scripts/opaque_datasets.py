@@ -26,7 +26,12 @@ def write_datasets(f):
     ])
 
     dataType = h5py.opaque_dtype(data.dtype)
-    f.create_dataset('opaque', data=data.astype(dataType))
+    f.create_dataset('timestamp', data=data.astype(dataType))
+
+    # 2D String data
+    data = np.arange(35).reshape(5,7).astype(bytes)
+    dataType = h5py.opaque_dtype(data.dtype)
+    f.create_dataset('opaque_2d_string', data=data.astype(dataType))
 
     f.flush()
     f.close()

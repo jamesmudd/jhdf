@@ -23,7 +23,7 @@ import static io.jhdf.Utils.stripLeadingIndex;
  *
  * @author James Mudd
  */
-class OpaqueDataType extends DataType {
+public class OpaqueDataType extends DataType {
     private final String asciiTag;
 
     public OpaqueDataType(ByteBuffer bb) {

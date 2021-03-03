@@ -11,23 +11,20 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
-import io.jhdf.api.Node;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
+import io.jhdf.object.datatype.OpaqueDataType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.time.Instant;
 
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-public class OpaqueDatasetTest {
+class OpaqueDatasetTest {
 
 	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "opaque_datasets_earliest.hdf5";
 	private static final String HDF5_TEST_LATEST_FILE_NAME = "opaque_datasets_latest.hdf5";
@@ -53,9 +50,12 @@ public class OpaqueDatasetTest {
 
 	@Test
 	void testTimestampsEarliest() {
-		Dataset dataset = earliestHdfFile.getDatasetByPath("opaque");
+		Dataset dataset = earliestHdfFile.getDatasetByPath("timestamp");
 		assertThat(dataset.getJavaType(), is(byte[].class));
 		assertThat(dataset.getDimensions(), is(new int[]{5}));
+		OpaqueDataType opaqueDataType = (OpaqueDataType) dataset.getDataType();
+		assertThat(opaqueDataType.getAsciiTag(), is("NUMPY:<M8[s]"));
+		// Now check the data
 		byte[][] data = (byte[][]) dataset.getData();
 		// Check timestamps match numpy datetime64
 		assertThat(toTimeStampString(data[0]), is("2017-02-22T14:14:14Z"));
@@ -67,9 +67,12 @@ public class OpaqueDatasetTest {
 
 	@Test
 	void testTimestampsLatest() {
-		Dataset dataset = latestHdfFile.getDatasetByPath("opaque");
+		Dataset dataset = latestHdfFile.getDatasetByPath("timestamp");
 		assertThat(dataset.getJavaType(), is(byte[].class));
 		assertThat(dataset.getDimensions(), is(new int[]{5}));
+		OpaqueDataType opaqueDataType = (OpaqueDataType) dataset.getDataType();
+		assertThat(opaqueDataType.getAsciiTag(), is("NUMPY:<M8[s]"));
+		// Now check the data
 		byte[][] data = (byte[][]) dataset.getData();
 		// Check timestamps match numpy datetime64
 		assertThat(toTimeStampString(data[0]), is("2017-02-22T14:14:14Z"));
@@ -77,5 +80,43 @@ public class OpaqueDatasetTest {
 		assertThat(toTimeStampString(data[2]), is("2019-02-22T14:14:14Z"));
 		assertThat(toTimeStampString(data[3]), is("2020-02-22T14:14:14Z"));
 		assertThat(toTimeStampString(data[4]), is("2021-02-22T14:14:14Z"));
+	}
+
+	@Test
+	void test2DStringEarliest() {
+		Dataset dataset = earliestHdfFile.getDatasetByPath("opaque_2d_string");
+		assertThat(dataset.getJavaType(), is(byte[].class));
+		assertThat(dataset.getDimensions(), is(new int[]{5, 7}));
+		OpaqueDataType opaqueDataType = (OpaqueDataType) dataset.getDataType();
+		assertThat(opaqueDataType.getAsciiTag(), is("NUMPY:|S21"));
+
+		// Now check the data
+		byte[][][] data = (byte[][][]) dataset.getData();
+		int counter = 0;
+		for (int i = 0; i < 5; i++) {
+			for (int j = 0; j < 7; j++) {
+				assertThat(new String(data[i][j]).trim(), is(Integer.toString(counter)));
+				counter++;
+			}
+		}
+	}
+
+	@Test
+	void test2DStringLatest() {
+		Dataset dataset = latestHdfFile.getDatasetByPath("opaque_2d_string");
+		assertThat(dataset.getJavaType(), is(byte[].class));
+		assertThat(dataset.getDimensions(), is(new int[]{5, 7}));
+		OpaqueDataType opaqueDataType = (OpaqueDataType) dataset.getDataType();
+		assertThat(opaqueDataType.getAsciiTag(), is("NUMPY:|S21"));
+
+		// Now check the data
+		byte[][][] data = (byte[][][]) dataset.getData();
+		int counter = 0;
+		for (int i = 0; i < 5; i++) {
+			for (int j = 0; j < 7; j++) {
+				assertThat(new String(data[i][j]).trim(), is(Integer.toString(counter)));
+				counter++;
+			}
+		}
 	}
 }
