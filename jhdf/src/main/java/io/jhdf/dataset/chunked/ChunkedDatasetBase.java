@@ -49,7 +49,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
                                      final int fastestChunkDim,
                                      final int elementSize) {
 
-        logger.debug("Filling data from chunk '{}'", chunk);
+        logger.trace("Filling data from chunk '{}'", chunk);
 
         // Get the un-filtered (decompressed) data in this chunk
         final byte[] chunkData = decompressChunk(chunk);
@@ -68,7 +68,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
                         length); // length
             }
         } else {
-            logger.debug("Handling partial chunk '{}'", chunk);
+            logger.trace("Handling partial chunk '{}'", chunk);
             // Partial chunk
             final int highestDimIndex = getDimensions().length - 1;
 
@@ -236,13 +236,12 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 
             if (pipeline == null) {
                 // No filters
-                logger.debug("No filters returning decoded chunk '{}'", chunk);
                 return encodedBytes;
             }
 
             // Decode using the pipeline applying the filters
             final byte[] decodedBytes = pipeline.decode(encodedBytes);
-            logger.debug("Decoded {}", chunk);
+            logger.trace("Decoded {}", chunk);
 
             return decodedBytes;
         } catch (ConcurrentException e) {
