@@ -27,7 +27,8 @@ Mostly it's a challenge, HDF5 is a fairly complex file format with lots of flexi
 - No use of JNI, so you avoid all the issues associated with calling native code from the JVM.
 - Fully debug-able you can step fully through the library with a Java debugger.
 - Provides access to datasets `ByteBuffer`s to allow for custom reading logic, or integration with other libraries. 
-- Performance? Maybe, the library uses Java NIO `MappedByteBuffer`s which should provide fast file access. In addition, when accessing chunked datasets the library is parallelized to take advantage of modern CPUs. `jHDF` will also allow parallel reading of multiple datasets or multiple files. I have seen cases where `jHDF` is significantly faster than the C libraries, but as with all performance issues, it is case specific so you will need to do your own tests on the cases you care about. If you do tests please post the results so everyone can benefit.
+- Performance? Maybe, the library uses Java NIO `MappedByteBuffer`s which should provide fast file access. In addition, when accessing chunked datasets the library is parallelized to take advantage of modern CPUs. `jHDF` will also allow parallel reading of multiple datasets or multiple files. I have seen cases where `jHDF` is significantly faster than the C libraries, but as with all performance issues, it is case specific so you will need to do your own tests on the cases you care about. If you do tests please post the results so everyone can benefit, here are some results I am aware of:
+    - [Peter Kirkham - Parallel IO Improvements](http://pkirkham.github.io/pyrus/parallel-io-improvements/)
 
 ## Why should I not use jHDF?
 - If you want to write HDF5 files. Currently, this is not supported. This will be supported in the future, but full read-only compatibility is currently the goal.
@@ -36,7 +37,7 @@ Mostly it's a challenge, HDF5 is a fairly complex file format with lots of flexi
 - If you want to read datasets larger than can fit in a Java array (i.e. `Integer.MAX_VALUE` elements). This issue would also be addressed by slicing.
 
 ## Developing jHDF
-- Clone this repository.
+- Fork this repository and clone your fork
 - Inside the `jhdf` directory run `./gradlew build` (`./gradlew.bat build` on Windows) this will run the build and tests fetching dependencies. 
 - Import the Gradle project `jhdf` into your IDE.
 - Make your changes and add tests.
@@ -44,3 +45,5 @@ Mostly it's a challenge, HDF5 is a fairly complex file format with lots of flexi
 - Once you have made any changes please open a pull request.
 
 To see other available Gradle tasks run `./gradlew tasks` 
+
+If you have read this far please consider staring this repo. Thanks!
