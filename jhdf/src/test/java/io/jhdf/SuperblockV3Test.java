@@ -31,20 +31,20 @@ class SuperblockV3Test {
 	private RandomAccessFile raf;
 
 	@BeforeEach
-    void setUp() throws FileNotFoundException {
+	void setUp() throws FileNotFoundException {
 		final String testFileUrl = this.getClass().getResource("/hdf5/test_file2.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
 	}
 
 	@AfterEach
-    void after() throws IOException {
+	void after() throws IOException {
 		raf.close();
 		fc.close();
 	}
 
 	@Test
-    void testExtractV0SuperblockFromFile() throws IOException {
+	void testExtractV0SuperblockFromFile() throws IOException {
 		Superblock sb = Superblock.readSuperblock(fc, 0);
 		// Test version independent methods
 		assertThat(sb.getVersionOfSuperblock(), is(equalTo(3)));
@@ -60,17 +60,17 @@ class SuperblockV3Test {
 	}
 
 	@Test
-    void testVerifySuperblock() {
+	void testVerifySuperblock() {
 		assertThat(Superblock.verifySignature(fc, 0), is(true));
 	}
 
 	@Test
-    void testVerifySuperblockReturnsFalseWhenNotCorrect() {
+	void testVerifySuperblockReturnsFalseWhenNotCorrect() {
 		assertThat(Superblock.verifySignature(fc, 3), is(false));
 	}
 
 	@Test
-    void testReadSuperblockThrowsWhenGivenInvalidOffset() {
+	void testReadSuperblockThrowsWhenGivenInvalidOffset() {
 		assertThrows(HdfException.class, () -> Superblock.readSuperblock(fc, 5));
 	}
 }

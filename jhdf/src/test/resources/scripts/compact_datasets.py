@@ -1,12 +1,12 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # This file is part of jHDF. A pure Java library for accessing HDF5 files.
-# 
+#
 # http://jhdf.io
-# 
+#
 # Copyright (c) 2021 James Mudd
-# 
+#
 # MIT License see 'LICENSE' file
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 import h5py
 
 import numpy as np
@@ -14,22 +14,23 @@ import numpy as np
 '''
 The idea of this test is to write compact datasets
 '''
-def write_chunked_datasets(f):
 
+
+def write_chunked_datasets(f):
     data = np.arange(10)
 
     compact = h5py.h5p.create(h5py.h5p.DATASET_CREATE)
     compact.set_layout(h5py.h5d.COMPACT)
 
     float_group = f.create_group('float')
-    float_group.create_dataset('float16', data=data, dtype='f2',  dcpl=compact)
-    float_group.create_dataset('float32', data=data, dtype='f4',  dcpl=compact)
-    float_group.create_dataset('float64', data=data, dtype='f8',  dcpl=compact)
+    float_group.create_dataset('float16', data=data, dtype='f2', dcpl=compact)
+    float_group.create_dataset('float32', data=data, dtype='f4', dcpl=compact)
+    float_group.create_dataset('float64', data=data, dtype='f8', dcpl=compact)
 
     int_group = f.create_group('int')
     int_group.create_dataset('int8', data=data, dtype='i1', dcpl=compact)
-    int_group.create_dataset('int16', data=data, dtype='i2',  dcpl=compact)
-    int_group.create_dataset('int32', data=data, dtype='i4',  dcpl=compact)
+    int_group.create_dataset('int16', data=data, dtype='i2', dcpl=compact)
+    int_group.create_dataset('int32', data=data, dtype='i4', dcpl=compact)
 
     string_group = f.create_group('string')
     # Fixed length (20) ASCII dataset
@@ -58,6 +59,7 @@ def write_chunked_datasets(f):
 
     f.flush()
     f.close()
+
 
 if __name__ == '__main__':
     print('Making compact dataset test files...')

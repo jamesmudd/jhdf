@@ -54,8 +54,8 @@ public class HdfFile implements Group, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(HdfFile.class);
 
 	static {
-		final String versionStr =  HdfFile.class.getPackage().getImplementationVersion();
-		if( versionStr != null) {
+		final String versionStr = HdfFile.class.getPackage().getImplementationVersion();
+		if (versionStr != null) {
 			logger.info("jHDF version: {}", HdfFile.class.getPackage().getImplementationVersion());
 		} else {
 			logger.warn("Using development version of jHDF");
@@ -65,7 +65,7 @@ public class HdfFile implements Group, AutoCloseable {
 	private final Optional<File> optionalFile;
 	private final HdfBackingStorage hdfBackingStorage;
 
-    private final Group rootGroup;
+	private final Group rootGroup;
 
 	private final Set<HdfFile> openExternalFiles = new HashSet<>();
 
@@ -80,10 +80,10 @@ public class HdfFile implements Group, AutoCloseable {
 	/**
 	 * Opens an HDF5 contained in an in-memory byte array.
 	 *
-	 * @see HdfFile#fromByteBuffer(ByteBuffer)
-	 * @see HdfFile#fromInputStream(InputStream)
 	 * @param bytes The byte array containing an HDF5 file
 	 * @return an open HdfFile object
+	 * @see HdfFile#fromByteBuffer(ByteBuffer)
+	 * @see HdfFile#fromInputStream(InputStream)
 	 */
 	public static HdfFile fromBytes(byte[] bytes) {
 		logger.info("Reading HDF5 file from byte[]");
@@ -93,10 +93,10 @@ public class HdfFile implements Group, AutoCloseable {
 	/**
 	 * Opens an HDF5 contained in {@link ByteBuffer}
 	 *
-	 * @see HdfFile#fromBytes(byte[])
-	 * @see HdfFile#fromInputStream(InputStream)
 	 * @param byteBuffer The buffer containing an HDF5 file
 	 * @return an open HdfFile object
+	 * @see HdfFile#fromBytes(byte[])
+	 * @see HdfFile#fromInputStream(InputStream)
 	 */
 	public static HdfFile fromByteBuffer(ByteBuffer byteBuffer) {
 		logger.info("Reading HDF5 file from ByteBuffer");
@@ -139,7 +139,7 @@ public class HdfFile implements Group, AutoCloseable {
 		if (superblock instanceof SuperblockV0V1) {
 			SuperblockV0V1 sb = (SuperblockV0V1) superblock;
 			SymbolTableEntry ste = new SymbolTableEntry(hdfBackingStorage,
-					sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
+				sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
 			this.rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, ste.getObjectHeaderAddress(), this);
 		} else if (superblock instanceof SuperblockV2V3) {
 			SuperblockV2V3 sb = (SuperblockV2V3) superblock;
@@ -154,10 +154,10 @@ public class HdfFile implements Group, AutoCloseable {
 	 * Opens an {@link HdfFile} from an {@link InputStream}. The stream will be read fully into a temporary file. The
 	 * file will be cleaned up at application exit.
 	 *
-	 * @see HdfFile#fromBytes(byte[])
-	 * @see HdfFile#fromByteBuffer(ByteBuffer)
 	 * @param inputStream the {@link InputStream} to read
 	 * @return HdfFile instance
+	 * @see HdfFile#fromBytes(byte[])
+	 * @see HdfFile#fromByteBuffer(ByteBuffer)
 	 */
 	public static HdfFile fromInputStream(InputStream inputStream) {
 		try {
@@ -197,7 +197,7 @@ public class HdfFile implements Group, AutoCloseable {
 			}
 
 			// We have a valid HDF5 file so read the full superblock
-            final Superblock superblock = Superblock.readSuperblock(fc, offset);
+			final Superblock superblock = Superblock.readSuperblock(fc, offset);
 
 			// Validate the superblock
 			if (superblock.getBaseAddressByte() != offset) {
@@ -209,7 +209,7 @@ public class HdfFile implements Group, AutoCloseable {
 			if (superblock instanceof SuperblockV0V1) {
 				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
 				SymbolTableEntry ste = new SymbolTableEntry(hdfBackingStorage,
-						sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
+					sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
 				rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, ste.getObjectHeaderAddress(), this);
 			} else if (superblock instanceof SuperblockV2V3) {
 				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
@@ -255,7 +255,7 @@ public class HdfFile implements Group, AutoCloseable {
 	 */
 	@Override
 	public void close() {
-		if(!inMemory()) {
+		if (!inMemory()) {
 			for (HdfFile externalHdfFile : openExternalFiles) {
 				externalHdfFile.close();
 				logger.info("Closed external file '{}'", externalHdfFile.getFile().getAbsolutePath());
@@ -369,7 +369,7 @@ public class HdfFile implements Group, AutoCloseable {
 	 * @param hdfFile an open external file linked from this file
 	 */
 	public void addExternalFile(HdfFile hdfFile) {
-		if(inMemory()) {
+		if (inMemory()) {
 			throw new InMemoryHdfException();
 		}
 		openExternalFiles.add(hdfFile);

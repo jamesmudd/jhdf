@@ -55,7 +55,7 @@ public class StringData extends DataType {
 		}
 	}
 
-    public enum PaddingType {
+	public enum PaddingType {
 		NULL_TERMINATED(new NullTerminated()),
 		NULL_PADDED(new NullPadded()),
 		SPACE_PADDED(new SpacePadded());
@@ -87,14 +87,14 @@ public class StringData extends DataType {
 
 		final int charsetIndex = Utils.bitsToInt(classBits, 4, 4);
 		switch (charsetIndex) {
-		case 0:
-			charset = StandardCharsets.US_ASCII;
-			break;
-		case 1:
-			charset = StandardCharsets.UTF_8;
-			break;
-		default:
-			throw new HdfException("Unrecognized Charset. Index is: " + charsetIndex);
+			case 0:
+				charset = StandardCharsets.US_ASCII;
+				break;
+			case 1:
+				charset = StandardCharsets.UTF_8;
+				break;
+			default:
+				throw new HdfException("Unrecognized Charset. Index is: " + charsetIndex);
 		}
 	}
 
@@ -159,8 +159,8 @@ public class StringData extends DataType {
 	@Override
 	public String toString() {
 		return "StringData{" +
-				"paddingType=" + paddingType +
-				", charset=" + charset +
-				'}';
+			"paddingType=" + paddingType +
+			", charset=" + charset +
+			'}';
 	}
 }

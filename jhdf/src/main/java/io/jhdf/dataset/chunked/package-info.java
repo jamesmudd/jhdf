@@ -10,7 +10,7 @@
 
 /**
  * Chunked dataset classes.
- *
+ * <p>
  * These are the classes used when accessing chunked HDF5 datasets.
  *
  * @author James Mudd

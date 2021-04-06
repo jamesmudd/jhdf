@@ -56,7 +56,7 @@ public class HdfInMemoryByteBuffer implements HdfBackingStorage {
 	}
 
 	@Override
-	public FileChannel getFileChannel(){
+	public FileChannel getFileChannel() {
 		throw new InMemoryHdfException();
 	}
 

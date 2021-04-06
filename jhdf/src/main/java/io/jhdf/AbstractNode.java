@@ -58,13 +58,13 @@ public abstract class AbstractNode implements Node {
 					// Create the heap and btree
 					FractalHeap fractalHeap = new FractalHeap(hdfBackingStorage, attributeInfoMessage.getFractalHeapAddress());
 					BTreeV2<AttributeNameForIndexedAttributesRecord> btree = new BTreeV2<>(hdfBackingStorage,
-							attributeInfoMessage.getAttributeNameBTreeAddress());
+						attributeInfoMessage.getAttributeNameBTreeAddress());
 
 					// Read the attribute messages from the btree+heap
 					for (AttributeNameForIndexedAttributesRecord attributeRecord : btree.getRecords()) {
 						ByteBuffer bb = fractalHeap.getId(attributeRecord.getHeapId());
 						AttributeMessage attributeMessage = new AttributeMessage(bb, hdfBackingStorage,
-								attributeRecord.getFlags());
+							attributeRecord.getFlags());
 						logger.trace("Read attribute message '{}'", attributeMessage);
 						attributeMessages.add(attributeMessage);
 					}
@@ -75,9 +75,9 @@ public abstract class AbstractNode implements Node {
 			attributeMessages.addAll(oh.getMessagesOfType(AttributeMessage.class));
 
 			return attributeMessages.stream()
-					.collect(
-							toMap(AttributeMessage::getName,
-									message -> new AttributeImpl(hdfBackingStorage, AbstractNode.this, message)));
+				.collect(
+					toMap(AttributeMessage::getName,
+						message -> new AttributeImpl(hdfBackingStorage, AbstractNode.this, message)));
 		}
 	}
 
@@ -155,7 +155,7 @@ public abstract class AbstractNode implements Node {
 			return attributes.get();
 		} catch (Exception e) {
 			throw new HdfException(
-					"Failed to load attributes for '" + getPath() + "' at address '" + getAddress() + "'", e);
+				"Failed to load attributes for '" + getPath() + "' at address '" + getAddress() + "'", e);
 		}
 	}
 
@@ -174,7 +174,7 @@ public abstract class AbstractNode implements Node {
 			return header.get();
 		} catch (Exception e) {
 			throw new HdfException("Failed reading header for '" + getPath() + "' at address '" + getAddress() + "'",
-					e);
+				e);
 		}
 	}
 }

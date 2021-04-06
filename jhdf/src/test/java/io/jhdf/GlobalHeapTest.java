@@ -110,8 +110,8 @@ class GlobalHeapTest {
 	@Test
 	void testDifferentObjectZero() throws Exception {
 		HdfFile file = TestUtils.loadTestHdfFile("globalheaps_test.hdf5");
-			Object data = file.getAttribute("attribute").getData();
-			assertThat((String[]) data, is(arrayContaining(
-					"value0", "value1", "value2", "value3", "value4", "value5", "value6", "")));
+		Object data = file.getAttribute("attribute").getData();
+		assertThat((String[]) data, is(arrayContaining(
+			"value0", "value1", "value2", "value3", "value4", "value5", "value6", "")));
 	}
 }

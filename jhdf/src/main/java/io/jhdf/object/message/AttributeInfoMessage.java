@@ -47,7 +47,7 @@ public class AttributeInfoMessage extends Message {
 			throw new HdfException("Unrecognized version " + version);
 		}
 
-		BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
+		BitSet flags = BitSet.valueOf(new byte[]{bb.get()});
 
 		if (flags.get(MAXIMUM_CREATION_INDEX_PRESENT)) {
 			maximumCreationIndex = Utils.readBytesAsUnsignedInt(bb, 2);

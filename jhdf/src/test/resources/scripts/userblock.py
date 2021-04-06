@@ -1,23 +1,24 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # This file is part of jHDF. A pure Java library for accessing HDF5 files.
-# 
+#
 # http://jhdf.io
-# 
+#
 # Copyright (c) 2021 James Mudd
-# 
+#
 # MIT License see 'LICENSE' file
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 import h5py
 
 '''
 The idea of this test if to write userblock data to HDF5 file
 '''
+
+
 def write_userblock_data(f):
-    
     filename = f.filename
     # Close the h5py file
     f.close()
-    
+
     # Open as plain binary file to write the user block
     with open(filename, "rb+") as fb:
         fb.write("userblock data here...".encode(encoding='utf_8', errors='strict'))

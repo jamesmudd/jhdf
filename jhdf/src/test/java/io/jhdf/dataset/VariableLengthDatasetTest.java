@@ -57,51 +57,51 @@ class VariableLengthDatasetTest {
 	Collection<DynamicNode> compressedChunkedDatasetReadTests() {
 		// List of all the datasetPaths
 		return Arrays.asList(
-				dynamicContainer(HDF5_TEST_EARLIEST_FILE_NAME, Arrays.asList(
-						dynamicTest("float32", createTest(earliestHdfFile,"vlen_float32_data")),
-						dynamicTest("float32 - chunked", createTest(earliestHdfFile,"vlen_float32_data_chunked")),
-						dynamicTest("float64", createTest(earliestHdfFile,"vlen_float64_data")),
-						dynamicTest("float64 - chunked", createTest(earliestHdfFile,"vlen_float64_data_chunked")),
-						dynamicTest("uint8", createTest(earliestHdfFile,"vlen_uint8_data")),
-						dynamicTest("uint8 - chunked", createTest(earliestHdfFile,"vlen_uint8_data_chunked")),
-						dynamicTest("uint16", createTest(earliestHdfFile,"vlen_uint16_data")),
-						dynamicTest("uint16 - chunked", createTest(earliestHdfFile,"vlen_uint16_data_chunked")),
-						dynamicTest("uint32", createTest(earliestHdfFile,"vlen_uint32_data")),
-						dynamicTest("uint32 - chunked", createTest(earliestHdfFile,"vlen_uint32_data_chunked")),
-						dynamicTest("uint64", createTest(earliestHdfFile,"vlen_uint64_data")),
-						dynamicTest("uint64 - chunked", createTest(earliestHdfFile,"vlen_uint64_data_chunked")),
-						dynamicTest("int8", createTest(earliestHdfFile,"vlen_int8_data")),
-						dynamicTest("int8 - chunked", createTest(earliestHdfFile,"vlen_int8_data_chunked")),
-						dynamicTest("int16", createTest(earliestHdfFile,"vlen_int16_data")),
-						dynamicTest("int16 - chunked", createTest(earliestHdfFile,"vlen_int16_data_chunked")),
-						dynamicTest("int32", createTest(earliestHdfFile,"vlen_int32_data")),
-						dynamicTest("int32 - chunked", createTest(earliestHdfFile,"vlen_int32_data_chunked")),
-						dynamicTest("int64", createTest(earliestHdfFile,"vlen_int64_data")),
-						dynamicTest("int64 - chunked", createTest(earliestHdfFile,"vlen_int64_data_chunked"))
-				)),
+			dynamicContainer(HDF5_TEST_EARLIEST_FILE_NAME, Arrays.asList(
+				dynamicTest("float32", createTest(earliestHdfFile, "vlen_float32_data")),
+				dynamicTest("float32 - chunked", createTest(earliestHdfFile, "vlen_float32_data_chunked")),
+				dynamicTest("float64", createTest(earliestHdfFile, "vlen_float64_data")),
+				dynamicTest("float64 - chunked", createTest(earliestHdfFile, "vlen_float64_data_chunked")),
+				dynamicTest("uint8", createTest(earliestHdfFile, "vlen_uint8_data")),
+				dynamicTest("uint8 - chunked", createTest(earliestHdfFile, "vlen_uint8_data_chunked")),
+				dynamicTest("uint16", createTest(earliestHdfFile, "vlen_uint16_data")),
+				dynamicTest("uint16 - chunked", createTest(earliestHdfFile, "vlen_uint16_data_chunked")),
+				dynamicTest("uint32", createTest(earliestHdfFile, "vlen_uint32_data")),
+				dynamicTest("uint32 - chunked", createTest(earliestHdfFile, "vlen_uint32_data_chunked")),
+				dynamicTest("uint64", createTest(earliestHdfFile, "vlen_uint64_data")),
+				dynamicTest("uint64 - chunked", createTest(earliestHdfFile, "vlen_uint64_data_chunked")),
+				dynamicTest("int8", createTest(earliestHdfFile, "vlen_int8_data")),
+				dynamicTest("int8 - chunked", createTest(earliestHdfFile, "vlen_int8_data_chunked")),
+				dynamicTest("int16", createTest(earliestHdfFile, "vlen_int16_data")),
+				dynamicTest("int16 - chunked", createTest(earliestHdfFile, "vlen_int16_data_chunked")),
+				dynamicTest("int32", createTest(earliestHdfFile, "vlen_int32_data")),
+				dynamicTest("int32 - chunked", createTest(earliestHdfFile, "vlen_int32_data_chunked")),
+				dynamicTest("int64", createTest(earliestHdfFile, "vlen_int64_data")),
+				dynamicTest("int64 - chunked", createTest(earliestHdfFile, "vlen_int64_data_chunked"))
+			)),
 
-				dynamicContainer(HDF5_TEST_LATEST_FILE_NAME, Arrays.asList(
-						dynamicTest("float32", createTest(latestHdfFile,"vlen_float32_data")),
-						dynamicTest("float32 - chunked", createTest(latestHdfFile,"vlen_float32_data_chunked")),
-						dynamicTest("float64", createTest(latestHdfFile,"vlen_float64_data")),
-						dynamicTest("float64 - chunked", createTest(latestHdfFile,"vlen_float64_data_chunked")),
-						dynamicTest("uint8", createTest(latestHdfFile,"vlen_uint8_data")),
-						dynamicTest("uint8 - chunked", createTest(latestHdfFile,"vlen_uint8_data_chunked")),
-						dynamicTest("uint16", createTest(latestHdfFile,"vlen_uint16_data")),
-						dynamicTest("uint16 - chunked", createTest(latestHdfFile,"vlen_uint16_data_chunked")),
-						dynamicTest("uint32", createTest(latestHdfFile,"vlen_uint32_data")),
-						dynamicTest("uint32 - chunked", createTest(latestHdfFile,"vlen_uint32_data_chunked")),
-						dynamicTest("uint64", createTest(latestHdfFile,"vlen_uint64_data")),
-						dynamicTest("uint64 - chunked", createTest(latestHdfFile,"vlen_uint64_data_chunked")),
-						dynamicTest("int8", createTest(earliestHdfFile,"vlen_int8_data")),
-						dynamicTest("int8 - chunked", createTest(earliestHdfFile,"vlen_int8_data_chunked")),
-						dynamicTest("int16", createTest(earliestHdfFile,"vlen_int16_data")),
-						dynamicTest("int16 - chunked", createTest(earliestHdfFile,"vlen_int16_data_chunked")),
-						dynamicTest("int32", createTest(earliestHdfFile,"vlen_int32_data")),
-						dynamicTest("int32 - chunked", createTest(earliestHdfFile,"vlen_int32_data_chunked")),
-						dynamicTest("int64", createTest(earliestHdfFile,"vlen_int64_data")),
-						dynamicTest("int64 - chunked", createTest(earliestHdfFile,"vlen_int64_data_chunked"))
-				)));
+			dynamicContainer(HDF5_TEST_LATEST_FILE_NAME, Arrays.asList(
+				dynamicTest("float32", createTest(latestHdfFile, "vlen_float32_data")),
+				dynamicTest("float32 - chunked", createTest(latestHdfFile, "vlen_float32_data_chunked")),
+				dynamicTest("float64", createTest(latestHdfFile, "vlen_float64_data")),
+				dynamicTest("float64 - chunked", createTest(latestHdfFile, "vlen_float64_data_chunked")),
+				dynamicTest("uint8", createTest(latestHdfFile, "vlen_uint8_data")),
+				dynamicTest("uint8 - chunked", createTest(latestHdfFile, "vlen_uint8_data_chunked")),
+				dynamicTest("uint16", createTest(latestHdfFile, "vlen_uint16_data")),
+				dynamicTest("uint16 - chunked", createTest(latestHdfFile, "vlen_uint16_data_chunked")),
+				dynamicTest("uint32", createTest(latestHdfFile, "vlen_uint32_data")),
+				dynamicTest("uint32 - chunked", createTest(latestHdfFile, "vlen_uint32_data_chunked")),
+				dynamicTest("uint64", createTest(latestHdfFile, "vlen_uint64_data")),
+				dynamicTest("uint64 - chunked", createTest(latestHdfFile, "vlen_uint64_data_chunked")),
+				dynamicTest("int8", createTest(earliestHdfFile, "vlen_int8_data")),
+				dynamicTest("int8 - chunked", createTest(earliestHdfFile, "vlen_int8_data_chunked")),
+				dynamicTest("int16", createTest(earliestHdfFile, "vlen_int16_data")),
+				dynamicTest("int16 - chunked", createTest(earliestHdfFile, "vlen_int16_data_chunked")),
+				dynamicTest("int32", createTest(earliestHdfFile, "vlen_int32_data")),
+				dynamicTest("int32 - chunked", createTest(earliestHdfFile, "vlen_int32_data_chunked")),
+				dynamicTest("int64", createTest(earliestHdfFile, "vlen_int64_data")),
+				dynamicTest("int64 - chunked", createTest(earliestHdfFile, "vlen_int64_data_chunked"))
+			)));
 	}
 
 	private Executable createTest(HdfFile hdfFile, String datasetPath) {
@@ -109,7 +109,7 @@ class VariableLengthDatasetTest {
 			Dataset dataset = hdfFile.getDatasetByPath(datasetPath);
 
 			assertThat(dataset.isVariableLength(), is(true));
-			assertThat(dataset.getDimensions(), is(new int[] {3}));
+			assertThat(dataset.getDimensions(), is(new int[]{3}));
 			assertThat(dataset.getJavaType(), is(Object.class));
 
 			Object[] data = (Object[]) dataset.getData();
@@ -136,7 +136,7 @@ class VariableLengthDatasetTest {
 		Dataset dataset = earliestHdfFile.getDatasetByPath("vlen_issue_247");
 
 		assertThat(dataset.isVariableLength(), is(true));
-		assertThat(dataset.getDimensions(), is(new int[] {3}));
+		assertThat(dataset.getDimensions(), is(new int[]{3}));
 		assertThat(dataset.getJavaType(), is(Object.class));
 
 		Object[] data = (Object[]) dataset.getData();
@@ -154,7 +154,7 @@ class VariableLengthDatasetTest {
 		Dataset dataset = latestHdfFile.getDatasetByPath("vlen_issue_247");
 
 		assertThat(dataset.isVariableLength(), is(true));
-		assertThat(dataset.getDimensions(), is(new int[] {3}));
+		assertThat(dataset.getDimensions(), is(new int[]{3}));
 		assertThat(dataset.getJavaType(), is(Object.class));
 
 		Object[] data = (Object[]) dataset.getData();

@@ -29,7 +29,7 @@ while response.json()['links'].get('next', None):
                 download[file['key']] = file['links']['self']
                 print(len(download))
                 urllib.request.urlretrieve(file['links']['self'], file['key'])
-                break # Only get one file from each record to try and get different uses
+                break  # Only get one file from each record to try and get different uses
     # Don't want to download too much!
     if len(download) > 25:
         break

@@ -51,7 +51,7 @@ class LargeAttributesTest {
 		assertThat(db.limit(), is(equalTo(EXPECTED_DATA_LENGTH)));
 
 		double referenceData[] = new double[EXPECTED_DATA_LENGTH];
-		for (int i=0; i < EXPECTED_DATA_LENGTH; i++) referenceData[i] = (double)i;
+		for (int i = 0; i < EXPECTED_DATA_LENGTH; i++) referenceData[i] = (double) i;
 
 		double obtainedData[] = new double[EXPECTED_DATA_LENGTH];
 		db.get(obtainedData);

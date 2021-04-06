@@ -31,7 +31,7 @@ public class LinkInfoMessage extends Message {
 		super(messageFlags);
 
 		version = bb.get();
-		flags = BitSet.valueOf(new byte[] { bb.get() });
+		flags = BitSet.valueOf(new byte[]{bb.get()});
 
 		if (flags.get(CREATION_ORDER_TRACKED)) {
 			maximumCreationIndex = Utils.readBytesAsUnsignedLong(bb, 8);

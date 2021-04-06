@@ -16,8 +16,8 @@ import java.util.Collections;
 
 public class EmptyChunkIndex implements ChunkIndex {
 
-    @Override
-    public Collection<Chunk> getAllChunks() {
-        return Collections.emptyList();
-    }
+	@Override
+	public Collection<Chunk> getAllChunks() {
+		return Collections.emptyList();
+	}
 }

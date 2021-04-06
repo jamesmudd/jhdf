@@ -20,7 +20,9 @@ import static io.jhdf.Utils.toHex;
 public class SymbolTableEntry {
 	private static final Logger logger = LoggerFactory.getLogger(SymbolTableEntry.class);
 
-	/** The location of this symbol table entry in the file */
+	/**
+	 * The location of this symbol table entry in the file
+	 */
 	private final long address;
 	private final int linkNameOffset;
 	private final long objectHeaderAddress;
@@ -53,26 +55,26 @@ public class SymbolTableEntry {
 
 		// Scratch pad
 		switch (cacheType) {
-		case 0:
-			// Nothing in scratch pad space
-			break;
-		case 1:
-			// B Tree
-			// Address of B Tree
-			bTreeAddress = Utils.readBytesAsUnsignedLong(bb, fc.getSizeOfOffsets());
-			logger.trace("addressOfBTree = {}", bTreeAddress);
+			case 0:
+				// Nothing in scratch pad space
+				break;
+			case 1:
+				// B Tree
+				// Address of B Tree
+				bTreeAddress = Utils.readBytesAsUnsignedLong(bb, fc.getSizeOfOffsets());
+				logger.trace("addressOfBTree = {}", bTreeAddress);
 
-			// Address of Name Heap
-			nameHeapAddress = Utils.readBytesAsUnsignedLong(bb, fc.getSizeOfOffsets());
-			logger.trace("nameHeapAddress = {}", nameHeapAddress);
-			break;
-		case 2:
-			// Link
-			linkValueOffset = Utils.readBytesAsUnsignedInt(bb, 4);
-			logger.trace("linkValueOffset = {}", linkValueOffset);
-			break;
-		default:
-			throw new IllegalStateException("SymbolTableEntry: Unrecognized cache type = " + cacheType);
+				// Address of Name Heap
+				nameHeapAddress = Utils.readBytesAsUnsignedLong(bb, fc.getSizeOfOffsets());
+				logger.trace("nameHeapAddress = {}", nameHeapAddress);
+				break;
+			case 2:
+				// Link
+				linkValueOffset = Utils.readBytesAsUnsignedInt(bb, 4);
+				logger.trace("linkValueOffset = {}", linkValueOffset);
+				break;
+			default:
+				throw new IllegalStateException("SymbolTableEntry: Unrecognized cache type = " + cacheType);
 		}
 
 	}
@@ -108,9 +110,9 @@ public class SymbolTableEntry {
 	@Override
 	public String toString() {
 		return "SymbolTableEntry [address=" + toHex(address) + ", linkNameOffset=" + linkNameOffset
-				+ ", objectHeaderAddress=" + toHex(objectHeaderAddress) + ", cacheType=" + cacheType + ", bTreeAddress="
-				+ toHex(bTreeAddress) + ", nameHeapAddress=" + toHex(nameHeapAddress) + ", linkValueOffset="
-				+ linkValueOffset + "]";
+			+ ", objectHeaderAddress=" + toHex(objectHeaderAddress) + ", cacheType=" + cacheType + ", bTreeAddress="
+			+ toHex(bTreeAddress) + ", nameHeapAddress=" + toHex(nameHeapAddress) + ", linkValueOffset="
+			+ linkValueOffset + "]";
 	}
 
 }

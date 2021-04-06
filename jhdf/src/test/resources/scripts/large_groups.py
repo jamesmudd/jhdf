@@ -1,12 +1,12 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # This file is part of jHDF. A pure Java library for accessing HDF5 files.
-# 
+#
 # http://jhdf.io
-# 
+#
 # Copyright (c) 2021 James Mudd
-# 
+#
 # MIT License see 'LICENSE' file
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 import h5py
 
 import numpy as np
@@ -19,13 +19,14 @@ def write_large_group(f):
     f.flush()
     f.close()
 
+
 if __name__ == '__main__':
     print('Making large group test files...')
-    
+
     f = h5py.File('test_large_group_latest.hdf5', 'w', libver='latest')
     write_large_group(f)
     print('created test_long_file_latest.hdf5')
-        
+
     f = h5py.File('test_large_group_earliest.hdf5', 'w', libver='earliest')
     write_large_group(f)
     print('created test_long_file_earliest.hdf5')

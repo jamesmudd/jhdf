@@ -43,9 +43,9 @@ public final class DatasetReader {
 	/**
 	 * This converts a buffer into a Java object representing this dataset.
 	 *
-	 * @param type The data type of this dataset
-	 * @param buffer The buffer containing the dataset
-	 * @param dimensions The dimensions of this dataset
+	 * @param type              The data type of this dataset
+	 * @param buffer            The buffer containing the dataset
+	 * @param dimensions        The dimensions of this dataset
 	 * @param hdfBackingStorage The file channel for reading the file
 	 * @return A Java object representation of this dataset
 	 */

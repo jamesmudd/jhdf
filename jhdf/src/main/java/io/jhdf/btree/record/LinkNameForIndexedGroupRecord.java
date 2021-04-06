@@ -22,7 +22,7 @@ public class LinkNameForIndexedGroupRecord extends BTreeRecord {
 	public LinkNameForIndexedGroupRecord(ByteBuffer bb) {
 		if (bb.remaining() != 11) {
 			throw new HdfException(
-					"Invalid length buffer for LinkNameForIndexedGroupRecord. remaining bytes = " + bb.remaining());
+				"Invalid length buffer for LinkNameForIndexedGroupRecord. remaining bytes = " + bb.remaining());
 		}
 
 		hash = Utils.readBytesAsUnsignedLong(bb, 4);

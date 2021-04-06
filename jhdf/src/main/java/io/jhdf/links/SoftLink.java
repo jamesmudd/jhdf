@@ -43,7 +43,7 @@ public class SoftLink extends AbstractLink {
 			return targetNode.get();
 		} catch (Exception e) {
 			throw new HdfBrokenLinkException(
-					"Could not resolve link target '" + target + "' from link '" + getPath() + "'", e);
+				"Could not resolve link target '" + target + "' from link '" + getPath() + "'", e);
 		}
 	}
 

@@ -46,9 +46,9 @@ class BitfieldDatasetTest {
 
 	static Stream<Arguments> testBitfieldDataset() {
 		return Stream.of(
-				Arguments.of(hdfFile.getDatasetByPath("/bitfield")),
-				Arguments.of(hdfFile.getDatasetByPath("/chunked_bitfield")),
-				Arguments.of(hdfFile.getDatasetByPath("/compressed_chunked_bitfield"))
+			Arguments.of(hdfFile.getDatasetByPath("/bitfield")),
+			Arguments.of(hdfFile.getDatasetByPath("/chunked_bitfield")),
+			Arguments.of(hdfFile.getDatasetByPath("/compressed_chunked_bitfield"))
 		);
 	}
 

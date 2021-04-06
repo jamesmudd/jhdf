@@ -29,7 +29,7 @@ public abstract class DataType {
 		bb.mark();
 
 		// Class and version
-		final BitSet classAndVersion = BitSet.valueOf(new byte[]{ bb.get() });
+		final BitSet classAndVersion = BitSet.valueOf(new byte[]{bb.get()});
 		int version = Utils.bitsToInt(classAndVersion, 4, 4);
 		int dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
 
@@ -72,7 +72,7 @@ public abstract class DataType {
 	protected DataType(ByteBuffer bb) {
 
 		// Class and version
-		final BitSet classAndVersion = BitSet.valueOf(new byte[] { bb.get() });
+		final BitSet classAndVersion = BitSet.valueOf(new byte[]{bb.get()});
 		dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
 		version = Utils.bitsToInt(classAndVersion, 4, 4);
 

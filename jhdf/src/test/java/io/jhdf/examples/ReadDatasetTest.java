@@ -16,15 +16,15 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 class ReadDatasetTest {
 
 	@Test
-    void testOpeningV1File() {
+	void testOpeningV1File() {
 		assertDoesNotThrow(() ->
-			ReadDataset.main(new String[] { "src/test/resources/hdf5/test_file.hdf5", "/nD_Datasets/3D_float32" }));
+			ReadDataset.main(new String[]{"src/test/resources/hdf5/test_file.hdf5", "/nD_Datasets/3D_float32"}));
 	}
 
 	@Test
-    void testOpeningV2File() {
+	void testOpeningV2File() {
 		assertDoesNotThrow(() ->
-			ReadDataset.main(new String[] { "src/test/resources/hdf5/test_file2.hdf5", "/nD_Datasets/3D_float32" }));
+			ReadDataset.main(new String[]{"src/test/resources/hdf5/test_file2.hdf5", "/nD_Datasets/3D_float32"}));
 	}
 
 }

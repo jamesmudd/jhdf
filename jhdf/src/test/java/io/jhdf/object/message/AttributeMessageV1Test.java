@@ -37,7 +37,7 @@ class AttributeMessageV1Test {
 	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
-    void setUp() throws IOException {
+	void setUp() throws IOException {
 		final String testFileUrl = this.getClass().getResource("/hdf5/test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
@@ -49,13 +49,13 @@ class AttributeMessageV1Test {
 	}
 
 	@AfterEach
-    void after() throws IOException {
+	void after() throws IOException {
 		raf.close();
 		fc.close();
 	}
 
 	@Test
-    void test() {
+	void test() {
 		AttributeMessage am = new AttributeMessage(bb, hdfBackingStorage, BitSet.valueOf(new byte[1]));
 		assertThat(am.getName(), is(equalTo("string_attr")));
 		assertThat(am.getDataType().getDataClass(), is(equalTo(9)));
