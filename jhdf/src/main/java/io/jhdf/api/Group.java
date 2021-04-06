@@ -63,7 +63,7 @@ public interface Group extends Node, Iterable<Node> {
 	 * tracked (recorded) in the file.
 	 *
 	 * @return <code>true</code> if link creation order is tracked,
-	 *         <code>false</code> otherwise
+	 * <code>false</code> otherwise
 	 */
 	boolean isLinkCreationOrderTracked();
 }

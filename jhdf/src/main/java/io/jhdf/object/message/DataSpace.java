@@ -72,8 +72,8 @@ public class DataSpace {
 		} else {
 			// Calculate the total length by multiplying all dimensions
 			totalLength = IntStream.of(dimensions)
-					.mapToLong(Long::valueOf) // Convert to long to avoid int overflow
-					.reduce(1, Math::multiplyExact);
+				.mapToLong(Long::valueOf) // Convert to long to avoid int overflow
+				.reduce(1, Math::multiplyExact);
 		}
 
 		// Permutation indices - Note never implemented in HDF library!

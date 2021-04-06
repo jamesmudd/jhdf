@@ -77,32 +77,32 @@ class StringDatasetTest {
 	Collection<DynamicNode> stringDataset1DTests() {
 		// List of all the datasetPaths
 		return Arrays.asList(
-				dynamicContainer("earliest", Arrays.asList(
-						dynamicTest("fixed ASCII",
-								createTest(earliestHdfFile, "/fixed_length_ascii")),
-						dynamicTest("fixed ASCII 1 char",
-								createTest(earliestHdfFile, "/fixed_length_ascii_1_char")),
-						dynamicTest("variable ASCII",
-								createTest(earliestHdfFile, "/variable_length_ascii")),
-						dynamicTest("variable UTF8",
-								createTest(earliestHdfFile, "/variable_length_utf8")))),
+			dynamicContainer("earliest", Arrays.asList(
+				dynamicTest("fixed ASCII",
+					createTest(earliestHdfFile, "/fixed_length_ascii")),
+				dynamicTest("fixed ASCII 1 char",
+					createTest(earliestHdfFile, "/fixed_length_ascii_1_char")),
+				dynamicTest("variable ASCII",
+					createTest(earliestHdfFile, "/variable_length_ascii")),
+				dynamicTest("variable UTF8",
+					createTest(earliestHdfFile, "/variable_length_utf8")))),
 
-				dynamicContainer("latest", Arrays.asList(
-						dynamicTest("fixed ASCII",
-								createTest(latestHdfFile, "/fixed_length_ascii")),
-						dynamicTest("fixed ASCII 1 char",
-								createTest(latestHdfFile, "/fixed_length_ascii_1_char")),
-						dynamicTest("variable ASCII",
-								createTest(latestHdfFile, "/variable_length_ascii")),
-						dynamicTest("variable UTF8",
-								createTest(latestHdfFile, "/variable_length_utf8")))));
+			dynamicContainer("latest", Arrays.asList(
+				dynamicTest("fixed ASCII",
+					createTest(latestHdfFile, "/fixed_length_ascii")),
+				dynamicTest("fixed ASCII 1 char",
+					createTest(latestHdfFile, "/fixed_length_ascii_1_char")),
+				dynamicTest("variable ASCII",
+					createTest(latestHdfFile, "/variable_length_ascii")),
+				dynamicTest("variable UTF8",
+					createTest(latestHdfFile, "/variable_length_utf8")))));
 	}
 
 	private Executable createTest(HdfFile file, String datasetPath) {
 		return () -> {
 			Dataset dataset = file.getDatasetByPath(datasetPath);
 			Object data = dataset.getData();
-			assertThat(getDimensions(data), is(equalTo(new int[] { 10 })));
+			assertThat(getDimensions(data), is(equalTo(new int[]{10})));
 			Object[] flatData = flatten(data);
 			for (int i = 0; i < flatData.length; i++) {
 				// Do element comparison as there are all different primitive numeric types
@@ -116,7 +116,7 @@ class StringDatasetTest {
 	void test2DStringDatasetEarliest() {
 		Dataset dataset = earliestHdfFile.getDatasetByPath("variable_length_2d");
 		Object data = dataset.getData();
-		assertThat(getDimensions(data), is(equalTo(new int[] { 5, 7 })));
+		assertThat(getDimensions(data), is(equalTo(new int[]{5, 7})));
 		Object[] flatData = flatten(data);
 		for (int i = 0; i < flatData.length; i++) {
 			// Do element comparison as there are all different primitive numeric types
@@ -129,7 +129,7 @@ class StringDatasetTest {
 	void test2DStringDatasetLatest() {
 		Dataset dataset = latestHdfFile.getDatasetByPath("variable_length_2d");
 		Object data = dataset.getData();
-		assertThat(getDimensions(data), is(equalTo(new int[] { 5, 7 })));
+		assertThat(getDimensions(data), is(equalTo(new int[]{5, 7})));
 		Object[] flatData = flatten(data);
 		for (int i = 0; i < flatData.length; i++) {
 			// Do element comparison as there are all different primitive numeric types
@@ -138,11 +138,12 @@ class StringDatasetTest {
 		}
 	}
 
-	@Test // https://github.com/jamesmudd/jhdf/issues/113
+	@Test
+		// https://github.com/jamesmudd/jhdf/issues/113
 	void testUtf8FixedLengthDataset() {
 		Dataset dataset = utf8FixedHdfFile.getDatasetByPath("a0");
 
-		assertThat(dataset.getDimensions(), is(equalTo(new int[]{ 10 })));
+		assertThat(dataset.getDimensions(), is(equalTo(new int[]{10})));
 
 		StringData stringDataType = (StringData) dataset.getDataType();
 		assertThat(stringDataType.getCharset(), is(sameInstance(UTF_8)));
@@ -150,23 +151,24 @@ class StringDatasetTest {
 		Object data = dataset.getData();
 		String[] stringData = (String[]) data;
 		assertThat(stringData, is(arrayContaining(
-				"att-1ä@µÜß?3",
-				"att-1ä@µÜß?1",
-				"att-1ä@µÜß?0",
-				"att-1ä@µÜß?0",
-				"att-1ä@µÜß?0",
-				"att-1ä@µÜß?6",
-				"att-1ä@µÜß?2",
-				"att-1ä@µÜß?5",
-				"att-1ä@µÜß?0",
-				"att-1ä@µÜß?5")));
+			"att-1ä@µÜß?3",
+			"att-1ä@µÜß?1",
+			"att-1ä@µÜß?0",
+			"att-1ä@µÜß?0",
+			"att-1ä@µÜß?0",
+			"att-1ä@µÜß?6",
+			"att-1ä@µÜß?2",
+			"att-1ä@µÜß?5",
+			"att-1ä@µÜß?0",
+			"att-1ä@µÜß?5")));
 	}
 
-	@Test // https://github.com/jamesmudd/jhdf/issues/113
+	@Test
+		// https://github.com/jamesmudd/jhdf/issues/113
 	void testUtf8VariableLengthReusedDataset() {
 		Dataset dataset = utf8VariableLengthReusedHdfFile.getDatasetByPath("a0");
 
-		assertThat(dataset.getDimensions(), is(equalTo(new int[]{ 10 })));
+		assertThat(dataset.getDimensions(), is(equalTo(new int[]{10})));
 
 		VariableLength variableLengthDataType = (VariableLength) dataset.getDataType();
 		assertThat(variableLengthDataType.getEncoding(), is(sameInstance(UTF_8)));
@@ -174,19 +176,20 @@ class StringDatasetTest {
 		Object data = dataset.getData();
 		String[] stringData = (String[]) data;
 		assertThat(stringData, is(arrayContaining(
-				"att-0-value-1",
-				"att-0-value-1",
-				"NULL",
-				"NULL",
-				"NULL",
-				"att-0-value-1",
-				"att-0-value-0",
-				"att-0-value-1",
-				"NULL",
-				"NULL")));
+			"att-0-value-1",
+			"att-0-value-1",
+			"NULL",
+			"NULL",
+			"NULL",
+			"att-0-value-1",
+			"att-0-value-0",
+			"att-0-value-1",
+			"NULL",
+			"NULL")));
 	}
 
-	@Test // https://github.com/jamesmudd/jhdf/issues/124
+	@Test
+		// https://github.com/jamesmudd/jhdf/issues/124
 	void testStringPaddedDataset() {
 		Attribute attribute = stringPaddedHdfFile.getAttribute("Test");
 		Object data = attribute.getData();
@@ -204,8 +207,8 @@ class StringDatasetTest {
 
 		Object[] flatData = flatten(data);
 		assertThat(flatData, is(arrayContaining(
-				"a1", "a2",
-				"a3", "a4",
-				"a5", "a6")));
+			"a1", "a2",
+			"a3", "a4",
+			"a5", "a6")));
 	}
 }

@@ -46,7 +46,7 @@ class FractalHeapTest {
 	@Test
 	void testGetIdWorksForValidId() {
 		ByteBuffer id = ByteBuffer.allocate(7);
-		id.put(new byte[] { 0 }); // Flags none set for managed
+		id.put(new byte[]{0}); // Flags none set for managed
 		id.putInt(3129); // offset
 		id.putShort((short) 18); // length
 		id.rewind();
@@ -88,7 +88,7 @@ class FractalHeapTest {
 	@Test
 	void testToString() {
 		assertThat(fractalHeap.toString(), is(equalTo(
-				"FractalHeap [address=1870, idLength=7, numberOfTinyObjectsInHeap=0, numberOfHugeObjectsInHeap=0, numberOfManagedObjectsInHeap=1000]")));
+			"FractalHeap [address=1870, idLength=7, numberOfTinyObjectsInHeap=0, numberOfHugeObjectsInHeap=0, numberOfManagedObjectsInHeap=1000]")));
 	}
 
 }

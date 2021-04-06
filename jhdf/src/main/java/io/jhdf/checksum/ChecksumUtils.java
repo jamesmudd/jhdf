@@ -31,7 +31,7 @@ public final class ChecksumUtils {
 		buffer.get(bytes);
 		int calculatedChecksum = checksum(bytes);
 		int storedChecksum = buffer.getInt();
-		if(calculatedChecksum != storedChecksum) {
+		if (calculatedChecksum != storedChecksum) {
 			throw new HdfChecksumMismatchException(storedChecksum, calculatedChecksum);
 		}
 

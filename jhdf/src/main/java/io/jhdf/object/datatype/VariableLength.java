@@ -48,14 +48,14 @@ public class VariableLength extends DataType {
 
 		final int characterEncoding = Utils.bitsToInt(classBits, 8, 4);
 		switch (characterEncoding) {
-		case 0:
-			encoding = StandardCharsets.US_ASCII;
-			break;
-		case 1:
-			encoding = StandardCharsets.UTF_8;
-			break;
-		default:
-			throw new HdfException("Unrecognized character encoding = " + characterEncoding);
+			case 0:
+				encoding = StandardCharsets.US_ASCII;
+				break;
+			case 1:
+				encoding = StandardCharsets.UTF_8;
+				break;
+			default:
+				throw new HdfException("Unrecognized character encoding = " + characterEncoding);
 		}
 
 		parent = DataType.readDataType(bb);
@@ -70,14 +70,14 @@ public class VariableLength extends DataType {
 	}
 
 	public PaddingType getPaddingType() {
-		if(!isVariableLengthString()) {
+		if (!isVariableLengthString()) {
 			throw new HdfException("Cannot get padding type for variable length dataset thats not string type");
 		}
 		return paddingType;
 	}
 
 	public Charset getEncoding() {
-		if(!isVariableLengthString()) {
+		if (!isVariableLengthString()) {
 			throw new HdfException("Cannot get encoding for variable length dataset thats not string type");
 		}
 		return encoding;
@@ -98,6 +98,6 @@ public class VariableLength extends DataType {
 
 	@Override
 	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
-		return  VariableLengthDatasetReader.readDataset(this, buffer, dimensions, hdfBackingStorage);
+		return VariableLengthDatasetReader.readDataset(this, buffer, dimensions, hdfBackingStorage);
 	}
 }

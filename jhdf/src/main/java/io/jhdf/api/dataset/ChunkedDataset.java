@@ -21,20 +21,20 @@ import java.nio.ByteBuffer;
  */
 public interface ChunkedDataset extends Dataset {
 
-    /**
-     * Gets the chunk dimensions of this dataset.
-     *
-     * @return the chunk dimensions of this dataset
-     */
-    int[] getChunkDimensions();
+	/**
+	 * Gets the chunk dimensions of this dataset.
+	 *
+	 * @return the chunk dimensions of this dataset
+	 */
+	int[] getChunkDimensions();
 
-    /**
-     * Gets the raw buffer for the specified chunk.
-     *
-     * @param chunkOffset the offset of the required chunk
-     * @return the raw buffer for this chunk
-     * @throws HdfException If the chunk offset is not valid for this dataset
-     */
-    ByteBuffer getRawChunkBuffer(int[] chunkOffset);
+	/**
+	 * Gets the raw buffer for the specified chunk.
+	 *
+	 * @param chunkOffset the offset of the required chunk
+	 * @return the raw buffer for this chunk
+	 * @throws HdfException If the chunk offset is not valid for this dataset
+	 */
+	ByteBuffer getRawChunkBuffer(int[] chunkOffset);
 
 }

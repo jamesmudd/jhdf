@@ -76,7 +76,7 @@ abstract class TestAllFilesBase {
 
 		// Check at least some files have been discovered
 		assertThat("Less than 3 HDF5 test files discovered searched paths below: " + path.toAbsolutePath(),
-				files.size(), is(greaterThan(2)));
+			files.size(), is(greaterThan(2)));
 
 		// Make a test for each file
 		return files.stream().map(this::createTest);
@@ -98,8 +98,8 @@ abstract class TestAllFilesBase {
 	}
 
 	protected void verifyAttributes(Node node) {
-		if(node instanceof Link) {
-			if(((Link) node).isBrokenLink()) {
+		if (node instanceof Link) {
+			if (((Link) node).isBrokenLink()) {
 				return; // Can't verify broken links
 			}
 		}
@@ -168,7 +168,7 @@ abstract class TestAllFilesBase {
 		} else if (dataset.isVariableLength()) {
 			assertThat(getDimensions(data)[0], is(equalTo(dims[0])));
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
-		} else if(dataset.getJavaType().isArray()) {
+		} else if (dataset.getJavaType().isArray()) {
 			// e.g. Opaque dataset
 			assertThat(getType(data), is(equalTo(dataset.getJavaType().getComponentType())));
 			// Should have some size

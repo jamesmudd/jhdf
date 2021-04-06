@@ -52,7 +52,7 @@ class LocalHeapTest {
 		assertThat(heap.getOffsetToHeadOfFreeList(), is(equalTo(56L)));
 		assertThat(heap.getAddressOfDataSegment(), is(equalTo(712L)));
 		assertThat(heap.toString(), is(equalTo(
-				"LocalHeap [address=0x2a8, version=0, dataSegmentSize=88, offsetToHeadOfFreeList=56, addressOfDataSegment=0x2c8]")));
+			"LocalHeap [address=0x2a8, version=0, dataSegmentSize=88, offsetToHeadOfFreeList=56, addressOfDataSegment=0x2c8]")));
 	}
 
 	@Test

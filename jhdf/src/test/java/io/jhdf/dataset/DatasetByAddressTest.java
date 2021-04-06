@@ -53,15 +53,15 @@ class DatasetByAddressTest {
 	Collection<DynamicNode> scalarDatasetTests() {
 		// List of all the datasetPaths
 		return Collections.singletonList(
-				dynamicContainer("earliest", Arrays.asList(
-						dynamicTest("fixed ASCII",
-								createTest(earliestHdfFile, 800)),
-						dynamicTest("fixed ASCII 1 char",
-								createTest(earliestHdfFile, 1400)),
-						dynamicTest("variable ASCII",
-								createTest(earliestHdfFile, 1672)),
-						dynamicTest("variable UTF8",
-								createTest(earliestHdfFile, 6654)))));
+			dynamicContainer("earliest", Arrays.asList(
+				dynamicTest("fixed ASCII",
+					createTest(earliestHdfFile, 800)),
+				dynamicTest("fixed ASCII 1 char",
+					createTest(earliestHdfFile, 1400)),
+				dynamicTest("variable ASCII",
+					createTest(earliestHdfFile, 1672)),
+				dynamicTest("variable UTF8",
+					createTest(earliestHdfFile, 6654)))));
 
 	}
 

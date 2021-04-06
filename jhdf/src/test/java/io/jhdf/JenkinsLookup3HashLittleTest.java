@@ -26,12 +26,12 @@ class JenkinsLookup3HashLittleTest {
 	// Examples taken from http://burtleburtle.net/bob/c/lookup3.c driver5
 	static Stream<Arguments> testCases() {
 		return Stream.of(
-				//1D
-				Arguments.of("".getBytes(US_ASCII), 0, 0xdeadbeef),
-				Arguments.of("".getBytes(US_ASCII), 0xdeadbeef, 0xbd5b7dde),
-				Arguments.of("".getBytes(US_ASCII), 0xbd5b7dde, 0x9c093ccd),
-				Arguments.of("Four score and seven years ago".getBytes(US_ASCII), 0, 0x17770551),
-				Arguments.of("Four score and seven years ago".getBytes(US_ASCII), 1, 0xcd628161)
+			//1D
+			Arguments.of("".getBytes(US_ASCII), 0, 0xdeadbeef),
+			Arguments.of("".getBytes(US_ASCII), 0xdeadbeef, 0xbd5b7dde),
+			Arguments.of("".getBytes(US_ASCII), 0xbd5b7dde, 0x9c093ccd),
+			Arguments.of("Four score and seven years ago".getBytes(US_ASCII), 0, 0x17770551),
+			Arguments.of("Four score and seven years ago".getBytes(US_ASCII), 1, 0xcd628161)
 		);
 	}
 

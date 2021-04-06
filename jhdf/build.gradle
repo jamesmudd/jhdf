@@ -95,19 +95,19 @@ def getGitHash = { ->
 jar {
     manifest {
         attributes('Implementation-Title': project.name,
-                'Implementation-Version': project.version,
-                'Automatic-Module-Name': 'io.jhdf',
-                // OSGi headers
-                'Bundle-ManifestVersion': '2',
-                'Bundle-SymbolicName': 'io.jhdf',
-                'Bundle-Name': project.name,
-                'Bundle-Vendor': 'James Mudd',
-                'Export-Package': 'io.jhdf.*',
-                // Build data
-                'Build-Time': new Date().toTimestamp(),
-                'Build-JDK': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
-                'Build-OS': System.getProperty('os.name') + ' ' + System.getProperty('os.version'),
-                'Git-Commit': getGitHash()
+            'Implementation-Version': project.version,
+            'Automatic-Module-Name': 'io.jhdf',
+            // OSGi headers
+            'Bundle-ManifestVersion': '2',
+            'Bundle-SymbolicName': 'io.jhdf',
+            'Bundle-Name': project.name,
+            'Bundle-Vendor': 'James Mudd',
+            'Export-Package': 'io.jhdf.*',
+            // Build data
+            'Build-Time': new Date().toTimestamp(),
+            'Build-JDK': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
+            'Build-OS': System.getProperty('os.name') + ' ' + System.getProperty('os.version'),
+            'Git-Commit': getGitHash()
         )
         exclude('io/jhdf/examples')
     }

@@ -44,15 +44,15 @@ class CommittedDatatypeTest {
 		DataType dataType = ((CommittedDatatype) node).getDataType();
 		assertThat(dataType.getJavaType(), is(javaType));
 		assertThat(dataType.getSize(), is(bytes));
-		assertThat(((OrderedDataType)dataType).getByteOrder(), is(byteOrder));
+		assertThat(((OrderedDataType) dataType).getByteOrder(), is(byteOrder));
 	}
 
 	static Stream<Arguments> readCommittedDatatype() {
 		return Stream.of(
-				Arguments.of("float32_LE", float.class, LITTLE_ENDIAN, 4),
-				Arguments.of("float64_BE", double.class, LITTLE_ENDIAN, 8),
-				Arguments.of("int32_LE", int.class, LITTLE_ENDIAN, 4),
-				Arguments.of("int32_BE", int.class, LITTLE_ENDIAN, 4)
+			Arguments.of("float32_LE", float.class, LITTLE_ENDIAN, 4),
+			Arguments.of("float64_BE", double.class, LITTLE_ENDIAN, 8),
+			Arguments.of("int32_LE", int.class, LITTLE_ENDIAN, 4),
+			Arguments.of("int32_BE", int.class, LITTLE_ENDIAN, 4)
 		);
 	}
 }

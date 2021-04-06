@@ -30,7 +30,7 @@ class SymbolTableEntryTest {
 	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
-    void setUp() throws URISyntaxException, IOException {
+	void setUp() throws URISyntaxException, IOException {
 		final URI testFileUri = this.getClass().getResource("/hdf5/test_file.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
@@ -38,12 +38,12 @@ class SymbolTableEntryTest {
 	}
 
 	@AfterEach
-    void after() {
+	void after() {
 		hdfBackingStorage.close();
 	}
 
 	@Test
-    void testSymbolTableEntry() {
+	void testSymbolTableEntry() {
 		SymbolTableEntry ste = new SymbolTableEntry(hdfBackingStorage, 56);
 		assertThat(ste.getLinkNameOffset(), is(equalTo(0)));
 		assertThat(ste.getObjectHeaderAddress(), is(equalTo(96L)));
@@ -51,6 +51,6 @@ class SymbolTableEntryTest {
 		assertThat(ste.getBTreeAddress(), is(equalTo(136L)));
 		assertThat(ste.getNameHeapAddress(), is(equalTo(680L)));
 		assertThat(ste.toString(), is(equalTo(
-				"SymbolTableEntry [address=0x38, linkNameOffset=0, objectHeaderAddress=0x60, cacheType=1, bTreeAddress=0x88, nameHeapAddress=0x2a8, linkValueOffset=-1]")));
+			"SymbolTableEntry [address=0x38, linkNameOffset=0, objectHeaderAddress=0x60, cacheType=1, bTreeAddress=0x88, nameHeapAddress=0x2a8, linkValueOffset=-1]")));
 	}
 }

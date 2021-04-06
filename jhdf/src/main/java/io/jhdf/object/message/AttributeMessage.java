@@ -46,7 +46,7 @@ public class AttributeMessage extends Message {
 			bb.position(bb.position() + 1);
 			flags = BitSet.valueOf(new byte[0]); // No flags in v1
 		} else {
-			flags = BitSet.valueOf(new byte[] { bb.get() });
+			flags = BitSet.valueOf(new byte[]{bb.get()});
 		}
 
 		final int nameSize = Utils.readBytesAsUnsignedInt(bb, 2);

@@ -16,4 +16,3 @@ if __name__ == '__main__':
     f.attrs.create('large_attribute', data=large_attr_data, dtype='f8')
 
     print('created large_attribute.hdf5')
-

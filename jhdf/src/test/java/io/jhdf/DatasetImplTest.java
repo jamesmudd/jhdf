@@ -40,16 +40,16 @@ class DatasetImplTest {
 
 	// These are the "correct" contents of the datasets i.e need to match what was
 	// written by h5py
-	private static final byte[] REFERENCE_BYTE_DATA = new byte[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3,
-			4, 5, 6, 7, 8, 9, 10 };
-	private static final short[] REFERENCE_SHORT_DATA = new short[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2,
-			3, 4, 5, 6, 7, 8, 9, 10 };
-	private static final int[] REFERENCE_INT_DATA = new int[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4,
-			5, 6, 7, 8, 9, 10 };
-	private static final double[] REFERENCE_DOUBLE_DATA = new double[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1,
-			2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	private static final float[] REFERENCE_FLOAT_DATA = new float[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2,
-			3, 4, 5, 6, 7, 8, 9, 10 };
+	private static final byte[] REFERENCE_BYTE_DATA = new byte[]{-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3,
+		4, 5, 6, 7, 8, 9, 10};
+	private static final short[] REFERENCE_SHORT_DATA = new short[]{-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2,
+		3, 4, 5, 6, 7, 8, 9, 10};
+	private static final int[] REFERENCE_INT_DATA = new int[]{-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4,
+		5, 6, 7, 8, 9, 10};
+	private static final double[] REFERENCE_DOUBLE_DATA = new double[]{-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1,
+		2, 3, 4, 5, 6, 7, 8, 9, 10};
+	private static final float[] REFERENCE_FLOAT_DATA = new float[]{-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2,
+		3, 4, 5, 6, 7, 8, 9, 10};
 
 	// Tolerance to use when comparing float values
 	private static final float FLOAT_DELTA = 0.000000001f;
@@ -186,13 +186,13 @@ class DatasetImplTest {
 	@Test
 	void testInt32DatasetDimensions() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
-		assertThat(dataset.getDimensions(), is(equalTo(new int[] { 21 })));
+		assertThat(dataset.getDimensions(), is(equalTo(new int[]{21})));
 	}
 
 	@Test
 	void testInt32DatasetMaxSizes() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
-		assertThat(dataset.getMaxSize(), is(equalTo(new int[] { 21 })));
+		assertThat(dataset.getMaxSize(), is(equalTo(new int[]{21})));
 	}
 
 	@Test

@@ -108,7 +108,7 @@ public interface Dataset extends Node {
 	 * </ul>
 	 *
 	 * @return the data in the dataset as a Java object or <code>null</code> if the
-	 *         dataset is empty.
+	 * dataset is empty.
 	 */
 	Object getData();
 

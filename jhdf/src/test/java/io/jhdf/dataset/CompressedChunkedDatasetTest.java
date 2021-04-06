@@ -55,27 +55,27 @@ class CompressedChunkedDatasetTest {
 	Collection<DynamicNode> compressedChunkedDatasetReadTests() {
 		// List of all the datasetPaths
 		List<DynamicTest> datasets = Arrays.asList(
-				dynamicTest("float32", createTest(earliestHdfFile, "/float/float32", 0.456)),
-				dynamicTest("float32lzf", createTest(earliestHdfFile, "/float/float32lzf", 0.875)),
-				dynamicTest("float64", createTest(earliestHdfFile, "/float/float64", 1.637)),
-				dynamicTest("float64lzf", createTest(earliestHdfFile, "/float/float64lzf", 1.379)),
-				dynamicTest("int8", createTest(earliestHdfFile, "/int/int8", 0.454)),
-				dynamicTest("int8lzf", createTest(earliestHdfFile, "/int/int8lzf", 0.636)),
-				dynamicTest("int16", createTest(earliestHdfFile, "/int/int16", 0.2)),
-				dynamicTest("int16lzf", createTest(earliestHdfFile, "/int/int16lzf", 1.0)),
-				dynamicTest("int32", createTest(earliestHdfFile, "/int/int32", 0.625)),
-				dynamicTest("int32lzf", createTest(earliestHdfFile, "/int/int32lzf", 0.833)));
+			dynamicTest("float32", createTest(earliestHdfFile, "/float/float32", 0.456)),
+			dynamicTest("float32lzf", createTest(earliestHdfFile, "/float/float32lzf", 0.875)),
+			dynamicTest("float64", createTest(earliestHdfFile, "/float/float64", 1.637)),
+			dynamicTest("float64lzf", createTest(earliestHdfFile, "/float/float64lzf", 1.379)),
+			dynamicTest("int8", createTest(earliestHdfFile, "/int/int8", 0.454)),
+			dynamicTest("int8lzf", createTest(earliestHdfFile, "/int/int8lzf", 0.636)),
+			dynamicTest("int16", createTest(earliestHdfFile, "/int/int16", 0.2)),
+			dynamicTest("int16lzf", createTest(earliestHdfFile, "/int/int16lzf", 1.0)),
+			dynamicTest("int32", createTest(earliestHdfFile, "/int/int32", 0.625)),
+			dynamicTest("int32lzf", createTest(earliestHdfFile, "/int/int32lzf", 0.833)));
 
 		return Arrays.asList(
-				dynamicContainer(HDF5_TEST_EARLIEST_FILE_NAME, datasets),
-				dynamicContainer(HDF5_TEST_LATEST_FILE_NAME, datasets));
+			dynamicContainer(HDF5_TEST_EARLIEST_FILE_NAME, datasets),
+			dynamicContainer(HDF5_TEST_LATEST_FILE_NAME, datasets));
 	}
 
 	private Executable createTest(HdfFile hdfFile, String datasetPath, double expectedCompressionRatio) {
 		return () -> {
 			Dataset dataset = hdfFile.getDatasetByPath(datasetPath);
 			Object data = dataset.getData();
-			assertThat(TestUtils.getDimensions(data), is(equalTo(new int[] { 7, 5 })));
+			assertThat(TestUtils.getDimensions(data), is(equalTo(new int[]{7, 5})));
 			Object[] flatData = TestUtils.flatten(data);
 			for (int i = 0; i < flatData.length; i++) {
 				// Do element comparison as there are all different primitive numeric types

@@ -56,9 +56,9 @@ public class HdfFileChannel implements HdfBackingStorage {
 			fc.read(bb, address + sb.getBaseAddressByte());
 		} catch (IOException e) {
 			throw new HdfException(
-					"Failed to read from file at address '" + address + "' (raw address '" + address
-							+ sb.getBaseAddressByte() + "'",
-					e);
+				"Failed to read from file at address '" + address + "' (raw address '" + address
+					+ sb.getBaseAddressByte() + "'",
+				e);
 		}
 		bb.order(LITTLE_ENDIAN);
 		bb.rewind();
@@ -76,7 +76,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 			return fc.map(MapMode.READ_ONLY, address, length);
 		} catch (IOException e) {
 			throw new HdfException("Failed to map buffer at address '" + address
-					+ "' of length '" + length + "'", e);
+				+ "' of length '" + length + "'", e);
 		}
 	}
 
@@ -91,7 +91,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 	}
 
 	@Override
-	public FileChannel getFileChannel(){
+	public FileChannel getFileChannel() {
 		return fc;
 	}
 

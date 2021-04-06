@@ -52,14 +52,14 @@ class OddDatasetTest {
 	Collection<DynamicNode> compressedChunkedDatasetReadTests() {
 		// List of all the datasetPaths
 		return Arrays.asList(
-				dynamicContainer(HDF5_TEST_EARLIEST_FILE_NAME, Arrays.asList(
-						dynamicTest("8D_int16", createTest(earliestHdfFile, "/8D_int16")),
-						dynamicTest("1D_int16", createTest(earliestHdfFile, "/1D_int16")))),
+			dynamicContainer(HDF5_TEST_EARLIEST_FILE_NAME, Arrays.asList(
+				dynamicTest("8D_int16", createTest(earliestHdfFile, "/8D_int16")),
+				dynamicTest("1D_int16", createTest(earliestHdfFile, "/1D_int16")))),
 
-				dynamicContainer(HDF5_TEST_LATEST_FILE_NAME, Arrays.asList(
-						dynamicTest("8D_int16", createTest(latestHdfFile, "/8D_int16")),
-						dynamicTest("1D_int16", createTest(latestHdfFile, "/1D_int16"))))
-				);
+			dynamicContainer(HDF5_TEST_LATEST_FILE_NAME, Arrays.asList(
+				dynamicTest("8D_int16", createTest(latestHdfFile, "/8D_int16")),
+				dynamicTest("1D_int16", createTest(latestHdfFile, "/1D_int16"))))
+		);
 	}
 
 	private Executable createTest(HdfFile hdfFile, String datasetPath) {

@@ -15,16 +15,16 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class ReadAttributeTest {
 
-    @Test
-    void testReadingAttributeEarliest() {
-        assertDoesNotThrow(() ->
-            ReadAttribute.main(new String[]{"src/test/resources/hdf5/test_attribute_earliest.hdf5", "/test_group/data", "2d_string"}));
-    }
+	@Test
+	void testReadingAttributeEarliest() {
+		assertDoesNotThrow(() ->
+			ReadAttribute.main(new String[]{"src/test/resources/hdf5/test_attribute_earliest.hdf5", "/test_group/data", "2d_string"}));
+	}
 
-    @Test
-    void testReadingAttributeLatest() {
-        assertDoesNotThrow(() ->
-		    ReadAttribute.main(new String[]{"src/test/resources/hdf5/test_attribute_latest.hdf5", "/test_group/data", "2d_string"}));
-    }
+	@Test
+	void testReadingAttributeLatest() {
+		assertDoesNotThrow(() ->
+			ReadAttribute.main(new String[]{"src/test/resources/hdf5/test_attribute_latest.hdf5", "/test_group/data", "2d_string"}));
+	}
 
 }

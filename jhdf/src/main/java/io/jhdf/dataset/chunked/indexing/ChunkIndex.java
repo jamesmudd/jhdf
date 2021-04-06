@@ -15,6 +15,6 @@ import java.util.Collection;
 
 public interface ChunkIndex {
 
-    Collection<Chunk> getAllChunks();
+	Collection<Chunk> getAllChunks();
 
 }

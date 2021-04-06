@@ -43,7 +43,7 @@ class GroupTest {
 	private Group rootGroup;
 
 	@BeforeEach
-    void setUp() throws IOException {
+	void setUp() throws IOException {
 		final String testFileUrl = this.getClass().getResource("/hdf5/test_file.hdf5").getFile();
 		File file = new File(testFileUrl);
 		FileChannel fc = FileChannel.open(file.toPath(), StandardOpenOption.READ);
@@ -57,12 +57,12 @@ class GroupTest {
 	}
 
 	@AfterEach
-    void after() {
+	void after() {
 		hdfBackingStorage.close();
 	}
 
 	@Test
-    void testGroup() {
+	void testGroup() {
 		Group group = GroupImpl.createGroup(hdfBackingStorage, 800, DATASETS_GROUP, rootGroup);
 		assertThat(group.getPath(), is(equalTo("/datasets_group/")));
 		assertThat(group.toString(), is(equalTo("Group [name=datasets_group, path=/datasets_group/, address=0x320]")));

@@ -37,7 +37,9 @@ public abstract class BTreeV1 {
 	private static final byte[] BTREE_NODE_V1_SIGNATURE = "TREE".getBytes(StandardCharsets.US_ASCII);
 	private static final int HEADER_BYTES = 6;
 
-	/** The location of this B tree in the file */
+	/**
+	 * The location of this B tree in the file
+	 */
 	private final long address;
 	protected final int entriesUsed;
 	private final long leftSiblingAddress;

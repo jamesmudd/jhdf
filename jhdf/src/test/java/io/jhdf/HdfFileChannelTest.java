@@ -44,7 +44,7 @@ class HdfFileChannelTest {
 	Superblock sb;
 
 	// Under test
-    private HdfFileChannel hdfFc;
+	private HdfFileChannel hdfFc;
 
 	@BeforeEach
 	void before() {
@@ -57,7 +57,7 @@ class HdfFileChannelTest {
 	}
 
 	@SuppressWarnings("SameReturnValue")
-    @Test
+	@Test
 	void testReadingBuffer() throws IOException {
 
 		Mockito.doAnswer(invocation -> {

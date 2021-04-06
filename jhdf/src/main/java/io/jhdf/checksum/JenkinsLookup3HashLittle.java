@@ -19,7 +19,7 @@ import static java.lang.Integer.rotateLeft;
  * code.
  * <p>
  * lookup3.c, by Bob Jenkins, May 2006, Public Domain.
- *
+ * <p>
  * You can use this free for any purpose.  It's in the public domain.
  * It has no warranty.
  * </p>
@@ -77,7 +77,7 @@ public final class JenkinsLookup3HashLittle {
 	 * acceptable.  Do NOT use for cryptographic purposes.
 	 * </p>
 	 *
-	 * @param bytes bytes to hash
+	 * @param bytes        bytes to hash
 	 * @param initialValue can be any integer value
 	 * @return hash value.
 	 */
@@ -151,7 +151,7 @@ public final class JenkinsLookup3HashLittle {
 	 * acceptable.  Do NOT use for cryptographic purposes.
 	 * </p>
 	 *
-	 * @param byteBuffer to hash
+	 * @param byteBuffer   to hash
 	 * @param initialValue can be any integer value
 	 * @return hash value.
 	 */

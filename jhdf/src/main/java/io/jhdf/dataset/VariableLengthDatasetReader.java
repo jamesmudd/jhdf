@@ -46,7 +46,7 @@ public final class VariableLengthDatasetReader {
 			// Scalar dataset
 			data = Array.newInstance(javaType, 1);
 			isScalar = true;
-			dimensions = new int[] { 1 }; // Fake the dimensions
+			dimensions = new int[]{1}; // Fake the dimensions
 		} else {
 			data = Array.newInstance(javaType, dimensions);
 			isScalar = false;
@@ -56,13 +56,13 @@ public final class VariableLengthDatasetReader {
 
 		List<ByteBuffer> elements = new ArrayList<>();
 		for (GlobalHeapId globalHeapId : getGlobalHeapIds(buffer, type.getSize(), hdfBackingStorage, getTotalPoints(dimensions))) {
-			if(globalHeapId.getIndex() == 0) {
+			if (globalHeapId.getIndex() == 0) {
 				// https://github.com/jamesmudd/jhdf/issues/247
 				// Empty arrays have index=0 and address=0
 				elements.add(EMPTY_BYTE_BUFFER);
 			} else {
 				GlobalHeap heap = heaps.computeIfAbsent(globalHeapId.getHeapAddress(),
-						address -> new GlobalHeap(hdfBackingStorage, address));
+					address -> new GlobalHeap(hdfBackingStorage, address));
 
 				ByteBuffer bb = heap.getObjectData(globalHeapId.getIndex());
 				elements.add(bb);
@@ -70,7 +70,7 @@ public final class VariableLengthDatasetReader {
 		}
 
 		// Make the output array
-		if(type.isVariableLengthString()) {
+		if (type.isVariableLengthString()) {
 			fillStringData(type, data, dimensions, elements.iterator());
 		} else {
 			fillData(type.getParent(), data, dimensions, elements.iterator(), hdfBackingStorage);
@@ -92,7 +92,7 @@ public final class VariableLengthDatasetReader {
 		} else {
 			for (int i = 0; i < dims[0]; i++) {
 				ByteBuffer buffer = elements.next();
-				int[] elementDims = new int[]{ buffer.limit() / dataType.getSize()};
+				int[] elementDims = new int[]{buffer.limit() / dataType.getSize()};
 				Object elementData = DatasetReader.readDataset(dataType, buffer, elementDims, hdfBackingStorage);
 				Array.set(data, i, elementData);
 			}
@@ -115,7 +115,7 @@ public final class VariableLengthDatasetReader {
 	}
 
 	private static List<GlobalHeapId> getGlobalHeapIds(ByteBuffer bb, int length, HdfBackingStorage hdfBackingStorage,
-			int datasetTotalSize) {
+													   int datasetTotalSize) {
 		// For variable length datasets the actual data is in the global heap so need to
 		// resolve that then build the buffer.
 		List<GlobalHeapId> ids = new ArrayList<>(datasetTotalSize);
@@ -139,6 +139,6 @@ public final class VariableLengthDatasetReader {
 
 	private static int getTotalPoints(int[] dimensions) {
 		return IntStream.of(dimensions)
-				.reduce(1, Math::multiplyExact);
+			.reduce(1, Math::multiplyExact);
 	}
 }

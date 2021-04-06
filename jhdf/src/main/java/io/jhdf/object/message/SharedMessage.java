@@ -35,18 +35,18 @@ public class SharedMessage {
 
 	public SharedMessage(ByteBuffer bb, Superblock sb) {
 		final byte version = bb.get();
-		if (version < 1 || version> 3) {
+		if (version < 1 || version > 3) {
 			throw new HdfException("Unrecognized shared message version " + version);
 		}
 
 		final byte type = bb.get();
 
-		if(version == 1) {
+		if (version == 1) {
 			// Skip reserved bytes
 			bb.position(bb.position() + 6);
 		}
 
-		if(version == 3 && type == 1) {
+		if (version == 3 && type == 1) {
 			throw new UnsupportedHdfException("Shared message v3 in fractal heap");
 		}
 
