@@ -20,7 +20,6 @@ plugins {
     id 'checkstyle' // Code style checks
 
     // Community plugins (need versions)
-    id 'com.jfrog.bintray' version '1.8.5' // For publishing to Bintray
     id 'org.sonarqube' version '3.2.0' // Code quality
     id "com.github.spotbugs" version "4.7.1" // Static analysis
 }
@@ -186,33 +185,6 @@ publishing {
 
 signing {
     sign publishing.publications.maven
-}
-
-bintray {
-    user = 'jamesmudd'
-    key = System.getenv('BINTRAY_KEY')
-    pkg {
-        repo = 'jhdf'
-        name = 'jhdf'
-        userOrg = 'jamesmudd'
-        licenses = ['MIT']
-        vcsUrl = 'https://github.com/jamesmudd/jhdf.git'
-        version {
-            name = project.version
-            desc = 'jHDF'
-            released = new Date()
-        }
-    }
-    // Upload the 'maven' publication i.e jar, sourcesJar, javadocJar, POM
-    publications = ['maven']
-    // Use filesSpec to copy the signatures not sure this is the best way but it works
-    filesSpec {
-        from "$buildDir/libs", "$buildDir/publications/maven/pom-default.xml.asc"
-        include "*.asc" // Signature files
-        into "io/jhdf/jhdf/${project.version}"
-        rename 'pom-default.xml.asc', "jhdf-${project.version}.pom.asc"
-    }
-
 }
 
 spotbugs {
