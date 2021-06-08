@@ -36,15 +36,25 @@ public class BTreeV2<T extends BTreeRecord> {
 	private static final byte[] BTREE_INTERNAL_NODE_SIGNATURE = "BTIN".getBytes(StandardCharsets.US_ASCII);
 	private static final byte[] BTREE_LEAF_NODE_SIGNATURE = "BTLF".getBytes(StandardCharsets.US_ASCII);
 
-	/** The location of this B tree in the file */
+	/**
+	 * The location of this B tree in the file
+	 */
 	private final long address;
-	/** Type of node. */
+	/**
+	 * Type of node.
+	 */
 	private final int nodeType;
-	/** The records in this b-tree */
+	/**
+	 * The records in this b-tree
+	 */
 	private final List<T> records;
-	/** bytes in each node */
+	/**
+	 * bytes in each node
+	 */
 	private final int nodeSize;
-	/** bytes in each record */
+	/**
+	 * bytes in each record
+	 */
 	private final int recordSize;
 
 	public List<T> getRecords() {
@@ -75,7 +85,7 @@ public class BTreeV2<T extends BTreeRecord> {
 			}
 
 			nodeType = bb.get();
-			if((nodeType == 10 || nodeType == 11) && datasetInfo == null) {
+			if ((nodeType == 10 || nodeType == 11) && datasetInfo == null) {
 				throw new HdfException("datasetInfo not set when building chunk B tree");
 			}
 
@@ -135,12 +145,12 @@ public class BTreeV2<T extends BTreeRecord> {
 			for (int i = 0; i < numberOfRecords + 1; i++) {
 				final long childAddress = readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
 				int sizeOfNumberOfRecords = getSizeOfNumberOfRecords(nodeSize, depth, totalRecords, recordSize,
-						hdfBackingStorage.getSizeOfOffsets());
+					hdfBackingStorage.getSizeOfOffsets());
 				final int numberOfChildRecords = readBytesAsUnsignedInt(bb, sizeOfNumberOfRecords);
 				final int totalNumberOfChildRecords;
 				if (depth > 1) {
 					totalNumberOfChildRecords = readBytesAsUnsignedInt(bb,
-							getSizeOfTotalNumberOfChildRecords(nodeSize, depth, recordSize));
+						getSizeOfTotalNumberOfChildRecords(nodeSize, depth, recordSize));
 				} else {
 					totalNumberOfChildRecords = -1;
 				}

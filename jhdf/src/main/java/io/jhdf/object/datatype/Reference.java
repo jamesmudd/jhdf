@@ -35,7 +35,7 @@ import static io.jhdf.Utils.stripLeadingIndex;
  */
 public class Reference extends DataType {
 
-	public enum ReferenceType{
+	public enum ReferenceType {
 
 		/** Object Reference: A reference to another object in the HDF5 file.*/
 		OBJECT,

@@ -75,7 +75,7 @@ public class GroupImpl extends AbstractNode implements Group {
 			} else {
 				// Links are not stored compactly i.e in the fractal heap
 				final BTreeV2<LinkNameForIndexedGroupRecord> bTreeNode = new BTreeV2<>(hdfBackingStorage,
-						linkInfoMessage.getBTreeNameIndexAddress());
+					linkInfoMessage.getBTreeNameIndexAddress());
 				final FractalHeap fractalHeap = new FractalHeap(hdfBackingStorage, linkInfoMessage.getFractalHeapAddress());
 
 				List<LinkNameForIndexedGroupRecord> records = bTreeNode.getRecords();
@@ -93,18 +93,18 @@ public class GroupImpl extends AbstractNode implements Group {
 			for (LinkMessage link : links) {
 				String linkName = link.getLinkName();
 				switch (link.getLinkType()) {
-				case HARD:
-					long hardLinkAddress = link.getHardLinkAddress();
-					final Node node = createNode(linkName, hardLinkAddress);
-					lazyChildren.put(linkName, node);
-					break;
-				case SOFT:
-					lazyChildren.put(linkName, new SoftLink(link.getSoftLink(), linkName, parent));
-					break;
-				case EXTERNAL:
-					lazyChildren.put(linkName,
+					case HARD:
+						long hardLinkAddress = link.getHardLinkAddress();
+						final Node node = createNode(linkName, hardLinkAddress);
+						lazyChildren.put(linkName, node);
+						break;
+					case SOFT:
+						lazyChildren.put(linkName, new SoftLink(link.getSoftLink(), linkName, parent));
+						break;
+					case EXTERNAL:
+						lazyChildren.put(linkName,
 							new ExternalLink(link.getExternalFile(), link.getExternalPath(), linkName, parent));
-					break;
+						break;
 				}
 			}
 
@@ -127,20 +127,20 @@ public class GroupImpl extends AbstractNode implements Group {
 					String childName = readName(nameBuffer, ste.getLinkNameOffset());
 					final Node node;
 					switch (ste.getCacheType()) {
-					case 0: // No cache
-						node = createNode(childName, ste.getObjectHeaderAddress());
-						break;
-					case 1: // Cached group
-						logger.trace("Creating group '{}'", childName);
-						node = createGroup(hdfBackingStorage, ste.getObjectHeaderAddress(), childName, parent);
-						break;
-					case 2: // Soft Link
-						logger.trace("Creating soft link '{}'", childName);
-						String target = readName(nameBuffer, ste.getLinkValueOffset());
-						node = new SoftLink(target, childName, parent);
-						break;
-					default:
-						throw new HdfException(
+						case 0: // No cache
+							node = createNode(childName, ste.getObjectHeaderAddress());
+							break;
+						case 1: // Cached group
+							logger.trace("Creating group '{}'", childName);
+							node = createGroup(hdfBackingStorage, ste.getObjectHeaderAddress(), childName, parent);
+							break;
+						case 2: // Soft Link
+							logger.trace("Creating soft link '{}'", childName);
+							String target = readName(nameBuffer, ste.getLinkValueOffset());
+							node = new SoftLink(target, childName, parent);
+							break;
+						default:
+							throw new HdfException(
 								"Unrecognized symbol table entry cache type. Type was: " + ste.getCacheType());
 					}
 					lazyChildren.put(childName, node);
@@ -190,7 +190,7 @@ public class GroupImpl extends AbstractNode implements Group {
 	/**
 	 * This is a special case constructor for the root group.
 	 *
-	 * @param hdfBackingStorage               The file channel for reading the file
+	 * @param hdfBackingStorage   The file channel for reading the file
 	 * @param objectHeaderAddress The offset into the file of the object header for
 	 *                            this group
 	 * @param parent              For the root group the parent is the file itself.
@@ -209,19 +209,21 @@ public class GroupImpl extends AbstractNode implements Group {
 	 * Creates a group for the specified object header with the given name by
 	 * reading from the file channel.
 	 *
-	 * @param hdfBackingStorage               The file channel for reading the file
+	 * @param hdfBackingStorage   The file channel for reading the file
 	 * @param objectHeaderAddress The offset into the file of the object header for
 	 *                            this group
 	 * @param name                The name of this group
 	 * @param parent              For the root group the parent is the file itself.
 	 * @return The newly read group
 	 */
-	/* package */ static Group createGroup(HdfBackingStorage hdfBackingStorage, long objectHeaderAddress, String name,
-										   Group parent) {
+	/* package */
+	static Group createGroup(HdfBackingStorage hdfBackingStorage, long objectHeaderAddress, String name,
+							 Group parent) {
 		return new GroupImpl(hdfBackingStorage, objectHeaderAddress, name, parent);
 	}
 
-	/* package */ static Group createRootGroup(HdfBackingStorage hdfBackingStorage, long objectHeaderAddress, HdfFile file) {
+	/* package */
+	static Group createRootGroup(HdfBackingStorage hdfBackingStorage, long objectHeaderAddress, HdfFile file) {
 		// Call the special root group constructor
 		return new GroupImpl(hdfBackingStorage, objectHeaderAddress, file);
 	}
@@ -232,7 +234,7 @@ public class GroupImpl extends AbstractNode implements Group {
 			return children.get();
 		} catch (Exception e) {
 			throw new HdfException(
-					"Failed to load children for group '" + getPath() + "' at address '" + getAddress() + "'", e);
+				"Failed to load children for group '" + getPath() + "' at address '" + getAddress() + "'", e);
 		}
 	}
 
@@ -262,7 +264,7 @@ public class GroupImpl extends AbstractNode implements Group {
 			return children.get().get(name);
 		} catch (Exception e) {
 			throw new HdfException(
-					"Failed to load children of group '" + getPath() + "' at address '" + getAddress() + "'", e);
+				"Failed to load children of group '" + getPath() + "' at address '" + getAddress() + "'", e);
 		}
 	}
 

@@ -1,12 +1,12 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # This file is part of jHDF. A pure Java library for accessing HDF5 files.
-# 
+#
 # http://jhdf.io
-# 
+#
 # Copyright (c) 2021 James Mudd
-# 
+#
 # MIT License see 'LICENSE' file
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 import h5py
 
 import numpy as np
@@ -14,8 +14,9 @@ import numpy as np
 '''
 The idea of this test if to write enum datasets
 '''
-def write_enum_datasets(f):
 
+
+def write_enum_datasets(f):
     data = np.arange(4)
 
     uint8_enum_type = h5py.enum_dtype({"RED": 0, "GREEN": 1, "BLUE": 2, "YELLOW": 3}, basetype=np.uint8)
@@ -27,7 +28,7 @@ def write_enum_datasets(f):
     uint64_enum_type = h5py.enum_dtype({"RED": 0, "GREEN": 1, "BLUE": 2, "YELLOW": 3}, basetype=np.uint64)
     f.create_dataset("enum_uint64_data", data=data, dtype=uint64_enum_type)
 
-    data = np.arange(4).reshape(2,2)
+    data = np.arange(4).reshape(2, 2)
 
     uint8_enum_type = h5py.enum_dtype({"RED": 0, "GREEN": 1, "BLUE": 2, "YELLOW": 3}, basetype=np.uint8)
     f.create_dataset("2d_enum_uint8_data", data=data, dtype=uint8_enum_type)
@@ -40,6 +41,7 @@ def write_enum_datasets(f):
 
     f.flush()
     f.close()
+
 
 if __name__ == '__main__':
     print('Making compressed chunked dataset test files...')

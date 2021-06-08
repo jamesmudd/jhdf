@@ -16,15 +16,15 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 class PrintTreeTest {
 
 	@Test
-    void testOpeningV1File() {
+	void testOpeningV1File() {
 		assertDoesNotThrow(() ->
-			PrintTree.main(new String[] { "src/test/resources/hdf5/test_file.hdf5" }));
+			PrintTree.main(new String[]{"src/test/resources/hdf5/test_file.hdf5"}));
 	}
 
 	@Test
-    void testOpeningV2File() {
+	void testOpeningV2File() {
 		assertDoesNotThrow(() ->
-			PrintTree.main(new String[] { "src/test/resources/hdf5/test_file2.hdf5" }));
+			PrintTree.main(new String[]{"src/test/resources/hdf5/test_file2.hdf5"}));
 	}
 
 }

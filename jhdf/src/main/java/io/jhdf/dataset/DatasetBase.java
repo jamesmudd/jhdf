@@ -61,7 +61,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		if (dataType instanceof OrderedDataType) {
 			final ByteOrder order = (((OrderedDataType) dataType).getByteOrder());
 			bb.order(order);
-			if(logger.isTraceEnabled()) {
+			if (logger.isTraceEnabled()) {
 				logger.trace("Set buffer order of '{}' to {}", getPath(), order);
 			}
 		} else {
@@ -139,7 +139,9 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	}
 
 	@Override
-	public boolean isCompound() { return getDataType() instanceof CompoundDataType; }
+	public boolean isCompound() {
+		return getDataType() instanceof CompoundDataType;
+	}
 
 	/**
 	 * Gets the buffer that holds this datasets data. The returned buffer will be of

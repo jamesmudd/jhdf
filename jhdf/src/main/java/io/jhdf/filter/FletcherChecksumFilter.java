@@ -19,27 +19,27 @@ import org.slf4j.LoggerFactory;
  * @author James Mudd
  */
 public class FletcherChecksumFilter implements Filter {
-    private static final Logger logger = LoggerFactory.getLogger(FletcherChecksumFilter.class);
+	private static final Logger logger = LoggerFactory.getLogger(FletcherChecksumFilter.class);
 
-    private boolean warningIssued = false;
+	private boolean warningIssued = false;
 
-    @Override
-    public int getId() {
-        return 3;
-    }
+	@Override
+	public int getId() {
+		return 3;
+	}
 
-    @Override
-    public String getName() {
-        return "fletcher32";
-    }
+	@Override
+	public String getName() {
+		return "fletcher32";
+	}
 
-    @Override
-    public byte[] decode(byte[] encodedData, int[] filterData) {
-        if(!warningIssued) {
-            logger.warn("Fletcher 32 checksum will not be verified");
-            warningIssued = true;
-        }
+	@Override
+	public byte[] decode(byte[] encodedData, int[] filterData) {
+		if (!warningIssued) {
+			logger.warn("Fletcher 32 checksum will not be verified");
+			warningIssued = true;
+		}
 
-        return encodedData;
-    }
+		return encodedData;
+	}
 }

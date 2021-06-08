@@ -53,8 +53,8 @@ public class DeflatePipelineFilter implements Filter {
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Decompressed chunk. Compressed size = {} bytes, Decompressed size = {}",
-						inflater.getBytesRead(),
-						inflater.getBytesWritten());
+					inflater.getBytesRead(),
+					inflater.getBytesWritten());
 			}
 
 			// Close the inflater

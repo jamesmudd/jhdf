@@ -36,7 +36,7 @@ class BTreeV1Test {
 	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
-    void setUp() throws URISyntaxException, IOException {
+	void setUp() throws URISyntaxException, IOException {
 		final URI testFileUri = this.getClass().getResource("/hdf5/test_chunked_datasets_earliest.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
@@ -44,7 +44,7 @@ class BTreeV1Test {
 	}
 
 	@AfterEach
-    void after() {
+	void after() {
 		hdfBackingStorage.close();
 	}
 

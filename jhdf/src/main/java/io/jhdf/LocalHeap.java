@@ -23,7 +23,9 @@ public class LocalHeap {
 
 	private static final byte[] HEAP_SIGNATURE = "HEAP".getBytes(StandardCharsets.US_ASCII);
 
-	/** The location of this Heap in the file */
+	/**
+	 * The location of this Heap in the file
+	 */
 	private final long address;
 	private final short version;
 	private final long dataSegmentSize;
@@ -89,8 +91,8 @@ public class LocalHeap {
 	@Override
 	public String toString() {
 		return "LocalHeap [address=" + Utils.toHex(address) + ", version=" + version + ", dataSegmentSize="
-				+ dataSegmentSize + ", offsetToHeadOfFreeList=" + offsetToHeadOfFreeList + ", addressOfDataSegment="
-				+ Utils.toHex(addressOfDataSegment) + "]";
+			+ dataSegmentSize + ", offsetToHeadOfFreeList=" + offsetToHeadOfFreeList + ", addressOfDataSegment="
+			+ Utils.toHex(addressOfDataSegment) + "]";
 	}
 
 	public ByteBuffer getDataBuffer() {

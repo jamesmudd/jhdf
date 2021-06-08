@@ -29,13 +29,15 @@ import static org.hamcrest.Matchers.is;
 
 class ObjectHeaderV2Test {
 
-	/** This will need to be updated each time the test files are regenerated */
+	/**
+	 * This will need to be updated each time the test files are regenerated
+	 */
 	private static final long TIMESTAMP = 1553279213L;
 
 	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
-    void setUp() throws IOException, URISyntaxException {
+	void setUp() throws IOException, URISyntaxException {
 		final URI testFileUri = this.getClass().getResource("/hdf5/test_file2.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
@@ -43,12 +45,12 @@ class ObjectHeaderV2Test {
 	}
 
 	@AfterEach
-    void after() {
+	void after() {
 		hdfBackingStorage.close();
 	}
 
 	@Test
-    void testRootGroupObjectHeaderV2() {
+	void testRootGroupObjectHeaderV2() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 48); // Root group header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -68,7 +70,7 @@ class ObjectHeaderV2Test {
 	}
 
 	@Test
-    void testDatasetsGroupObjectHeaderV2() {
+	void testDatasetsGroupObjectHeaderV2() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 195); // Root group header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -88,7 +90,7 @@ class ObjectHeaderV2Test {
 	}
 
 	@Test
-    void testObjectHeaderOnFloat16Dataset() {
+	void testObjectHeaderOnFloat16Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 608); // float16 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -108,7 +110,7 @@ class ObjectHeaderV2Test {
 	}
 
 	@Test
-    void testObjectHeaderOnFloat32Dataset() {
+	void testObjectHeaderOnFloat32Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 892); // float32 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -128,7 +130,7 @@ class ObjectHeaderV2Test {
 	}
 
 	@Test
-    void testObjectHeaderOnFloat64Dataset() {
+	void testObjectHeaderOnFloat64Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 1176); // float64 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -148,7 +150,7 @@ class ObjectHeaderV2Test {
 	}
 
 	@Test
-    void testObjectHeaderOnInt8Dataset() {
+	void testObjectHeaderOnInt8Dataset() {
 		ObjectHeader oh = ObjectHeader.readObjectHeader(hdfBackingStorage, 1655); // int8 header
 
 		assertThat(oh.getVersion(), is(equalTo(2)));
@@ -168,7 +170,7 @@ class ObjectHeaderV2Test {
 	}
 
 	@Test
-    void testCreationOrderTracked() throws IOException, URISyntaxException {
+	void testCreationOrderTracked() throws IOException, URISyntaxException {
 		// this test fails without skipping the creation order in Message#readObjectHeaderV2Message
 		final URI testFileUri = this.getClass().getResource("/hdf5/test_attribute_with_creation_order.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);

@@ -71,7 +71,7 @@ public interface Node {
 	 * Checks if this {@link Node} is a {@link Group}.
 	 *
 	 * @return <code>true</code> if this node is a group <code>false</code>
-	 *         otherwise
+	 * otherwise
 	 */
 	boolean isGroup();
 
@@ -102,7 +102,7 @@ public interface Node {
 	 * Checks if this {@link Node} is a {@link Link}.
 	 *
 	 * @return <code>true</code> if this {@link Node} is a link <code>false</code>
-	 *         otherwise
+	 * otherwise
 	 */
 	boolean isLink();
 

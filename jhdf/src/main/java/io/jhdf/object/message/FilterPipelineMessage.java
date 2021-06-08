@@ -69,7 +69,7 @@ public class FilterPipelineMessage extends Message {
 			}
 
 			// 2 bytes of optional
-			final BitSet flags = BitSet.valueOf(new byte[] { bb.get(), bb.get() });
+			final BitSet flags = BitSet.valueOf(new byte[]{bb.get(), bb.get()});
 			final boolean optional = flags.get(OPTIONAL);
 
 			final int numberOfDataValues = Utils.readBytesAsUnsignedInt(bb, 2);
@@ -133,8 +133,8 @@ public class FilterPipelineMessage extends Message {
 		@Override
 		public String toString() {
 			return "FilterInfo [id=" + id + ", name=" + name + ", optional=" + optional + ", data="
-					+ Arrays.toString(data)
-					+ "]";
+				+ Arrays.toString(data)
+				+ "]";
 		}
 	}
 }

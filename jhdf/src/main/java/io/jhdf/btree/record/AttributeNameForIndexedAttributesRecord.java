@@ -25,12 +25,12 @@ public class AttributeNameForIndexedAttributesRecord extends BTreeRecord {
 	public AttributeNameForIndexedAttributesRecord(ByteBuffer bb) {
 		if (bb.remaining() != 17) {
 			throw new HdfException(
-					"Invalid length buffer for AttributeNameForIndexedAttributesRecord. remaining bytes = "
-							+ bb.remaining());
+				"Invalid length buffer for AttributeNameForIndexedAttributesRecord. remaining bytes = "
+					+ bb.remaining());
 		}
 
 		heapId = Utils.createSubBuffer(bb, 8);
-		flags = BitSet.valueOf(new byte[] { bb.get() });
+		flags = BitSet.valueOf(new byte[]{bb.get()});
 		creationOrder = Utils.readBytesAsUnsignedLong(bb, 4);
 		hash = Utils.readBytesAsUnsignedLong(bb, 4);
 	}

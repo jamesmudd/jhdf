@@ -35,7 +35,7 @@ class DatasetLoaderTest {
 		Group group = mock(Group.class);
 
 		when(objectHeader.getMessageOfType(DataLayoutMessage.class))
-				.thenReturn(new UnknownDataLayoutMessage(new BitSet()));
+			.thenReturn(new UnknownDataLayoutMessage(new BitSet()));
 
 		assertThrows(HdfException.class, () -> DatasetLoader.createDataset(hdfBackingStorage, objectHeader, name, group));
 	}
@@ -48,7 +48,7 @@ class DatasetLoaderTest {
 		Group group = mock(Group.class);
 
 		when(objectHeader.getMessageOfType(DataLayoutMessage.class))
-				.thenThrow(RuntimeException.class);
+			.thenThrow(RuntimeException.class);
 
 		assertThrows(HdfException.class, () -> DatasetLoader.createDataset(hdfBackingStorage, objectHeader, name, group));
 	}

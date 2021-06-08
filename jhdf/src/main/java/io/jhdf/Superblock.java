@@ -26,7 +26,7 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 public abstract class Superblock {
 	private static final Logger logger = LoggerFactory.getLogger(Superblock.class);
 
-	private static final byte[] HDF5_FILE_SIGNATURE = new byte[] {(byte) 137, 72, 68, 70, 13, 10, 26, 10 };
+	private static final byte[] HDF5_FILE_SIGNATURE = new byte[]{(byte) 137, 72, 68, 70, 13, 10, 26, 10};
 	private static final int HDF5_FILE_SIGNATURE_LENGTH = HDF5_FILE_SIGNATURE.length;
 
 	public abstract int getVersionOfSuperblock();
@@ -46,7 +46,7 @@ public abstract class Superblock {
 	 * @param fc     The file to test
 	 * @param offset The offset into the file where the superblock starts
 	 * @return <code>true</code> if signature is matched <code>false</code>
-	 *         otherwise
+	 * otherwise
 	 */
 	static boolean verifySignature(FileChannel fc, long offset) {
 
@@ -100,14 +100,14 @@ public abstract class Superblock {
 		logger.debug("Version of superblock is = {}", versionOfSuperblock);
 
 		switch (versionOfSuperblock) {
-		case 0:
-		case 1:
-			return new SuperblockV0V1(fc, fileLocation);
-		case 2:
-		case 3:
-			return new SuperblockV2V3(fc, fileLocation);
-		default:
-			throw new UnsupportedHdfException(
+			case 0:
+			case 1:
+				return new SuperblockV0V1(fc, fileLocation);
+			case 2:
+			case 3:
+				return new SuperblockV2V3(fc, fileLocation);
+			default:
+				throw new UnsupportedHdfException(
 					"Superblock version is not supported. Detected version = " + versionOfSuperblock);
 		}
 	}
@@ -134,7 +134,7 @@ public abstract class Superblock {
 				return new SuperblockV2V3(byteBuffer, versionOfSuperblock);
 			default:
 				throw new UnsupportedHdfException(
-						"Superblock version is not supported. Detected version = " + versionOfSuperblock);
+					"Superblock version is not supported. Detected version = " + versionOfSuperblock);
 		}
 	}
 
@@ -174,7 +174,7 @@ public abstract class Superblock {
 				// Version # of File Free-space Storage
 				versionNumberOfTheFileFreeSpaceInformation = header.get();
 				logger.trace("Version Number of the File Free-Space Information: {}",
-						versionNumberOfTheFileFreeSpaceInformation);
+					versionNumberOfTheFileFreeSpaceInformation);
 
 				// Version # of Root Group Symbol Table Entry
 				versionOfRootGroupSymbolTableEntry = header.get();
@@ -254,7 +254,7 @@ public abstract class Superblock {
 			// Version # of File Free-space Storage
 			versionNumberOfTheFileFreeSpaceInformation = byteBuffer.get();
 			logger.trace("Version Number of the File Free-Space Information: {}",
-					versionNumberOfTheFileFreeSpaceInformation);
+				versionNumberOfTheFileFreeSpaceInformation);
 
 			// Version # of Root Group Symbol Table Entry
 			versionOfRootGroupSymbolTableEntry = byteBuffer.get();

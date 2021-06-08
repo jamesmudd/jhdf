@@ -26,14 +26,14 @@ import static java.util.stream.Collectors.toList;
  */
 public class BTreeIndex implements ChunkIndex {
 
-    private final BTreeV2<BTreeDatasetChunkRecord> bTreeV2;
+	private final BTreeV2<BTreeDatasetChunkRecord> bTreeV2;
 
-    public BTreeIndex(HdfBackingStorage hdfBackingStorage, long address, DatasetInfo datasetInfo) {
-        bTreeV2 = new BTreeV2<>(hdfBackingStorage, address, datasetInfo);
-    }
+	public BTreeIndex(HdfBackingStorage hdfBackingStorage, long address, DatasetInfo datasetInfo) {
+		bTreeV2 = new BTreeV2<>(hdfBackingStorage, address, datasetInfo);
+	}
 
-    @Override
-    public Collection<Chunk> getAllChunks() {
-        return bTreeV2.getRecords().stream().map(BTreeDatasetChunkRecord::getChunk).collect(toList());
-    }
+	@Override
+	public Collection<Chunk> getAllChunks() {
+		return bTreeV2.getRecords().stream().map(BTreeDatasetChunkRecord::getChunk).collect(toList());
+	}
 }

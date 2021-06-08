@@ -24,7 +24,9 @@ public final class Constants {
 
 	public static final byte SPACE = ' ';
 
-	/** All bits on */
+	/**
+	 * All bits on
+	 */
 	public static final long UNDEFINED_ADDRESS = -1L;
 
 	public static final String PATH_SEPARATOR = "/";

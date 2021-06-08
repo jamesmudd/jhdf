@@ -15,24 +15,24 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class RawChunkAccessTest {
 
-    @Test
-    void testChunkedV4() {
-        assertDoesNotThrow(() ->
-                RawChunkAccess.main(new String[]{"src/test/resources/hdf5/chunked_v4_datasets.hdf5",
-                        "/filtered_btree_v2/float32"}));
-    }
+	@Test
+	void testChunkedV4() {
+		assertDoesNotThrow(() ->
+			RawChunkAccess.main(new String[]{"src/test/resources/hdf5/chunked_v4_datasets.hdf5",
+				"/filtered_btree_v2/float32"}));
+	}
 
-    @Test
-    void testChunkedEarliest() {
-        assertDoesNotThrow(() ->
-                RawChunkAccess.main(new String[]{"src/test/resources/hdf5/test_chunked_datasets_earliest.hdf5",
-                        "/int/int8"}));
-    }
+	@Test
+	void testChunkedEarliest() {
+		assertDoesNotThrow(() ->
+			RawChunkAccess.main(new String[]{"src/test/resources/hdf5/test_chunked_datasets_earliest.hdf5",
+				"/int/int8"}));
+	}
 
-    @Test
-    void testChunkedLatest() {
-        assertDoesNotThrow(() ->
-                RawChunkAccess.main(new String[]{"src/test/resources/hdf5/test_chunked_datasets_earliest.hdf5",
-                        "/float/float64"}));
-    }
+	@Test
+	void testChunkedLatest() {
+		assertDoesNotThrow(() ->
+			RawChunkAccess.main(new String[]{"src/test/resources/hdf5/test_chunked_datasets_earliest.hdf5",
+				"/float/float64"}));
+	}
 }

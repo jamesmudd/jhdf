@@ -113,7 +113,7 @@ class HdfFileTest {
 			Node secondLevelGroup = firstGroup.getChildren().values().iterator().next();
 			String secondLevelGroupName = secondLevelGroup.getName();
 			assertThat(secondLevelGroup.getPath(),
-					is(equalTo("/" + firstGroupName + "/" + secondLevelGroupName + "/")));
+				is(equalTo("/" + firstGroupName + "/" + secondLevelGroupName + "/")));
 			assertThat(secondLevelGroup.getParent(), is(sameInstance(firstGroup)));
 		}
 	}
@@ -136,7 +136,8 @@ class HdfFileTest {
 		}
 	}
 
-	@Test // This is to ensure no exceptions are thrown when inspecting the whole file
+	@Test
+		// This is to ensure no exceptions are thrown when inspecting the whole file
 	void recurseThroughTheFileCallingBasicMethodsOnAllNodes() {
 		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
 			recurseGroup(hdfFile);
@@ -241,8 +242,8 @@ class HdfFileTest {
 			assertThat(e.getPath(), is(equalTo(path)));
 			assertThat(e.getFile(), is(sameInstance(file)));
 			assertThat(e.getMessage(), is(equalTo(
-					"The path '/datasets_group/float/float32/invalid_name' could not be found in the HDF5 file '"
-							+ file.getAbsolutePath() + "'")));
+				"The path '/datasets_group/float/float32/invalid_name' could not be found in the HDF5 file '"
+					+ file.getAbsolutePath() + "'")));
 		}
 	}
 

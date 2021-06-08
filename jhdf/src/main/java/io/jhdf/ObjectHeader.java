@@ -31,9 +31,13 @@ import static io.jhdf.Utils.readBytesAsUnsignedInt;
 public abstract class ObjectHeader {
 	private static final Logger logger = LoggerFactory.getLogger(ObjectHeader.class);
 
-	/** The location of this Object header in the file */
+	/**
+	 * The location of this Object header in the file
+	 */
 	private final long address;
-	/** The messages contained in this object header */
+	/**
+	 * The messages contained in this object header
+	 */
 	protected final List<Message> messages = new ArrayList<>();
 
 	public long getAddress() {
@@ -77,9 +81,13 @@ public abstract class ObjectHeader {
 
 	public static class ObjectHeaderV1 extends ObjectHeader {
 
-		/** version of the header */
+		/**
+		 * version of the header
+		 */
 		private final byte version;
-		/** Level of the node 0 = leaf */
+		/**
+		 * Level of the node 0 = leaf
+		 */
 		private final int referenceCount;
 
 		private ObjectHeaderV1(HdfBackingStorage hdfBackingStorage, long address) {
@@ -157,7 +165,7 @@ public abstract class ObjectHeader {
 
 	/**
 	 * The Object Header V2
-	 *
+	 * <p>
 	 * <a href=
 	 * "https://support.hdfgroup.org/HDF5/doc/H5.format.html#V2ObjectHeaderPrefix">V2ObjectHeaderPrefix</a>
 	 */
@@ -171,7 +179,9 @@ public abstract class ObjectHeader {
 		private static final int NUMBER_OF_ATTRIBUTES_PRESENT = 4;
 		private static final int TIMESTAMPS_PRESENT = 5;
 
-		/** Type of node. 0 = group, 1 = data */
+		/**
+		 * Type of node. 0 = group, 1 = data
+		 */
 		private final byte version;
 
 		private final long accessTime;
@@ -208,7 +218,7 @@ public abstract class ObjectHeader {
 				}
 
 				// Flags
-				flags = BitSet.valueOf(new byte[] { bb.get() });
+				flags = BitSet.valueOf(new byte[]{bb.get()});
 
 				// Size of chunk 0
 				final byte sizeOfChunk0;
@@ -295,7 +305,7 @@ public abstract class ObjectHeader {
 					continuationBuffer.get(continuationSignatureBytes);
 					if (!Arrays.equals(OBJECT_HEADER_V2_CONTINUATION_SIGNATURE, continuationSignatureBytes)) {
 						throw new HdfException(
-								"Object header continuation header not matched, at address: " + ohcm.getOffset());
+							"Object header continuation header not matched, at address: " + ohcm.getOffset());
 					}
 
 					// Recursively read messages
