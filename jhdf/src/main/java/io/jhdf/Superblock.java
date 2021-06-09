@@ -425,6 +425,16 @@ public abstract class Superblock {
 		private final long endOfFileAddress;
 		private final long rootGroupObjectHeaderAddress;
 
+		public SuperblockV2V3() {
+			versionOfSuperblock = 3;
+			sizeOfOffsets = 8;
+			sizeOfLengths = 8;
+			baseAddressByte = Constants.UNDEFINED_ADDRESS;; //TODO
+			superblockExtensionAddress = Constants.UNDEFINED_ADDRESS;
+			endOfFileAddress = 1024; // TODO
+			rootGroupObjectHeaderAddress = 32;
+		}
+
 		private SuperblockV2V3(FileChannel fc, final long address) {
 			try {
 
