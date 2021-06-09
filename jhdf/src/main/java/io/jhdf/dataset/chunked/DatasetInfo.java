@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -18,25 +18,25 @@ import org.apache.commons.lang3.ArrayUtils;
  */
 public class DatasetInfo {
 
-    private final int chunkSizeInBytes;
-    private final int[] datasetDimensions;
-    private final int[] chunkDimensions;
+	private final int chunkSizeInBytes;
+	private final int[] datasetDimensions;
+	private final int[] chunkDimensions;
 
-    public DatasetInfo(int chunkSizeInBytes, int[] datasetDimensions, int[] chunkDimensions) {
-        this.chunkSizeInBytes = chunkSizeInBytes;
-        this.datasetDimensions = ArrayUtils.clone(datasetDimensions);
-        this.chunkDimensions = ArrayUtils.clone(chunkDimensions);
-    }
+	public DatasetInfo(int chunkSizeInBytes, int[] datasetDimensions, int[] chunkDimensions) {
+		this.chunkSizeInBytes = chunkSizeInBytes;
+		this.datasetDimensions = ArrayUtils.clone(datasetDimensions);
+		this.chunkDimensions = ArrayUtils.clone(chunkDimensions);
+	}
 
-    public int getChunkSizeInBytes() {
-        return chunkSizeInBytes;
-    }
+	public int getChunkSizeInBytes() {
+		return chunkSizeInBytes;
+	}
 
-    public int[] getDatasetDimensions() {
-        return ArrayUtils.clone(datasetDimensions);
-    }
+	public int[] getDatasetDimensions() {
+		return ArrayUtils.clone(datasetDimensions);
+	}
 
-    public int[] getChunkDimensions() {
-        return ArrayUtils.clone(chunkDimensions);
-    }
+	public int[] getChunkDimensions() {
+		return ArrayUtils.clone(chunkDimensions);
+	}
 }

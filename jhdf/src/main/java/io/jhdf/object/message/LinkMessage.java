@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -27,14 +27,14 @@ public class LinkMessage extends Message {
 
 		private static LinkType fromInt(int typeInt) {
 			switch (typeInt) {
-			case 0:
-				return HARD;
-			case 1:
-				return SOFT;
-			case 64:
-				return EXTERNAL;
-			default:
-				throw new HdfException("Unrecognized link type: " + typeInt);
+				case 0:
+					return HARD;
+				case 1:
+					return SOFT;
+				case 64:
+					return EXTERNAL;
+				default:
+					throw new HdfException("Unrecognized link type: " + typeInt);
 			}
 		}
 	}
@@ -66,26 +66,26 @@ public class LinkMessage extends Message {
 		}
 
 		// Flags
-		final BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
+		final BitSet flags = BitSet.valueOf(new byte[]{bb.get()});
 
 		// Size of length of link name
 		final int sizeOfLengthOfLinkNameIndex = Utils.bitsToInt(flags, 0, 2);
 		final int sizeOfLengthOfLinkName;
 		switch (sizeOfLengthOfLinkNameIndex) {
-		case 0:
-			sizeOfLengthOfLinkName = 1;
-			break;
-		case 1:
-			sizeOfLengthOfLinkName = 2;
-			break;
-		case 2:
-			sizeOfLengthOfLinkName = 4;
-			break;
-		case 3:
-			sizeOfLengthOfLinkName = 8;
-			break;
-		default:
-			throw new HdfException("Unrecognized size of link name");
+			case 0:
+				sizeOfLengthOfLinkName = 1;
+				break;
+			case 1:
+				sizeOfLengthOfLinkName = 2;
+				break;
+			case 2:
+				sizeOfLengthOfLinkName = 4;
+				break;
+			case 3:
+				sizeOfLengthOfLinkName = 8;
+				break;
+			default:
+				throw new HdfException("Unrecognized size of link name");
 		}
 
 		if (flags.get(LINK_TYPE_PRESENT)) {
@@ -104,14 +104,14 @@ public class LinkMessage extends Message {
 		if (flags.get(LINK_CHARACTER_SET_PRESENT)) {
 			int charsetValue = Utils.readBytesAsUnsignedInt(bb, 1);
 			switch (charsetValue) {
-			case 0:
-				linkNameCharset = US_ASCII;
-				break;
-			case 1:
-				linkNameCharset = UTF_8;
-				break;
-			default:
-				throw new HdfException("Unknown link charset value = " + charsetValue);
+				case 0:
+					linkNameCharset = US_ASCII;
+					break;
+				case 1:
+					linkNameCharset = UTF_8;
+					break;
+				default:
+					throw new HdfException("Unknown link charset value = " + charsetValue);
 			}
 		} else {
 			linkNameCharset = US_ASCII;
@@ -125,24 +125,24 @@ public class LinkMessage extends Message {
 
 		// Link Information
 		switch (linkType) {
-		case HARD: // Hard Link
-			hardLinkAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
-			break;
-		case SOFT: // Soft link
-			int lengthOfSoftLink = Utils.readBytesAsUnsignedInt(bb, 2);
-			ByteBuffer linkBuffer = Utils.createSubBuffer(bb, lengthOfSoftLink);
-			softLink = US_ASCII.decode(linkBuffer).toString();
-			break;
-		case EXTERNAL: // External link
-			int lengthOfExternalLink = Utils.readBytesAsUnsignedInt(bb, 2);
-			ByteBuffer externalLinkBuffer = Utils.createSubBuffer(bb, lengthOfExternalLink);
-			// Skip first byte contains version = 0 and flags = 0
-			externalLinkBuffer.position(1);
-			externalFile = Utils.readUntilNull(externalLinkBuffer);
-			externalPath = Utils.readUntilNull(externalLinkBuffer);
-			break;
-		default:
-			throw new HdfException("Unrecognized link type = " + linkType);
+			case HARD: // Hard Link
+				hardLinkAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+				break;
+			case SOFT: // Soft link
+				int lengthOfSoftLink = Utils.readBytesAsUnsignedInt(bb, 2);
+				ByteBuffer linkBuffer = Utils.createSubBuffer(bb, lengthOfSoftLink);
+				softLink = US_ASCII.decode(linkBuffer).toString();
+				break;
+			case EXTERNAL: // External link
+				int lengthOfExternalLink = Utils.readBytesAsUnsignedInt(bb, 2);
+				ByteBuffer externalLinkBuffer = Utils.createSubBuffer(bb, lengthOfExternalLink);
+				// Skip first byte contains version = 0 and flags = 0
+				externalLinkBuffer.position(1);
+				externalFile = Utils.readUntilNull(externalLinkBuffer);
+				externalPath = Utils.readUntilNull(externalLinkBuffer);
+				break;
+			default:
+				throw new HdfException("Unrecognized link type = " + linkType);
 		}
 	}
 

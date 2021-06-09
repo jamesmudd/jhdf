@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -29,15 +29,15 @@ class NoInstancesTest {
 
 	static Stream<Arguments> noInstances() {
 		return Stream.of(
-				Arguments.of(DatasetLoader.class),
-				Arguments.of(DatasetReader.class),
-				Arguments.of(CompoundDatasetReader.class),
-				Arguments.of(EnumDatasetReader.class),
-				Arguments.of(VariableLengthDatasetReader.class),
-				Arguments.of(Constants.class),
-				Arguments.of(Utils.class),
-				Arguments.of(JenkinsLookup3HashLittle.class),
-				Arguments.of(ChecksumUtils.class)
+			Arguments.of(DatasetLoader.class),
+			Arguments.of(DatasetReader.class),
+			Arguments.of(CompoundDatasetReader.class),
+			Arguments.of(EnumDatasetReader.class),
+			Arguments.of(VariableLengthDatasetReader.class),
+			Arguments.of(Constants.class),
+			Arguments.of(Utils.class),
+			Arguments.of(JenkinsLookup3HashLittle.class),
+			Arguments.of(ChecksumUtils.class)
 		);
 	}
 

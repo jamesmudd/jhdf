@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -31,7 +31,7 @@ class LargeGroupTest {
 	@TestFactory
 	Collection<DynamicNode> datasetReadTests() {
 		return Arrays.asList(dynamicTest("earliest", createTest("test_large_group_earliest.hdf5")),
-				dynamicTest("latest", createTest("test_large_group_latest.hdf5")));
+			dynamicTest("latest", createTest("test_large_group_latest.hdf5")));
 	}
 
 	private Executable createTest(String file) {
@@ -46,7 +46,7 @@ class LargeGroupTest {
 					assertThat(node, instanceOf(Dataset.class));
 					Dataset dataset = (Dataset) node;
 					int[] data = (int[]) dataset.getData();
-					assertThat(data, is(equalTo(new int[] { i })));
+					assertThat(data, is(equalTo(new int[]{i})));
 				}
 			}
 		};

@@ -3,14 +3,14 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 /**
  * Dataset classes. The implementations of {@link io.jhdf.api.Dataset} and
  * helper classes.
- *
+ * <p>
  * These are the classes used when accessing HDF5 datasets.
  *
  * @author James Mudd

@@ -3,18 +3,18 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.btree;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.indexing.ChunkImpl;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -30,8 +30,8 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class BTreeV1Data extends BTreeV1 {
 
-	private BTreeV1Data(HdfFileChannel hdfFc, long address) {
-		super(hdfFc, address);
+	private BTreeV1Data(HdfBackingStorage hdfBackingStorage, long address) {
+		super(hdfBackingStorage, address);
 	}
 
 	/**
@@ -43,20 +43,20 @@ public abstract class BTreeV1Data extends BTreeV1 {
 
 		private final ArrayList<Chunk> chunks;
 
-		/* package */ BTreeV1DataLeafNode(HdfFileChannel hdfFc, long address, int dataDimensions) {
-			super(hdfFc, address);
+		/* package */ BTreeV1DataLeafNode(HdfBackingStorage hdfBackingStorage, long address, int dataDimensions) {
+			super(hdfBackingStorage, address);
 
 			final int keySize = 4 + 4 + (dataDimensions + 1) * 8;
 			final int keyBytes = (entriesUsed + 1) * keySize;
-			final int childPointerBytes = entriesUsed * hdfFc.getSizeOfOffsets();
+			final int childPointerBytes = entriesUsed * hdfBackingStorage.getSizeOfOffsets();
 			final int keysAndPointersBytes = keyBytes + childPointerBytes;
 
-			final long keysAddress = address + 8L + 2L * hdfFc.getSizeOfOffsets();
-			final ByteBuffer bb = hdfFc.readBufferFromAddress(keysAddress, keysAndPointersBytes);
+			final long keysAddress = address + 8L + 2L * hdfBackingStorage.getSizeOfOffsets();
+			final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(keysAddress, keysAndPointersBytes);
 
 			chunks = new ArrayList<>(entriesUsed);
 			for (int i = 0; i < entriesUsed; i++) {
-				Chunk chunk = readKeyAsChunk(hdfFc.getSuperblock(), dataDimensions, bb);
+				Chunk chunk = readKeyAsChunk(hdfBackingStorage.getSuperblock(), dataDimensions, bb);
 				chunks.add(chunk);
 			}
 
@@ -65,7 +65,7 @@ public abstract class BTreeV1Data extends BTreeV1 {
 
 		private Chunk readKeyAsChunk(Superblock sb, int dataDimensions, ByteBuffer bb) {
 			final int chunkSize = Utils.readBytesAsUnsignedInt(bb, 4);
-			final BitSet filterMask = BitSet.valueOf(new byte[] { bb.get(), bb.get(), bb.get(), bb.get() });
+			final BitSet filterMask = BitSet.valueOf(new byte[]{bb.get(), bb.get(), bb.get(), bb.get()});
 			final int[] chunkOffset = new int[dataDimensions];
 			for (int j = 0; j < dataDimensions; j++) {
 				chunkOffset[j] = Utils.readBytesAsUnsignedInt(bb, 8);
@@ -94,23 +94,23 @@ public abstract class BTreeV1Data extends BTreeV1 {
 
 		private final List<BTreeV1Data> childNodes;
 
-		/* package */ BTreeV1DataNonLeafNode(HdfFileChannel hdfFc, long address, int dataDimensions) {
-			super(hdfFc, address);
+		/* package */ BTreeV1DataNonLeafNode(HdfBackingStorage hdfBackingStorage, long address, int dataDimensions) {
+			super(hdfBackingStorage, address);
 
 			final int keySize = 4 + 4 + (dataDimensions + 1) * 8;
 			final int keyBytes = (entriesUsed + 1) * keySize;
-			final int childPointerBytes = entriesUsed * hdfFc.getSizeOfOffsets();
+			final int childPointerBytes = entriesUsed * hdfBackingStorage.getSizeOfOffsets();
 			final int keysAndPointersBytes = keyBytes + childPointerBytes;
 
-			final long keysAddress = address + 8L + 2L * hdfFc.getSizeOfOffsets();
-			final ByteBuffer keysAndPointersBuffer = hdfFc.readBufferFromAddress(keysAddress, keysAndPointersBytes);
+			final long keysAddress = address + 8L + 2L * hdfBackingStorage.getSizeOfOffsets();
+			final ByteBuffer keysAndPointersBuffer = hdfBackingStorage.readBufferFromAddress(keysAddress, keysAndPointersBytes);
 
 			childNodes = new ArrayList<>(entriesUsed);
 
 			for (int i = 0; i < entriesUsed; i++) {
 				keysAndPointersBuffer.position(keysAndPointersBuffer.position() + keySize);
-				long childAddress = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, hdfFc.getSizeOfOffsets());
-				childNodes.add(BTreeV1.createDataBTree(hdfFc, childAddress, dataDimensions));
+				long childAddress = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, hdfBackingStorage.getSizeOfOffsets());
+				childNodes.add(BTreeV1.createDataBTree(hdfBackingStorage, childAddress, dataDimensions));
 			}
 		}
 

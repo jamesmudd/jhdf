@@ -3,16 +3,16 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
@@ -29,7 +29,7 @@ public abstract class DataType {
 		bb.mark();
 
 		// Class and version
-		final BitSet classAndVersion = BitSet.valueOf(new byte[]{ bb.get() });
+		final BitSet classAndVersion = BitSet.valueOf(new byte[]{bb.get()});
 		int version = Utils.bitsToInt(classAndVersion, 4, 4);
 		int dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
 
@@ -52,7 +52,7 @@ public abstract class DataType {
 			case 4: // Bit field
 				return new BitField(bb);
 			case 5: // Opaque
-				throw new UnsupportedHdfException("Opaque data type is not yet supported");
+				return new OpaqueDataType(bb);
 			case 6: // Compound
 				return new CompoundDataType(bb);
 			case 7: // Reference
@@ -72,7 +72,7 @@ public abstract class DataType {
 	protected DataType(ByteBuffer bb) {
 
 		// Class and version
-		final BitSet classAndVersion = BitSet.valueOf(new byte[] { bb.get() });
+		final BitSet classAndVersion = BitSet.valueOf(new byte[]{bb.get()});
 		dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
 		version = Utils.bitsToInt(classAndVersion, 4, 4);
 
@@ -103,6 +103,6 @@ public abstract class DataType {
 
 	public abstract Class<?> getJavaType();
 
-	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc);
+	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage);
 
 }

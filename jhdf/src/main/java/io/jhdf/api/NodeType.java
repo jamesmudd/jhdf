@@ -3,12 +3,12 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.api;
 
 public enum NodeType {
-	FILE, GROUP, DATASET
+	FILE, GROUP, DATASET, COMMITTED_DATATYPE
 }

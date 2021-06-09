@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -43,7 +43,7 @@ public class SoftLink extends AbstractLink {
 			return targetNode.get();
 		} catch (Exception e) {
 			throw new HdfBrokenLinkException(
-					"Could not resolve link target '" + target + "' from link '" + getPath() + "'", e);
+				"Could not resolve link target '" + target + "' from link '" + getPath() + "'", e);
 		}
 	}
 

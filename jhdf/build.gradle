@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -20,14 +20,13 @@ plugins {
     id 'checkstyle' // Code style checks
 
     // Community plugins (need versions)
-    id 'com.jfrog.bintray' version '1.8.5' // For publishing to Bintray
-    id 'org.sonarqube' version '3.0' // Code quality
-    id "com.github.spotbugs" version "4.6.0" // Static analysis
+    id 'org.sonarqube' version '3.2.0' // Code quality
+    id "com.github.spotbugs" version "4.7.1" // Static analysis
 }
 
 // Variables
 group = 'io.jhdf'
-version = '0.5.11'
+version = '0.6.1'
 
 compileJava {
     sourceCompatibility = "1.8"
@@ -42,7 +41,7 @@ compileTestJava {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 ext {
@@ -53,9 +52,9 @@ ext {
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     // lzf compression support
-    implementation group: 'com.ning', name: 'compress-lzf', version: '1.0.4'
+    implementation group: 'com.ning', name: 'compress-lzf', version: '1.1'
 
     // Use JUnit 5 test framework
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion
@@ -64,7 +63,7 @@ dependencies {
     testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
 
     // Mocking
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.28'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.11.0'
     testImplementation group: 'org.powermock', name: 'powermock-core', version: '2.0.9'
     // Matchers
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
@@ -95,19 +94,19 @@ def getGitHash = { ->
 jar {
     manifest {
         attributes('Implementation-Title': project.name,
-                'Implementation-Version': project.version,
-                'Automatic-Module-Name': 'io.jhdf',
-                // OSGi headers
-                'Bundle-ManifestVersion': '2',
-                'Bundle-SymbolicName': 'io.jhdf',
-                'Bundle-Name': project.name,
-                'Bundle-Vendor': 'James Mudd',
-                'Export-Package': 'io.jhdf.*',
-                // Build data
-                'Build-Time': new Date().toTimestamp(),
-                'Build-JDK': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
-                'Build-OS': System.getProperty('os.name') + ' ' + System.getProperty('os.version'),
-                'Git-Commit': getGitHash()
+            'Implementation-Version': project.version,
+            'Automatic-Module-Name': 'io.jhdf',
+            // OSGi headers
+            'Bundle-ManifestVersion': '2',
+            'Bundle-SymbolicName': 'io.jhdf',
+            'Bundle-Name': project.name,
+            'Bundle-Vendor': 'James Mudd',
+            'Export-Package': 'io.jhdf.*',
+            // Build data
+            'Build-Time': new Date().toTimestamp(),
+            'Build-JDK': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
+            'Build-OS': System.getProperty('os.name') + ' ' + System.getProperty('os.version'),
+            'Git-Commit': getGitHash()
         )
         exclude('io/jhdf/examples')
     }
@@ -173,38 +172,19 @@ publishing {
                 password = System.getenv('GITHUB_TOKEN')
             }
         }
+        maven {
+            name = 'Sonatype'
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username System.getenv('SONATYPE_USERNAME')
+                password System.getenv('SONATYPE_PASSWORD')
+            }
+        }
     }
 }
 
 signing {
     sign publishing.publications.maven
-}
-
-bintray {
-    user = 'jamesmudd'
-    key = System.getenv('BINTRAY_KEY')
-    pkg {
-        repo = 'jhdf'
-        name = 'jhdf'
-        userOrg = 'jamesmudd'
-        licenses = ['MIT']
-        vcsUrl = 'https://github.com/jamesmudd/jhdf.git'
-        version {
-            name = project.version
-            desc = 'jHDF'
-            released = new Date()
-        }
-    }
-    // Upload the 'maven' publication i.e jar, sourcesJar, javadocJar, POM
-    publications = ['maven']
-    // Use filesSpec to copy the signatures not sure this is the best way but it works
-    filesSpec {
-        from "$buildDir/libs", "$buildDir/publications/maven/pom-default.xml.asc"
-        include "*.asc" // Signature files
-        into "io/jhdf/jhdf/${project.version}"
-        rename 'pom-default.xml.asc', "jhdf-${project.version}.pom.asc"
-    }
-
 }
 
 spotbugs {

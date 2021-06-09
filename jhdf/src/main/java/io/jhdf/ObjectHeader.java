@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -13,6 +13,7 @@ import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.Message;
 import io.jhdf.object.message.ObjectHeaderContinuationMessage;
+import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +31,13 @@ import static io.jhdf.Utils.readBytesAsUnsignedInt;
 public abstract class ObjectHeader {
 	private static final Logger logger = LoggerFactory.getLogger(ObjectHeader.class);
 
-	/** The location of this Object header in the file */
+	/**
+	 * The location of this Object header in the file
+	 */
 	private final long address;
-	/** The messages contained in this object header */
+	/**
+	 * The messages contained in this object header
+	 */
 	protected final List<Message> messages = new ArrayList<>();
 
 	public long getAddress() {
@@ -49,7 +54,7 @@ public abstract class ObjectHeader {
 		return messages;
 	}
 
-	public ObjectHeader(long address) {
+	protected ObjectHeader(long address) {
 		this.address = address;
 	}
 
@@ -76,16 +81,20 @@ public abstract class ObjectHeader {
 
 	public static class ObjectHeaderV1 extends ObjectHeader {
 
-		/** version of the header */
+		/**
+		 * version of the header
+		 */
 		private final byte version;
-		/** Level of the node 0 = leaf */
+		/**
+		 * Level of the node 0 = leaf
+		 */
 		private final int referenceCount;
 
-		private ObjectHeaderV1(HdfFileChannel hdfFc, long address) {
+		private ObjectHeaderV1(HdfBackingStorage hdfBackingStorage, long address) {
 			super(address);
 
 			try {
-				ByteBuffer header = hdfFc.readBufferFromAddress(address, 12);
+				ByteBuffer header = hdfBackingStorage.readBufferFromAddress(address, 12);
 
 				// Version
 				version = header.get();
@@ -107,9 +116,9 @@ public abstract class ObjectHeader {
 
 				// 12 up to this point + 4 missed in format spec = 16
 				address += 16;
-				header = hdfFc.readBufferFromAddress(address, headerSize);
+				header = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
-				readMessages(hdfFc, header, numberOfMessages);
+				readMessages(hdfBackingStorage, header, numberOfMessages);
 
 				logger.debug("Read object header from address: {}", address);
 
@@ -118,17 +127,17 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private void readMessages(HdfFileChannel hdfFc, ByteBuffer bb, int numberOfMessages) {
+		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb, int numberOfMessages) {
 			while (bb.remaining() > 4 && messages.size() < numberOfMessages) {
-				Message m = Message.readObjectHeaderV1Message(bb, hdfFc.getSuperblock());
+				Message m = Message.readObjectHeaderV1Message(bb, hdfBackingStorage);
 				messages.add(m);
 
 				if (m instanceof ObjectHeaderContinuationMessage) {
 					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
 
-					ByteBuffer continuationBuffer = hdfFc.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
+					ByteBuffer continuationBuffer = hdfBackingStorage.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
 
-					readMessages(hdfFc, continuationBuffer, numberOfMessages);
+					readMessages(hdfBackingStorage, continuationBuffer, numberOfMessages);
 				}
 			}
 		}
@@ -156,7 +165,7 @@ public abstract class ObjectHeader {
 
 	/**
 	 * The Object Header V2
-	 *
+	 * <p>
 	 * <a href=
 	 * "https://support.hdfgroup.org/HDF5/doc/H5.format.html#V2ObjectHeaderPrefix">V2ObjectHeaderPrefix</a>
 	 */
@@ -170,7 +179,9 @@ public abstract class ObjectHeader {
 		private static final int NUMBER_OF_ATTRIBUTES_PRESENT = 4;
 		private static final int TIMESTAMPS_PRESENT = 5;
 
-		/** Type of node. 0 = group, 1 = data */
+		/**
+		 * Type of node. 0 = group, 1 = data
+		 */
 		private final byte version;
 
 		private final long accessTime;
@@ -182,12 +193,12 @@ public abstract class ObjectHeader {
 		private final int maximumNumberOfDenseAttributes;
 		private final BitSet flags;
 
-		private ObjectHeaderV2(HdfFileChannel hdfFc, long address) {
+		private ObjectHeaderV2(HdfBackingStorage hdfBackingStorage, long address) {
 			super(address);
 			int headerSize = 0; // Keep track of the size for checksum
 
 			try {
-				ByteBuffer bb = hdfFc.readBufferFromAddress(address, 6);
+				ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, 6);
 				address += 6;
 				headerSize += 6;
 
@@ -207,7 +218,7 @@ public abstract class ObjectHeader {
 				}
 
 				// Flags
-				flags = BitSet.valueOf(new byte[] { bb.get() });
+				flags = BitSet.valueOf(new byte[]{bb.get()});
 
 				// Size of chunk 0
 				final byte sizeOfChunk0;
@@ -227,7 +238,7 @@ public abstract class ObjectHeader {
 
 				// Timestamps
 				if (flags.get(TIMESTAMPS_PRESENT)) {
-					bb = hdfFc.readBufferFromAddress(address, 16);
+					bb = hdfBackingStorage.readBufferFromAddress(address, 16);
 					address += 16;
 					headerSize += 16;
 
@@ -244,7 +255,7 @@ public abstract class ObjectHeader {
 
 				// Number of attributes
 				if (flags.get(NUMBER_OF_ATTRIBUTES_PRESENT)) {
-					bb = hdfFc.readBufferFromAddress(address, 4);
+					bb = hdfBackingStorage.readBufferFromAddress(address, 4);
 					address += 4;
 					headerSize += 4;
 
@@ -255,22 +266,22 @@ public abstract class ObjectHeader {
 					maximumNumberOfDenseAttributes = -1;
 				}
 
-				bb = hdfFc.readBufferFromAddress(address, sizeOfChunk0);
+				bb = hdfBackingStorage.readBufferFromAddress(address, sizeOfChunk0);
 				address += sizeOfChunk0;
 				headerSize += sizeOfChunk0;
 
 				int sizeOfMessages = readBytesAsUnsignedInt(bb, sizeOfChunk0);
 
-				bb = hdfFc.readBufferFromAddress(address, sizeOfMessages);
+				bb = hdfBackingStorage.readBufferFromAddress(address, sizeOfMessages);
 				headerSize += sizeOfMessages;
 
 				// There might be a gap at the end of the header of up to 4 bytes
 				// message type (1_byte) + message size (2 bytes) + message flags (1 byte)
-				readMessages(hdfFc, bb);
+				readMessages(hdfBackingStorage, bb);
 
 				// Checksum
 				headerSize += 4;
-				ByteBuffer fullHeaderBuffer = hdfFc.readBufferFromAddress(super.getAddress(), headerSize);
+				ByteBuffer fullHeaderBuffer = hdfBackingStorage.readBufferFromAddress(super.getAddress(), headerSize);
 				ChecksumUtils.validateChecksum(fullHeaderBuffer);
 
 				logger.debug("Read object header from address: {}", address);
@@ -280,25 +291,25 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private void readMessages(HdfFileChannel hdfFc, ByteBuffer bb) {
+		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb) {
 			while (bb.remaining() >= 8) {
-				Message m = Message.readObjectHeaderV2Message(bb, hdfFc.getSuperblock(), this.isAttributeCreationOrderTracked());
+				Message m = Message.readObjectHeaderV2Message(bb, hdfBackingStorage, this.isAttributeCreationOrderTracked());
 				messages.add(m);
 
 				if (m instanceof ObjectHeaderContinuationMessage) {
 					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
-					ByteBuffer continuationBuffer = hdfFc.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
+					ByteBuffer continuationBuffer = hdfBackingStorage.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
 
 					// Verify continuation block signature
 					byte[] continuationSignatureBytes = new byte[OBJECT_HEADER_V2_CONTINUATION_SIGNATURE.length];
 					continuationBuffer.get(continuationSignatureBytes);
 					if (!Arrays.equals(OBJECT_HEADER_V2_CONTINUATION_SIGNATURE, continuationSignatureBytes)) {
 						throw new HdfException(
-								"Object header continuation header not matched, at address: " + ohcm.getOffset());
+							"Object header continuation header not matched, at address: " + ohcm.getOffset());
 					}
 
 					// Recursively read messages
-					readMessages(hdfFc, continuationBuffer);
+					readMessages(hdfBackingStorage, continuationBuffer);
 
 					continuationBuffer.rewind();
 					ChecksumUtils.validateChecksum(continuationBuffer);
@@ -347,24 +358,24 @@ public abstract class ObjectHeader {
 
 	}
 
-	public static ObjectHeader readObjectHeader(HdfFileChannel hdfFc, long address) {
-		ByteBuffer bb = hdfFc.readBufferFromAddress(address, 1);
+	public static ObjectHeader readObjectHeader(HdfBackingStorage hdfBackingStorage, long address) {
+		ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, 1);
 		byte version = bb.get();
 		if (version == 1) {
-			return new ObjectHeaderV1(hdfFc, address);
+			return new ObjectHeaderV1(hdfBackingStorage, address);
 		} else {
-			return new ObjectHeaderV2(hdfFc, address);
+			return new ObjectHeaderV2(hdfBackingStorage, address);
 		}
 	}
 
-	public static LazyInitializer<ObjectHeader> lazyReadObjectHeader(HdfFileChannel hdfFc, long address) {
+	public static LazyInitializer<ObjectHeader> lazyReadObjectHeader(HdfBackingStorage hdfBackingStorage, long address) {
 		logger.debug("Creating lazy object header at address: {}", address);
 		return new LazyInitializer<ObjectHeader>() {
 
 			@Override
 			protected ObjectHeader initialize() {
 				logger.debug("Lazy initializing object header at address: {}", address);
-				return readObjectHeader(hdfFc, address);
+				return readObjectHeader(hdfBackingStorage, address);
 			}
 
 		};

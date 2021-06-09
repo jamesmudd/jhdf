@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -53,53 +53,53 @@ class ScalarDatasetTest {
 	Collection<DynamicNode> scalarDatasetTests() {
 		// List of all the datasetPaths
 		return Arrays.asList(
-				dynamicContainer("earliest", Arrays.asList(
-						dynamicTest("float32",
-								createTest(earliestHdfFile, "scalar_float_32", 123.45f)),
-						dynamicTest("float64",
-								createTest(earliestHdfFile, "scalar_float_64", 123.45d)),
-						dynamicTest("int8",
-								createTest(earliestHdfFile, "scalar_int_8", (byte) 123)),
-						dynamicTest("int16",
-								createTest(earliestHdfFile, "scalar_int_16", (short) 123)),
-						dynamicTest("int32",
-								createTest(earliestHdfFile, "scalar_int_32", 123)),
-						dynamicTest("int64",
-								createTest(earliestHdfFile, "scalar_int_64", (long) 123)),
-						dynamicTest("uint8",
-								createTest(earliestHdfFile, "scalar_uint_8", 123)),
-						dynamicTest("uint16",
-								createTest(earliestHdfFile, "scalar_uint_16", 123)),
-						dynamicTest("uint32",
-								createTest(earliestHdfFile, "scalar_uint_32", (long) 123)),
-						dynamicTest("uint64",
-								createTest(earliestHdfFile, "scalar_uint_64", BigInteger.valueOf(123))),
-						dynamicTest("string",
-								createTest(earliestHdfFile, "scalar_string", "hello")))),
+			dynamicContainer("earliest", Arrays.asList(
+				dynamicTest("float32",
+					createTest(earliestHdfFile, "scalar_float_32", 123.45f)),
+				dynamicTest("float64",
+					createTest(earliestHdfFile, "scalar_float_64", 123.45d)),
+				dynamicTest("int8",
+					createTest(earliestHdfFile, "scalar_int_8", (byte) 123)),
+				dynamicTest("int16",
+					createTest(earliestHdfFile, "scalar_int_16", (short) 123)),
+				dynamicTest("int32",
+					createTest(earliestHdfFile, "scalar_int_32", 123)),
+				dynamicTest("int64",
+					createTest(earliestHdfFile, "scalar_int_64", (long) 123)),
+				dynamicTest("uint8",
+					createTest(earliestHdfFile, "scalar_uint_8", 123)),
+				dynamicTest("uint16",
+					createTest(earliestHdfFile, "scalar_uint_16", 123)),
+				dynamicTest("uint32",
+					createTest(earliestHdfFile, "scalar_uint_32", (long) 123)),
+				dynamicTest("uint64",
+					createTest(earliestHdfFile, "scalar_uint_64", BigInteger.valueOf(123))),
+				dynamicTest("string",
+					createTest(earliestHdfFile, "scalar_string", "hello")))),
 
-				dynamicContainer("latest", Arrays.asList(
-						dynamicTest("float32",
-								createTest(latestHdfFile, "scalar_float_32", 123.45f)),
-						dynamicTest("float64",
-								createTest(latestHdfFile, "scalar_float_64", 123.45d)),
-						dynamicTest("int8",
-								createTest(latestHdfFile, "scalar_int_8", (byte) 123)),
-						dynamicTest("int16",
-								createTest(latestHdfFile, "scalar_int_16", (short) 123)),
-						dynamicTest("int32",
-								createTest(latestHdfFile, "scalar_int_32", 123)),
-						dynamicTest("int64",
-								createTest(latestHdfFile, "scalar_int_64", (long) 123)),
-						dynamicTest("uint8",
-								createTest(latestHdfFile, "scalar_uint_8", 123)),
-						dynamicTest("uint16",
-								createTest(latestHdfFile, "scalar_uint_16", 123)),
-						dynamicTest("uint32",
-								createTest(latestHdfFile, "scalar_uint_32", (long) 123)),
-						dynamicTest("uint64",
-								createTest(latestHdfFile, "scalar_uint_64", BigInteger.valueOf(123))),
-						dynamicTest("string",
-								createTest(latestHdfFile, "scalar_string", "hello")))));
+			dynamicContainer("latest", Arrays.asList(
+				dynamicTest("float32",
+					createTest(latestHdfFile, "scalar_float_32", 123.45f)),
+				dynamicTest("float64",
+					createTest(latestHdfFile, "scalar_float_64", 123.45d)),
+				dynamicTest("int8",
+					createTest(latestHdfFile, "scalar_int_8", (byte) 123)),
+				dynamicTest("int16",
+					createTest(latestHdfFile, "scalar_int_16", (short) 123)),
+				dynamicTest("int32",
+					createTest(latestHdfFile, "scalar_int_32", 123)),
+				dynamicTest("int64",
+					createTest(latestHdfFile, "scalar_int_64", (long) 123)),
+				dynamicTest("uint8",
+					createTest(latestHdfFile, "scalar_uint_8", 123)),
+				dynamicTest("uint16",
+					createTest(latestHdfFile, "scalar_uint_16", 123)),
+				dynamicTest("uint32",
+					createTest(latestHdfFile, "scalar_uint_32", (long) 123)),
+				dynamicTest("uint64",
+					createTest(latestHdfFile, "scalar_uint_64", BigInteger.valueOf(123))),
+				dynamicTest("string",
+					createTest(latestHdfFile, "scalar_string", "hello")))));
 	}
 
 	private Executable createTest(HdfFile file, String datasetPath, Object expected) {

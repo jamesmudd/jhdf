@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -24,7 +24,9 @@ public final class Constants {
 
 	public static final byte SPACE = ' ';
 
-	/** All bits on */
+	/**
+	 * All bits on
+	 */
 	public static final long UNDEFINED_ADDRESS = -1L;
 
 	public static final String PATH_SEPARATOR = "/";

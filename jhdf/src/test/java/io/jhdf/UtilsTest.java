@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -28,64 +28,64 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class UtilsTest {
 
 	@Test
-    void testToHex() {
+	void testToHex() {
 		assertThat(Utils.toHex(88), is(equalTo("0x58")));
 	}
 
 	@Test
-    void testToHexWithUndefinedAddress() {
+	void testToHexWithUndefinedAddress() {
 		assertThat(Utils.toHex(Constants.UNDEFINED_ADDRESS), is(equalTo("UNDEFINED")));
 	}
 
 	@Test
-    void testReadUntilNull() {
+	void testReadUntilNull() {
 		ByteBuffer bb = ByteBuffer.allocate(4);
-		byte[] b = new byte[] { 'H', 'D', 'F', Constants.NULL };
+		byte[] b = new byte[]{'H', 'D', 'F', Constants.NULL};
 		bb.put(b);
 		bb.rewind();
 		assertThat(Utils.readUntilNull(bb), is(equalTo("HDF")));
 	}
 
 	@Test
-    void testReadUntilNullThrowsIfNoNullIsFound() {
+	void testReadUntilNullThrowsIfNoNullIsFound() {
 		ByteBuffer bb = ByteBuffer.allocate(3);
-		byte[] b = new byte[] { 'H', 'D', 'F' };
+		byte[] b = new byte[]{'H', 'D', 'F'};
 		bb.put(b);
 		bb.rewind();
 		assertThrows(IllegalArgumentException.class, () -> Utils.readUntilNull(bb));
 	}
 
 	@Test
-    void testReadUntilNullThrowsIfNonAlphanumericCharacterIsSeen() {
+	void testReadUntilNullThrowsIfNonAlphanumericCharacterIsSeen() {
 		ByteBuffer bb = ByteBuffer.allocate(3);
-		byte[] b = new byte[] { 'H', 'D', ' ' };
+		byte[] b = new byte[]{'H', 'D', ' '};
 		bb.put(b);
 		bb.rewind();
 		assertThrows(IllegalArgumentException.class, () -> Utils.readUntilNull(bb));
 	}
 
 	@Test
-    void testValidNameReturnsTrue() {
+	void testValidNameReturnsTrue() {
 		assertThat(Utils.validateName("hello"), is(true));
 	}
 
 	@Test
-    void testNameContainingDotIsInvalid() {
+	void testNameContainingDotIsInvalid() {
 		assertThat(Utils.validateName("hello."), is(false));
 	}
 
 	@Test
-    void testNameContainingSlashIsInvalid() {
+	void testNameContainingSlashIsInvalid() {
 		assertThat(Utils.validateName("hello/"), is(false));
 	}
 
 	@Test
-    void testNameContainingNonAsciiIsInvalid() {
+	void testNameContainingNonAsciiIsInvalid() {
 		assertThat(Utils.validateName("helloμ"), is(false));
 	}
 
 	@Test
-    void testMovingBufferAlreadyAtEightBytePositionDoesNothing() {
+	void testMovingBufferAlreadyAtEightBytePositionDoesNothing() {
 		ByteBuffer bb = ByteBuffer.allocate(11);
 		// Buffer position is 0
 		Utils.seekBufferToNextMultipleOfEight(bb);
@@ -98,7 +98,7 @@ class UtilsTest {
 	}
 
 	@Test
-    void testMovingBufferToNextEightBytePosition() {
+	void testMovingBufferToNextEightBytePosition() {
 		ByteBuffer bb = ByteBuffer.allocate(20);
 		bb.position(1);
 		// Buffer position is 1 should be moved to 8
@@ -112,94 +112,94 @@ class UtilsTest {
 	}
 
 	@Test
-    void testReadingOneByteToLong() {
-		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+	void testReadingOneByteToLong() {
+		byte[] bytes = new byte[]{12, 0, 0, 0, 0, 0, 0, 0};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 1), is(equalTo(12L)));
 		assertThat(bb.position(), is(1));
 	}
 
 	@Test
-    void testReadingTwoBytesToLong() {
-		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+	void testReadingTwoBytesToLong() {
+		byte[] bytes = new byte[]{12, 0, 0, 0, 0, 0, 0, 0};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 2), is(equalTo(12L)));
 		assertThat(bb.position(), is(2));
 	}
 
 	@Test
-    void testReadingThreeBytesToLong() {
-		byte[] bytes = new byte[] { 0, 0, 1 };
+	void testReadingThreeBytesToLong() {
+		byte[] bytes = new byte[]{0, 0, 1};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 3), is(equalTo(65536L)));
 		assertThat(bb.position(), is(3));
 	}
 
 	@Test
-    void testReadingThreeBytesToLongBigEndian() {
-		byte[] bytes = new byte[] { 1, 0, 0 };
+	void testReadingThreeBytesToLongBigEndian() {
+		byte[] bytes = new byte[]{1, 0, 0};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(BIG_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 3), is(equalTo(65536L)));
 		assertThat(bb.position(), is(3));
 	}
 
 	@Test
-    void testReadingFourBytesToLong() {
-		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+	void testReadingFourBytesToLong() {
+		byte[] bytes = new byte[]{12, 0, 0, 0, 0, 0, 0, 0};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 4), is(equalTo(12L)));
 		assertThat(bb.position(), is(4));
 	}
 
 	@Test
-    void testReadingFiveBytesToLong() {
-		byte[] bytes = new byte[] { 0, 0, 0, 0, 1 };
+	void testReadingFiveBytesToLong() {
+		byte[] bytes = new byte[]{0, 0, 0, 0, 1};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 5), is(equalTo(4294967296L)));
 		assertThat(bb.position(), is(5));
 	}
 
 	@Test
-    void testReadingSixBytesToLong() {
-		byte[] bytes = new byte[] { 0, 0, 0, 0, 0, 1 };
+	void testReadingSixBytesToLong() {
+		byte[] bytes = new byte[]{0, 0, 0, 0, 0, 1};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 6), is(equalTo(1099511627776L)));
 		assertThat(bb.position(), is(6));
 	}
 
 	@Test
-    void testReadingSixBytesToInt() {
-		byte[] bytes = new byte[] { 0, 0, 1, 0, 0, 0 };
+	void testReadingSixBytesToInt() {
+		byte[] bytes = new byte[]{0, 0, 1, 0, 0, 0};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedInt(bb, 6), is(equalTo(65536)));
 		assertThat(bb.position(), is(6));
 	}
 
 	@Test
-    void testReadingSevenBytesToLong() {
-		byte[] bytes = new byte[] { 0, 0, 0, 0, 0, 0, 1 };
+	void testReadingSevenBytesToLong() {
+		byte[] bytes = new byte[]{0, 0, 0, 0, 0, 0, 1};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 7), is(equalTo(281474976710656L)));
 		assertThat(bb.position(), is(7));
 	}
 
 	@Test
-    void testReadingEightBytesToLong() {
-		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+	void testReadingEightBytesToLong() {
+		byte[] bytes = new byte[]{12, 0, 0, 0, 0, 0, 0, 0};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedLong(bb, 8), is(equalTo(12L)));
 		assertThat(bb.position(), is(8));
 	}
 
 	@Test
-    void testReadingUnsupportedLengthLongThrows() {
-		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+	void testReadingUnsupportedLengthLongThrows() {
+		byte[] bytes = new byte[]{12, 0, 0, 0, 0, 0, 0, 0};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThrows(IllegalArgumentException.class, () -> Utils.readBytesAsUnsignedLong(bb, 9));
 	}
 
 	@Test
-    void testReadingEightByteNegativeIntegerThrows() {
+	void testReadingEightByteNegativeIntegerThrows() {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.rewind();
 		bb.putInt(-462);
@@ -208,7 +208,7 @@ class UtilsTest {
 	}
 
 	@Test
-    void testReadingEightByteNegativeLongThrows() {
+	void testReadingEightByteNegativeLongThrows() {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.rewind();
 		bb.putLong(-462);
@@ -217,61 +217,61 @@ class UtilsTest {
 	}
 
 	@Test
-    void testReadingOneByteToInt() {
-		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+	void testReadingOneByteToInt() {
+		byte[] bytes = new byte[]{12, 0, 0, 0, 0, 0, 0, 0};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedInt(bb, 1), is(equalTo(12)));
 		assertThat(bb.position(), is(1));
 	}
 
 	@Test
-    void testReadingTwoBytesToInt() {
-		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+	void testReadingTwoBytesToInt() {
+		byte[] bytes = new byte[]{12, 0, 0, 0, 0, 0, 0, 0};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedInt(bb, 2), is(equalTo(12)));
 		assertThat(bb.position(), is(2));
 	}
 
 	@Test
-    void testReadingThreeBytesToInt() {
-		byte[] bytes = new byte[] { 0, 0, 1 };
+	void testReadingThreeBytesToInt() {
+		byte[] bytes = new byte[]{0, 0, 1};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedInt(bb, 3), is(equalTo(65536)));
 		assertThat(bb.position(), is(3));
 	}
 
 	@Test
-    void testReadingFourBytesToInt() {
-		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+	void testReadingFourBytesToInt() {
+		byte[] bytes = new byte[]{12, 0, 0, 0, 0, 0, 0, 0};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedInt(bb, 4), is(equalTo(12)));
 		assertThat(bb.position(), is(4));
 	}
 
 	@Test
-    void testReadingFourBytesToIntThatCantBeUnsigned() {
-		byte[] bytes = new byte[] { -127, -127, -127, -127 };
+	void testReadingFourBytesToIntThatCantBeUnsigned() {
+		byte[] bytes = new byte[]{-127, -127, -127, -127};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThrows(ArithmeticException.class, () -> Utils.readBytesAsUnsignedInt(bb, 4));
 	}
 
 	@Test
-    void testReadingEightBytesToInt() {
-		byte[] bytes = new byte[] { 12, 0, 0, 0, 0, 0, 0, 0 };
+	void testReadingEightBytesToInt() {
+		byte[] bytes = new byte[]{12, 0, 0, 0, 0, 0, 0, 0};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThat(Utils.readBytesAsUnsignedInt(bb, 8), is(equalTo(12)));
 		assertThat(bb.position(), is(8));
 	}
 
 	@Test
-    void testReadingUnsupportedLengthThrows() {
-		byte[] bytes = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+	void testReadingUnsupportedLengthThrows() {
+		byte[] bytes = new byte[]{1, 0, 0, 0, 0, 0, 0, 0, 0};
 		ByteBuffer bb = ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN);
 		assertThrows(IllegalArgumentException.class, () -> Utils.readBytesAsUnsignedInt(bb, 9));
 	}
 
 	@Test
-    void testReadingLargeLongThrows() {
+	void testReadingLargeLongThrows() {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.putLong(Long.MAX_VALUE);
 		bb.rewind();
@@ -279,7 +279,7 @@ class UtilsTest {
 	}
 
 	@Test
-    void testReadingUndefinedAddressSpecialCaseWorks() {
+	void testReadingUndefinedAddressSpecialCaseWorks() {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.putLong(Constants.UNDEFINED_ADDRESS);
 		bb.rewind();
@@ -287,8 +287,8 @@ class UtilsTest {
 	}
 
 	@Test
-    void testCreatingSubBuffer() {
-		byte[] ints = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	void testCreatingSubBuffer() {
+		byte[] ints = new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 		ByteBuffer bb = ByteBuffer.wrap(ints);
 
 		ByteBuffer subBuffer = Utils.createSubBuffer(bb, 3);
@@ -299,7 +299,7 @@ class UtilsTest {
 	}
 
 	@Test
-    void testBitsToInt() {
+	void testBitsToInt() {
 		BitSet bits = new BitSet();
 		assertThat(Utils.bitsToInt(bits, 0, 8), is(equalTo(0)));
 		bits.set(0, true);
@@ -318,13 +318,13 @@ class UtilsTest {
 	}
 
 	@Test
-    void testBitsToIntThrowsWithNegativeLength() {
+	void testBitsToIntThrowsWithNegativeLength() {
 		BitSet bits = new BitSet(8);
 		assertThrows(IllegalArgumentException.class, () -> Utils.bitsToInt(bits, 3, -1)); // Should throw
 	}
 
 	@Test
-    void testBytesNeededToHoldNumber() {
+	void testBytesNeededToHoldNumber() {
 		// Edge case 0
 		assertThat(Utils.bytesNeededToHoldNumber(0), is(equalTo(1)));
 
@@ -340,7 +340,7 @@ class UtilsTest {
 	}
 
 	@Test
-    void testBytesNeededToHoldNumberThrowsWithNegative() {
+	void testBytesNeededToHoldNumberThrowsWithNegative() {
 		assertThrows(IllegalArgumentException.class, () -> Utils.bytesNeededToHoldNumber(-123));
 	}
 
@@ -352,60 +352,60 @@ class UtilsTest {
 
 	static Stream<Arguments> chunkIndexToChunkOffset() {
 		return Stream.of(
-				//1D
-				Arguments.of(0, new int[]{2}, new int[]{5}, new int[] {0}),
-				Arguments.of(1, new int[]{2}, new int[]{5}, new int[] {2}),
-				Arguments.of(2, new int[]{2}, new int[]{5}, new int[] {4}),
-				Arguments.of(3, new int[]{2}, new int[]{5}, new int[] {6}), // This is outside the data
+			//1D
+			Arguments.of(0, new int[]{2}, new int[]{5}, new int[]{0}),
+			Arguments.of(1, new int[]{2}, new int[]{5}, new int[]{2}),
+			Arguments.of(2, new int[]{2}, new int[]{5}, new int[]{4}),
+			Arguments.of(3, new int[]{2}, new int[]{5}, new int[]{6}), // This is outside the data
 
-				// 2D
-				// Mismatched in both directions i.e dataset dims not a multiple of chunk dims
-				Arguments.of(0, new int[]{2,3}, new int[]{7,5}, new int[] {0,0}),
-				Arguments.of(1, new int[]{2,3}, new int[]{7,5}, new int[] {0,3}),
-				Arguments.of(2, new int[]{2,3}, new int[]{7,5}, new int[] {2,0}),
-				Arguments.of(3, new int[]{2,3}, new int[]{7,5}, new int[] {2,3}),
-				Arguments.of(4, new int[]{2,3}, new int[]{7,5}, new int[] {4,0}),
-				Arguments.of(5, new int[]{2,3}, new int[]{7,5}, new int[] {4,3}),
-				Arguments.of(6, new int[]{2,3}, new int[]{7,5}, new int[] {6,0}),
-				Arguments.of(7, new int[]{2,3}, new int[]{7,5}, new int[] {6,3}), // This is outside the data
+			// 2D
+			// Mismatched in both directions i.e dataset dims not a multiple of chunk dims
+			Arguments.of(0, new int[]{2, 3}, new int[]{7, 5}, new int[]{0, 0}),
+			Arguments.of(1, new int[]{2, 3}, new int[]{7, 5}, new int[]{0, 3}),
+			Arguments.of(2, new int[]{2, 3}, new int[]{7, 5}, new int[]{2, 0}),
+			Arguments.of(3, new int[]{2, 3}, new int[]{7, 5}, new int[]{2, 3}),
+			Arguments.of(4, new int[]{2, 3}, new int[]{7, 5}, new int[]{4, 0}),
+			Arguments.of(5, new int[]{2, 3}, new int[]{7, 5}, new int[]{4, 3}),
+			Arguments.of(6, new int[]{2, 3}, new int[]{7, 5}, new int[]{6, 0}),
+			Arguments.of(7, new int[]{2, 3}, new int[]{7, 5}, new int[]{6, 3}), // This is outside the data
 
-				// Matched in both dims
-				Arguments.of(0, new int[]{3,5}, new int[]{9,20}, new int[] {0,0}),
-				Arguments.of(1, new int[]{3,5}, new int[]{9,20}, new int[] {0,5}),
-				Arguments.of(2, new int[]{3,5}, new int[]{9,20}, new int[] {0,10}),
-				Arguments.of(3, new int[]{3,5}, new int[]{9,20}, new int[] {0,15}),
-				Arguments.of(4, new int[]{3,5}, new int[]{9,20}, new int[] {3,0}),
-				Arguments.of(5, new int[]{3,5}, new int[]{9,20}, new int[] {3,5}),
-				Arguments.of(6, new int[]{3,5}, new int[]{9,20}, new int[] {3,10}),
-				Arguments.of(7, new int[]{3,5}, new int[]{9,20}, new int[] {3,15}),
-				Arguments.of(8, new int[]{3,5}, new int[]{9,20}, new int[] {6,0}),
-				Arguments.of(9, new int[]{3,5}, new int[]{9,20}, new int[] {6,5}),
-				Arguments.of(10, new int[]{3,5}, new int[]{9,20}, new int[] {6,10}),
-				Arguments.of(11, new int[]{3,5}, new int[]{9,20}, new int[] {6,15}),
+			// Matched in both dims
+			Arguments.of(0, new int[]{3, 5}, new int[]{9, 20}, new int[]{0, 0}),
+			Arguments.of(1, new int[]{3, 5}, new int[]{9, 20}, new int[]{0, 5}),
+			Arguments.of(2, new int[]{3, 5}, new int[]{9, 20}, new int[]{0, 10}),
+			Arguments.of(3, new int[]{3, 5}, new int[]{9, 20}, new int[]{0, 15}),
+			Arguments.of(4, new int[]{3, 5}, new int[]{9, 20}, new int[]{3, 0}),
+			Arguments.of(5, new int[]{3, 5}, new int[]{9, 20}, new int[]{3, 5}),
+			Arguments.of(6, new int[]{3, 5}, new int[]{9, 20}, new int[]{3, 10}),
+			Arguments.of(7, new int[]{3, 5}, new int[]{9, 20}, new int[]{3, 15}),
+			Arguments.of(8, new int[]{3, 5}, new int[]{9, 20}, new int[]{6, 0}),
+			Arguments.of(9, new int[]{3, 5}, new int[]{9, 20}, new int[]{6, 5}),
+			Arguments.of(10, new int[]{3, 5}, new int[]{9, 20}, new int[]{6, 10}),
+			Arguments.of(11, new int[]{3, 5}, new int[]{9, 20}, new int[]{6, 15}),
 
-				// 3D
-				Arguments.of(0, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {0,0,0}),
-				Arguments.of(1, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {0,0,4}),
-				Arguments.of(2, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {0,3,0}),
-				Arguments.of(3, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {0,3,4}),
-				Arguments.of(4, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {2,0,0}),
-				Arguments.of(5, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {2,0,4}),
-				Arguments.of(6, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {2,3,0}),
-				Arguments.of(7, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {2,3,4}),
-				Arguments.of(8, new int[]{2,3,4}, new int[]{7,5,6}, new int[] {4,0,0})
+			// 3D
+			Arguments.of(0, new int[]{2, 3, 4}, new int[]{7, 5, 6}, new int[]{0, 0, 0}),
+			Arguments.of(1, new int[]{2, 3, 4}, new int[]{7, 5, 6}, new int[]{0, 0, 4}),
+			Arguments.of(2, new int[]{2, 3, 4}, new int[]{7, 5, 6}, new int[]{0, 3, 0}),
+			Arguments.of(3, new int[]{2, 3, 4}, new int[]{7, 5, 6}, new int[]{0, 3, 4}),
+			Arguments.of(4, new int[]{2, 3, 4}, new int[]{7, 5, 6}, new int[]{2, 0, 0}),
+			Arguments.of(5, new int[]{2, 3, 4}, new int[]{7, 5, 6}, new int[]{2, 0, 4}),
+			Arguments.of(6, new int[]{2, 3, 4}, new int[]{7, 5, 6}, new int[]{2, 3, 0}),
+			Arguments.of(7, new int[]{2, 3, 4}, new int[]{7, 5, 6}, new int[]{2, 3, 4}),
+			Arguments.of(8, new int[]{2, 3, 4}, new int[]{7, 5, 6}, new int[]{4, 0, 0})
 		);
 	}
 
 	static Stream<Arguments> testStripLeadingIndex() {
 		return Stream.of(
-			Arguments.of(new int[]{1,2,3}, new int[]{2,3}),
-			Arguments.of(new int[]{1,2,3,4,5}, new int[]{2,3,4,5})
+			Arguments.of(new int[]{1, 2, 3}, new int[]{2, 3}),
+			Arguments.of(new int[]{1, 2, 3, 4, 5}, new int[]{2, 3, 4, 5})
 		);
 	}
 
 	@ParameterizedTest
 	@MethodSource
-    void testStripLeadingIndex(int[] input, int[] output) {
+	void testStripLeadingIndex(int[] input, int[] output) {
 		assertThat(Utils.stripLeadingIndex(input), is(output));
-    }
+	}
 }

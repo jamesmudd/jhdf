@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -24,30 +24,30 @@ import java.util.BitSet;
  */
 public class FilteredDatasetChunks extends BTreeDatasetChunkRecord {
 
-    private final Chunk chunk;
+	private final Chunk chunk;
 
-    public FilteredDatasetChunks(ByteBuffer buffer, DatasetInfo datasetInfo) {
-        final long address = Utils.readBytesAsUnsignedLong(buffer, 8); // size of offsets
+	public FilteredDatasetChunks(ByteBuffer buffer, DatasetInfo datasetInfo) {
+		final long address = Utils.readBytesAsUnsignedLong(buffer, 8); // size of offsets
 
-        final int chunkSizeBytes = buffer.limit()
-                - 8 // size of offsets
-                - 4 // filter mask
-                - datasetInfo.getDatasetDimensions().length * 8; // dimension offsets
+		final int chunkSizeBytes = buffer.limit()
+			- 8 // size of offsets
+			- 4 // filter mask
+			- datasetInfo.getDatasetDimensions().length * 8; // dimension offsets
 
-        final int chunkSize = Utils.readBytesAsUnsignedInt(buffer, chunkSizeBytes);
-        final BitSet filterMask = BitSet.valueOf(new byte[] { buffer.get(), buffer.get(), buffer.get(), buffer.get() });
+		final int chunkSize = Utils.readBytesAsUnsignedInt(buffer, chunkSizeBytes);
+		final BitSet filterMask = BitSet.valueOf(new byte[]{buffer.get(), buffer.get(), buffer.get(), buffer.get()});
 
-        int[] chunkOffset = new int[datasetInfo.getDatasetDimensions().length];
-        for (int i = 0; i < chunkOffset.length; i++) {
-            chunkOffset[i] = Utils.readBytesAsUnsignedInt(buffer, 8) * datasetInfo.getChunkDimensions()[i];
-        }
+		int[] chunkOffset = new int[datasetInfo.getDatasetDimensions().length];
+		for (int i = 0; i < chunkOffset.length; i++) {
+			chunkOffset[i] = Utils.readBytesAsUnsignedInt(buffer, 8) * datasetInfo.getChunkDimensions()[i];
+		}
 
-        chunk = new ChunkImpl(address, chunkSize, chunkOffset, filterMask);
+		chunk = new ChunkImpl(address, chunkSize, chunkOffset, filterMask);
 
-    }
+	}
 
-    @Override
-    public Chunk getChunk() {
-        return chunk;
-    }
+	@Override
+	public Chunk getChunk() {
+		return chunk;
+	}
 }

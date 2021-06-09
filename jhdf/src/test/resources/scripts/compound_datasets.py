@@ -1,36 +1,36 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # This file is part of jHDF. A pure Java library for accessing HDF5 files.
-# 
+#
 # http://jhdf.io
-# 
-# Copyright (c) 2020 James Mudd
-# 
+#
+# Copyright (c) 2021 James Mudd
+#
 # MIT License see 'LICENSE' file
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 import h5py
 
 import numpy as np
 
+
 # The idea of this test if to write compound datasets
 def write_compound_datasets(f):
-
     utf8 = h5py.special_dtype(vlen=str)
     gender_enum_dtype = h5py.enum_dtype({"MALE": 0, "FEMALE": 1}, basetype=np.uint8)
     dt = np.dtype([
-        ('firstName', utf8), # variable length utf8
-        ('surname', 'S20'), # fixed length ASCII
-        ('gender', gender_enum_dtype), # enum type
-        ('age', np.uint8), # uint
-        ('fav_number', np.float32), # float
-        ('vector', np.float32, (3,))]) # array
+        ('firstName', utf8),  # variable length utf8
+        ('surname', 'S20'),  # fixed length ASCII
+        ('gender', gender_enum_dtype),  # enum type
+        ('age', np.uint8),  # uint
+        ('fav_number', np.float32),  # float
+        ('vector', np.float32, (3,))])  # array
 
     data = np.zeros(4, dtype=dt)
 
     # Set the example data
     data[0] = ('Bob', 'Smith', 0, 32, 1.0, [1, 2, 3])
     data[1] = ('Peter', 'Fletcher', 0, 43, 2.0, [16.2, 2.2, -32.4])
-    data[2] = ('James', 'Mudd', 0, 12, 3.0, [-32.1,-774.1,-3.0])
-    data[3] = ('Ellie', 'Kyle', 1, 22, 4.0, [2.1,74.1,-3.8])
+    data[2] = ('James', 'Mudd', 0, 12, 3.0, [-32.1, -774.1, -3.0])
+    data[3] = ('Ellie', 'Kyle', 1, 22, 4.0, [2.1, 74.1, -3.8])
 
     f.create_dataset('contiguous_compound', data=data)
     f.create_dataset('chunked_compound', data=data, chunks=(1,), compression="gzip")
@@ -52,7 +52,7 @@ def write_compound_datasets(f):
     data[2][2] = (-32.3, -0.3)
 
     f.create_dataset('2d_contiguous_compound', data=data)
-    f.create_dataset('2d_chunked_compound', data=data, chunks=(1,2), compression="gzip")
+    f.create_dataset('2d_chunked_compound', data=data, chunks=(1, 2), compression="gzip")
 
     # Compound dataset containing ragged arrays
     uint8_vlen_type = h5py.vlen_dtype(np.uint8)
@@ -62,8 +62,8 @@ def write_compound_datasets(f):
     ])
     data = np.zeros(3, dtype=compound_vlen_dtype)
     data[0] = (np.array([1]), np.array([2]))
-    data[1] = (np.array([1,1]), np.array([2,2]))
-    data[2] = (np.array([1,1,1]), np.array([2,2,2]))
+    data[1] = (np.array([1, 1]), np.array([2, 2]))
+    data[2] = (np.array([1, 1, 1]), np.array([2, 2, 2]))
 
     f.create_dataset('vlen_contiguous_compound', data=data, dtype=compound_vlen_dtype)
     f.create_dataset('vlen_chunked_compound', data=data, dtype=compound_vlen_dtype, chunks=(1,), compression="gzip")
@@ -79,7 +79,8 @@ def write_compound_datasets(f):
     data['name'] = np.array(pointData)
 
     f.create_dataset('array_vlen_contiguous_compound', data=data, dtype=compound_vlen_dtype)
-    f.create_dataset('array_vlen_chunked_compound', data=data, dtype=compound_vlen_dtype, chunks=(1,), compression="gzip")
+    f.create_dataset('array_vlen_chunked_compound', data=data, dtype=compound_vlen_dtype, chunks=(1,),
+                     compression="gzip")
 
     # Nested compound datasets use 2 img numbers as an example
     nested_dt = np.dtype([
@@ -88,8 +89,8 @@ def write_compound_datasets(f):
     ])
 
     data = np.zeros(3, dtype=nested_dt)
-    data[1] = ((1,1), (1,1))
-    data[2] = ((2,2), (2,2))
+    data[1] = ((1, 1), (1, 1))
+    data[2] = ((2, 2), (2, 2))
     f.create_dataset('nested_contiguous_compound', data=data, dtype=nested_dt)
     f.create_dataset('nested_chunked_compound', data=data, dtype=nested_dt, chunks=(2,), compression="gzip")
 

@@ -3,13 +3,12 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.dataset;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -21,6 +20,7 @@ import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV4;
 import io.jhdf.object.message.DataLayoutMessage.CompactDataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
+import io.jhdf.storage.HdfBackingStorage;
 
 public final class DatasetLoader {
 
@@ -28,8 +28,8 @@ public final class DatasetLoader {
 		throw new AssertionError("No instances of DatasetLoader");
 	}
 
-	public static Dataset createDataset(HdfFileChannel hdfFc, ObjectHeader oh, String name,
-			Group parent) {
+	public static Dataset createDataset(HdfBackingStorage hdfBackingStorage, ObjectHeader oh, String name,
+										Group parent) {
 
 		final long address = oh.getAddress();
 		try {
@@ -37,16 +37,16 @@ public final class DatasetLoader {
 			final DataLayoutMessage dlm = oh.getMessageOfType(DataLayoutMessage.class);
 
 			if (dlm instanceof CompactDataLayoutMessage) {
-				return new CompactDataset(hdfFc, address, name, parent, oh);
+				return new CompactDataset(hdfBackingStorage, address, name, parent, oh);
 
 			} else if (dlm instanceof ContiguousDataLayoutMessage) {
-				return new ContiguousDatasetImpl(hdfFc, address, name, parent, oh);
+				return new ContiguousDatasetImpl(hdfBackingStorage, address, name, parent, oh);
 
 			} else if (dlm instanceof ChunkedDataLayoutMessage) {
-				return new ChunkedDatasetV3(hdfFc, address, name, parent, oh);
+				return new ChunkedDatasetV3(hdfBackingStorage, address, name, parent, oh);
 
 			} else if (dlm instanceof ChunkedDataLayoutMessageV4) {
-				return new ChunkedDatasetV4(hdfFc, address, name, parent, oh);
+				return new ChunkedDatasetV4(hdfBackingStorage, address, name, parent, oh);
 
 			} else {
 				throw new HdfException("Unrecognized Dataset layout type: " + dlm.getClass().getCanonicalName());

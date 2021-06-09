@@ -3,13 +3,15 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf;
 
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +23,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
@@ -102,15 +103,15 @@ class GlobalHeapTest {
 			return null;
 		}).when(mockFc).read(ArgumentMatchers.any(ByteBuffer.class), ArgumentMatchers.anyLong());
 
-		HdfFileChannel hdfFileChannel = new HdfFileChannel(mockFc, sb);
-		assertThrows(HdfException.class, () -> new GlobalHeap(hdfFileChannel, 0));
+		HdfBackingStorage hdfBackingStorage = new HdfFileChannel(mockFc, sb);
+		assertThrows(HdfException.class, () -> new GlobalHeap(hdfBackingStorage, 0));
 	}
 
 	@Test
 	void testDifferentObjectZero() throws Exception {
 		HdfFile file = TestUtils.loadTestHdfFile("globalheaps_test.hdf5");
-			Object data = file.getAttribute("attribute").getData();
-			assertThat((String[]) data, is(arrayContaining(
-					"value0", "value1", "value2", "value3", "value4", "value5", "value6", "")));
+		Object data = file.getAttribute("attribute").getData();
+		assertThat((String[]) data, is(arrayContaining(
+			"value0", "value1", "value2", "value3", "value4", "value5", "value6", "")));
 	}
 }

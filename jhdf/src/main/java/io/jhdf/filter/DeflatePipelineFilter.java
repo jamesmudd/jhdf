@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -53,8 +53,8 @@ public class DeflatePipelineFilter implements Filter {
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Decompressed chunk. Compressed size = {} bytes, Decompressed size = {}",
-						inflater.getBytesRead(),
-						inflater.getBytesWritten());
+					inflater.getBytesRead(),
+					inflater.getBytesWritten());
 			}
 
 			// Close the inflater

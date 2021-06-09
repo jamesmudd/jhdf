@@ -3,12 +3,14 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf;
 
+import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,36 +28,36 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 class LocalHeapTest {
-	private HdfFileChannel hdfFc;
+	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
 	void setUp() throws IOException, URISyntaxException {
 		final URI testFileUri = this.getClass().getResource("/hdf5/test_file.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
-		hdfFc = new HdfFileChannel(fc, sb);
+		hdfBackingStorage = new HdfFileChannel(fc, sb);
 	}
 
 	@AfterEach
 	void after() {
-		hdfFc.close();
+		hdfBackingStorage.close();
 	}
 
 	@Test
 	void testLocalHeap() {
-		LocalHeap heap = new LocalHeap(hdfFc, 680);
+		LocalHeap heap = new LocalHeap(hdfBackingStorage, 680);
 
 		assertThat(heap.getVersion(), is(equalTo((short) 0)));
 		assertThat(heap.getDataSegmentSize(), is(equalTo(88L)));
 		assertThat(heap.getOffsetToHeadOfFreeList(), is(equalTo(56L)));
 		assertThat(heap.getAddressOfDataSegment(), is(equalTo(712L)));
 		assertThat(heap.toString(), is(equalTo(
-				"LocalHeap [address=0x2a8, version=0, dataSegmentSize=88, offsetToHeadOfFreeList=56, addressOfDataSegment=0x2c8]")));
+			"LocalHeap [address=0x2a8, version=0, dataSegmentSize=88, offsetToHeadOfFreeList=56, addressOfDataSegment=0x2c8]")));
 	}
 
 	@Test
 	void testAccessingData() {
-		LocalHeap heap = new LocalHeap(hdfFc, 680);
+		LocalHeap heap = new LocalHeap(hdfBackingStorage, 680);
 		ByteBuffer bb = heap.getDataBuffer();
 		assertThat(bb.capacity(), is(equalTo(88)));
 		// Test reading a name from the heap

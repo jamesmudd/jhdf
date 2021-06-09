@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -15,31 +15,31 @@ import io.jhdf.exceptions.HdfException;
 import java.nio.ByteBuffer;
 
 public class HugeFractalHeapObjectUnfilteredRecord extends BTreeRecord {
-    private final long hugeObjectAddress;
-    private final long hugeObjectLength;
-    private final long hugeObjectID;
+	private final long hugeObjectAddress;
+	private final long hugeObjectLength;
+	private final long hugeObjectID;
 
-    public HugeFractalHeapObjectUnfilteredRecord(ByteBuffer bb) {
-        if (bb.remaining() < 24) {
-            throw new HdfException("Invalid length buffer for "
-        		+ "HugeFractalHeapObjectUnfilteredRecord. remaining bytes = " + bb.remaining());
-        }
+	public HugeFractalHeapObjectUnfilteredRecord(ByteBuffer bb) {
+		if (bb.remaining() < 24) {
+			throw new HdfException("Invalid length buffer for "
+				+ "HugeFractalHeapObjectUnfilteredRecord. remaining bytes = " + bb.remaining());
+		}
 
-        hugeObjectAddress = Utils.readBytesAsUnsignedLong(bb, 8);
-        hugeObjectLength = Utils.readBytesAsUnsignedLong(bb, 8);
-        hugeObjectID = Utils.readBytesAsUnsignedLong(bb, 8);
-    }
+		hugeObjectAddress = Utils.readBytesAsUnsignedLong(bb, 8);
+		hugeObjectLength = Utils.readBytesAsUnsignedLong(bb, 8);
+		hugeObjectID = Utils.readBytesAsUnsignedLong(bb, 8);
+	}
 
-    public long getAddress() {
-        return this.hugeObjectAddress;
-    }
+	public long getAddress() {
+		return this.hugeObjectAddress;
+	}
 
-    public long getLength() {
-        return this.hugeObjectLength;
-    }
+	public long getLength() {
+		return this.hugeObjectLength;
+	}
 
-    public long getId() {
-        return this.hugeObjectID;
-    }
+	public long getId() {
+		return this.hugeObjectID;
+	}
 }
 

@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -12,6 +12,7 @@ package io.jhdf;
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.storage.HdfBackingStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,7 @@ public class FractalHeap {
 	private static final BigInteger TWO = BigInteger.valueOf(2L);
 
 	private final long address;
-	private final HdfFileChannel hdfFc;
+	private final HdfBackingStorage hdfBackingStorage;
 	private final Superblock sb;
 
 	private final int maxDirectBlockSize;
@@ -94,15 +95,15 @@ public class FractalHeap {
 	private final int bytesToStoreOffset;
 	private final int bytesToStoreLength;
 
-	public FractalHeap(HdfFileChannel hdfFc, long address) {
-		this.hdfFc = hdfFc;
-		this.sb = hdfFc.getSuperblock();
+	public FractalHeap(HdfBackingStorage hdfBackingStorage, long address) {
+		this.hdfBackingStorage = hdfBackingStorage;
+		this.sb = hdfBackingStorage.getSuperblock();
 		this.address = address;
 
 		final int headerSize = 4 + 1 + 2 + 2 + 1 + 4 + 12 * sb.getSizeOfLengths() + 3 * sb.getSizeOfOffsets() + 2
-				+ 2 + 2 + 2 + 4;
+			+ 2 + 2 + 2 + 4;
 
-		ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
+		ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
 		byte[] formatSignatureBytes = new byte[4];
 		bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -121,7 +122,7 @@ public class FractalHeap {
 		idLength = readBytesAsUnsignedInt(bb, 2);
 		ioFiltersLength = readBytesAsUnsignedInt(bb, 2);
 
-		flags = BitSet.valueOf(new byte[] { bb.get() });
+		flags = BitSet.valueOf(new byte[]{bb.get()});
 
 		maxSizeOfManagedObjects = readBytesAsUnsignedLong(bb, 4);
 
@@ -194,10 +195,10 @@ public class FractalHeap {
 	public ByteBuffer getId(ByteBuffer buffer) {
 		if (buffer.remaining() != idLength) {
 			throw new HdfException("ID length is incorrect accessing fractal heap at address " + address
-					+ ". IDs should be " + idLength + " bytes but was " + buffer.capacity() + " bytes.");
+				+ ". IDs should be " + idLength + " bytes but was " + buffer.capacity() + " bytes.");
 		}
 
-		BitSet idFlags = BitSet.valueOf(new byte[] { buffer.get() });
+		BitSet idFlags = BitSet.valueOf(new byte[]{buffer.get()});
 
 		final int version = bitsToInt(idFlags, 6, 2);
 		if (version != 0) {
@@ -207,39 +208,39 @@ public class FractalHeap {
 		final int type = bitsToInt(idFlags, 4, 2);
 
 		switch (type) {
-		case 0: // Managed Objects
-			long offset = readBytesAsUnsignedLong(buffer, bytesToStoreOffset);
-			int length = readBytesAsUnsignedInt(buffer, bytesToStoreLength);
+			case 0: // Managed Objects
+				long offset = readBytesAsUnsignedLong(buffer, bytesToStoreOffset);
+				int length = readBytesAsUnsignedInt(buffer, bytesToStoreLength);
 
-			logger.debug("Getting ID at offset={} length={}", offset, length);
+				logger.debug("Getting ID at offset={} length={}", offset, length);
 
-			// Figure out which direct block holds the offset
-			Entry<Long, DirectBlock> entry = directBlocks.floorEntry(offset);
+				// Figure out which direct block holds the offset
+				Entry<Long, DirectBlock> entry = directBlocks.floorEntry(offset);
 
-			ByteBuffer bb = entry.getValue().getData();
-			bb.order(LITTLE_ENDIAN);
-			bb.position(Math.toIntExact(offset - entry.getKey()));
-			return createSubBuffer(bb, length);
+				ByteBuffer bb = entry.getValue().getData();
+				bb.order(LITTLE_ENDIAN);
+				bb.position(Math.toIntExact(offset - entry.getKey()));
+				return createSubBuffer(bb, length);
 
-		case 1: // Huge objects
-            if (this.bTreeAddressOfHugeObjects <= 0) {
-			    throw new UnsupportedHdfException("Huge objects without BTreev2 are currently not supported");
-			}
+			case 1: // Huge objects
+				if (this.bTreeAddressOfHugeObjects <= 0) {
+					throw new UnsupportedHdfException("Huge objects without BTreev2 are currently not supported");
+				}
 
-			BTreeV2<HugeFractalHeapObjectUnfilteredRecord> hugeObjectBTree =
-			    new BTreeV2<>(this.hdfFc, this.bTreeAddressOfHugeObjects);
+				BTreeV2<HugeFractalHeapObjectUnfilteredRecord> hugeObjectBTree =
+					new BTreeV2<>(this.hdfBackingStorage, this.bTreeAddressOfHugeObjects);
 
-			if (hugeObjectBTree.getRecords().size() != 1) {
-			    throw new UnsupportedHdfException("Only Huge objects BTrees with 1 record are currently supported");
-			}
+				if (hugeObjectBTree.getRecords().size() != 1) {
+					throw new UnsupportedHdfException("Only Huge objects BTrees with 1 record are currently supported");
+				}
 
-			HugeFractalHeapObjectUnfilteredRecord ho = hugeObjectBTree.getRecords().get(0);
+				HugeFractalHeapObjectUnfilteredRecord ho = hugeObjectBTree.getRecords().get(0);
 
-			return this.hdfFc.readBufferFromAddress(ho.getAddress(), (int) ho.getLength());
-		case 2: // Tiny objects
-			throw new UnsupportedHdfException("Tiny objects are currently not supported");
-		default:
-			throw new HdfException("Unrecognized ID type, type=" + type);
+				return this.hdfBackingStorage.readBufferFromAddress(ho.getAddress(), (int) ho.getLength());
+			case 2: // Tiny objects
+				throw new UnsupportedHdfException("Tiny objects are currently not supported");
+			default:
+				throw new HdfException("Unrecognized ID type, type=" + type);
 		}
 	}
 
@@ -249,9 +250,9 @@ public class FractalHeap {
 
 		private IndirectBlock(long address) {
 			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset
-					+ currentRowsInRootIndirectBlock * tableWidth * getRowSize() + 4;
+				+ currentRowsInRootIndirectBlock * tableWidth * getRowSize() + 4;
 
-			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
+			ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
 			byte[] formatSignatureBytes = new byte[4];
 			bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -259,7 +260,7 @@ public class FractalHeap {
 			// Verify signature
 			if (!Arrays.equals(INDIRECT_BLOCK_SIGNATURE, formatSignatureBytes)) {
 				throw new HdfException(
-						"Fractal heap indirect block signature 'FHIB' not matched, at address " + address);
+					"Fractal heap indirect block signature 'FHIB' not matched, at address " + address);
 			}
 
 			// Version Number
@@ -318,7 +319,7 @@ public class FractalHeap {
 
 			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset + 4;
 
-			ByteBuffer bb = hdfFc.readBufferFromAddress(address, headerSize);
+			ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
 			byte[] formatSignatureBytes = new byte[4];
 			bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -341,7 +342,7 @@ public class FractalHeap {
 
 			blockOffset = readBytesAsUnsignedLong(bb, bytesToStoreOffset);
 
-			data = hdfFc.map(address, getSizeOfDirectBlock(blockIndex));
+			data = hdfBackingStorage.map(address, getSizeOfDirectBlock(blockIndex));
 
 			if (checksumPresent()) {
 				int storedChecksum = bb.getInt();
@@ -385,8 +386,8 @@ public class FractalHeap {
 	@Override
 	public String toString() {
 		return "FractalHeap [address=" + address + ", idLength=" + idLength + ", numberOfTinyObjectsInHeap="
-				+ numberOfTinyObjectsInHeap + ", numberOfHugeObjectsInHeap=" + numberOfHugeObjectsInHeap
-				+ ", numberOfManagedObjectsInHeap=" + numberOfManagedObjectsInHeap + "]";
+			+ numberOfTinyObjectsInHeap + ", numberOfHugeObjectsInHeap=" + numberOfHugeObjectsInHeap
+			+ ", numberOfManagedObjectsInHeap=" + numberOfManagedObjectsInHeap + "]";
 	}
 
 	public long getAddress() {

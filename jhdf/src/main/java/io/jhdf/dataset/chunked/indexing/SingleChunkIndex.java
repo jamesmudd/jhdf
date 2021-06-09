@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -18,20 +18,20 @@ import java.util.Collections;
 
 public class SingleChunkIndex implements ChunkIndex {
 
-    private final Chunk singleChunk;
+	private final Chunk singleChunk;
 
-    public SingleChunkIndex(ChunkedDataLayoutMessageV4 layoutMessageV4, DatasetInfo datasetInfo) {
-        final int[] chunkOffset = new int[datasetInfo.getDatasetDimensions().length]; // Single chunk so zero offset
-        if (layoutMessageV4.isFilteredSingleChunk()) {
-            this.singleChunk = new ChunkImpl(layoutMessageV4.getAddress(), layoutMessageV4.getSizeOfFilteredSingleChunk(), chunkOffset, layoutMessageV4.getFilterMaskFilteredSingleChunk());
-        } else {
-            this.singleChunk = new ChunkImpl(layoutMessageV4.getAddress(), datasetInfo.getChunkSizeInBytes(), chunkOffset);
-        }
-    }
+	public SingleChunkIndex(ChunkedDataLayoutMessageV4 layoutMessageV4, DatasetInfo datasetInfo) {
+		final int[] chunkOffset = new int[datasetInfo.getDatasetDimensions().length]; // Single chunk so zero offset
+		if (layoutMessageV4.isFilteredSingleChunk()) {
+			this.singleChunk = new ChunkImpl(layoutMessageV4.getAddress(), layoutMessageV4.getSizeOfFilteredSingleChunk(), chunkOffset, layoutMessageV4.getFilterMaskFilteredSingleChunk());
+		} else {
+			this.singleChunk = new ChunkImpl(layoutMessageV4.getAddress(), datasetInfo.getChunkSizeInBytes(), chunkOffset);
+		}
+	}
 
-    @Override
-    public Collection<Chunk> getAllChunks() {
-        return Collections.singletonList(singleChunk);
-    }
+	@Override
+	public Collection<Chunk> getAllChunks() {
+		return Collections.singletonList(singleChunk);
+	}
 
 }

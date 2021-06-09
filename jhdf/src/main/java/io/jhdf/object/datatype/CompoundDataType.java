@@ -3,16 +3,16 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.dataset.CompoundDatasetReader;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
@@ -33,7 +33,7 @@ public class CompoundDataType extends DataType {
 		super(bb);
 
 		final int version = getVersion();
-		if(version > 3) {
+		if (version > 3) {
 			throw new UnsupportedHdfException("Compound data type version is not yet supported: version = " + version);
 		}
 
@@ -50,14 +50,14 @@ public class CompoundDataType extends DataType {
 			if (version < 3) {
 				final int posAfterName = bb.position();
 				final int bytesPastEight = (posAfterName - posBeforeName) % 8;
-				if(bytesPastEight != 0) {
+				if (bytesPastEight != 0) {
 					int bytesToSkip = 8 - bytesPastEight;
 					bb.position(bb.position() + bytesToSkip);
 				}
 			}
 
 			final int offset;
-			if(version < 3)
+			if (version < 3)
 				offset = Utils.readBytesAsUnsignedInt(bb, 4);
 			else {
 				int offsetBytes = Utils.bytesNeededToHoldNumber(getSize());
@@ -96,11 +96,11 @@ public class CompoundDataType extends DataType {
 	}
 
 	@Override
-	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
-		return CompoundDatasetReader.readDataset(this, buffer, dimensions, hdfFc);
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
+		return CompoundDatasetReader.readDataset(this, buffer, dimensions, hdfBackingStorage);
 	}
 
-    public static class CompoundDataMember {
+	public static class CompoundDataMember {
 		private final String name;
 		private final int[] dimensionSize;
 		private final int offset;

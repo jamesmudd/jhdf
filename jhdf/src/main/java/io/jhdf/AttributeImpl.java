@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -14,6 +14,7 @@ import io.jhdf.api.Node;
 import io.jhdf.dataset.DatasetReader;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.AttributeMessage;
+import io.jhdf.storage.HdfBackingStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,13 +25,13 @@ import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 public class AttributeImpl implements Attribute {
 	private static final Logger logger = LoggerFactory.getLogger(AttributeImpl.class);
 
-	private final HdfFileChannel hdfFc;
+	private final HdfBackingStorage hdfBackingStorage;
 	private final Node node;
 	private final String name;
 	private final AttributeMessage message;
 
-	public AttributeImpl(HdfFileChannel hdfFc, Node node, AttributeMessage message) {
-		this.hdfFc = hdfFc;
+	public AttributeImpl(HdfBackingStorage hdfBackingStorage, Node node, AttributeMessage message) {
+		this.hdfBackingStorage = hdfBackingStorage;
 		this.node = node;
 		this.name = message.getName();
 		this.message = message;
@@ -69,7 +70,7 @@ public class AttributeImpl implements Attribute {
 		}
 		DataType type = message.getDataType();
 		ByteBuffer bb = message.getDataBuffer();
-		return DatasetReader.readDataset(type, bb, getDimensions(), hdfFc);
+		return DatasetReader.readDataset(type, bb, getDimensions(), hdfBackingStorage);
 	}
 
 	@Override

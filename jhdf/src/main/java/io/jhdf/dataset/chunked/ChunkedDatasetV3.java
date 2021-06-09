@@ -3,20 +3,20 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.dataset.chunked;
 
 import io.jhdf.Constants;
-import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
 import io.jhdf.btree.BTreeV1;
 import io.jhdf.btree.BTreeV1Data;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessage;
+import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
@@ -37,50 +37,50 @@ import static java.util.stream.Collectors.toMap;
  * @author James Mudd
  */
 public class ChunkedDatasetV3 extends ChunkedDatasetBase {
-    private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetV3.class);
+	private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetV3.class);
 
-    private final ChunkedDataLayoutMessage layoutMessage;
+	private final ChunkedDataLayoutMessage layoutMessage;
 
-    private final ChunkLookupLazyInitializer chunkLookupLazyInitializer;
+	private final ChunkLookupLazyInitializer chunkLookupLazyInitializer;
 
-    public ChunkedDatasetV3(HdfFileChannel hdfFc, long address, String name, Group parent, ObjectHeader oh) {
-        super(hdfFc, address, name, parent, oh);
+	public ChunkedDatasetV3(HdfBackingStorage hdfBackingStorage, long address, String name, Group parent, ObjectHeader oh) {
+		super(hdfBackingStorage, address, name, parent, oh);
 
-        layoutMessage = oh.getMessageOfType(ChunkedDataLayoutMessage.class);
+		layoutMessage = oh.getMessageOfType(ChunkedDataLayoutMessage.class);
 
-        chunkLookupLazyInitializer = new ChunkLookupLazyInitializer();
-    }
+		chunkLookupLazyInitializer = new ChunkLookupLazyInitializer();
+	}
 
-    @Override
-    protected Map<ChunkOffset, Chunk> getChunkLookup() {
-        try {
-            return chunkLookupLazyInitializer.get();
-        } catch (ConcurrentException e) {
-            throw new HdfException("Failed to create chunk lookup for: " + getPath(), e);
-        }
-    }
+	@Override
+	protected Map<ChunkOffset, Chunk> getChunkLookup() {
+		try {
+			return chunkLookupLazyInitializer.get();
+		} catch (ConcurrentException e) {
+			throw new HdfException("Failed to create chunk lookup for: " + getPath(), e);
+		}
+	}
 
-    @Override
-    public int[] getChunkDimensions() {
-        return layoutMessage.getChunkDimensions();
-    }
+	@Override
+	public int[] getChunkDimensions() {
+		return layoutMessage.getChunkDimensions();
+	}
 
-    private final class ChunkLookupLazyInitializer extends LazyInitializer<Map<ChunkOffset, Chunk>> {
-        @Override
-        protected Map<ChunkOffset, Chunk> initialize() {
-            logger.debug("Creating chunk lookup for [{}]", getPath());
+	private final class ChunkLookupLazyInitializer extends LazyInitializer<Map<ChunkOffset, Chunk>> {
+		@Override
+		protected Map<ChunkOffset, Chunk> initialize() {
+			logger.debug("Creating chunk lookup for [{}]", getPath());
 
-            if(layoutMessage.getBTreeAddress() == Constants.UNDEFINED_ADDRESS) {
-                return Collections.emptyMap();
-            }
+			if (layoutMessage.getBTreeAddress() == Constants.UNDEFINED_ADDRESS) {
+				return Collections.emptyMap();
+			}
 
-            final BTreeV1Data bTree = BTreeV1.createDataBTree(hdfFc, layoutMessage.getBTreeAddress(), getDimensions().length);
-            final Collection<Chunk> allChunks = bTree.getChunks();
+			final BTreeV1Data bTree = BTreeV1.createDataBTree(hdfBackingStorage, layoutMessage.getBTreeAddress(), getDimensions().length);
+			final Collection<Chunk> allChunks = bTree.getChunks();
 
-            return allChunks.stream().
-                    collect(toMap(chunk -> new ChunkOffset(chunk.getChunkOffset()) // keys
-                            , Function.identity())); // values
-        }
-    }
+			return allChunks.stream().
+				collect(toMap(chunk -> new ChunkOffset(chunk.getChunkOffset()) // keys
+					, Function.identity())); // values
+		}
+	}
 
 }

@@ -3,13 +3,13 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 /**
  * Support for HDF5 filters used when accessing chunked datasets.
- *
+ * <p>
  * Filters can add useful features such as compression, or error detection.
  *
  * @author James Mudd

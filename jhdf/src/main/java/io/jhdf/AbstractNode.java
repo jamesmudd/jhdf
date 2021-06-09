@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -19,6 +19,7 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.AttributeInfoMessage;
 import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.Message;
+import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
@@ -55,15 +56,15 @@ public abstract class AbstractNode implements Node {
 
 				if (attributeInfoMessage.getFractalHeapAddress() != Constants.UNDEFINED_ADDRESS) {
 					// Create the heap and btree
-					FractalHeap fractalHeap = new FractalHeap(hdfFc, attributeInfoMessage.getFractalHeapAddress());
-					BTreeV2<AttributeNameForIndexedAttributesRecord> btree = new BTreeV2<>(hdfFc,
-							attributeInfoMessage.getAttributeNameBTreeAddress());
+					FractalHeap fractalHeap = new FractalHeap(hdfBackingStorage, attributeInfoMessage.getFractalHeapAddress());
+					BTreeV2<AttributeNameForIndexedAttributesRecord> btree = new BTreeV2<>(hdfBackingStorage,
+						attributeInfoMessage.getAttributeNameBTreeAddress());
 
 					// Read the attribute messages from the btree+heap
 					for (AttributeNameForIndexedAttributesRecord attributeRecord : btree.getRecords()) {
 						ByteBuffer bb = fractalHeap.getId(attributeRecord.getHeapId());
-						AttributeMessage attributeMessage = new AttributeMessage(bb, hdfFc.getSuperblock(),
-								attributeRecord.getFlags());
+						AttributeMessage attributeMessage = new AttributeMessage(bb, hdfBackingStorage,
+							attributeRecord.getFlags());
 						logger.trace("Read attribute message '{}'", attributeMessage);
 						attributeMessages.add(attributeMessage);
 					}
@@ -74,27 +75,27 @@ public abstract class AbstractNode implements Node {
 			attributeMessages.addAll(oh.getMessagesOfType(AttributeMessage.class));
 
 			return attributeMessages.stream()
-					.collect(
-							toMap(AttributeMessage::getName,
-									message -> new AttributeImpl(hdfFc, AbstractNode.this, message)));
+				.collect(
+					toMap(AttributeMessage::getName,
+						message -> new AttributeImpl(hdfBackingStorage, AbstractNode.this, message)));
 		}
 	}
 
-	private final HdfFileChannel hdfFc;
+	private final HdfBackingStorage hdfBackingStorage;
 	protected final long address;
 	protected final String name;
 	protected final Group parent;
 	protected final LazyInitializer<ObjectHeader> header;
 	protected final AttributesLazyInitializer attributes;
 
-	public AbstractNode(HdfFileChannel hdfFc, long address, String name, Group parent) {
-		this.hdfFc = hdfFc;
+	protected AbstractNode(HdfBackingStorage hdfBackingStorage, long address, String name, Group parent) {
+		this.hdfBackingStorage = hdfBackingStorage;
 		this.address = address;
 		this.name = name;
 		this.parent = parent;
 
 		try {
-			header = ObjectHeader.lazyReadObjectHeader(hdfFc, address);
+			header = ObjectHeader.lazyReadObjectHeader(hdfBackingStorage, address);
 
 			// Attributes
 			attributes = new AttributesLazyInitializer(header);
@@ -154,7 +155,7 @@ public abstract class AbstractNode implements Node {
 			return attributes.get();
 		} catch (Exception e) {
 			throw new HdfException(
-					"Failed to load attributes for '" + getPath() + "' at address '" + getAddress() + "'", e);
+				"Failed to load attributes for '" + getPath() + "' at address '" + getAddress() + "'", e);
 		}
 	}
 
@@ -173,7 +174,7 @@ public abstract class AbstractNode implements Node {
 			return header.get();
 		} catch (Exception e) {
 			throw new HdfException("Failed reading header for '" + getPath() + "' at address '" + getAddress() + "'",
-					e);
+				e);
 		}
 	}
 }

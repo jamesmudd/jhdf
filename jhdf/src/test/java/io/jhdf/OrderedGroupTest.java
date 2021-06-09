@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -38,14 +38,14 @@ class OrderedGroupTest {
 	}
 
 	@Test
-    void testOrderedGroup() {
+	void testOrderedGroup() {
 		Group group = (Group) hdfFile.getByPath(ORDERED_GROUP);
 		assertThat(group.isLinkCreationOrderTracked(), is(true));
 		assertThat(group.getChildren().keySet(), contains("z", "h", "a"));
 	}
 
 	@Test
-    void testUnOrderedGroup() {
+	void testUnOrderedGroup() {
 		Group group = (Group) hdfFile.getByPath(UNORDERED_GROUP);
 		assertThat(group.isLinkCreationOrderTracked(), is(false));
 		assertThat(group.getChildren().keySet(), containsInAnyOrder("z", "h", "a"));

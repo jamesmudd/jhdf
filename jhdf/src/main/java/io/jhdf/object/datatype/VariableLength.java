@@ -3,17 +3,17 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.dataset.VariableLengthDatasetReader;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.datatype.StringData.PaddingType;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -48,14 +48,14 @@ public class VariableLength extends DataType {
 
 		final int characterEncoding = Utils.bitsToInt(classBits, 8, 4);
 		switch (characterEncoding) {
-		case 0:
-			encoding = StandardCharsets.US_ASCII;
-			break;
-		case 1:
-			encoding = StandardCharsets.UTF_8;
-			break;
-		default:
-			throw new HdfException("Unrecognized character encoding = " + characterEncoding);
+			case 0:
+				encoding = StandardCharsets.US_ASCII;
+				break;
+			case 1:
+				encoding = StandardCharsets.UTF_8;
+				break;
+			default:
+				throw new HdfException("Unrecognized character encoding = " + characterEncoding);
 		}
 
 		parent = DataType.readDataType(bb);
@@ -70,14 +70,14 @@ public class VariableLength extends DataType {
 	}
 
 	public PaddingType getPaddingType() {
-		if(!isVariableLengthString()) {
+		if (!isVariableLengthString()) {
 			throw new HdfException("Cannot get padding type for variable length dataset thats not string type");
 		}
 		return paddingType;
 	}
 
 	public Charset getEncoding() {
-		if(!isVariableLengthString()) {
+		if (!isVariableLengthString()) {
 			throw new HdfException("Cannot get encoding for variable length dataset thats not string type");
 		}
 		return encoding;
@@ -97,7 +97,7 @@ public class VariableLength extends DataType {
 	}
 
 	@Override
-	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
-		return  VariableLengthDatasetReader.readDataset(this, buffer, dimensions, hdfFc);
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
+		return VariableLengthDatasetReader.readDataset(this, buffer, dimensions, hdfBackingStorage);
 	}
 }

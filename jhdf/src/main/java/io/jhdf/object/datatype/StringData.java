@@ -3,15 +3,15 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -34,7 +34,7 @@ public class StringData extends DataType {
 	private final Charset charset;
 
 	@Override
-	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
 		final Object data = Array.newInstance(getJavaType(), dimensions);
 		fillFixedLengthStringData(data, dimensions, buffer, getSize(), getCharset(), getStringPaddingHandler());
 		return data;
@@ -55,7 +55,7 @@ public class StringData extends DataType {
 		}
 	}
 
-    public enum PaddingType {
+	public enum PaddingType {
 		NULL_TERMINATED(new NullTerminated()),
 		NULL_PADDED(new NullPadded()),
 		SPACE_PADDED(new SpacePadded());
@@ -87,14 +87,14 @@ public class StringData extends DataType {
 
 		final int charsetIndex = Utils.bitsToInt(classBits, 4, 4);
 		switch (charsetIndex) {
-		case 0:
-			charset = StandardCharsets.US_ASCII;
-			break;
-		case 1:
-			charset = StandardCharsets.UTF_8;
-			break;
-		default:
-			throw new HdfException("Unrecognized Charset. Index is: " + charsetIndex);
+			case 0:
+				charset = StandardCharsets.US_ASCII;
+				break;
+			case 1:
+				charset = StandardCharsets.UTF_8;
+				break;
+			default:
+				throw new HdfException("Unrecognized Charset. Index is: " + charsetIndex);
 		}
 	}
 
@@ -159,8 +159,8 @@ public class StringData extends DataType {
 	@Override
 	public String toString() {
 		return "StringData{" +
-				"paddingType=" + paddingType +
-				", charset=" + charset +
-				'}';
+			"paddingType=" + paddingType +
+			", charset=" + charset +
+			'}';
 	}
 }

@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -16,8 +16,8 @@ import java.util.Collections;
 
 public class EmptyChunkIndex implements ChunkIndex {
 
-    @Override
-    public Collection<Chunk> getAllChunks() {
-        return Collections.emptyList();
-    }
+	@Override
+	public Collection<Chunk> getAllChunks() {
+		return Collections.emptyList();
+	}
 }

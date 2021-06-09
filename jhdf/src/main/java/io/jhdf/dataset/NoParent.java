@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * A placeholder for a {@link Group} to use when the group of a {@link Dataset} is not known because it is specified by
  * a {@link io.jhdf.object.datatype.Reference}. Allows to do
- * {@code DatasetLoader.createDataset(hdfFc, linkHeader, "Unknown dataset", NoParent.INSTANCE)}.
+ * {@code DatasetLoader.createDataset(hdfBackingStorage, linkHeader, "Unknown dataset", NoParent.INSTANCE)}.
  */
 public enum NoParent implements Group {
 

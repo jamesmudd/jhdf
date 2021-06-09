@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -46,7 +46,7 @@ public class GroupInfoMessage extends Message {
 			throw new HdfException("Unrecognized version " + version);
 		}
 
-		BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
+		BitSet flags = BitSet.valueOf(new byte[]{bb.get()});
 
 		if (flags.get(LINK_PHASE_CHANGE_PRESENT)) {
 			maximumCompactLinks = Utils.readBytesAsUnsignedInt(bb, 2);

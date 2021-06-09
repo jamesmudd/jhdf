@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -60,7 +60,7 @@ public class FillValueMessage extends Message {
 				fillValueDefined = false;
 			}
 		} else if (version == 3) {
-			BitSet flags = BitSet.valueOf(new byte[] { bb.get() });
+			BitSet flags = BitSet.valueOf(new byte[]{bb.get()});
 			spaceAllocationTime = Utils.bitsToInt(flags, 0, 2); // 0-1
 			fillValueWriteTime = Utils.bitsToInt(flags, 2, 2); // 2-3
 			fillValueDefined = flags.get(FILL_VALUE_DEFINED_BIT);

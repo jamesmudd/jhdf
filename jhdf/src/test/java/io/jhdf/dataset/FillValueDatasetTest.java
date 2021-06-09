@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -51,40 +51,40 @@ class FillValueDatasetTest {
 	Collection<DynamicNode> fillValueTests() {
 		// List of all the datasetPaths
 		return Arrays.asList(
-				dynamicContainer("earliest", Arrays.asList(
-						dynamicTest("float32",
-								createTest(earliestHdfFile, "float/float32", float.class, 33.33f)),
-						dynamicTest("float64",
-								createTest(earliestHdfFile, "float/float64", double.class, 123.456)),
-						dynamicTest("int8",
-								createTest(earliestHdfFile, "int/int8", byte.class, (byte) 8)),
-						dynamicTest("int16",
-								createTest(earliestHdfFile, "int/int16", short.class, (short) 16)),
-						dynamicTest("int32",
-								createTest(earliestHdfFile, "int/int32", int.class, 32)),
-						dynamicTest("int64",
-								createTest(earliestHdfFile, "no_fill", byte.class, null)))),
+			dynamicContainer("earliest", Arrays.asList(
+				dynamicTest("float32",
+					createTest(earliestHdfFile, "float/float32", float.class, 33.33f)),
+				dynamicTest("float64",
+					createTest(earliestHdfFile, "float/float64", double.class, 123.456)),
+				dynamicTest("int8",
+					createTest(earliestHdfFile, "int/int8", byte.class, (byte) 8)),
+				dynamicTest("int16",
+					createTest(earliestHdfFile, "int/int16", short.class, (short) 16)),
+				dynamicTest("int32",
+					createTest(earliestHdfFile, "int/int32", int.class, 32)),
+				dynamicTest("int64",
+					createTest(earliestHdfFile, "no_fill", byte.class, null)))),
 
-				dynamicContainer("latest", Arrays.asList(
-						dynamicTest("float32",
-								createTest(latestHdfFile, "float/float32", float.class, 33.33f)),
-						dynamicTest("float64",
-								createTest(latestHdfFile, "float/float64", double.class, 123.456)),
-						dynamicTest("int8",
-								createTest(latestHdfFile, "int/int8", byte.class, (byte) 8)),
-						dynamicTest("int16",
-								createTest(latestHdfFile, "int/int16", short.class, (short) 16)),
-						dynamicTest("int32",
-								createTest(latestHdfFile, "int/int32", int.class, 32)),
-						dynamicTest("int64",
-								createTest(latestHdfFile, "no_fill", byte.class, null)))));
+			dynamicContainer("latest", Arrays.asList(
+				dynamicTest("float32",
+					createTest(latestHdfFile, "float/float32", float.class, 33.33f)),
+				dynamicTest("float64",
+					createTest(latestHdfFile, "float/float64", double.class, 123.456)),
+				dynamicTest("int8",
+					createTest(latestHdfFile, "int/int8", byte.class, (byte) 8)),
+				dynamicTest("int16",
+					createTest(latestHdfFile, "int/int16", short.class, (short) 16)),
+				dynamicTest("int32",
+					createTest(latestHdfFile, "int/int32", int.class, 32)),
+				dynamicTest("int64",
+					createTest(latestHdfFile, "no_fill", byte.class, null)))));
 	}
 
 	private Executable createTest(HdfFile file, String datasetPath, Class<?> expectedType, Object fillValue) {
 		return () -> {
 			Dataset dataset = file.getDatasetByPath(datasetPath);
 			// should have 0 length dimensions
-			assertThat(dataset.getDimensions(), is(equalTo(new int[] { 2, 5 })));
+			assertThat(dataset.getDimensions(), is(equalTo(new int[]{2, 5})));
 
 			// Do element comparison as there are all different primitive numeric types
 			// convert to double

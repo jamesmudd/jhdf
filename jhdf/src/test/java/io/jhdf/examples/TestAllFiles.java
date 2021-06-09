@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -57,28 +57,9 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
  *
  * @author James Mudd
  */
-class TestAllFiles {
+class TestAllFiles extends TestAllFilesBase {
 
-	private static final PathMatcher HDF5 = FileSystems.getDefault().getPathMatcher("glob:**.{hdf5,h5}");
-
-	@TestFactory
-	Stream<DynamicNode> allHdf5TestFiles() throws IOException, URISyntaxException {
-
-		// Auto discover the test files assuming they exist in under the directory
-		// containing test_file.hdf5
-		URL resource = this.getClass().getResource("/hdf5/");
-		Path path = Paths.get(resource.toURI()).getParent();
-		List<Path> files = Files.walk(path).filter(HDF5::matches).collect(Collectors.toList());
-
-		// Check at least some files have been discovered
-		assertThat("Less than 3 HDF5 test files discovered searched paths below: " + path.toAbsolutePath(),
-				files.size(), is(greaterThan(2)));
-
-		// Make a test for each file
-		return files.stream().map(this::createTest);
-	}
-
-	private DynamicNode createTest(Path path) {
+	protected DynamicNode createTest(Path path) {
 		return dynamicTest(path.getFileName().toString(), () -> {
 			try (HdfFile hdfFile = new HdfFile(path.toFile())) {
 				verifyAttributes(hdfFile);
@@ -87,131 +68,4 @@ class TestAllFiles {
 		});
 	}
 
-	private void recurseGroup(Group group) {
-		for (Node node : group) {
-			if (node instanceof Group) {
-				Group group2 = (Group) node;
-				verifyGroup(group2);
-				recurseGroup(group2);
-			} else if (node instanceof Dataset) {
-				verifyDataset((Dataset) node, group);
-			}
-			verifyAttributes(node);
-		}
-	}
-
-	private void verifyAttributes(Node node) {
-		if(node instanceof Link) {
-			if(((Link) node).isBrokenLink()) {
-				return; // Can't verify broken links
-			}
-		}
-		for (Entry<String, Attribute> entry : node.getAttributes().entrySet()) {
-			Attribute attribute = entry.getValue();
-			assertThat(attribute.getName(), is(equalTo(entry.getKey())));
-			assertThat(attribute.getJavaType(), is(notNullValue()));
-			if (attribute.isEmpty()) {
-				assertThat(attribute.getSize(), is(equalTo(0L)));
-				assertThat(attribute.getSizeInBytes(), is(equalTo(0L)));
-				assertThat(attribute.getData(), is(nullValue()));
-			} else if (attribute.isScalar()) {
-				assertThat(attribute.getSize(), is(equalTo(1L)));
-				assertThat(attribute.getSizeInBytes(), is(greaterThan(0L)));
-				assertThat(attribute.getData(), is(notNullValue()));
-				assertThat(attribute.getBuffer(), is(notNullValue()));
-			} else {
-				assertThat(attribute.getSize(), is(greaterThan(0L)));
-				assertThat(attribute.getSizeInBytes(), is(greaterThan(0L)));
-				assertThat(attribute.getData(), is(notNullValue()));
-				assertThat(attribute.getBuffer(), is(notNullValue()));
-			}
-		}
-	}
-
-	/**
-	 * Verifies things that should be true about all datasets
-	 *
-	 * @param dataset the dataset to be exercised
-	 * @param group   its parent group
-	 */
-	@SuppressWarnings("unchecked")
-	private void verifyDataset(Dataset dataset, Group group) {
-		assertThat(dataset.getName(), is(notNullValue()));
-		assertThat(dataset.getPath(), is(group.getPath() + dataset.getName()));
-		assertThat(dataset.getParent(), is(sameInstance(group)));
-		int[] dims = dataset.getDimensions();
-		assertThat(dims, is(notNullValue()));
-
-		// Call getAttributes twice to check lazy initialisation
-		assertThat(dataset.getAttributes(), is(notNullValue()));
-		assertThat(dataset.getAttributes(), is(notNullValue()));
-
-		assertThat(dataset.isGroup(), is(false));
-		assertThat(dataset.isLink(), is(false));
-		assertThat(dataset.getType(), is(NodeType.DATASET));
-		assertThat(dataset.getDataLayout(), is(notNullValue()));
-
-		// Call getData twice to check cases of lazy initialisation are working correctly
-		dataset.getData();
-		final Object data = dataset.getData();
-
-		if (dataset.isEmpty()) {
-			assertThat(data, is(nullValue()));
-			// Empty so should have 0 size
-			assertThat(dataset.getStorageInBytes(), is(equalTo(0L)));
-		} else if (dataset.isScalar()) {
-			assertThat(data.getClass(), is(equalTo(dataset.getJavaType())));
-			// Should have some size
-			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
-		} else if (dataset.isCompound()) {
-			// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future..
-			assertThat(data, is(instanceOf(Map.class)));
-			assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
-			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
-		} else if (dataset.isVariableLength()) {
-			assertThat(getDimensions(data)[0], is(equalTo(dims[0])));
-			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
-		} else {
-			assertThat(getDimensions(data), is(equalTo(dims)));
-			assertThat(getType(data), is(equalTo(dataset.getJavaType())));
-			// Should have some size
-			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
-		}
-
-		if (dataset instanceof ContiguousDataset && !dataset.isEmpty()) {
-			ContiguousDataset contiguousDataset = (ContiguousDataset) dataset;
-			ByteBuffer buffer = contiguousDataset.getBuffer();
-			assertThat(buffer, is(notNullValue()));
-			assertThat(buffer.capacity(), is(greaterThan(0)));
-			assertThat(contiguousDataset.getDataAddress(), is(greaterThan(0L)));
-		}
-
-		if (dataset instanceof ChunkedDataset && !dataset.isEmpty()) {
-			ChunkedDataset chunkedDataset = (ChunkedDataset) dataset;
-			// Get the first chunk
-			ByteBuffer buffer = chunkedDataset.getRawChunkBuffer(new int[dataset.getDimensions().length]);
-			assertThat(buffer, is(notNullValue()));
-			assertThat(buffer.capacity(), is(greaterThan(0)));
-		}
-	}
-
-	private Class<?> getType(Object data) {
-		if (Array.get(data, 0).getClass().isArray()) {
-			return getType(Array.get(data, 0));
-		} else {
-			return data.getClass().getComponentType();
-		}
-	}
-
-	/**
-	 * Verifies things that should be true about all groups
-	 *
-	 * @param group to exercise
-	 */
-	private void verifyGroup(Group group) {
-		assertThat(group.getAttributes(), is(notNullValue()));
-		assertThat(group.isGroup(), is(true));
-		assertThat(group.isLink(), is(false));
-		assertThat(group.getType(), is(NodeType.GROUP));
-	}
 }

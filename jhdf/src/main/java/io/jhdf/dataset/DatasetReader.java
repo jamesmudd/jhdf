@@ -3,14 +3,14 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.dataset;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.object.datatype.DataType;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -43,13 +43,13 @@ public final class DatasetReader {
 	/**
 	 * This converts a buffer into a Java object representing this dataset.
 	 *
-	 * @param type The data type of this dataset
-	 * @param buffer The buffer containing the dataset
-	 * @param dimensions The dimensions of this dataset
-	 * @param hdfFc The file channel for reading the file
+	 * @param type              The data type of this dataset
+	 * @param buffer            The buffer containing the dataset
+	 * @param dimensions        The dimensions of this dataset
+	 * @param hdfBackingStorage The file channel for reading the file
 	 * @return A Java object representation of this dataset
 	 */
-	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions, HdfFileChannel hdfFc) {
+	public static Object readDataset(DataType type, ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
 		// If the data is scalar make a fake one element array then remove it at the end
 
 		final boolean isScalar;
@@ -61,7 +61,7 @@ public final class DatasetReader {
 			isScalar = false;
 		}
 
-		final Object data = type.fillData(buffer, dimensions, hdfFc);
+		final Object data = type.fillData(buffer, dimensions, hdfBackingStorage);
 
 		if (isScalar) {
 			return Array.get(data, 0);

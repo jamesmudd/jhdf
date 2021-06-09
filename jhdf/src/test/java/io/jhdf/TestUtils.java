@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -19,44 +19,44 @@ import java.util.List;
 
 public final class TestUtils {
 
-    private TestUtils() {
-        throw new AssertionError("No instances of TestUtils");
-    }
+	private TestUtils() {
+		throw new AssertionError("No instances of TestUtils");
+	}
 
-    public static HdfFile loadTestHdfFile(String fileName) throws Exception {
-        URL url = TestUtils.class.getResource("/hdf5/" + fileName);
-        if (url == null) {
-            throw new RuntimeException("Could not find test file named: " + fileName);
-        }
-        return new HdfFile(Paths.get(url.toURI()));
-    }
+	public static HdfFile loadTestHdfFile(String fileName) throws Exception {
+		URL url = TestUtils.class.getResource("/hdf5/" + fileName);
+		if (url == null) {
+			throw new RuntimeException("Could not find test file named: " + fileName);
+		}
+		return new HdfFile(Paths.get(url.toURI()));
+	}
 
-    public static Object[] flatten(Object data) {
-        List<Object> flat = new ArrayList<>();
-        flattenInternal(data, flat);
-        return flat.toArray();
-    }
+	public static Object[] flatten(Object data) {
+		List<Object> flat = new ArrayList<>();
+		flattenInternal(data, flat);
+		return flat.toArray();
+	}
 
-    private static void flattenInternal(Object data, List<Object> flat) {
-        int length = Array.getLength(data);
-        for (int i = 0; i < length; i++) {
-            Object element = Array.get(data, i);
-            if (element.getClass().isArray()) {
-                flattenInternal(element, flat);
-            } else {
-                flat.add(element);
-            }
-        }
-    }
+	private static void flattenInternal(Object data, List<Object> flat) {
+		int length = Array.getLength(data);
+		for (int i = 0; i < length; i++) {
+			Object element = Array.get(data, i);
+			if (element.getClass().isArray()) {
+				flattenInternal(element, flat);
+			} else {
+				flat.add(element);
+			}
+		}
+	}
 
-    public static int[] getDimensions(Object data) {
-        List<Integer> dims = new ArrayList<>();
-        dims.add(Array.getLength(data));
+	public static int[] getDimensions(Object data) {
+		List<Integer> dims = new ArrayList<>();
+		dims.add(Array.getLength(data));
 
-        while (Array.get(data, 0).getClass().isArray()) {
-            data = Array.get(data, 0);
-            dims.add(Array.getLength(data));
-        }
-        return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
-    }
+		while (Array.get(data, 0).getClass().isArray()) {
+			data = Array.get(data, 0);
+			dims.add(Array.getLength(data));
+		}
+		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
+	}
 }

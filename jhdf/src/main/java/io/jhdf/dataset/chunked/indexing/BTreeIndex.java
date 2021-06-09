@@ -3,17 +3,17 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.dataset.chunked.indexing;
 
-import io.jhdf.HdfFileChannel;
 import io.jhdf.btree.BTreeV2;
 import io.jhdf.btree.record.BTreeDatasetChunkRecord;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.DatasetInfo;
+import io.jhdf.storage.HdfBackingStorage;
 
 import java.util.Collection;
 
@@ -26,14 +26,14 @@ import static java.util.stream.Collectors.toList;
  */
 public class BTreeIndex implements ChunkIndex {
 
-    private final BTreeV2<BTreeDatasetChunkRecord> bTreeV2;
+	private final BTreeV2<BTreeDatasetChunkRecord> bTreeV2;
 
-    public BTreeIndex(HdfFileChannel hdfFc, long address, DatasetInfo datasetInfo) {
-        bTreeV2 = new BTreeV2<>(hdfFc, address, datasetInfo);
-    }
+	public BTreeIndex(HdfBackingStorage hdfBackingStorage, long address, DatasetInfo datasetInfo) {
+		bTreeV2 = new BTreeV2<>(hdfBackingStorage, address, datasetInfo);
+	}
 
-    @Override
-    public Collection<Chunk> getAllChunks() {
-        return bTreeV2.getRecords().stream().map(BTreeDatasetChunkRecord::getChunk).collect(toList());
-    }
+	@Override
+	public Collection<Chunk> getAllChunks() {
+		return bTreeV2.getRecords().stream().map(BTreeDatasetChunkRecord::getChunk).collect(toList());
+	}
 }

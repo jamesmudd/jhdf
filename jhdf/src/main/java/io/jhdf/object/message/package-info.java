@@ -3,13 +3,13 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 /**
  * Classes representing the messages within HDF5 object headers.
- *
+ * <p>
  * This package should be considered internal the classes should not be directly
  * accessed when using the library.
  *

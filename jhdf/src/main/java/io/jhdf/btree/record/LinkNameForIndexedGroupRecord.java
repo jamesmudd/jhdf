@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -22,7 +22,7 @@ public class LinkNameForIndexedGroupRecord extends BTreeRecord {
 	public LinkNameForIndexedGroupRecord(ByteBuffer bb) {
 		if (bb.remaining() != 11) {
 			throw new HdfException(
-					"Invalid length buffer for LinkNameForIndexedGroupRecord. remaining bytes = " + bb.remaining());
+				"Invalid length buffer for LinkNameForIndexedGroupRecord. remaining bytes = " + bb.remaining());
 		}
 
 		hash = Utils.readBytesAsUnsignedLong(bb, 4);

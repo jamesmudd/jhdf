@@ -3,13 +3,15 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf;
 
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,16 +37,16 @@ class FractalHeapTest {
 		try (RandomAccessFile raf = new RandomAccessFile(new File(testFile), "r")) {
 			FileChannel fc = raf.getChannel();
 			Superblock sb = Superblock.readSuperblock(fc, 0);
-			HdfFileChannel hdfFc = new HdfFileChannel(fc, sb);
+			HdfBackingStorage hdfBackingStorage = new HdfFileChannel(fc, sb);
 
-			fractalHeap = new FractalHeap(hdfFc, 1870);
+			fractalHeap = new FractalHeap(hdfBackingStorage, 1870);
 		}
 	}
 
 	@Test
 	void testGetIdWorksForValidId() {
 		ByteBuffer id = ByteBuffer.allocate(7);
-		id.put(new byte[] { 0 }); // Flags none set for managed
+		id.put(new byte[]{0}); // Flags none set for managed
 		id.putInt(3129); // offset
 		id.putShort((short) 18); // length
 		id.rewind();
@@ -86,7 +88,7 @@ class FractalHeapTest {
 	@Test
 	void testToString() {
 		assertThat(fractalHeap.toString(), is(equalTo(
-				"FractalHeap [address=1870, idLength=7, numberOfTinyObjectsInHeap=0, numberOfHugeObjectsInHeap=0, numberOfManagedObjectsInHeap=1000]")));
+			"FractalHeap [address=1870, idLength=7, numberOfTinyObjectsInHeap=0, numberOfHugeObjectsInHeap=0, numberOfManagedObjectsInHeap=1000]")));
 	}
 
 }

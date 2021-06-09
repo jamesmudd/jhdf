@@ -3,16 +3,16 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
-import io.jhdf.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Dataset;
+import io.jhdf.storage.HdfBackingStorage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
@@ -53,23 +53,23 @@ class DatasetByAddressTest {
 	Collection<DynamicNode> scalarDatasetTests() {
 		// List of all the datasetPaths
 		return Collections.singletonList(
-				dynamicContainer("earliest", Arrays.asList(
-						dynamicTest("fixed ASCII",
-								createTest(earliestHdfFile, 800)),
-						dynamicTest("fixed ASCII 1 char",
-								createTest(earliestHdfFile, 1400)),
-						dynamicTest("variable ASCII",
-								createTest(earliestHdfFile, 1672)),
-						dynamicTest("variable UTF8",
-								createTest(earliestHdfFile, 6654)))));
+			dynamicContainer("earliest", Arrays.asList(
+				dynamicTest("fixed ASCII",
+					createTest(earliestHdfFile, 800)),
+				dynamicTest("fixed ASCII 1 char",
+					createTest(earliestHdfFile, 1400)),
+				dynamicTest("variable ASCII",
+					createTest(earliestHdfFile, 1672)),
+				dynamicTest("variable UTF8",
+					createTest(earliestHdfFile, 6654)))));
 
 	}
 
 	private Executable createTest(HdfFile file, long address) {
 		return () -> {
-			HdfFileChannel hdfFc = file.getHdfChannel();
-			ObjectHeader header = ObjectHeader.readObjectHeader(hdfFc, address);
-			Dataset dataset = DatasetLoader.createDataset(hdfFc, header, "unknown dataset", NoParent.INSTANCE);
+			HdfBackingStorage hdfBackingStorage = file.getHdfBackingStorage();
+			ObjectHeader header = ObjectHeader.readObjectHeader(hdfBackingStorage, address);
+			Dataset dataset = DatasetLoader.createDataset(hdfBackingStorage, header, "unknown dataset", NoParent.INSTANCE);
 			Object data = dataset.getData();
 			assertThat(getDimensions(data), is(equalTo(new int[]{10})));
 			Object[] flatData = flatten(data);

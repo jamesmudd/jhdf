@@ -3,16 +3,18 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.object.message;
 
 import io.jhdf.Superblock;
+import io.jhdf.storage.HdfBackingStorage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,26 +34,29 @@ class AttributeMessageV1Test {
 	private RandomAccessFile raf;
 	private Superblock sb;
 	private ByteBuffer bb;
+	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
-    void setUp() throws IOException {
+	void setUp() throws IOException {
 		final String testFileUrl = this.getClass().getResource("/hdf5/test_file.hdf5").getFile();
 		raf = new RandomAccessFile(new File(testFileUrl), "r");
 		fc = raf.getChannel();
 		sb = Superblock.readSuperblock(fc, 0);
 		bb = fc.map(READ_ONLY, 1864, 80);
 		bb.order(LITTLE_ENDIAN);
+		hdfBackingStorage = Mockito.mock(HdfBackingStorage.class);
+		Mockito.when(hdfBackingStorage.getSuperblock()).thenReturn(sb);
 	}
 
 	@AfterEach
-    void after() throws IOException {
+	void after() throws IOException {
 		raf.close();
 		fc.close();
 	}
 
 	@Test
-    void test() {
-		AttributeMessage am = new AttributeMessage(bb, sb, BitSet.valueOf(new byte[1]));
+	void test() {
+		AttributeMessage am = new AttributeMessage(bb, hdfBackingStorage, BitSet.valueOf(new byte[1]));
 		assertThat(am.getName(), is(equalTo("string_attr")));
 		assertThat(am.getDataType().getDataClass(), is(equalTo(9)));
 		assertThat(am.getDataSpace().getTotalLength(), is(equalTo(1L)));

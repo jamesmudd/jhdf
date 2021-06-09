@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -70,7 +70,7 @@ public final class Utils {
 	 *
 	 * @param name To check if valid
 	 * @return <code>true</code> if this is a valid HDF5 name, <code>false</code>
-	 *         otherwise
+	 * otherwise
 	 */
 	public static boolean validateName(String name) {
 		return ASCII.canEncode(name) && !name.contains("/") && !name.contains(".");
@@ -108,27 +108,27 @@ public final class Utils {
 	 */
 	public static int readBytesAsUnsignedInt(ByteBuffer buffer, int length) {
 		switch (length) {
-		case 1:
-			return Byte.toUnsignedInt(buffer.get());
-		case 2:
-			return Short.toUnsignedInt(buffer.getShort());
-		case 3:
-			return readArbitraryLengthBytesAsUnsignedInt(buffer, length);
-		case 4:
-			int value = buffer.getInt();
-			if (value < 0) {
-				throw new ArithmeticException("Could not convert to unsigned");
-			}
-			return value;
-		case 5:
-		case 6:
-		case 7:
-			return readArbitraryLengthBytesAsUnsignedInt(buffer, length);
-		case 8:
-			// Throws if the long can't be converted safely
-			return Math.toIntExact(buffer.getLong());
-		default:
-			throw new IllegalArgumentException("Couldn't read " + length + " bytes as int");
+			case 1:
+				return Byte.toUnsignedInt(buffer.get());
+			case 2:
+				return Short.toUnsignedInt(buffer.getShort());
+			case 3:
+				return readArbitraryLengthBytesAsUnsignedInt(buffer, length);
+			case 4:
+				int value = buffer.getInt();
+				if (value < 0) {
+					throw new ArithmeticException("Could not convert to unsigned");
+				}
+				return value;
+			case 5:
+			case 6:
+			case 7:
+				return readArbitraryLengthBytesAsUnsignedInt(buffer, length);
+			case 8:
+				// Throws if the long can't be converted safely
+				return Math.toIntExact(buffer.getLong());
+			default:
+				throw new IllegalArgumentException("Couldn't read " + length + " bytes as int");
 		}
 	}
 
@@ -170,26 +170,26 @@ public final class Utils {
 	 */
 	public static long readBytesAsUnsignedLong(ByteBuffer buffer, int length) {
 		switch (length) {
-		case 1:
-			return Byte.toUnsignedLong(buffer.get());
-		case 2:
-			return Short.toUnsignedLong(buffer.getShort());
-		case 3:
-			return readArbitraryLengthBytesAsUnsignedLong(buffer, length);
-		case 4:
-			return Integer.toUnsignedLong(buffer.getInt());
-		case 5:
-		case 6:
-		case 7:
-			return readArbitraryLengthBytesAsUnsignedLong(buffer, length);
-		case 8:
-			long value = buffer.getLong();
-			if (value < 0 && value != Constants.UNDEFINED_ADDRESS) {
-				throw new ArithmeticException("Could not convert to unsigned");
-			}
-			return value;
-		default:
-			throw new IllegalArgumentException("Couldn't read " + length + " bytes as int");
+			case 1:
+				return Byte.toUnsignedLong(buffer.get());
+			case 2:
+				return Short.toUnsignedLong(buffer.getShort());
+			case 3:
+				return readArbitraryLengthBytesAsUnsignedLong(buffer, length);
+			case 4:
+				return Integer.toUnsignedLong(buffer.getInt());
+			case 5:
+			case 6:
+			case 7:
+				return readArbitraryLengthBytesAsUnsignedLong(buffer, length);
+			case 8:
+				long value = buffer.getLong();
+				if (value < 0 && value != Constants.UNDEFINED_ADDRESS) {
+					throw new ArithmeticException("Could not convert to unsigned");
+				}
+				return value;
+			default:
+				throw new IllegalArgumentException("Couldn't read " + length + " bytes as int");
 		}
 	}
 
@@ -278,37 +278,37 @@ public final class Utils {
 		return (int) Math.ceil(BigInteger.valueOf(number).bitLength() / 8.0);
 	}
 
-    public static int[] linearIndexToDimensionIndex(int index, int[] dimensions) {
-        int[] dimIndex = new int[dimensions.length];
+	public static int[] linearIndexToDimensionIndex(int index, int[] dimensions) {
+		int[] dimIndex = new int[dimensions.length];
 
-        for (int i = dimIndex.length - 1; i >= 0; i--) {
-            dimIndex[i] = index % dimensions[i];
-            index = index / dimensions[i];
-        }
-        return dimIndex;
-    }
+		for (int i = dimIndex.length - 1; i >= 0; i--) {
+			dimIndex[i] = index % dimensions[i];
+			index = index / dimensions[i];
+		}
+		return dimIndex;
+	}
 
-    public static int dimensionIndexToLinearIndex(int[] index, int[] dimensions) {
-        int linear = 0;
-        for (int i = 0; i < dimensions.length; i++) {
-            int temp = index[i];
-            for (int j = i + 1; j < dimensions.length; j++) {
-                temp *= dimensions[j];
-            }
-            linear += temp;
-        }
-        return linear;
-    }
+	public static int dimensionIndexToLinearIndex(int[] index, int[] dimensions) {
+		int linear = 0;
+		for (int i = 0; i < dimensions.length; i++) {
+			int temp = index[i];
+			for (int j = i + 1; j < dimensions.length; j++) {
+				temp *= dimensions[j];
+			}
+			linear += temp;
+		}
+		return linear;
+	}
 
 	/**
 	 * Calculates the chunk offset from a given chunk index
 	 *
-	 * @param chunkIndex The index to calculate for
-	 * @param chunkDimensions The chunk dimensions
+	 * @param chunkIndex        The index to calculate for
+	 * @param chunkDimensions   The chunk dimensions
 	 * @param datasetDimensions The dataset dimensions
 	 * @return The chunk offset for the chunk of this index
 	 */
-    public static int[] chunkIndexToChunkOffset(int chunkIndex, int[] chunkDimensions, int[] datasetDimensions) {
+	public static int[] chunkIndexToChunkOffset(int chunkIndex, int[] chunkDimensions, int[] datasetDimensions) {
 		final int[] chunkOffset = new int[chunkDimensions.length];
 
 		// Start from the slowest dim
@@ -316,12 +316,12 @@ public final class Utils {
 			// Find out how many chunks make one chunk in this dim
 			int chunksBelowThisDim = 1;
 			// Start one dim faster
-			for (int j = i+ 1; j < chunkOffset.length; j++) {
+			for (int j = i + 1; j < chunkOffset.length; j++) {
 				chunksBelowThisDim *= (int) Math.ceil((double) datasetDimensions[j] / chunkDimensions[j]);
 			}
 
-			chunkOffset[i] = (chunkIndex / chunksBelowThisDim ) * chunkDimensions[i];
-			chunkIndex -= chunkOffset[i]/chunkDimensions[i] * chunksBelowThisDim;
+			chunkOffset[i] = (chunkIndex / chunksBelowThisDim) * chunkDimensions[i];
+			chunkIndex -= chunkOffset[i] / chunkDimensions[i] * chunksBelowThisDim;
 		}
 
 		return chunkOffset;

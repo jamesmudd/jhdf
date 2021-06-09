@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -11,8 +11,8 @@ package io.jhdf.btree.record;
 
 import io.jhdf.dataset.chunked.Chunk;
 
-public abstract class BTreeDatasetChunkRecord extends  BTreeRecord {
+public abstract class BTreeDatasetChunkRecord extends BTreeRecord {
 
-    public abstract Chunk getChunk();
+	public abstract Chunk getChunk();
 
 }

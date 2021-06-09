@@ -3,15 +3,16 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2020 James Mudd
+ * Copyright (c) 2021 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.btree;
 
-import io.jhdf.HdfFileChannel;
+import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.Superblock;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.storage.HdfBackingStorage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,24 +33,24 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BTreeV1Test {
-	private HdfFileChannel hdfFc;
+	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
-    void setUp() throws URISyntaxException, IOException {
+	void setUp() throws URISyntaxException, IOException {
 		final URI testFileUri = this.getClass().getResource("/hdf5/test_chunked_datasets_earliest.hdf5").toURI();
 		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
-		hdfFc = new HdfFileChannel(fc, sb);
+		hdfBackingStorage = new HdfFileChannel(fc, sb);
 	}
 
 	@AfterEach
-    void after() {
-		hdfFc.close();
+	void after() {
+		hdfBackingStorage.close();
 	}
 
 	@Test
 	void testGroupBTreeNode() {
-		BTreeV1Group bTree = BTreeV1.createGroupBTree(hdfFc, 136);
+		BTreeV1Group bTree = BTreeV1.createGroupBTree(hdfBackingStorage, 136);
 
 		assertThat(bTree.getAddress(), is(equalTo(136L)));
 		assertThat(bTree.getEntriesUsed(), is(equalTo(1)));
@@ -61,7 +62,7 @@ class BTreeV1Test {
 
 	@Test
 	void testDataBTreeNode() {
-		BTreeV1Data bTree = BTreeV1.createDataBTree(hdfFc, 2104, 3);
+		BTreeV1Data bTree = BTreeV1.createDataBTree(hdfBackingStorage, 2104, 3);
 
 		assertThat(bTree.getAddress(), is(equalTo(2104L)));
 		assertThat(bTree.getEntriesUsed(), is(equalTo(20)));
@@ -73,11 +74,11 @@ class BTreeV1Test {
 
 	@Test
 	void testCreatingBTreeOfDataTypeWithGroupThrows() {
-		assertThrows(HdfException.class, () -> BTreeV1.createDataBTree(hdfFc, 136, 1245));
+		assertThrows(HdfException.class, () -> BTreeV1.createDataBTree(hdfBackingStorage, 136, 1245));
 	}
 
 	@Test
 	void testCreatingBTreeOfGroupTypeWithDataThrows() {
-		assertThrows(HdfException.class, () -> BTreeV1.createGroupBTree(hdfFc, 2104));
+		assertThrows(HdfException.class, () -> BTreeV1.createGroupBTree(hdfBackingStorage, 2104));
 	}
 }
