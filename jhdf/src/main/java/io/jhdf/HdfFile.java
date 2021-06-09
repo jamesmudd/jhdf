@@ -17,6 +17,7 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.HdfWritingExcpetion;
 import io.jhdf.exceptions.InMemoryHdfException;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
@@ -229,6 +230,15 @@ public class HdfFile implements Group, AutoCloseable {
 			return 512L;
 		}
 		return offset * 2;
+	}
+
+	public static WritableHdfFile write(Path path) {
+		try {
+			FileChannel fc = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+			return new WritableHdfFile(fc);
+		} catch (IOException e) {
+			throw new HdfWritingExcpetion("Failed to ope file: " + path.toAbsolutePath(), e);
+		}
 	}
 
 	/**
