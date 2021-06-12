@@ -20,7 +20,7 @@ plugins {
     id 'checkstyle' // Code style checks
 
     // Community plugins (need versions)
-    id 'org.sonarqube' version '3.2.0' // Code quality
+    id 'org.sonarqube' version '3.3' // Code quality
     id "com.github.spotbugs" version "4.7.1" // Static analysis
 }
 
