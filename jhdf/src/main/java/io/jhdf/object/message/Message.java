@@ -169,4 +169,8 @@ public class Message {
 		return flags.get(ALWAYS_FAIL_ON_UNKNOWN_MESSAGE_TYPE);
 	}
 
+	public byte[] toBytes() {
+		return flags.toByteArray();
+	}
+
 }

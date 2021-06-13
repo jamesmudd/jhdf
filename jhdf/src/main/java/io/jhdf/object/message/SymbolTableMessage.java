@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.BufferBuilder;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 
@@ -38,6 +39,21 @@ public class SymbolTableMessage extends Message {
 
 		bTreeAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 		localHeapAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
+	}
+
+
+	public SymbolTableMessage(BitSet flags, long bTreeAddress, long localHeapAddress) {
+		super(flags);
+		this.bTreeAddress = bTreeAddress;
+		this.localHeapAddress = localHeapAddress;
+	}
+
+	public ByteBuffer toBuffer() {
+		return new BufferBuilder()
+			.writeBytes(super.toBytes())
+			.writeLong(bTreeAddress)
+			.writeLong(localHeapAddress)
+			.build();
 	}
 
 	public long getBTreeAddress() {
