@@ -21,6 +21,8 @@ import java.util.BitSet;
 
 public abstract class DataLayoutMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 8;
+
 	public DataLayoutMessage(BitSet flags) {
 		super(flags);
 	}
@@ -345,4 +347,8 @@ public abstract class DataLayoutMessage extends Message {
 		}
 	}
 
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
 }

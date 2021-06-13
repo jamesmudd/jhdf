@@ -33,6 +33,8 @@ import static java.nio.charset.StandardCharsets.US_ASCII;
  */
 public class OldObjectModificationTimeMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 14;
+
 	final LocalDateTime modificationTime;
 
 	public OldObjectModificationTimeMessage(ByteBuffer bb, BitSet flags) {
@@ -64,5 +66,10 @@ public class OldObjectModificationTimeMessage extends Message {
 
 	public LocalDateTime getModifiedTime() {
 		return modificationTime;
+	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
 	}
 }

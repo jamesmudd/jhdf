@@ -30,6 +30,8 @@ import java.util.BitSet;
  */
 public class GroupInfoMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 10;
+
 	private static final int LINK_PHASE_CHANGE_PRESENT = 0;
 	private static final int ESTIMATED_ENTRY_INFORMATION_PRESENT = 1;
 
@@ -81,4 +83,8 @@ public class GroupInfoMessage extends Message {
 		return estimatedLengthOfEntryName;
 	}
 
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
 }

@@ -31,6 +31,8 @@ import java.util.BitSet;
  */
 public class SymbolTableMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 17;
+
 	private final long bTreeAddress;
 	private final long localHeapAddress;
 
@@ -50,7 +52,7 @@ public class SymbolTableMessage extends Message {
 
 	public ByteBuffer toBuffer() {
 		return new BufferBuilder()
-			.writeBytes(super.toBytes())
+			.writeBytes(super.flagsToBytes())
 			.writeLong(bTreeAddress)
 			.writeLong(localHeapAddress)
 			.build();
@@ -64,4 +66,8 @@ public class SymbolTableMessage extends Message {
 		return localHeapAddress;
 	}
 
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
 }

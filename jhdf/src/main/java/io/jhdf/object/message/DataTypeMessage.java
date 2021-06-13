@@ -16,6 +16,8 @@ import java.util.BitSet;
 
 public class DataTypeMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 3;
+
 	private final DataType dataType;
 
 	/* package */ DataTypeMessage(ByteBuffer bb, BitSet flags) {
@@ -26,6 +28,11 @@ public class DataTypeMessage extends Message {
 
 	public DataType getDataType() {
 		return dataType;
+	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
 	}
 
 }

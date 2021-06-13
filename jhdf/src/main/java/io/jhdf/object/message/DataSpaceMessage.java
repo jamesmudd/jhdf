@@ -29,6 +29,8 @@ import java.util.BitSet;
  */
 public class DataSpaceMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 1;
+
 	private final DataSpace dataSpace;
 
 	/* package */ DataSpaceMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
@@ -39,5 +41,10 @@ public class DataSpaceMessage extends Message {
 
 	public DataSpace getDataSpace() {
 		return dataSpace;
+	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
 	}
 }
