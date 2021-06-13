@@ -291,6 +291,30 @@ public abstract class ObjectHeader {
 			}
 		}
 
+		public ObjectHeaderV2(long address, List<Message> messages) {
+			super(address);
+			this.messages.addAll(messages);
+			version = 2;
+
+			accessTime = -1;
+			modificationTime = -1;
+			changeTime = -1;
+			birthTime = -1;
+
+			maximumNumberOfCompactAttributes = -1;
+			maximumNumberOfDenseAttributes = -1;
+
+			flags = new BitSet(8); // TODO make consistent with values
+		}
+
+		public ByteBuffer toBuffer() {
+			return new BufferBuilder()
+				.writeBytes(OBJECT_HEADER_V2_SIGNATURE)
+				.writeByte(version)
+				.writeBitSet(flags, 1)
+				.build();
+		}
+
 		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb) {
 			while (bb.remaining() >= 8) {
 				Message m = Message.readObjectHeaderV2Message(bb, hdfBackingStorage, this.isAttributeCreationOrderTracked());
@@ -380,4 +404,5 @@ public abstract class ObjectHeader {
 
 		};
 	}
+
 }
