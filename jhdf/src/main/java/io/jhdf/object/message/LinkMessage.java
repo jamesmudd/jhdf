@@ -22,6 +22,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class LinkMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 6;
+
 	public enum LinkType {
 		HARD, SOFT, EXTERNAL;
 
@@ -192,5 +194,10 @@ public class LinkMessage extends Message {
 		} else {
 			throw new HdfException("This link message is not a external link. Link type is: " + linkType);
 		}
+	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
 	}
 }

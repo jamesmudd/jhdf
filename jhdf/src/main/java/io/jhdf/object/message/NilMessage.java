@@ -27,10 +27,16 @@ import java.util.BitSet;
  */
 public class NilMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 0;
+
 	/* package */ NilMessage(ByteBuffer bb, BitSet flags) {
 		super(flags);
 		// Move buffer to the end
 		bb.position(bb.limit());
 	}
 
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
 }

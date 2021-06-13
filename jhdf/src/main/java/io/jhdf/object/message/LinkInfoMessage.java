@@ -17,6 +17,8 @@ import java.util.BitSet;
 
 public class LinkInfoMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 2;
+
 	private static final int CREATION_ORDER_TRACKED = 0;
 	private static final int CREATION_ORDER_INDEXED = 1;
 
@@ -72,5 +74,10 @@ public class LinkInfoMessage extends Message {
 
 	public boolean isLinkCreationOrderTracked() {
 		return flags.get(CREATION_ORDER_TRACKED);
+	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
 	}
 }

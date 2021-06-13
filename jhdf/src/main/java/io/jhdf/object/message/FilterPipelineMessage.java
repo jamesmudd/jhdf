@@ -34,6 +34,8 @@ import java.util.List;
  */
 public class FilterPipelineMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 11;
+
 	private static final int OPTIONAL = 0;
 
 	private final List<FilterInfo> filters;
@@ -136,5 +138,10 @@ public class FilterPipelineMessage extends Message {
 				+ Arrays.toString(data)
 				+ "]";
 		}
+	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
 	}
 }

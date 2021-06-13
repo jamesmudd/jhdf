@@ -30,6 +30,8 @@ import java.util.BitSet;
  */
 public class ObjectHeaderContinuationMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 16;
+
 	private final long offset;
 	private final int length;
 
@@ -46,5 +48,10 @@ public class ObjectHeaderContinuationMessage extends Message {
 
 	public int getLength() {
 		return length;
+	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
 	}
 }

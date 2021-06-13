@@ -23,6 +23,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 
 public class AttributeMessage extends Message {
+	public static final int MESSAGE_TYPE = 12;
+
 	private static final Logger logger = LoggerFactory.getLogger(AttributeMessage.class);
 
 	private static final int DATA_TYPE_SHARED = 0;
@@ -157,4 +159,8 @@ public class AttributeMessage extends Message {
 		return "AttributeMessage [name=" + name + ", dataType=" + dataType + ", dataSpace=" + dataSpace + "]";
 	}
 
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
 }
