@@ -79,7 +79,7 @@ public class BufferBuilder {
 	}
 
 	public BufferBuilder writeBitSet(BitSet bitSet, int length) {
-		if(bitSet.length() > length) {
+		if(bitSet.toByteArray().length > length) {
 			throw new IllegalArgumentException("BitSet is longer than length provided");
 		}
 		try {
