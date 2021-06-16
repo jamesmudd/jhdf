@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -67,6 +68,14 @@ class ObjectHeaderV2Test {
 		assertThat(ohV2.getModificationTime(), is(equalTo(TIMESTAMP)));
 		assertThat(ohV2.getMaximumNumberOfCompactAttributes(), is(equalTo(-1)));
 		assertThat(ohV2.getMaximumNumberOfDenseAttributes(), is(equalTo(-1)));
+	}
+
+	@Test
+	void roundTripRootGroupObjectHeader() {
+		ObjectHeaderV2 oh = (ObjectHeaderV2) ObjectHeader.readObjectHeader(hdfBackingStorage, 48);
+		ByteBuffer recreated = oh.toBuffer();
+		ByteBuffer original = hdfBackingStorage.readBufferFromAddress(48, 147); // This header is 147 bytes
+		assertThat(recreated.array(), is(original.array()));
 	}
 
 	@Test
