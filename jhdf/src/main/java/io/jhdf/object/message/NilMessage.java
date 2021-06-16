@@ -42,6 +42,6 @@ public class NilMessage extends Message {
 
 	@Override
 	public ByteBuffer toBuffer() {
-		return null;
+		return ByteBuffer.allocate(0);
 	}
 }

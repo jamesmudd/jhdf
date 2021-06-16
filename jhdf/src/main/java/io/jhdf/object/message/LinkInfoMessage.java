@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.BufferBuilder;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 
@@ -83,6 +84,20 @@ public class LinkInfoMessage extends Message {
 
 	@Override
 	public ByteBuffer toBuffer() {
-		return null;
+		BufferBuilder bufferBuilder = new BufferBuilder()
+			.writeByte(version)
+			.writeBitSet(flags, 1);
+
+		if(flags.get(CREATION_ORDER_TRACKED)) {
+			bufferBuilder.writeLong(maximumCreationIndex);
+		}
+
+		bufferBuilder.writeLong(fractalHeapAddress)
+			.writeLong(bTreeNameIndexAddress);
+
+		if(flags.get(CREATION_ORDER_INDEXED)) {
+			bufferBuilder.writeLong(bTreeCreationOrderIndexAddress);
+		}
+		return bufferBuilder.build();
 	}
 }

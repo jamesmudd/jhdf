@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.BufferBuilder;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 
@@ -35,6 +36,8 @@ public class GroupInfoMessage extends Message {
 	private static final int LINK_PHASE_CHANGE_PRESENT = 0;
 	private static final int ESTIMATED_ENTRY_INFORMATION_PRESENT = 1;
 
+	private final byte version;
+	private final BitSet flags;
 	private final int maximumCompactLinks;
 	private final int minimumDenseLinks;
 	private final int estimatedNumberOfEntries;
@@ -43,12 +46,12 @@ public class GroupInfoMessage extends Message {
 	/* package */ GroupInfoMessage(ByteBuffer bb, BitSet messageFlags) {
 		super(messageFlags);
 
-		final byte version = bb.get();
+		version = bb.get();
 		if (version != 0) {
 			throw new HdfException("Unrecognized version " + version);
 		}
 
-		BitSet flags = BitSet.valueOf(new byte[]{bb.get()});
+		flags = BitSet.valueOf(new byte[]{bb.get()});
 
 		if (flags.get(LINK_PHASE_CHANGE_PRESENT)) {
 			maximumCompactLinks = Utils.readBytesAsUnsignedInt(bb, 2);
@@ -90,6 +93,17 @@ public class GroupInfoMessage extends Message {
 
 	@Override
 	public ByteBuffer toBuffer() {
-		return null;
+		BufferBuilder bufferBuilder = new BufferBuilder();
+		bufferBuilder.writeByte(version);
+		bufferBuilder.writeBitSet(flags, 1);
+		if (flags.get(LINK_PHASE_CHANGE_PRESENT)) {
+			bufferBuilder.writeShort(maximumCompactLinks);
+			bufferBuilder.writeShort(minimumDenseLinks);
+		}
+		if (flags.get(ESTIMATED_ENTRY_INFORMATION_PRESENT)) {
+			bufferBuilder.writeShort(estimatedNumberOfEntries);
+			bufferBuilder.writeShort(estimatedLengthOfEntryName);
+		}
+		return bufferBuilder.build();
 	}
 }

@@ -221,20 +221,7 @@ public abstract class ObjectHeader {
 				flags = BitSet.valueOf(new byte[]{bb.get()});
 
 				// Size of chunk 0
-				final byte sizeOfChunk0;
-				if (flags.get(1)) {
-					if (flags.get(0)) {
-						sizeOfChunk0 = 8;
-					} else {
-						sizeOfChunk0 = 4;
-					}
-				} else { // bit 0 = false
-					if (flags.get(0)) {
-						sizeOfChunk0 = 2;
-					} else {
-						sizeOfChunk0 = 1;
-					}
-				}
+				final byte sizeOfChunk0 = getSizeOfChunk0Size();
 
 				// Timestamps
 				if (flags.get(TIMESTAMPS_PRESENT)) {
@@ -291,6 +278,24 @@ public abstract class ObjectHeader {
 			}
 		}
 
+		private byte getSizeOfChunk0Size() {
+			final byte sizeOfChunk0;
+			if (flags.get(1)) {
+				if (flags.get(0)) {
+					sizeOfChunk0 = 8;
+				} else {
+					sizeOfChunk0 = 4;
+				}
+			} else { // bit 0 = false
+				if (flags.get(0)) {
+					sizeOfChunk0 = 2;
+				} else {
+					sizeOfChunk0 = 1;
+				}
+			}
+			return sizeOfChunk0;
+		}
+
 		public ObjectHeaderV2(long address, List<Message> messages) {
 			super(address);
 			this.messages.addAll(messages);
@@ -308,11 +313,25 @@ public abstract class ObjectHeader {
 		}
 
 		public ByteBuffer toBuffer() {
+			ByteBuffer messagesBuffer = messagesToBuffer();
 			return new BufferBuilder()
 				.writeBytes(OBJECT_HEADER_V2_SIGNATURE)
 				.writeByte(version)
 				.writeBitSet(flags, 1)
+				.writeInt(messagesBuffer.capacity())
+				.writeBuffer(messagesBuffer)
+				.appendChecksum()
 				.build();
+		}
+
+		private ByteBuffer messagesToBuffer() {
+			BufferBuilder bufferBuilder = new BufferBuilder();
+			for (Message message : messages) {
+				bufferBuilder.writeByte(message.getMessageType())
+					.writeBuffer(message.toBuffer())
+					.writeBytes(message.flagsToBytes());
+			}
+			return bufferBuilder.build();
 		}
 
 		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb) {
