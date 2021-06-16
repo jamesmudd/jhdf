@@ -47,4 +47,9 @@ public class DataSpaceMessage extends Message {
 	public int getMessageType() {
 		return MESSAGE_TYPE;
 	}
+
+	@Override
+	public ByteBuffer toBuffer() {
+		return null;
+	}
 }

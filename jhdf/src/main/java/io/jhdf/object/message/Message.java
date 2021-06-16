@@ -175,4 +175,6 @@ public abstract class Message {
 		return flags.toByteArray();
 	}
 
+	public abstract ByteBuffer toBuffer();
+
 }
