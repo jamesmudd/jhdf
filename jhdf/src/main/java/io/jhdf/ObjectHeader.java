@@ -11,6 +11,7 @@ package io.jhdf;
 
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.message.Message;
 import io.jhdf.object.message.ObjectHeaderContinuationMessage;
 import io.jhdf.storage.HdfBackingStorage;
@@ -313,23 +314,39 @@ public abstract class ObjectHeader {
 		}
 
 		public ByteBuffer toBuffer() {
-			ByteBuffer messagesBuffer = messagesToBuffer();
-			return new BufferBuilder()
+			BufferBuilder bufferBuilder = new BufferBuilder()
 				.writeBytes(OBJECT_HEADER_V2_SIGNATURE)
 				.writeByte(version)
-				.writeBitSet(flags, 1)
-				.writeInt(messagesBuffer.capacity())
-				.writeBuffer(messagesBuffer)
-				.appendChecksum()
-				.build();
+				.writeBitSet(flags, 1);
+
+			if (flags.get(TIMESTAMPS_PRESENT)) {
+				bufferBuilder.writeInt((int) accessTime);
+				bufferBuilder.writeInt((int) modificationTime);
+				bufferBuilder.writeInt((int) changeTime);
+				bufferBuilder.writeInt((int) birthTime);
+			}
+
+			if(flags.get(NUMBER_OF_ATTRIBUTES_PRESENT)) {
+				// TODO min/max attributes
+				throw new UnsupportedHdfException("Writting number of attributes");
+			}
+
+			// Start messages
+			ByteBuffer messagesBuffer = messagesToBuffer();
+			bufferBuilder.writeByte(messagesBuffer.capacity()) // Size of chunk 0 TODO support variable sizes
+					.writeBuffer(messagesBuffer);
+
+			return bufferBuilder.appendChecksum().build();
 		}
 
 		private ByteBuffer messagesToBuffer() {
 			BufferBuilder bufferBuilder = new BufferBuilder();
 			for (Message message : messages) {
+				final ByteBuffer messageBuffer = message.toBuffer();
 				bufferBuilder.writeByte(message.getMessageType())
-					.writeBuffer(message.toBuffer())
-					.writeBytes(message.flagsToBytes());
+					.writeShort(messageBuffer.capacity())
+					.writeBytes(message.flagsToBytes())
+					.writeBuffer(message.toBuffer());
 			}
 			return bufferBuilder.build();
 		}
