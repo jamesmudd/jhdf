@@ -29,8 +29,11 @@ public class NilMessage extends Message {
 
 	public static final int MESSAGE_TYPE = 0;
 
+	private final int size;
+
 	/* package */ NilMessage(ByteBuffer bb, BitSet flags) {
 		super(flags);
+		this.size = bb.capacity();
 		// Move buffer to the end
 		bb.position(bb.limit());
 	}
@@ -42,6 +45,6 @@ public class NilMessage extends Message {
 
 	@Override
 	public ByteBuffer toBuffer() {
-		return ByteBuffer.allocate(0);
+		return ByteBuffer.allocate(size);
 	}
 }

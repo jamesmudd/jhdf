@@ -47,10 +47,11 @@ public class BufferBuilder {
 
 	public BufferBuilder writeShort(int i) {
 		try {
+			short s = (short) i;
 			if(byteOrder == LITTLE_ENDIAN) {
-				i = Integer.reverseBytes(i);
+				s = Short.reverseBytes(s);
 			}
-			dataOutputStream.writeShort(i);
+			dataOutputStream.writeShort(s);
 			return this;
 		} catch (IOException e) {
 			throw new BufferBuilderException(e);

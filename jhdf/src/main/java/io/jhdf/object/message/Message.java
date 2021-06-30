@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.BitSet;
 
 public abstract class Message {
@@ -172,7 +173,8 @@ public abstract class Message {
 	}
 
 	public byte[] flagsToBytes() {
-		return flags.toByteArray();
+		// TODO Flags object
+		return Arrays.copyOf(flags.toByteArray(), 1);
 	}
 
 	public abstract ByteBuffer toBuffer();
