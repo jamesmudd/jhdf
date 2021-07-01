@@ -10,6 +10,7 @@
 package io.jhdf.object.message;
 
 import io.jhdf.BufferBuilder;
+import io.jhdf.Constants;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 
@@ -99,5 +100,19 @@ public class LinkInfoMessage extends Message {
 			bufferBuilder.writeLong(bTreeCreationOrderIndexAddress);
 		}
 		return bufferBuilder.build();
+	}
+
+	private LinkInfoMessage() {
+		super(new BitSet(1));
+		this.flags = new BitSet(1);
+		this.version  = 0;
+		this.maximumCreationIndex = Constants.UNDEFINED_ADDRESS;
+		this.fractalHeapAddress = Constants.UNDEFINED_ADDRESS;
+		this.bTreeNameIndexAddress = Constants.UNDEFINED_ADDRESS;
+		this.bTreeCreationOrderIndexAddress = Constants.UNDEFINED_ADDRESS;
+	}
+
+	public static LinkInfoMessage createBasic() {
+		return new LinkInfoMessage();
 	}
 }
