@@ -10,6 +10,7 @@
 package io.jhdf.object.message;
 
 import io.jhdf.BufferBuilder;
+import io.jhdf.Constants;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 
@@ -105,5 +106,19 @@ public class GroupInfoMessage extends Message {
 			bufferBuilder.writeShort(estimatedLengthOfEntryName);
 		}
 		return bufferBuilder.build();
+	}
+
+	private GroupInfoMessage() {
+		super(new BitSet(1));
+		this.flags = new BitSet(1);
+		this.version = 0;
+		this.maximumCompactLinks = -1;
+		this.minimumDenseLinks = -1;
+		this.estimatedNumberOfEntries = -1;
+		this. estimatedLengthOfEntryName = -1;
+	}
+
+	public static GroupInfoMessage createBasic() {
+		return new GroupInfoMessage();
 	}
 }
