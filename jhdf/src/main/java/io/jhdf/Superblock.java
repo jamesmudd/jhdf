@@ -426,7 +426,7 @@ public abstract class Superblock {
 		private final long rootGroupObjectHeaderAddress;
 
 		public SuperblockV2V3() {
-			versionOfSuperblock = 3;
+			versionOfSuperblock = 2;
 			sizeOfOffsets = 8;
 			sizeOfLengths = 8;
 			baseAddressByte = Constants.UNDEFINED_ADDRESS;; //TODO
