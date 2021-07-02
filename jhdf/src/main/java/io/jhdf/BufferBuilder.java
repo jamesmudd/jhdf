@@ -146,4 +146,10 @@ public class BufferBuilder {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "BufferBuilder{" +
+			 "bytesWriten=" + dataOutputStream.size() +
+			"}";
+	}
 }
