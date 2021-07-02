@@ -6,6 +6,7 @@ import io.jhdf.object.message.GroupInfoMessage;
 import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.Message;
+import io.jhdf.object.message.NilMessage;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class WritableHdfFile implements WritableGroup, AutoCloseable {
 
-	private static final long ROOT_GROUP_ADDRESS = 32;
+	private static final long ROOT_GROUP_ADDRESS = 48;
 
 	private final FileChannel fileChannel;
 	private final Superblock.SuperblockV2V3 superblock;
@@ -38,6 +39,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		List<Message> messages = new ArrayList<>();
 		messages.add(LinkInfoMessage.createBasic());
 		messages.add(GroupInfoMessage.createBasic());
+		messages.add(NilMessage.create());
 		this.rootGroupObjectHeader = new ObjectHeader.ObjectHeaderV2(ROOT_GROUP_ADDRESS, messages);
 	}
 
