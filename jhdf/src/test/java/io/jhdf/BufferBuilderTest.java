@@ -1,7 +1,5 @@
 package io.jhdf;
 
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -9,7 +7,6 @@ import java.nio.ByteBuffer;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
 
 class BufferBuilderTest {
 
@@ -40,5 +37,15 @@ class BufferBuilderTest {
 		buffer.get(returnedBytes);
 
 		assertThat(returnedBytes, is(equalTo(bytes)));
+	}
+
+	@Test
+	void writeLong() {
+		BufferBuilder bufferBuilder = new BufferBuilder()
+			.writeLong(12345L);
+
+		ByteBuffer byteBuffer = bufferBuilder.build();
+
+		assertThat(byteBuffer.getLong(), is(12345L));
 	}
 }
