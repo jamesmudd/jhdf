@@ -16,6 +16,6 @@ public class SimpleWritingTest {
 		writableHdfFile.close();
 
 		// Now read it back
-		new HdfFile(tempFile);
+		HdfFile hdfFile = new HdfFile(tempFile);
 	}
 }

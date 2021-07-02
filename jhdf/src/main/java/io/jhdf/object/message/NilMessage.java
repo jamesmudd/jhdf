@@ -38,6 +38,15 @@ public class NilMessage extends Message {
 		bb.position(bb.limit());
 	}
 
+	public static NilMessage create() {
+		return new NilMessage(16);
+	}
+
+	private NilMessage(int size) {
+		super(new BitSet(1));
+		this.size = size;
+	}
+
 	@Override
 	public int getMessageType() {
 		return MESSAGE_TYPE;
