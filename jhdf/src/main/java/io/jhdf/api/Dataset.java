@@ -82,9 +82,19 @@ public interface Dataset extends Node {
 	 * Gets the max size of this dataset. If not specified this will be equal to
 	 * {@link #getDimensions()}
 	 *
+	 * If max size overflows an int ArithmeticException is thrown
+	 *
 	 * @return the max size of this dataset
 	 */
 	int[] getMaxSize();
+
+	/**
+	 * Gets the max size of this dataset. If not specified this will be equal to
+	 * {@link #getDimensions()}
+	 *
+	 * @return the max size of this dataset
+	 */
+	long[] getMaxSizeAsLong();
 
 	/**
 	 * Gets the data layout of this dataset.

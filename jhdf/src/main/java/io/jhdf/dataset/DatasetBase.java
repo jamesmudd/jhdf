@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
@@ -87,9 +88,22 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	@Override
 	public int[] getMaxSize() {
 		if (dataSpace.isMaxSizesPresent()) {
-			return dataSpace.getMaxSizes();
+			return Arrays.stream(dataSpace.getMaxSizes())
+				.mapToInt(i -> Math.toIntExact(i))
+				.toArray();
 		} else {
 			return getDimensions();
+		}
+	}
+
+	@Override
+	public long[] getMaxSizeAsLong() {
+		if (dataSpace.isMaxSizesPresent()) {
+			return dataSpace.getMaxSizes();
+		} else {
+			return Arrays.stream(getDimensions())
+				.asLongStream()
+				.toArray();
 		}
 	}
 
