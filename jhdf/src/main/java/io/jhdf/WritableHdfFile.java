@@ -9,6 +9,7 @@ import io.jhdf.object.message.Message;
 import io.jhdf.object.message.NilMessage;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +31,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		try {
 			fileChannel.write(superblock.toBuffer());
 			fileChannel.write(rootGroupObjectHeader.toBuffer(), ROOT_GROUP_ADDRESS);
+			fileChannel.write(ByteBuffer.wrap(new byte[]{1}), 250);
 		} catch (IOException e) {
 			throw new HdfWritingExcpetion("Failed to write superblock", e);
 		}
