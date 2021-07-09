@@ -78,6 +78,20 @@ class HdfFileTest {
 	}
 
 	@Test
+	void testOpeningFileWithLargeMaxDimensonSize() {
+		File file = new File(testFileUrl);
+		String filePath = "/hdf5/100B_max_dimension_size.h5";
+
+		testFileUrl = this.getClass().getResource(filePath).getFile();
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			Dataset dataset = hdfFile.getDatasetByPath("/100B-MaxSize");
+
+			assertThat(dataset.getMaxSize().length, is(equalTo(1)));
+			assertThat(dataset.getMaxSize()[0], is(equalTo(100000000000L)));
+		}
+	}
+
+	@Test
 	void testOpeningInvalidFile() {
 		File file = new File(nonHdfFile);
 		HdfException ex = assertThrows(HdfException.class, () -> new HdfFile(file));

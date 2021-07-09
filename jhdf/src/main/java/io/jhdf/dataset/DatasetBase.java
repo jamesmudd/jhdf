@@ -86,24 +86,11 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	}
 
 	@Override
-	public int[] getMaxSize() {
-		if (dataSpace.isMaxSizesPresent()) {
-			return Arrays.stream(dataSpace.getMaxSizes())
-				.mapToInt(i -> Math.toIntExact(i))
-				.toArray();
-		} else {
-			return getDimensions();
-		}
-	}
-
-	@Override
-	public long[] getMaxSizeAsLong() {
+	public long[] getMaxSize() {
 		if (dataSpace.isMaxSizesPresent()) {
 			return dataSpace.getMaxSizes();
 		} else {
-			return Arrays.stream(getDimensions())
-				.asLongStream()
-				.toArray();
+			return Arrays.stream(getDimensions()).asLongStream().toArray();
 		}
 	}
 
