@@ -56,7 +56,7 @@ class BitfieldDatasetTest {
 	@MethodSource
 	void testBitfieldDataset(Dataset dataset) {
 		assertThat(dataset.getDimensions(), is(equalTo(new int[]{15})));
-		assertThat(dataset.getMaxSize(), is(equalTo(new int[]{15})));
+		assertThat(dataset.getMaxSize(), is(equalTo(new long[]{15})));
 		assertThat(dataset.isCompound(), is(false));
 		assertThat(dataset.isEmpty(), is(false));
 		assertThat(dataset.isScalar(), is(false));
@@ -79,7 +79,7 @@ class BitfieldDatasetTest {
 
 		// Should be 2D
 		assertThat(dataset.getDimensions(), is(equalTo(new int[]{3, 5})));
-		assertThat(dataset.getMaxSize(), is(equalTo(new int[]{3, 5})));
+		assertThat(dataset.getMaxSize(), is(equalTo(new long[]{3, 5})));
 		assertThat(dataset.isCompound(), is(false));
 		assertThat(dataset.isEmpty(), is(false));
 		assertThat(dataset.isScalar(), is(false));
@@ -103,7 +103,7 @@ class BitfieldDatasetTest {
 		Dataset dataset = hdfFile.getDatasetByPath("scalar_bitfield");
 
 		assertThat(dataset.getDimensions(), is(equalTo(new int[]{})));
-		assertThat(dataset.getMaxSize(), is(equalTo(new int[]{})));
+		assertThat(dataset.getMaxSize(), is(equalTo(new long[]{})));
 		assertThat(dataset.isCompound(), is(false));
 		assertThat(dataset.isEmpty(), is(false));
 		assertThat(dataset.isScalar(), is(true));

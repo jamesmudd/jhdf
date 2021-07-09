@@ -84,7 +84,7 @@ public interface Dataset extends Node {
 	 *
 	 * @return the max size of this dataset
 	 */
-	int[] getMaxSize();
+	long[] getMaxSize();
 
 	/**
 	 * Gets the data layout of this dataset.

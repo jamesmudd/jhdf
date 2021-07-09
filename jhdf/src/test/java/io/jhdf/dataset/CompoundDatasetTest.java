@@ -63,7 +63,7 @@ class CompoundDatasetTest {
 	void test2dCompound(Dataset dataset) {
 		// General checks
 		assertThat(dataset.getDimensions(), is(equalTo(new int[]{3, 3})));
-		assertThat(dataset.getMaxSize(), is(equalTo(new int[]{3, 3})));
+		assertThat(dataset.getMaxSize(), is(equalTo(new long[]{3, 3})));
 		assertThat(dataset.getJavaType(), is(Map.class));
 		assertThat(dataset.getFillValue(), is(nullValue()));
 		assertThat(dataset.isCompound(), is(true));
@@ -105,7 +105,7 @@ class CompoundDatasetTest {
 	void testCompound(Dataset dataset) {
 		// General checks
 		assertThat(dataset.getDimensions(), is(equalTo(new int[]{4})));
-		assertThat(dataset.getMaxSize(), is(equalTo(new int[]{4})));
+		assertThat(dataset.getMaxSize(), is(equalTo(new long[]{4})));
 		assertThat(dataset.getJavaType(), is(Map.class));
 		assertThat(dataset.getFillValue(), is(nullValue()));
 		assertThat(dataset.isCompound(), is(true));
@@ -154,7 +154,7 @@ class CompoundDatasetTest {
 	@MethodSource
 	void testArrayVariableLength(Dataset dataset) {
 		assertThat(dataset.getDimensions(), is(equalTo(new int[]{1})));
-		assertThat(dataset.getMaxSize(), is(equalTo(new int[]{1})));
+		assertThat(dataset.getMaxSize(), is(equalTo(new long[]{1})));
 		assertThat(dataset.isCompound(), is(true));
 		assertThat(dataset.getJavaType(), is(Map.class));
 		assertThat(dataset.getFillValue(), is(nullValue()));
@@ -182,7 +182,7 @@ class CompoundDatasetTest {
 	@MethodSource
 	void testVariableLengthCompound(Dataset dataset) {
 		assertThat(dataset.getDimensions(), is(equalTo(new int[]{3})));
-		assertThat(dataset.getMaxSize(), is(equalTo(new int[]{3})));
+		assertThat(dataset.getMaxSize(), is(equalTo(new long[]{3})));
 		assertThat(dataset.isCompound(), is(true));
 		assertThat(dataset.getJavaType(), is(Map.class));
 		assertThat(dataset.getFillValue(), is(nullValue()));
@@ -217,7 +217,7 @@ class CompoundDatasetTest {
 	@MethodSource
 	void testNestedCompound(Dataset dataset) {
 		assertThat(dataset.getDimensions(), is(equalTo(new int[]{3})));
-		assertThat(dataset.getMaxSize(), is(equalTo(new int[]{3})));
+		assertThat(dataset.getMaxSize(), is(equalTo(new long[]{3})));
 		assertThat(dataset.isCompound(), is(true));
 		assertThat(dataset.getJavaType(), is(Map.class));
 		assertThat(dataset.getFillValue(), is(nullValue()));

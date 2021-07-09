@@ -23,7 +23,7 @@ public class DataSpace {
 	private final byte version;
 	private final boolean maxSizesPresent;
 	private final int[] dimensions;
-	private final int[] maxSizes;
+	private final long[] maxSizes;
 	private final byte type;
 	private final long totalLength;
 
@@ -58,12 +58,12 @@ public class DataSpace {
 
 		// Max dimension sizes
 		if (maxSizesPresent) {
-			maxSizes = new int[numberOfDimensions];
+			maxSizes = new long[numberOfDimensions];
 			for (int i = 0; i < numberOfDimensions; i++) {
-				maxSizes[i] = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
+				maxSizes[i] = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 			}
 		} else {
-			maxSizes = new int[0];
+			maxSizes = new long[0];
 		}
 
 		// If type == 2 then it's an empty dataset and totalLength should be 0
@@ -104,7 +104,7 @@ public class DataSpace {
 		return ArrayUtils.clone(dimensions);
 	}
 
-	public int[] getMaxSizes() {
+	public long [] getMaxSizes() {
 		return ArrayUtils.clone(maxSizes);
 	}
 
