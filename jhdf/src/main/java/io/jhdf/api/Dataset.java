@@ -46,7 +46,7 @@ public interface Dataset extends Node {
 	 *
 	 * @return the dimensions of this dataset
 	 */
-	long[] getDimensions();
+	int[] getDimensions();
 
 	/**
 	 * Checks if this dataset is scalar i.e is a single element with no dimensions.
