@@ -79,7 +79,6 @@ class HdfFileTest {
 
 	@Test
 	void testOpeningFileWithLargeMaxDimensonSize() {
-		File file = new File(testFileUrl);
 		String filePath = "/hdf5/100B_max_dimension_size.h5";
 
 		testFileUrl = this.getClass().getResource(filePath).getFile();
