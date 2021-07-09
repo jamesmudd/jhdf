@@ -192,7 +192,7 @@ class DatasetImplTest {
 	@Test
 	void testInt32DatasetMaxSizes() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(INT32_PATH);
-		assertThat(dataset.getMaxSize(), is(equalTo(new int[]{21})));
+		assertThat(dataset.getMaxSize(), is(equalTo(new long[]{21})));
 	}
 
 	@Test
