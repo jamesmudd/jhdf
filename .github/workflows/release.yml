@@ -6,7 +6,8 @@ on:
         types:
             - created
     # Manual
-    workflow_dispatch
+    workflow_dispatch:
+
 
 jobs:
     release:
