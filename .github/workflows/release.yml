@@ -9,10 +9,10 @@ on:
 
 jobs:
     release:
+        runs-on: ubuntu-latest
         # Access environment with release keys
         environment: release
 
-        runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
 
