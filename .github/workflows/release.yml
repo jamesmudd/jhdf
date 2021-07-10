@@ -28,6 +28,8 @@ jobs:
                   distribution: 'adopt'
 
             - name: Test Env
+              env:
+                  - TEST_SECRET: ${{ secrets.TEST_SECRET }}
               run: echo $TEST_SECRET; echo "hello"
 
 #            - name: Build
