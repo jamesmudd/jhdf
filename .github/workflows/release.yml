@@ -9,7 +9,7 @@ on:
         branches: [ master ]
 
     # Manual
-    #workflow_dispatch:
+    workflow_dispatch:
 
 jobs:
     release:
@@ -28,7 +28,7 @@ jobs:
                   distribution: 'adopt'
 
             - name: Test Env
-              run: echo $TEST_SECRET
+              run: echo $TEST_SECRET; echo "hello"
 
 #            - name: Build
 #              working-directory: jhdf
