@@ -50,3 +50,11 @@ jobs:
                   SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
               working-directory: jhdf
               run: ./gradlew signMavenPublication -PsigningKey="$SIGNING_KEY" -PsigningPassword="$SIGNING_PASSWORD"
+
+            - name: Archive Artifacts
+              uses: actions/upload-artifact@v2
+              with:
+                  name: artifacts
+                  path: |
+                    jhdf/build/libs
+                    jhdf/build/publications
