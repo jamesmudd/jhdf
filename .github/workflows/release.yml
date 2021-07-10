@@ -49,4 +49,4 @@ jobs:
                   SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
                   SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
               working-directory: jhdf
-              run: ./gradlew signMavenPublication -PsigningKey=$SIGNING_KEY -PsigningPassword=$SIGNING_PASSWORD
+              run: ./gradlew signMavenPublication -PsigningKey="$SIGNING_KEY" -PsigningPassword="$SIGNING_PASSWORD"
