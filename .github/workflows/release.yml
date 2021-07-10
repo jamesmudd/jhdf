@@ -27,23 +27,23 @@ jobs:
                   java-version: '8'
                   distribution: 'adopt'
 
-            - name: Test Env
-              env:
-                  TEST_SECRET: ${{ secrets.TEST_SECRET }}
-              run: echo $TEST_SECRET; echo "hello"
+#            - name: Test Env
+#              env:
+#                  TEST_SECRET: ${{ secrets.TEST_SECRET }}
+#              run: echo $TEST_SECRET; echo "hello"
 
-#            - name: Build
-#              working-directory: jhdf
-#              run: ./gradlew assemble
-#
-#            - name: Test
-#              working-directory: jhdf
-#              run: ./gradlew check
-#
-#            - name: Gradle Build Jars
-#              working-directory: jhdf
-#              run: ./gradlew jar sourcesJar javadocJar
-#
-#            - name: Sign Publication
-#              working-directory: jhdf
-#              run: ./gradlew signMavenPublication
+            - name: Build
+              working-directory: jhdf
+              run: ./gradlew assemble
+
+            - name: Test
+              working-directory: jhdf
+              run: ./gradlew check
+
+            - name: Gradle Build Jars
+              working-directory: jhdf
+              run: ./gradlew jar sourcesJar javadocJar
+
+            - name: Sign Publication
+              working-directory: jhdf
+              run: ./gradlew signMavenPublication
