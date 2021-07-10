@@ -1,17 +1,18 @@
-name: jHDF Release
+name: 'jHDF Release'
 
 on:
     # When a release is created
     release:
-        types: [created]
+        types:
+            - created
     # Manual
-    workflow_dispatch:
+    workflow_dispatch
 
 jobs:
     release:
         runs-on: ubuntu-latest
         # Access environment with release keys
-        environment: release
+        environment: Release
 
         steps:
             - uses: actions/checkout@v2
@@ -23,18 +24,21 @@ jobs:
                   java-version: '8'
                   distribution: 'adopt'
 
-            - name: Build
-              working-directory: jhdf
-              run: ./gradlew assemble
+            - name: Test Env
+              run: echo $TEST_SECRET
 
-            - name: Test
-              working-directory: jhdf
-              run: ./gradlew check
-
-            - name: Gradle Build Jars
-              working-directory: jhdf
-              run: ./gradlew jar sourcesJar javadocJar
-
-            - name: Sign Publication
-              working-directory: jhdf
-              run: ./gradlew signMavenPublication
+#            - name: Build
+#              working-directory: jhdf
+#              run: ./gradlew assemble
+#
+#            - name: Test
+#              working-directory: jhdf
+#              run: ./gradlew check
+#
+#            - name: Gradle Build Jars
+#              working-directory: jhdf
+#              run: ./gradlew jar sourcesJar javadocJar
+#
+#            - name: Sign Publication
+#              working-directory: jhdf
+#              run: ./gradlew signMavenPublication
