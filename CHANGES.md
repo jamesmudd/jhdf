@@ -1,14 +1,22 @@
 # jHDF Change Log
 
+##v0.6.2
+- *Breaking API change* Dataset#getMaxSize not returns `long[]` allowing files with max sizes larger than `int` max to be opened. https://github.com/jamesmudd/jhdf/pull/283
+- Add support for opaque datatype https://github.com/jamesmudd/jhdf/pull/264
+- Improve chunked dataset read performance with default logging https://github.com/jamesmudd/jhdf/pull/267
+- Dependency updates
+- Add GitHub Actions CI
+- Switch away from Bintray https://github.com/jamesmudd/jhdf/issues/250
+
 ## v0.6.1
 - Add support for committed datatypes https://github.com/jamesmudd/jhdf/issues/255
 - Add support for attributes with shared datatype
-- Switch dependencies repository to Maven Central https://github.com/jamesmudd/jhdf/issues/250  
+- Switch dependencies repository to Maven Central https://github.com/jamesmudd/jhdf/issues/250
 - Code cleanup
 
 ## v0.6.0
 - Adds support for reading in-memory files from `byte[]` or `ByteBuffers` https://github.com/jamesmudd/jhdf/issues/245
-- *Breaking API change* To support in-memory files `HdfFile#getHdfChannel` is replaced by `HdfFile#getHdfBackingStorage` which now returns a `HdfBackingStorage`. Internally the new interface replaces the use of `HdfFileChannel`  
+- *Breaking API change* To support in-memory files `HdfFile#getHdfChannel` is replaced by `HdfFile#getHdfBackingStorage` which now returns a `HdfBackingStorage`. Internally the new interface replaces the use of `HdfFileChannel`
 - Fix https://github.com/jamesmudd/jhdf/issues/247 reading empty arrays in variable length datasets
 - Dependency updates
 - Update Gradle
@@ -33,7 +41,7 @@
 
 ## v0.5.8
 - *Breaking API change* `Dataset#getDiskSize` is renamed `Dataset#getSizeInBytes` and `Attribute#getDiskSize` is renamed `Attribute#getSizeInBytes`
-- New API method `Dataset#getStorageInBytes` which returns the total storage size of the dataset. By comparison with `Dataset#getSizeInBytes` allows the compression ratio to be obtained 
+- New API method `Dataset#getStorageInBytes` which returns the total storage size of the dataset. By comparison with `Dataset#getSizeInBytes` allows the compression ratio to be obtained
 - Fixes an issue when reading empty datasets with no allocated storage https://github.com/jamesmudd/jhdf/pull/162
 - Code quality improvements and cleanup
 - Dependency updates
@@ -124,7 +132,7 @@
 - Update test dependencies
 
 ## v0.4.4
-- Fix https://github.com/jamesmudd/jhdf/issues/88 error when running on Java 8 
+- Fix https://github.com/jamesmudd/jhdf/issues/88 error when running on Java 8
 - Improvements to IDE support
 - Improvements to exceptions in currently unsupported cases
 
