@@ -45,5 +45,8 @@ jobs:
               run: ./gradlew jar sourcesJar javadocJar
 
             - name: Sign Publication
+              env:
+                  SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+                  SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
               working-directory: jhdf
-              run: ./gradlew signMavenPublication
+              run: ./gradlew signMavenPublication -PsigningKey=$SIGNING_KEY -PsigningPassword=$SIGNING_PASSWORD
