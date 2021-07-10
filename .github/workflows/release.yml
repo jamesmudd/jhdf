@@ -12,28 +12,29 @@ jobs:
         # Access environment with release keys
         environment: release
 
+        runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
 
             - name: Set up JDK
-                uses: actions/setup-java@v2
-                with:
-                    # Must use lowest supported Java version
-                    java-version: '8'
-                    distribution: 'adopt'
+              uses: actions/setup-java@v2
+              with:
+                  # Must use lowest supported Java version
+                  java-version: '8'
+                  distribution: 'adopt'
 
             - name: Build
-                working-directory: jhdf
-                run: ./gradlew assemble
+              working-directory: jhdf
+              run: ./gradlew assemble
 
-            -   name: Test
-                    working-directory: jhdf
-                    run: ./gradlew check
+            - name: Test
+              working-directory: jhdf
+              run: ./gradlew check
 
             - name: Gradle Build Jars
-                working-directory: jhdf
-                run: ./gradlew jar sourcesJar javadocJar
+              working-directory: jhdf
+              run: ./gradlew jar sourcesJar javadocJar
 
             - name: Sign Publication
-                working-directory: jhdf
-                run: ./gradlew signMavenPublication
+              working-directory: jhdf
+              run: ./gradlew signMavenPublication
