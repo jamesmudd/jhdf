@@ -11,7 +11,7 @@ jobs:
     release:
         runs-on: ubuntu-latest
         # Access environment with release keys
-        environment: release
+        #environment: release
 
         steps:
             - uses: actions/checkout@v2
