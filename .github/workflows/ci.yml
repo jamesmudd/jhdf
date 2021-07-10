@@ -1,6 +1,12 @@
-name: Java CI
+name: jHDF CI
 
-on: [pull_request]
+on:
+    push:
+        branches: [ master]
+    pull_request:
+        branches: [ master ]
+    schedule:
+        - cron: '0 0 * * 4'
 
 jobs:
     build:
@@ -13,7 +19,7 @@ jobs:
         steps:
             - uses: actions/checkout@v2
 
-            - name: Set up JDK 11
+            - name: Set up JDK
               uses: actions/setup-java@v2
               with:
                   java-version: ${{ matrix.java }}
