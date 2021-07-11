@@ -1,6 +1,6 @@
 # jHDF Change Log
 
-##v0.6.2
+## v0.6.2
 - *Breaking API change* Dataset#getMaxSize not returns `long[]` allowing files with max sizes larger than `int` max to be opened. https://github.com/jamesmudd/jhdf/pull/283
 - Add support for opaque datatype https://github.com/jamesmudd/jhdf/pull/264
 - Improve chunked dataset read performance with default logging https://github.com/jamesmudd/jhdf/pull/267
