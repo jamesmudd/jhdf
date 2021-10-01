@@ -13,6 +13,7 @@ on:
 
 jobs:
     release:
+        name: "Publish Release"
         runs-on: ubuntu-latest
         # Access environment with release keys
         environment: Release
@@ -58,3 +59,8 @@ jobs:
                   path: |
                     jhdf/build/libs
                     jhdf/build/publications
+
+            - name: Publish to GitHub Packages
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: ./gradlew
