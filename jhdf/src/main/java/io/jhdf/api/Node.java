@@ -12,6 +12,7 @@ package io.jhdf.api;
 import io.jhdf.HdfFile;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Map;
 
 /**
@@ -76,11 +77,20 @@ public interface Node {
 	boolean isGroup();
 
 	/**
-	 * Gets the {@link File} object containing this {@link Node}.
+	 * Gets the {@link File} object containing this {@link Node}.<br/>
+	 * <br/>
+	 * Call {@link #getFileAsPath()} instead if the file does not reside in the default file system.
 	 *
 	 * @return the file containing this node
 	 */
 	File getFile();
+
+	/**
+	 * Gets the {@link Path} object containing this {@link Node}.
+	 *
+	 * @return the file containing this node
+	 */
+	Path getFileAsPath();
 
 	/**
 	 * Gets the parent {@link HdfFile} of this node can be useful if you want to

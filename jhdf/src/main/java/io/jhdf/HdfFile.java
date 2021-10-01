@@ -31,11 +31,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -62,19 +58,19 @@ public class HdfFile implements Group, AutoCloseable {
 		}
 	}
 
-	private final Optional<File> optionalFile;
+	private final Optional<Path> optionalFile;
 	private final HdfBackingStorage hdfBackingStorage;
 
 	private final Group rootGroup;
 
 	private final Set<HdfFile> openExternalFiles = new HashSet<>();
 
-	public HdfFile(Path path) {
-		this(path.toFile());
+	public HdfFile(File file) {
+		this(file.toPath());
 	}
 
 	public HdfFile(URI uri) {
-		this(Paths.get(uri).toFile());
+		this(Paths.get(uri));
 	}
 
 	/**
@@ -172,14 +168,15 @@ public class HdfFile implements Group, AutoCloseable {
 		}
 	}
 
-	public HdfFile(File hdfFile) {
-		logger.info("Opening HDF5 file '{}'...", hdfFile.getAbsolutePath());
+	public HdfFile(Path hdfFile) {
+		Path absoluteFile = hdfFile.toAbsolutePath();
+		logger.info("Opening HDF5 file '{}'...", absoluteFile);
 		this.optionalFile = Optional.of(hdfFile);
 
 		try {
 			// Sonar would like this closed but we are implementing a file object which
 			// needs this channel for operation it is closed when this HdfFile is closed
-			FileChannel fc = FileChannel.open(hdfFile.toPath(), StandardOpenOption.READ); // NOSONAR
+			FileChannel fc = FileChannel.open(hdfFile, StandardOpenOption.READ); // NOSONAR
 
 			// Find out if the file is a HDF5 file
 			boolean validSignature = false;
@@ -219,9 +216,9 @@ public class HdfFile implements Group, AutoCloseable {
 			}
 
 		} catch (IOException e) {
-			throw new HdfException("Failed to open file '" + optionalFile.get().getAbsolutePath() + "' . Is it a HDF5 file?", e);
+			throw new HdfException("Failed to open file '" + absoluteFile + "' . Is it a HDF5 file?", e);
 		}
-		logger.info("Opened HDF5 file '{}'", hdfFile.getAbsolutePath());
+		logger.info("Opened HDF5 file '{}'", absoluteFile);
 	}
 
 	private static long nextOffset(long offset) {
@@ -258,11 +255,11 @@ public class HdfFile implements Group, AutoCloseable {
 		if (!inMemory()) {
 			for (HdfFile externalHdfFile : openExternalFiles) {
 				externalHdfFile.close();
-				logger.info("Closed external file '{}'", externalHdfFile.getFile().getAbsolutePath());
+				logger.info("Closed external file '{}'", externalHdfFile.getFileAsPath().toAbsolutePath());
 			}
 
 			hdfBackingStorage.close();
-			logger.info("Closed HDF file '{}'", getFile().getAbsolutePath());
+			logger.info("Closed HDF file '{}'", getFileAsPath().toAbsolutePath());
 		}
 	}
 
@@ -287,7 +284,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	@Override
 	public String getName() {
-		return optionalFile.map(File::getName).orElse("In-Memory no backing file");
+		return optionalFile.map(Path::getFileName).map(Path::toString).orElse("In-Memory no backing file");
 	}
 
 	@Override
@@ -323,6 +320,12 @@ public class HdfFile implements Group, AutoCloseable {
 
 	@Override
 	public File getFile() {
+		Path fileAsPath = getFileAsPath();
+		return fileAsPath.getFileSystem() == FileSystems.getDefault() ? fileAsPath.toFile() : null;
+	}
+
+	@Override
+	public Path getFileAsPath() {
 		return optionalFile.orElseThrow(() -> new HdfException("No backing file. In-memory"));
 	}
 

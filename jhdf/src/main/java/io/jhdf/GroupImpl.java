@@ -286,7 +286,7 @@ public class GroupImpl extends AbstractNode implements Group {
 			return ((Group) child).getByPath(pathElements[1]);
 		} else {
 			// Path can't be resolved
-			throw new HdfInvalidPathException(getPath() + path, getFile());
+			throw new HdfInvalidPathException(getPath() + path, getFileAsPath());
 		}
 
 	}
@@ -300,7 +300,7 @@ public class GroupImpl extends AbstractNode implements Group {
 		if (node instanceof Dataset) {
 			return (Dataset) node;
 		} else {
-			throw new HdfInvalidPathException(getPath() + path, getFile());
+			throw new HdfInvalidPathException(getPath() + path, getFileAsPath());
 		}
 	}
 

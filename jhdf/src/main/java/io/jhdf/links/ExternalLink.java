@@ -16,6 +16,7 @@ import io.jhdf.exceptions.HdfBrokenLinkException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
@@ -47,14 +48,14 @@ public class ExternalLink extends AbstractLink {
 			return externalFile.getByPath(targetPath);
 		}
 
-		private File getTargetFile() {
+		private Path getTargetFile() {
 			// Check if the target file path is absolute
 			if (targetFile.startsWith(File.separator)) {
-				return Paths.get(targetFile).toFile();
+				return Paths.get(targetFile);
 			} else {
 				// Need to resolve the full path
-				String absolutePathOfThisFilesDirectory = parent.getFile().getParent();
-				return Paths.get(absolutePathOfThisFilesDirectory, targetFile).toFile();
+				Path thisFilesDirectory = parent.getFileAsPath().getParent();
+				return thisFilesDirectory.resolve(targetFile);
 			}
 		}
 	}
