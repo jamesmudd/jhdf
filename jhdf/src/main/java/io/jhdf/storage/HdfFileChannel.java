@@ -73,7 +73,35 @@ public class HdfFileChannel implements HdfBackingStorage {
 	@Override
 	public ByteBuffer mapNoOffset(long address, long length) {
 		try {
+			try {
 			return fc.map(MapMode.READ_ONLY, address, length);
+			} catch (UnsupportedOperationException e) {
+				// many file systems do not support memory mapping
+				int lengthAsInt = (int) length;
+				if (lengthAsInt != length) {
+					// length must be representable by an int such that we can allocate a ByteBuffer manually
+					throw e;
+				}
+				ByteBuffer buffer = ByteBuffer.allocate(lengthAsInt);
+				long oldPosition = fc.position();
+				fc.position(address);
+				try {
+					int totalNumberOfBytesRead = 0;
+					while (totalNumberOfBytesRead < lengthAsInt) {
+						int numberOfBytesRead = fc.read(buffer);
+						if (numberOfBytesRead < 0) {
+							throw new IOException("Trying to read more bytes than available");
+						}
+						totalNumberOfBytesRead += numberOfBytesRead;
+					}
+				}
+				finally {
+					// reset file channel to old position
+					fc.position(oldPosition);
+				}
+				buffer.flip();
+				return buffer;
+			}
 		} catch (IOException e) {
 			throw new HdfException("Failed to map buffer at address '" + address
 				+ "' of length '" + length + "'", e);
