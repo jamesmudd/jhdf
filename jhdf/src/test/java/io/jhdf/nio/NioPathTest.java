@@ -1,12 +1,28 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright (c) 2021 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
 package io.jhdf.nio;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +34,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import io.jhdf.HdfFile;
-import io.jhdf.api.*;
+import io.jhdf.api.Attribute;
+import io.jhdf.api.Dataset;
+import io.jhdf.api.Group;
+import io.jhdf.api.Link;
+import io.jhdf.api.Node;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.datatype.DataType;
 
@@ -36,11 +56,11 @@ import io.jhdf.object.datatype.DataType;
  */
 class NioPathTest
 {
-	private static final String	HDF5_TEST_FILE_DIRECTORY_PATH	= "/hdf5";
-	private static final String	ZIP_FILE_NAME					= "nio_test.zip";
-	private static Path			TEMP_DIR;
-	private static Path			LOCAL_ROOT_DIRECTORY;
-	private static URI			NON_LOCAL_ROOT_DIRECTORY_URI;
+	private static final String HDF5_TEST_FILE_DIRECTORY_PATH	= "/hdf5";
+	private static final String ZIP_FILE_NAME					= "nio_test.zip";
+	private static       Path   TEMP_DIR;
+	private static       Path   LOCAL_ROOT_DIRECTORY;
+	private static       URI    NON_LOCAL_ROOT_DIRECTORY_URI;
 
 	@BeforeAll
 	static void setup() throws IOException {
