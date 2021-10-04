@@ -24,7 +24,7 @@ public class HdfInvalidPathException extends HdfException {
 	private static final long serialVersionUID = 1L;
 
 	private final String path;
-	private final Path   file;
+	private final transient Path file;
 
 	public HdfInvalidPathException(String path, Path file) {
 		super("The path '" + path + "' could not be found in the HDF5 file '" + file.toAbsolutePath() + "'");
