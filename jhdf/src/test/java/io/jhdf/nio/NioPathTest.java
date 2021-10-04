@@ -9,9 +9,9 @@
  */
 package io.jhdf.nio;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 import java.net.URI;
@@ -99,26 +99,26 @@ class NioPathTest
 	}
 
 	private void compareNodes(Node node1, Node node2) {
-		assertEquals(node1.getName(), node2.getName(), "Deviating node names");
+		assertThat("Deviating node names", node1.getName(), is(node2.getName()));
 		String errorSuffix = " of nodes '" + node1.getName() + "'";
 
-		assertEquals(node1.getPath(), node2.getPath(), "Deviating paths" + errorSuffix);
-		assertEquals(node1.isLink(), node2.isLink(), "Deviating isLink flags" + errorSuffix);
+		assertThat("Deviating paths" + errorSuffix, node1.getPath(), is(node2.getPath()));
+		assertThat("Deviating isLink flags" + errorSuffix, node1.isLink(), is(node2.isLink()));
 
 		boolean brokenLink = node1.isLink() && ((Link) node1).isBrokenLink();
 
 		if (!brokenLink) {
 			// the following checks lead to exceptions for broken links
-			assertEquals(node1.getType(), node2.getType(), "Deviating types" + errorSuffix);
-			assertEquals(node1.isGroup(), node2.isGroup(), "Deviating isGroup flags" + errorSuffix);
-			assertEquals(node1.getAddress(), node2.getAddress(), "Deviating addresses" + errorSuffix);
-			assertEquals(node1.isAttributeCreationOrderTracked(), node2.isAttributeCreationOrderTracked(), "Deviating isAttributeCreationOrderTracked flags" + errorSuffix);
+			assertThat("Deviating types" + errorSuffix, node1.getType(), is(node2.getType()));
+			assertThat("Deviating isGroup flags" + errorSuffix, node1.isGroup(), is(node2.isGroup()));
+			assertThat("Deviating addresses" + errorSuffix, node1.getAddress(), is(node2.getAddress()));
+			assertThat("Deviating isAttributeCreationOrderTracked flags" + errorSuffix, node1.isAttributeCreationOrderTracked(), is(node2.isAttributeCreationOrderTracked()));
 
 			Map<String, Attribute> attributes1 = node1.getAttributes();
 			Map<String, Attribute> attributes2 = node2.getAttributes();
-			assertEquals(attributes1.size(), attributes2.size(), "Deviating number of attributes" + errorSuffix);
+			assertThat("Deviating number of attributes" + errorSuffix, attributes1.size(), is(attributes2.size()));
 			for (String attributeName : attributes1.keySet()) {
-				assertTrue(attributes2.containsKey(attributeName), "Missing attribute '" + attributeName + "' in second node '" + node2.getName() + "'");
+				assertThat("Missing attribute '" + attributeName + "' in second node '" + node2.getName() + "'", attributes2.containsKey(attributeName));
 				Attribute attribute1 = attributes1.get(attributeName);
 				Attribute attribute2 = attributes2.get(attributeName);
 				compareAttributes(attribute1, attribute2);
@@ -126,46 +126,46 @@ class NioPathTest
 		}
 
 		if (node1 instanceof Link) {
-			assertTrue(node2 instanceof Link, "Node '" + node2.getName() + "' is not a link");
+			assertThat("Node '" + node2.getName() + "' is not a link", node2 instanceof Link);
 			compareLinks((Link) node1, (Link) node2);
 		} else if (node1 instanceof Group) {
-			assertTrue(node2 instanceof Group, "Node '" + node2.getName() + "' is not a group");
+			assertThat("Node '" + node2.getName() + "' is not a group", node2 instanceof Group);
 			compareGroups((Group) node1, (Group) node2);
 		} else if (node1 instanceof Dataset) {
-			assertTrue(node2 instanceof Dataset, "Node '" + node2.getName() + "' is not a dataset");
+			assertThat("Node '" + node2.getName() + "' is not a dataset", node2 instanceof Dataset);
 			compareDatasets((Dataset) node1, (Dataset) node2);
 		}
 	}
 
 	private void compareAttributes(Attribute attribute1, Attribute attribute2) {
-		assertEquals(attribute1.getName(), attribute2.getName(), "Deviating attribute names");
+		assertThat("Deviating attribute names", attribute1.getName(), is(attribute2.getName()));
 		String errorSuffix = " of attributes '" + attribute1.getName() + "'";
 
-		assertEquals(attribute1.getSize(), attribute2.getSize(), "Deviating sizes" + errorSuffix);
-		assertEquals(attribute1.getSizeInBytes(), attribute2.getSizeInBytes(), "Deviating sizes in bytes" + errorSuffix);
-		assertArrayEquals(attribute1.getDimensions(), attribute2.getDimensions(), "Deviating dimensions" + errorSuffix);
-		assertEquals(attribute1.getJavaType(), attribute2.getJavaType(), "Deviating Java types" + errorSuffix);
-		assertEquals(attribute1.isScalar(), attribute2.isScalar(), "Deviating isScalar flags" + errorSuffix);
-		assertEquals(attribute1.isEmpty(), attribute2.isEmpty(), "Deviating isScalar flags" + errorSuffix);
+		assertThat("Deviating sizes" + errorSuffix, attribute1.getSize(), is(attribute2.getSize()));
+		assertThat("Deviating sizes in bytes" + errorSuffix, attribute1.getSizeInBytes(), is(attribute2.getSizeInBytes()));
+		assertThat("Deviating dimensions" + errorSuffix, attribute1.getDimensions(), is(attribute2.getDimensions()));
+		assertThat("Deviating Java types" + errorSuffix, attribute1.getJavaType(), is(attribute2.getJavaType()));
+		assertThat("Deviating isScalar flags" + errorSuffix, attribute1.isScalar(), is(attribute2.isScalar()));
+		assertThat("Deviating isScalar flags" + errorSuffix, attribute1.isEmpty(), is(attribute2.isEmpty()));
 	}
 
 	private void compareLinks(Link link1, Link link2) {
 		String errorSuffix = " of links '" + link1.getName() + "'";
 
-		assertEquals(link1.getTargetPath(), link2.getTargetPath(), "Deviating target paths" + errorSuffix);
-		assertEquals(link1.isBrokenLink(), link2.isBrokenLink(), "Deviating isBrokenLink flags" + errorSuffix);
+		assertThat("Deviating target paths" + errorSuffix, link1.getTargetPath(), is(link2.getTargetPath()));
+		assertThat("Deviating isBrokenLink flags" + errorSuffix, link1.isBrokenLink(), is(link2.isBrokenLink()));
 	}
 
 	private void compareGroups(Group group1, Group group2) {
 		String errorSuffix = " of groups '" + group1.getName() + "'";
 
-		assertEquals(group1.isLinkCreationOrderTracked(), group2.isLinkCreationOrderTracked(), "Deviating isLinkCreationOrderTracked flags" + errorSuffix);
+		assertThat("Deviating isLinkCreationOrderTracked flags" + errorSuffix, group1.isLinkCreationOrderTracked(), is(group2.isLinkCreationOrderTracked()));
 
 		Map<String, Node> children1 = group1.getChildren();
 		Map<String, Node> children2 = group2.getChildren();
-		assertEquals(children1.size(), children2.size(), "Deviating number of children" + errorSuffix);
+		assertThat("Deviating number of children" + errorSuffix, children1.size(), is(children2.size()));
 		for (String childName : children1.keySet()) {
-			assertTrue(children2.containsKey(childName), "Missing child '" + childName + "' in second group '" + group2.getName() + "'");
+			assertThat("Missing child '" + childName + "' in second group '" + group2.getName() + "'", children2.containsKey(childName));
 			Node child1 = children1.get(childName);
 			Node child2 = children2.get(childName);
 			compareNodes(child1, child2);
@@ -175,17 +175,17 @@ class NioPathTest
 	private void compareDatasets(Dataset dataset1, Dataset dataset2) {
 		String errorSuffix = " of datasets '" + dataset1.getName() + "'";
 
-		assertEquals(dataset1.getSize(), dataset2.getSize(), "Deviating sizes" + errorSuffix);
-		assertEquals(dataset1.getSizeInBytes(), dataset2.getSizeInBytes(), "Deviating sizes in bytes" + errorSuffix);
-		assertEquals(dataset1.getStorageInBytes(), dataset2.getStorageInBytes(), "Deviating storage sizes in bytes" + errorSuffix);
-		assertArrayEquals(dataset1.getDimensions(), dataset2.getDimensions(), "Deviating dimensions" + errorSuffix);
-		assertEquals(dataset1.isScalar(), dataset2.isScalar(), "Deviating isScalar flags" + errorSuffix);
-		assertEquals(dataset1.isEmpty(), dataset2.isEmpty(), "Deviating isScalar flags" + errorSuffix);
-		assertEquals(dataset1.isCompound(), dataset2.isCompound(), "Deviating isCompound flags" + errorSuffix);
-		assertEquals(dataset1.isVariableLength(), dataset2.isVariableLength(), "Deviating isVariableLength flags" + errorSuffix);
-		assertArrayEquals(dataset1.getMaxSize(), dataset2.getMaxSize(), "Deviating max sizes" + errorSuffix);
-		assertEquals(dataset1.getDataLayout(), dataset2.getDataLayout(), "Deviating data layouts" + errorSuffix);
-		assertEquals(dataset1.getJavaType(), dataset2.getJavaType(), "Deviating Java type" + errorSuffix);
+		assertThat("Deviating sizes" + errorSuffix, dataset1.getSize(), is(dataset2.getSize()));
+		assertThat("Deviating sizes in bytes" + errorSuffix, dataset1.getSizeInBytes(), is(dataset2.getSizeInBytes()));
+		assertThat("Deviating storage sizes in bytes" + errorSuffix, dataset1.getStorageInBytes(), is(dataset2.getStorageInBytes()));
+		assertThat("Deviating dimensions" + errorSuffix, dataset1.getDimensions(), is(dataset2.getDimensions()));
+		assertThat("Deviating isScalar flags" + errorSuffix, dataset1.isScalar(), is(dataset2.isScalar()));
+		assertThat("Deviating isScalar flags" + errorSuffix, dataset1.isEmpty(), is(dataset2.isEmpty()));
+		assertThat("Deviating isCompound flags" + errorSuffix, dataset1.isCompound(), is(dataset2.isCompound()));
+		assertThat("Deviating isVariableLength flags" + errorSuffix, dataset1.isVariableLength(), is(dataset2.isVariableLength()));
+		assertThat("Deviating max sizes" + errorSuffix, dataset1.getMaxSize(), is(dataset2.getMaxSize()));
+		assertThat("Deviating data layouts" + errorSuffix, dataset1.getDataLayout(), is(dataset2.getDataLayout()));
+		assertThat("Deviating Java type" + errorSuffix, dataset1.getJavaType(), is(dataset2.getJavaType()));
 
 		Object fillValue1 = null;
 		boolean fillValueExists;
@@ -196,7 +196,7 @@ class NioPathTest
 			fillValueExists = false;
 		}
 		if (fillValueExists) {
-			assertEquals(fillValue1, dataset2.getFillValue(), "Deviating fill values" + errorSuffix);
+			assertThat("Deviating fill values" + errorSuffix, fillValue1, is(dataset2.getFillValue()));
 		}
 
 		DataType dataType1 = dataset1.getDataType();
@@ -205,10 +205,10 @@ class NioPathTest
 	}
 
 	private void compareDataTypes(DataType dataType1, DataType dataType2, String errorSuffix) {
-		assertEquals(dataType1.getVersion(), dataType2.getVersion(), "Deviating data type versions" + errorSuffix);
-		assertEquals(dataType1.getDataClass(), dataType2.getDataClass(), "Deviating data type data classes" + errorSuffix);
-		assertEquals(dataType1.getSize(), dataType2.getSize(), "Deviating data type sizes" + errorSuffix);
-		assertEquals(dataType1.getJavaType(), dataType2.getJavaType(), "Deviating data type Java classes" + errorSuffix);
+		assertThat("Deviating data type versions" + errorSuffix, dataType1.getVersion(), is(dataType2.getVersion()));
+		assertThat("Deviating data type data classes" + errorSuffix, dataType1.getDataClass(), is(dataType2.getDataClass()));
+		assertThat("Deviating data type sizes" + errorSuffix, dataType1.getSize(), is(dataType2.getSize()));
+		assertThat("Deviating data type Java classes" + errorSuffix, dataType1.getJavaType(), is(dataType2.getJavaType()));
 	}
 
 	static List<String> getTestFileNames() throws IOException {
