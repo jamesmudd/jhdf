@@ -77,11 +77,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 			return fc.map(MapMode.READ_ONLY, address, length);
 			} catch (UnsupportedOperationException e) {
 				// many file systems do not support memory mapping
-				int lengthAsInt = (int) length;
-				if (lengthAsInt != length) {
-					// length must be representable by an int such that we can allocate a ByteBuffer manually
-					throw e;
-				}
+				int lengthAsInt = Math.toIntExact(length);
 				ByteBuffer buffer = ByteBuffer.allocate(lengthAsInt);
 				long oldPosition = fc.position();
 				fc.position(address);
