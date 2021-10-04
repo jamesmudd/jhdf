@@ -10,8 +10,8 @@
 package io.jhdf.nio;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.IOException;
 import java.net.URI;
@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -117,10 +118,11 @@ class NioPathTest
 			Map<String, Attribute> attributes1 = node1.getAttributes();
 			Map<String, Attribute> attributes2 = node2.getAttributes();
 			assertThat("Deviating number of attributes" + errorSuffix, attributes1.size(), is(attributes2.size()));
-			for (String attributeName : attributes1.keySet()) {
-				assertThat("Missing attribute '" + attributeName + "' in second node '" + node2.getName() + "'", attributes2.containsKey(attributeName));
-				Attribute attribute1 = attributes1.get(attributeName);
+			for (Entry<String, Attribute> attributeEntry1 : attributes1.entrySet()) {
+				String attributeName = attributeEntry1.getKey();
+				Attribute attribute1 = attributeEntry1.getValue();
 				Attribute attribute2 = attributes2.get(attributeName);
+				assertThat("Missing attribute '" + attributeName + "' in second node '" + node2.getName() + "'", attributes2, is(notNullValue()));
 				compareAttributes(attribute1, attribute2);
 			}
 		}
@@ -164,10 +166,12 @@ class NioPathTest
 		Map<String, Node> children1 = group1.getChildren();
 		Map<String, Node> children2 = group2.getChildren();
 		assertThat("Deviating number of children" + errorSuffix, children1.size(), is(children2.size()));
-		for (String childName : children1.keySet()) {
-			assertThat("Missing child '" + childName + "' in second group '" + group2.getName() + "'", children2.containsKey(childName));
-			Node child1 = children1.get(childName);
+
+		for (Entry<String, Node> childEntry1 : children1.entrySet()) {
+			String childName = childEntry1.getKey();
+			Node child1 = childEntry1.getValue();
 			Node child2 = children2.get(childName);
+			assertThat("Missing child '" + childName + "' in second group '" + group2.getName() + "'", child2, is(notNullValue()));
 			compareNodes(child1, child2);
 		}
 	}
