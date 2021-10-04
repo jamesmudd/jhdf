@@ -100,7 +100,7 @@ class GlobalHeapTest {
 			bb.rewind();
 			bb.put("GCOL".getBytes(US_ASCII)); // Match signature
 			bb.put((byte) 4); // mismatch version
-			return null;
+			return 4;
 		}).when(mockFc).read(ArgumentMatchers.any(ByteBuffer.class), ArgumentMatchers.anyLong());
 
 		HdfBackingStorage hdfBackingStorage = new HdfFileChannel(mockFc, sb);
