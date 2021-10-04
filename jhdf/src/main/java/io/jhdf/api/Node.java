@@ -77,8 +77,8 @@ public interface Node {
 	boolean isGroup();
 
 	/**
-	 * Gets the {@link File} object containing this {@link Node}.<br/>
-	 * <br/>
+	 * Gets the {@link File} object containing this {@link Node}.<br>
+	 * <br>
 	 * Call {@link #getFileAsPath()} instead if the file does not reside in the default file system.
 	 *
 	 * @return the file containing this node
