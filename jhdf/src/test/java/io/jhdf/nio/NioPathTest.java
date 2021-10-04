@@ -97,6 +97,8 @@ class NioPathTest
 		HdfFile hdfFile1 = new HdfFile(file1);
 		HdfFile hdfFile2 = new HdfFile(file2);
 		compareNodes(hdfFile1, hdfFile2);
+		hdfFile1.close();
+		hdfFile2.close();
 	}
 
 	private void compareNodes(Node node1, Node node2) {
