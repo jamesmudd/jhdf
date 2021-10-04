@@ -55,7 +55,7 @@ public class ExternalLink extends AbstractLink {
 			} else {
 				// Need to resolve the full path
 				Path thisFilesDirectory = parent.getFileAsPath().getParent();
-				return thisFilesDirectory.resolve(targetFile);
+				return thisFilesDirectory != null ? thisFilesDirectory.resolve(targetFile) : null;
 			}
 		}
 	}

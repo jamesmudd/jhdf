@@ -219,8 +219,9 @@ class NioPathTest
 		List<String> testFileNames = new ArrayList<>();
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(LOCAL_ROOT_DIRECTORY)) {
 			for (Path sourceFile : stream) {
-				if (Files.isRegularFile(sourceFile)) {
-					testFileNames.add(sourceFile.getFileName().toString());
+				Path sourceFileName = sourceFile.getFileName();
+				if (sourceFileName != null && Files.isRegularFile(sourceFile)) {
+					testFileNames.add(sourceFileName.toString());
 				}
 			}
 		}
@@ -241,8 +242,9 @@ class NioPathTest
 	private static void copyFiles(Path sourceDirectory, Path targetDirectory) throws IOException {
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(sourceDirectory)) {
 			for (Path sourceFile : stream) {
-				if (Files.isRegularFile(sourceFile)) {
-					Path targetFile = targetDirectory.resolve(sourceFile.getFileName().toString());
+				Path sourceFileName = sourceFile.getFileName();
+				if (sourceFileName != null && Files.isRegularFile(sourceFile)) {
+					Path targetFile = targetDirectory.resolve(sourceFileName.toString());
 					Files.copy(sourceFile, targetFile);
 				}
 			}
