@@ -221,9 +221,9 @@ class NioPathTest
 		List<String> testFileNames = new ArrayList<>();
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(LOCAL_ROOT_DIRECTORY)) {
 			for (Path sourceFile : stream) {
-				Path sourceFileName = sourceFile.getFileName();
-				if (sourceFileName != null && Files.isRegularFile(sourceFile)) {
-					testFileNames.add(sourceFileName.toString());
+//				Path sourceFileName = sourceFile.getFileName();
+				if (Files.isRegularFile(sourceFile)) {
+					testFileNames.add(sourceFile.toString());
 				}
 			}
 		}
