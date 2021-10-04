@@ -144,7 +144,7 @@ class HdfFileTest {
 		File file = new File(testFileUrl);
 		try (HdfFile hdfFile = new HdfFile(file)) {
 			for (Node node : hdfFile) {
-				assertThat(node.getFile(), is(Matchers.sameInstance(file)));
+				assertThat(node.getFile(), is(Matchers.equalTo(file)));
 			}
 		}
 	}
@@ -253,7 +253,7 @@ class HdfFileTest {
 			String path = "/datasets_group/float/float32/invalid_name";
 			HdfInvalidPathException e = assertThrows(HdfInvalidPathException.class, () -> hdfFile.getByPath(path));
 			assertThat(e.getPath(), is(equalTo(path)));
-			assertThat(e.getFile(), is(sameInstance(file)));
+			assertThat(e.getFile(), is(equalTo(file)));
 			assertThat(e.getMessage(), is(equalTo(
 				"The path '/datasets_group/float/float32/invalid_name' could not be found in the HDF5 file '"
 					+ file.getAbsolutePath() + "'")));
