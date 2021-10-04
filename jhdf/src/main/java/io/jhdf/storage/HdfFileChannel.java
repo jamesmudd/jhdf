@@ -51,18 +51,13 @@ public class HdfFileChannel implements HdfBackingStorage {
 	 */
 	@Override
 	public ByteBuffer readBufferFromAddress(long address, int length) {
-		ByteBuffer bb = ByteBuffer.allocate(length);
+		long rawAddress = address + sb.getBaseAddressByte();
 		try {
-			fc.read(bb, address + sb.getBaseAddressByte());
+			return readBufferNoOffset(rawAddress, length);
 		} catch (IOException e) {
 			throw new HdfException(
-				"Failed to read from file at address '" + address + "' (raw address '" + address
-					+ sb.getBaseAddressByte() + "'",
-				e);
+				"Failed to read from file at address '" + address + "' (raw address '" + rawAddress + "'", e);
 		}
-		bb.order(LITTLE_ENDIAN);
-		bb.rewind();
-		return bb;
 	}
 
 	@Override
@@ -74,34 +69,30 @@ public class HdfFileChannel implements HdfBackingStorage {
 	public ByteBuffer mapNoOffset(long address, long length) {
 		try {
 			try {
-			return fc.map(MapMode.READ_ONLY, address, length);
+				return fc.map(MapMode.READ_ONLY, address, length);
 			} catch (UnsupportedOperationException e) {
 				// many file systems do not support memory mapping
-				int lengthAsInt = Math.toIntExact(length);
-				ByteBuffer buffer = ByteBuffer.allocate(lengthAsInt);
-				long oldPosition = fc.position();
-				fc.position(address);
-				try {
-					int totalNumberOfBytesRead = 0;
-					while (totalNumberOfBytesRead < lengthAsInt) {
-						int numberOfBytesRead = fc.read(buffer);
-						if (numberOfBytesRead < 0) {
-							throw new IOException("Trying to read more bytes than available");
-						}
-						totalNumberOfBytesRead += numberOfBytesRead;
-					}
-				}
-				finally {
-					// reset file channel to old position
-					fc.position(oldPosition);
-				}
-				buffer.flip();
-				return buffer;
+				return readBufferNoOffset(address, Math.toIntExact(length));
 			}
 		} catch (IOException e) {
 			throw new HdfException("Failed to map buffer at address '" + address
 				+ "' of length '" + length + "'", e);
 		}
+	}
+
+	private ByteBuffer readBufferNoOffset(long address, int length) throws IOException {
+		ByteBuffer bb = ByteBuffer.allocate(length);
+		int totalNumberOfBytesRead = 0;
+		while (totalNumberOfBytesRead < length) {
+			int numberOfBytesRead = fc.read(bb, address);
+			if (numberOfBytesRead < 0) {
+				throw new IOException("Trying to read more bytes than available");
+			}
+			totalNumberOfBytesRead += numberOfBytesRead;
+		}
+		bb.order(LITTLE_ENDIAN);
+		bb.flip();
+		return bb;
 	}
 
 	@Override
