@@ -94,9 +94,10 @@ class NioPathTest
 	}
 
 	private void compareStructure(Path file1, Path file2) {
-		HdfFile hdfFile1 = new HdfFile(file1);
-		HdfFile hdfFile2 = new HdfFile(file2);
-		compareNodes(hdfFile1, hdfFile2);
+		try (HdfFile hdfFile1 = new HdfFile(file1);
+			 HdfFile hdfFile2 = new HdfFile(file2)) {
+			compareNodes(hdfFile1, hdfFile2);
+		}
 	}
 
 	private void compareNodes(Node node1, Node node2) {
