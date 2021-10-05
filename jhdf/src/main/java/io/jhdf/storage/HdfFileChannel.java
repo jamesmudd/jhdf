@@ -32,6 +32,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 
 	private final FileChannel fc;
 	private final Superblock sb;
+	private boolean memoryMappingFailed;
 
 	public HdfFileChannel(FileChannel fileChannel, Superblock superblock) {
 		this.fc = fileChannel;
@@ -68,12 +69,17 @@ public class HdfFileChannel implements HdfBackingStorage {
 	@Override
 	public ByteBuffer mapNoOffset(long address, long length) {
 		try {
-			try {
-				return fc.map(MapMode.READ_ONLY, address, length);
-			} catch (UnsupportedOperationException e) {
-				// many file systems do not support memory mapping
-				return readBufferNoOffset(address, Math.toIntExact(length));
+			if (!memoryMappingFailed) {
+				try {
+					return fc.map(MapMode.READ_ONLY, address, length);
+				} catch (UnsupportedOperationException e) {
+					// many file systems do not support memory mapping
+					memoryMappingFailed = true;
+				}
 			}
+			assert memoryMappingFailed;
+			// read channel into buffer instead of mapping it to memory
+			return readBufferNoOffset(address, Math.toIntExact(length));
 		} catch (IOException e) {
 			throw new HdfException("Failed to map buffer at address '" + address
 				+ "' of length '" + length + "'", e);
