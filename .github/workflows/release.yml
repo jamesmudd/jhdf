@@ -12,11 +12,37 @@ on:
     workflow_dispatch:
 
 jobs:
+    # First run all builds to verify
+    build:
+        name: "Build all platforms"
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                os: [ 'macos-latest', 'ubuntu-latest', 'windows-latest' ]
+                java: [ '8', '11' ]
+
+        steps:
+            -   uses: actions/checkout@v2
+
+            -   name: Set up JDK
+                uses: actions/setup-java@v2
+                with:
+                    java-version: ${{ matrix.java }}
+                    distribution: 'adopt'
+
+            -   name: Gradle Build
+                working-directory: jhdf
+                run: ./gradlew build
+
+            -   name: Gradle Build Jars
+                working-directory: jhdf
+                run: ./gradlew jar sourcesJar javadocJar
+
     release:
         name: "Publish Release"
+        needs: build # If all builds completed successfully
         runs-on: ubuntu-latest
-        # Access environment with release keys
-        environment: Release
+        environment: Release # Access environment with release keys
 
         steps:
             - uses: actions/checkout@v2
@@ -24,7 +50,7 @@ jobs:
             - name: Set up JDK
               uses: actions/setup-java@v2
               with:
-                  # Must use lowest supported Java version
+                  # Must use the lowest supported Java version
                   java-version: '8'
                   distribution: 'adopt'
 
@@ -40,6 +66,7 @@ jobs:
               working-directory: jhdf
               run: ./gradlew jar sourcesJar javadocJar
 
+            # Tests signing and ensure archived artifacts include signatures
             - name: Sign Publication
               env:
                   SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
