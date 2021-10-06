@@ -58,10 +58,6 @@ jobs:
               working-directory: jhdf
               run: ./gradlew assemble
 
-            - name: Test
-              working-directory: jhdf
-              run: ./gradlew check
-
             - name: Gradle Build Jars
               working-directory: jhdf
               run: ./gradlew jar sourcesJar javadocJar
