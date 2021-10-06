@@ -20,6 +20,7 @@ import io.jhdf.api.NodeType;
 import io.jhdf.api.dataset.ChunkedDataset;
 import io.jhdf.api.dataset.ContiguousDataset;
 import org.apache.commons.lang3.ArrayUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 
@@ -52,6 +53,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 /**
@@ -194,6 +196,11 @@ abstract class TestAllFilesBase {
 			ByteBuffer buffer = chunkedDataset.getRawChunkBuffer(new int[dataset.getDimensions().length]);
 			assertThat(buffer, is(notNullValue()));
 			assertThat(buffer.capacity(), is(greaterThan(0)));
+		}
+
+		Object fillValue = dataset.getFillValue(); // Should return fill value or null if not present
+		if(fillValue != null) {
+			assertThat(fillValue, is(instanceOf(dataset.getJavaType()))); // check fill value is correct type
 		}
 	}
 
