@@ -1,0 +1,94 @@
+name: 'jHDF Release'
+
+on:
+    # When a release is created
+    release:
+        types:
+            - created
+
+    # Manual
+    workflow_dispatch:
+
+jobs:
+    # First run all builds to verify
+    build:
+        name: "Build all platforms"
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                os: [ 'macos-latest', 'ubuntu-latest', 'windows-latest' ]
+                java: [ '8', '11' ]
+
+        steps:
+            -   uses: actions/checkout@v2
+
+            -   name: Set up JDK
+                uses: actions/setup-java@v2
+                with:
+                    java-version: ${{ matrix.java }}
+                    distribution: 'adopt'
+
+            -   name: Gradle Build
+                working-directory: jhdf
+                run: ./gradlew build
+
+            -   name: Gradle Build Jars
+                working-directory: jhdf
+                run: ./gradlew jar sourcesJar javadocJar
+
+    release:
+        name: "Publish Release"
+        needs: build # If all builds completed successfully
+        runs-on: ubuntu-latest
+        environment: Release # Access environment with release keys
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Set up JDK
+              uses: actions/setup-java@v2
+              with:
+                  # Must use the lowest supported Java version
+                  java-version: '8'
+                  distribution: 'adopt'
+
+            - name: Build
+              working-directory: jhdf
+              run: ./gradlew assemble
+
+            - name: Gradle Build Jars
+              working-directory: jhdf
+              run: ./gradlew jar sourcesJar javadocJar
+
+            # Tests signing and ensure archived artifacts include signatures
+            - name: Sign Publication
+              env:
+                  SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+                  SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+              working-directory: jhdf
+              run: ./gradlew signMavenPublication
+
+            - name: Archive Artifacts
+              uses: actions/upload-artifact@v2
+              with:
+                  name: artifacts
+                  path: |
+                    jhdf/build/libs
+                    jhdf/build/publications
+
+            - name: Publish to GitHub Packages
+              working-directory: jhdf
+              env:
+                  SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+                  SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: ./gradlew publishMavenPublicationToGitHubRepository
+
+            - name: Publish to Sonatype (Maven Central)
+              working-directory: jhdf
+              env:
+                  SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+                  SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+                  SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+                  SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+              run: ./gradlew publishMavenPublicationToSonatypeRepository

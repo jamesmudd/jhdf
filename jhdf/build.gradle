@@ -26,7 +26,7 @@ plugins {
 
 // Variables
 group = 'io.jhdf'
-version = '0.6.2'
+version = '0.6.3-DRAFT'
 
 compileJava {
     sourceCompatibility = "1.8"
@@ -103,7 +103,6 @@ jar {
             'Bundle-Vendor': 'James Mudd',
             'Export-Package': 'io.jhdf.*',
             // Build data
-            'Build-Time': new Date().toTimestamp(),
             'Build-JDK': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
             'Build-OS': System.getProperty('os.name') + ' ' + System.getProperty('os.version'),
             'Git-Commit': getGitHash()
@@ -184,6 +183,9 @@ publishing {
 }
 
 signing {
+    def signingKey = System.getenv("SIGNING_KEY")
+    def signingPassword = System.getenv("SIGNING_PASSWORD")
+    useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications.maven
 }
 
