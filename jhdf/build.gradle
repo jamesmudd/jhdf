@@ -103,7 +103,6 @@ jar {
             'Bundle-Vendor': 'James Mudd',
             'Export-Package': 'io.jhdf.*',
             // Build data
-            'Build-Time': new Date().toTimestamp(),
             'Build-JDK': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
             'Build-OS': System.getProperty('os.name') + ' ' + System.getProperty('os.version'),
             'Git-Commit': getGitHash()
