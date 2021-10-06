@@ -45,7 +45,7 @@ jobs:
                   SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
                   SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
               working-directory: jhdf
-              run: ./gradlew signMavenPublication -PsigningKey="$SIGNING_KEY" -PsigningPassword="$SIGNING_PASSWORD"
+              run: ./gradlew signMavenPublication
 
             - name: Archive Artifacts
               uses: actions/upload-artifact@v2
@@ -58,12 +58,16 @@ jobs:
             - name: Publish to GitHub Packages
               working-directory: jhdf
               env:
+                  SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+                  SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: ./gradlew publishMavenPublicationToGitHubRepository
 
             - name: Publish to Sonatype (Maven Central)
               working-directory: jhdf
               env:
+                  SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+                  SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
                   SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
                   SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
               run: ./gradlew publishMavenPublicationToSonatypeRepository
