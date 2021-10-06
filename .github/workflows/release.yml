@@ -56,11 +56,13 @@ jobs:
                     jhdf/build/publications
 
             - name: Publish to GitHub Packages
+              working-directory: jhdf
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: ./gradlew publishMavenPublicationToGitHubRepository
 
             - name: Publish to Sonatype (Maven Central)
+              working-directory: jhdf
               env:
                   SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
                   SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
