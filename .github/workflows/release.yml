@@ -28,11 +28,6 @@ jobs:
                   java-version: '8'
                   distribution: 'adopt'
 
-#            - name: Test Env
-#              env:
-#                  TEST_SECRET: ${{ secrets.TEST_SECRET }}
-#              run: echo $TEST_SECRET; echo "hello"
-
             - name: Build
               working-directory: jhdf
               run: ./gradlew assemble
@@ -63,4 +58,10 @@ jobs:
             - name: Publish to GitHub Packages
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: ./gradlew
+              run: ./gradlew publishMavenPublicationToGitHubRepository
+
+            - name: Publish to Sonatype (Maven Central)
+              env:
+                  SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+                  SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+              run: ./gradlew publishMavenPublicationToSonatypeRepository
