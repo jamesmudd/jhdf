@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -133,6 +134,11 @@ public abstract class AbstractNode implements Node {
 	public File getFile() {
 		// Recurse back up to the file
 		return getParent().getFile();
+	}
+
+	@Override
+	public Path getFileAsPath() {
+		return getParent().getFileAsPath();
 	}
 
 	@Override

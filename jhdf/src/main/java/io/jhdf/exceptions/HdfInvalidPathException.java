@@ -10,6 +10,8 @@
 package io.jhdf.exceptions;
 
 import java.io.File;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 
 /**
  * Thrown when a path inside a HDF5 file is invalid. It may contain invalid
@@ -22,10 +24,10 @@ public class HdfInvalidPathException extends HdfException {
 	private static final long serialVersionUID = 1L;
 
 	private final String path;
-	private final File file;
+	private final transient Path file;
 
-	public HdfInvalidPathException(String path, File file) {
-		super("The path '" + path + "' could not be found in the HDF5 file '" + file.getAbsolutePath() + "'");
+	public HdfInvalidPathException(String path, Path file) {
+		super("The path '" + path + "' could not be found in the HDF5 file '" + file.toAbsolutePath() + "'");
 		this.path = path;
 		this.file = file;
 	}
@@ -35,7 +37,10 @@ public class HdfInvalidPathException extends HdfException {
 	}
 
 	public File getFile() {
-		return file;
+		return file.getFileSystem() == FileSystems.getDefault() ? file.toFile() : null;
 	}
 
+	public Path getFileAsPath() {
+		return file;
+	}
 }
