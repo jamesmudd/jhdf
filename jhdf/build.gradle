@@ -26,7 +26,7 @@ plugins {
 
 // Variables
 group = 'io.jhdf'
-version = '0.6.2'
+version = '0.6.3-DRAFT'
 
 compileJava {
     sourceCompatibility = "1.8"
@@ -44,23 +44,18 @@ repositories {
     mavenCentral()
 }
 
-ext {
-    slf4jVersion = '1.7.30'
-    junitVersion = '5.6.2'
-}
-
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     // lzf compression support
     implementation group: 'com.ning', name: 'compress-lzf', version: '1.1'
 
     // Use JUnit 5 test framework
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junitVersion
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion
-    testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.1'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.8.1'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.1'
+    testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.32'
 
     // Mocking
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.12.4'
@@ -103,7 +98,6 @@ jar {
             'Bundle-Vendor': 'James Mudd',
             'Export-Package': 'io.jhdf.*',
             // Build data
-            'Build-Time': new Date().toTimestamp(),
             'Build-JDK': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
             'Build-OS': System.getProperty('os.name') + ' ' + System.getProperty('os.version'),
             'Git-Commit': getGitHash()
@@ -184,6 +178,9 @@ publishing {
 }
 
 signing {
+    def signingKey = System.getenv("SIGNING_KEY")
+    def signingPassword = System.getenv("SIGNING_PASSWORD")
+    useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications.maven
 }
 
