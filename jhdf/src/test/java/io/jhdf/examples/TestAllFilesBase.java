@@ -33,6 +33,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -68,6 +69,7 @@ abstract class TestAllFilesBase {
 		// Auto discover the test files assuming they exist in under the directory
 		// containing test_file.hdf5
 		URL resource = this.getClass().getResource("/hdf5/");
+		Objects.requireNonNull(resource);
 		Path path = Paths.get(resource.toURI()).getParent();
 		List<Path> files = Files.walk(path).filter(HDF5::matches).collect(Collectors.toList());
 
@@ -162,7 +164,7 @@ abstract class TestAllFilesBase {
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 			assertThat(dataset.getSize(), is(equalTo(1L)));
 		} else if (dataset.isCompound()) {
-			// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future..
+			// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future...
 			assertThat(data, is(instanceOf(Map.class)));
 			assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
@@ -199,6 +201,11 @@ abstract class TestAllFilesBase {
 			ByteBuffer buffer = chunkedDataset.getRawChunkBuffer(new int[dataset.getDimensions().length]);
 			assertThat(buffer, is(notNullValue()));
 			assertThat(buffer.capacity(), is(greaterThan(0)));
+		}
+
+		Object fillValue = dataset.getFillValue(); // Should return fill value or null if not present
+		if(fillValue != null) {
+			assertThat(fillValue, is(instanceOf(dataset.getJavaType()))); // check fill value is correct type
 		}
 	}
 

@@ -44,7 +44,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	private final DataType dataType;
 	private final DataSpace dataSpace;
 
-	public DatasetBase(HdfBackingStorage hdfBackingStorage, long address, String name, Group parent, ObjectHeader oh) {
+	protected DatasetBase(HdfBackingStorage hdfBackingStorage, long address, String name, Group parent, ObjectHeader oh) {
 		super(hdfBackingStorage, address, name, parent);
 		this.hdfBackingStorage = hdfBackingStorage;
 		this.oh = oh;
@@ -154,6 +154,9 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 	@Override
 	public Object getFillValue() {
+		if(!getHeader().hasMessageOfType(FillValueMessage.class)) {
+			return null; // No fill value message
+		}
 		FillValueMessage fillValueMessage = getHeaderMessage(FillValueMessage.class);
 		if (fillValueMessage.isFillValueDefined()) {
 			ByteBuffer bb = fillValueMessage.getFillValue();
