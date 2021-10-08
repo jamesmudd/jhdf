@@ -191,18 +191,7 @@ class NioPathTest
 		assertThat("Deviating max sizes" + errorSuffix, dataset1.getMaxSize(), is(dataset2.getMaxSize()));
 		assertThat("Deviating data layouts" + errorSuffix, dataset1.getDataLayout(), is(dataset2.getDataLayout()));
 		assertThat("Deviating Java type" + errorSuffix, dataset1.getJavaType(), is(dataset2.getJavaType()));
-
-		Object fillValue1 = null;
-		boolean fillValueExists;
-		try {
-			fillValue1 = dataset1.getFillValue();
-			fillValueExists = true;
-		} catch (HdfException e) {
-			fillValueExists = false;
-		}
-		if (fillValueExists) {
-			assertThat("Deviating fill values" + errorSuffix, fillValue1, is(dataset2.getFillValue()));
-		}
+		assertThat("Deviating fill values" + errorSuffix, dataset1.getFillValue(), is(dataset2.getFillValue()));
 
 		DataType dataType1 = dataset1.getDataType();
 		DataType dataType2 = dataset2.getDataType();

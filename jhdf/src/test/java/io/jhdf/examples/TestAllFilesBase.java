@@ -17,8 +17,6 @@ import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.dataset.ChunkedDataset;
 import io.jhdf.api.dataset.ContiguousDataset;
-import org.apache.commons.lang3.ArrayUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 
@@ -35,6 +33,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,8 +51,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 /**
  * This is a "catch all" test designed to look at all the test HDF5 files and
@@ -72,6 +69,7 @@ abstract class TestAllFilesBase {
 		// Auto discover the test files assuming they exist in under the directory
 		// containing test_file.hdf5
 		URL resource = this.getClass().getResource("/hdf5/");
+		Objects.requireNonNull(resource);
 		Path path = Paths.get(resource.toURI()).getParent();
 		List<Path> files = Files.walk(path).filter(HDF5::matches).collect(Collectors.toList());
 
@@ -166,7 +164,7 @@ abstract class TestAllFilesBase {
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 			assertThat(dataset.getSize(), is(equalTo(1L)));
 		} else if (dataset.isCompound()) {
-			// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future..
+			// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future...
 			assertThat(data, is(instanceOf(Map.class)));
 			assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
