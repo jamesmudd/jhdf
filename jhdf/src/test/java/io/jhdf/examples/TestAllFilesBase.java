@@ -9,8 +9,6 @@
  */
 package io.jhdf.examples;
 
-import io.jhdf.HdfFile;
-import io.jhdf.Utils;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -34,7 +32,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,11 +39,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.jhdf.TestUtils.getDimensions;
+import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -158,28 +157,36 @@ abstract class TestAllFilesBase {
 			assertThat(data, is(nullValue()));
 			// Empty so should have 0 size
 			assertThat(dataset.getStorageInBytes(), is(equalTo(0L)));
+			// Could still have non-zero size in case no storage is allocated
+			assertThat(dataset.getStorageInBytes(), is(greaterThanOrEqualTo(0L)));
 		} else if (dataset.isScalar()) {
+			assertThat(toObject(dataset.getDimensions()), is(emptyArray()));
 			assertThat(data.getClass(), is(equalTo(dataset.getJavaType())));
 			// Should have some size
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
+			assertThat(dataset.getSize(), is(equalTo(1L)));
 		} else if (dataset.isCompound()) {
 			// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future..
 			assertThat(data, is(instanceOf(Map.class)));
 			assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
+			assertThat(dataset.getSize(), is(greaterThan(0L)));
 		} else if (dataset.isVariableLength()) {
 			assertThat(getDimensions(data)[0], is(equalTo(dims[0])));
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
+			assertThat(dataset.getSize(), is(greaterThan(0L)));
 		} else if (dataset.getJavaType().isArray()) {
 			// e.g. Opaque dataset
 			assertThat(getType(data), is(equalTo(dataset.getJavaType().getComponentType())));
 			// Should have some size
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
+			assertThat(dataset.getSize(), is(greaterThan(0L)));
 		} else {
 			assertThat(getDimensions(data), is(equalTo(dims)));
 			assertThat(getType(data), is(equalTo(dataset.getJavaType())));
 			// Should have some size
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
+			assertThat(dataset.getSize(), is(greaterThan(0L)));
 		}
 
 		if (dataset instanceof ContiguousDataset && !dataset.isEmpty()) {

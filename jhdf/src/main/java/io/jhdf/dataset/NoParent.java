@@ -17,6 +17,7 @@ import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -95,6 +96,11 @@ public enum NoParent implements Group {
 
 	@Override
 	public File getFile() {
+		throw new UnsupportedOperationException(UNKNOWN_GROUP);
+	}
+
+	@Override
+	public Path getFileAsPath() {
 		throw new UnsupportedOperationException(UNKNOWN_GROUP);
 	}
 
