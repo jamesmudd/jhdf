@@ -32,11 +32,22 @@ public class HdfFileChannel implements HdfBackingStorage {
 
 	private final FileChannel fc;
 	private final Superblock sb;
-	private boolean memoryMappingFailed;
+	private final boolean supportsMemoryMapping;
 
 	public HdfFileChannel(FileChannel fileChannel, Superblock superblock) {
 		this.fc = fileChannel;
 		this.sb = superblock;
+		// Detect if memory mapping is supported by the fileChannel
+		boolean supportsMemoryMappingTest;
+		try {
+			fileChannel.map(MapMode.READ_ONLY, 0, 0);
+			supportsMemoryMappingTest = true;
+		} catch (UnsupportedOperationException ex) {
+			supportsMemoryMappingTest = false;
+		} catch (IOException ex) {
+			throw new HdfException("Failed to access file", ex);
+		}
+		this.supportsMemoryMapping = supportsMemoryMappingTest;
 	}
 
 	/**
@@ -57,7 +68,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 			return readBufferNoOffset(rawAddress, length);
 		} catch (IOException e) {
 			throw new HdfException(
-				"Failed to read from file at address '" + address + "' (raw address '" + rawAddress + "'", e);
+				"Failed to read from file at address '" + address + "' (raw address '" + rawAddress + "')", e);
 		}
 	}
 
@@ -68,34 +79,32 @@ public class HdfFileChannel implements HdfBackingStorage {
 
 	@Override
 	public ByteBuffer mapNoOffset(long address, long length) {
-		try {
-			if (!memoryMappingFailed) {
-				try {
-					return fc.map(MapMode.READ_ONLY, address, length);
-				} catch (UnsupportedOperationException e) {
-					// many file systems do not support memory mapping
-					memoryMappingFailed = true;
-				}
+		if (supportsMemoryMapping) {
+			try {
+				return fc.map(MapMode.READ_ONLY, address, length);
+			} catch (IOException e) {
+				throw new HdfException("Failed to map buffer at address '" + address
+					+ "' of length '" + length + "'", e);
 			}
-			assert memoryMappingFailed;
+		} else {
 			// read channel into buffer instead of mapping it to memory
-			return readBufferNoOffset(address, Math.toIntExact(length));
-		} catch (IOException e) {
-			throw new HdfException("Failed to map buffer at address '" + address
-				+ "' of length '" + length + "'", e);
+			try {
+				return readBufferNoOffset(address, Math.toIntExact(length));
+			} catch (IOException e) {
+				throw new HdfException("Failed to read to buffer at address '" + address
+					+ "' of length '" + length + "'", e);
+			}
 		}
 	}
 
 	private ByteBuffer readBufferNoOffset(long address, int length) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(length);
-		int totalNumberOfBytesRead = 0;
-		while (totalNumberOfBytesRead < length) {
-			int numberOfBytesRead = fc.read(bb, address);
-			if (numberOfBytesRead < 0) {
-				throw new IOException("Trying to read more bytes than available");
-			}
-			totalNumberOfBytesRead += numberOfBytesRead;
+		int numberOfBytesRead = fc.read(bb, address);
+
+		if (numberOfBytesRead != length) {
+			throw new HdfException(String.format("Bytes read mismatch length=%d read=%d", length, numberOfBytesRead));
 		}
+
 		bb.order(LITTLE_ENDIAN);
 		bb.flip();
 		return bb;

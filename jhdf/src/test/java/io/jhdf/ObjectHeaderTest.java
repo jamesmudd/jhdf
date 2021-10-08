@@ -32,7 +32,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 class ObjectHeaderTest {
 	private HdfBackingStorage hdfBackingStorage;
@@ -118,19 +121,23 @@ class ObjectHeaderTest {
 	void testLazyObjectHeader() throws ConcurrentException, IOException {
 		FileChannel spyFc = Mockito.spy(fc);
 		HdfBackingStorage hdfBackingStorage = new HdfFileChannel(spyFc, sb);
-		LazyInitializer<ObjectHeader> lazyObjectHeader = ObjectHeader.lazyReadObjectHeader(hdfBackingStorage, 10904); // int8
+		// One interaction checking mapping support
+
+		verify(spyFc, times(1)).map(any(), anyLong(), anyLong());
+
 		// header
+		LazyInitializer<ObjectHeader> lazyObjectHeader = ObjectHeader.lazyReadObjectHeader(hdfBackingStorage, 10904); // int8
 		// Creating the lazy object header should not touch the file
-		Mockito.verifyNoInteractions(spyFc);
+		verifyNoMoreInteractions(spyFc);
 
 		// Get the actual header should cause the file to be read
 		lazyObjectHeader.get();
 
 		// Check the file was read
-		verify(spyFc, Mockito.atLeastOnce()).read(any(ByteBuffer.class), anyLong());
+		verify(spyFc, atLeastOnce()).read(any(ByteBuffer.class), anyLong());
 
 		// Ensure nothing else was done to the file
-		Mockito.verifyNoMoreInteractions(spyFc);
+		verifyNoMoreInteractions(spyFc);
 	}
 
 }
