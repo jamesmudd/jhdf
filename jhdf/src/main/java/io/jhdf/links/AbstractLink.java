@@ -19,6 +19,7 @@ import io.jhdf.exceptions.HdfException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Map;
 
 /**
@@ -75,6 +76,11 @@ public abstract class AbstractLink implements Link {
 	@Override
 	public File getFile() {
 		return parent.getFile();
+	}
+
+	@Override
+	public Path getFileAsPath() {
+		return parent.getFileAsPath();
 	}
 
 	@Override

@@ -64,7 +64,7 @@ class HdfFileChannelTest {
 			ByteBuffer bb = invocation.getArgument(0);
 			bb.rewind();
 			bb.put("TEST".getBytes(US_ASCII)); // Put test data in buffer
-			return null;
+			return 4;
 		}).when(fc).read(any(ByteBuffer.class), eq(3L));
 
 		// Read 4 bytes

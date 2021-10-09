@@ -54,6 +54,7 @@ class GroupTest {
 		rootGroup = mock(Group.class);
 		when(rootGroup.getPath()).thenReturn("/");
 		when(rootGroup.getFile()).thenReturn(file);
+		when(rootGroup.getFileAsPath()).thenReturn(file.toPath());
 	}
 
 	@AfterEach
