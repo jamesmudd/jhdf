@@ -17,6 +17,8 @@ import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -115,6 +117,7 @@ class ObjectHeaderTest {
 	}
 
 	@Test
+	@DisabledOnJre(value = JRE.JAVA_17, disabledReason = "Mockito fails to class sun.nio.ch.FileChannelImpl")
 	void testLazyObjectHeader() throws ConcurrentException, IOException {
 		FileChannel spyFc = Mockito.spy(fc);
 		HdfBackingStorage hdfBackingStorage = new HdfFileChannel(spyFc, sb);
