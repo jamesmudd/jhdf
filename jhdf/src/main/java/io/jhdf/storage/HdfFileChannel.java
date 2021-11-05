@@ -91,7 +91,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 		int totalNumberOfBytesRead = 0;
 		while (totalNumberOfBytesRead < length) {
 			int numberOfBytesRead = fc.read(bb, address);
-			if (numberOfBytesRead < 0) {
+			if (numberOfBytesRead <= 0) {
 				throw new IOException("Trying to read more bytes than available");
 			}
 			totalNumberOfBytesRead += numberOfBytesRead;

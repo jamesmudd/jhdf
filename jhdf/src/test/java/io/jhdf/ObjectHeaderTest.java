@@ -17,8 +17,6 @@ import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnJre;
-import org.junit.jupiter.api.condition.JRE;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -117,23 +115,29 @@ class ObjectHeaderTest {
 	}
 
 	@Test
-	@DisabledOnJre(value = JRE.JAVA_17, disabledReason = "Mockito fails to class sun.nio.ch.FileChannelImpl")
 	void testLazyObjectHeader() throws ConcurrentException, IOException {
-		FileChannel spyFc = Mockito.spy(fc);
-		HdfBackingStorage hdfBackingStorage = new HdfFileChannel(spyFc, sb);
+		FileChannel mockFc = Mockito.mock(FileChannel.class);
+		Mockito.doAnswer(invocation -> {
+			ByteBuffer bb = invocation.getArgument(0);
+			long address = invocation.getArgument(1);
+			bb.put(hdfBackingStorage.readBufferFromAddress(address, bb.capacity()));
+			return bb.capacity();
+		}).when(mockFc).read(any(ByteBuffer.class), anyLong());
+		HdfBackingStorage hdfBackingStorage = new HdfFileChannel(mockFc, sb);
 		LazyInitializer<ObjectHeader> lazyObjectHeader = ObjectHeader.lazyReadObjectHeader(hdfBackingStorage, 10904); // int8
+
 		// header
 		// Creating the lazy object header should not touch the file
-		Mockito.verifyNoInteractions(spyFc);
+		Mockito.verifyNoInteractions(mockFc);
 
 		// Get the actual header should cause the file to be read
 		lazyObjectHeader.get();
 
 		// Check the file was read
-		verify(spyFc, Mockito.atLeastOnce()).read(any(ByteBuffer.class), anyLong());
+		verify(mockFc, Mockito.atLeastOnce()).read(any(ByteBuffer.class), anyLong());
 
 		// Ensure nothing else was done to the file
-		Mockito.verifyNoMoreInteractions(spyFc);
+		Mockito.verifyNoMoreInteractions(mockFc);
 	}
 
 }
