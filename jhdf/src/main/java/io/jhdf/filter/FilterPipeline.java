@@ -76,7 +76,7 @@ public class FilterPipeline {
 	@Override
 	public String toString() {
 		return "FilterPipeline{" +
-			filters.stream().map(Objects::toString).collect(Collectors.joining(" → ")) +
+			filters.stream().map(Objects::toString).collect(Collectors.joining(" -> ")) +
 			'}';
 	}
 }
