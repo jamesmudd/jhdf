@@ -3,7 +3,7 @@
 
 This project is a pure Java implementation for accessing HDF5 files. It is written from the file format specification and is not using any HDF Group code, it is *not* a wrapper around the C libraries. The file format specification is available from the HDF Group [here](https://portal.hdfgroup.org/display/HDF5/File+Format+Specification). More information on the format is available on [Wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format).
 
-The intention is to make a clean Java API to access HDF5 data. Currently, the project is targeting HDF5 read-only compatibility. For progress see the [change log](CHANGES.md). Java 8 and 11 are officially supported.
+The intention is to make a clean Java API to access HDF5 data. Currently, the project is targeting HDF5 read-only compatibility. For progress see the [change log](CHANGES.md). Java 8, 11 and 17 are officially supported.
 
 Here is an example of reading a dataset with `jHDF` (see [ReadDataset.java](jhdf/src/main/java/io/jhdf/examples/ReadDataset.java))
 
@@ -26,7 +26,7 @@ Mostly it's a challenge, HDF5 is a fairly complex file format with lots of flexi
 - The API design intends to be familiar to Java programmers, so hopefully it works as you might expect. (If this is not the case, open an issue with suggestions for improvement)
 - No use of JNI, so you avoid all the issues associated with calling native code from the JVM.
 - Fully debug-able you can step fully through the library with a Java debugger.
-- Provides access to datasets `ByteBuffer`s to allow for custom reading logic, or integration with other libraries. 
+- Provides access to datasets `ByteBuffer`s to allow for custom reading logic, or integration with other libraries.
 - Performance? Maybe, the library uses Java NIO `MappedByteBuffer`s which should provide fast file access. In addition, when accessing chunked datasets the library is parallelized to take advantage of modern CPUs. `jHDF` will also allow parallel reading of multiple datasets or multiple files. I have seen cases where `jHDF` is significantly faster than the C libraries, but as with all performance issues, it is case specific so you will need to do your own tests on the cases you care about. If you do tests please post the results so everyone can benefit, here are some results I am aware of:
     - [Peter Kirkham - Parallel IO Improvements](http://pkirkham.github.io/pyrus/parallel-io-improvements/)
 
@@ -38,12 +38,12 @@ Mostly it's a challenge, HDF5 is a fairly complex file format with lots of flexi
 
 ## Developing jHDF
 - Fork this repository and clone your fork
-- Inside the `jhdf` directory run `./gradlew build` (`./gradlew.bat build` on Windows) this will run the build and tests fetching dependencies. 
+- Inside the `jhdf` directory run `./gradlew build` (`./gradlew.bat build` on Windows) this will run the build and tests fetching dependencies.
 - Import the Gradle project `jhdf` into your IDE.
 - Make your changes and add tests.
 - Run `./gradlew check` to run the build and tests.
 - Once you have made any changes please open a pull request.
 
-To see other available Gradle tasks run `./gradlew tasks` 
+To see other available Gradle tasks run `./gradlew tasks`
 
 If you have read this far please consider staring this repo. Thanks!
