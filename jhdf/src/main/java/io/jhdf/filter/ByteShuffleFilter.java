@@ -45,6 +45,13 @@ public class ByteShuffleFilter implements Filter {
 			}
 		}
 
+		// Very special case here for mismatched length e.g use deflate then shuffle
+		// Not sure if there is actually any good use case
+		if(pos < data.length) {
+			// In the overrun section no shuffle is done just a straight copy
+			System.arraycopy(data, pos, out, pos, data.length - pos);
+		}
+
 		return out;
 	}
 }

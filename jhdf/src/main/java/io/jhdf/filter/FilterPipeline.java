@@ -12,7 +12,10 @@ package io.jhdf.filter;
 import io.jhdf.exceptions.HdfFilterException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * A collection of filters making up a ordered pipeline to decode chunks.
@@ -33,6 +36,14 @@ public class FilterPipeline {
 
 		private byte[] decode(byte[] data) {
 			return filter.decode(data, filterData);
+		}
+
+		@Override
+		public String toString() {
+			return "{" +
+				"filter=" + filter.getName() +
+				", filterData=" + Arrays.toString(filterData) +
+				'}';
 		}
 	}
 
@@ -62,4 +73,10 @@ public class FilterPipeline {
 		return encodedData;
 	}
 
+	@Override
+	public String toString() {
+		return "FilterPipeline{" +
+			filters.stream().map(Objects::toString).collect(Collectors.joining(" -> ")) +
+			'}';
+	}
 }

@@ -261,14 +261,17 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	protected final class FilterPipelineLazyInitializer extends LazyInitializer<FilterPipeline> {
 		@Override
 		protected FilterPipeline initialize() {
-			logger.debug("Lazy initializing filter pipeline for '{}'", getPath());
+			logger.debug("Lazy initializing filter pipeline for [{}]", getPath());
 
 			// If the dataset has filters get the message
 			if (oh.hasMessageOfType(FilterPipelineMessage.class)) {
 				FilterPipelineMessage filterPipelineMessage = oh.getMessageOfType(FilterPipelineMessage.class);
-				return FilterManager.getPipeline(filterPipelineMessage);
+				FilterPipeline filterPipeline = FilterManager.getPipeline(filterPipelineMessage);
+				logger.info("Initialized filter pipeline [{}] for [{}]", filterPipeline, getPath());
+				return filterPipeline;
 			} else {
 				// No filters
+				logger.debug("No filters for [{}]", getPath());
 				return null;
 			}
 		}
