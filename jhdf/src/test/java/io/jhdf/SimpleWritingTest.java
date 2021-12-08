@@ -15,8 +15,10 @@ public class SimpleWritingTest {
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 		writableHdfFile.close();
 
-		Files.copy(tempFile, Paths.get("test.hdf5"));
 		// Now read it back
 		HdfFile hdfFile = new HdfFile(tempFile);
+
+		// Cleanup
+		Files.delete(tempFile);
 	}
 }
