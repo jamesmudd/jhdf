@@ -7,7 +7,7 @@
 
 ## v0.6.3
 - Improve support for NIO Path. Allows jHDF to open files on non-default file systems such as zip files or remote storage systems. Thanks, @tbrunsch for this contribution https://github.com/jamesmudd/jhdf/pull/304
-- Fix accessing a missing fill value could cause and exception https://github.com/jamesmudd/jhdf/pull/307
+- Fix accessing a missing fill value could cause an exception https://github.com/jamesmudd/jhdf/pull/307
 - Dependency updates
 - CI and release process improvements
 
