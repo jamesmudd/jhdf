@@ -47,6 +47,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -115,11 +116,13 @@ abstract class TestAllFilesBase {
 				assertThat(attribute.getSizeInBytes(), is(greaterThan(0L)));
 				assertThat(attribute.getData(), is(notNullValue()));
 				assertThat(attribute.getBuffer(), is(notNullValue()));
+				assertThat(attribute.getData(), isA(attribute.getJavaType()));
 			} else {
 				assertThat(attribute.getSize(), is(greaterThan(0L)));
 				assertThat(attribute.getSizeInBytes(), is(greaterThan(0L)));
 				assertThat(attribute.getData(), is(notNullValue()));
 				assertThat(attribute.getBuffer(), is(notNullValue()));
+				assertThat(getType(attribute.getData()), is(attribute.getJavaType()));
 			}
 		}
 	}
@@ -173,6 +176,7 @@ abstract class TestAllFilesBase {
 			assertThat(getDimensions(data)[0], is(equalTo(dims[0])));
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 			assertThat(dataset.getSize(), is(greaterThan(0L)));
+			assertThat(getType(data), is(equalTo(dataset.getJavaType())));
 		} else if (dataset.getJavaType().isArray()) {
 			// e.g. Opaque dataset
 			assertThat(getType(data), is(equalTo(dataset.getJavaType().getComponentType())));
