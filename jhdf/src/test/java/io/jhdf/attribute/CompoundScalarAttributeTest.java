@@ -10,13 +10,19 @@
 package io.jhdf.attribute;
 
 import io.jhdf.HdfFile;
+
 import static io.jhdf.TestUtils.loadTestHdfFile;
+
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Node;
+
 import java.util.Map;
+
 import org.junit.jupiter.api.AfterAll;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -38,24 +44,24 @@ class CompoundScalarAttributeTest {
 
 	@Test
 	void testReadAttribute() {
-            
-            Node node = hdfFile.getByPath("GROUP");
-            Attribute attribute = node.getAttribute("VERSION");
-            
-            Object data = attribute.getData();
-            
-            Map<String,int[]> dataImpl = (Map<String,int[]>)data;
-            
-            String key = "myMajor";
-            assertTrue(dataImpl.containsKey(key));
-            assertEquals(1,dataImpl.get(key)[0]);
-            
-            key = "myMinor";
-            assertTrue(dataImpl.containsKey(key));
-            assertEquals(0,dataImpl.get(key)[0]);
-            
-            key = "myPatch";
-            assertTrue(dataImpl.containsKey(key));
-            assertEquals(0,dataImpl.get(key)[0]);
+
+		Node node = hdfFile.getByPath("GROUP");
+		Attribute attribute = node.getAttribute("VERSION");
+
+		Object data = attribute.getData();
+
+		Map<String, int[]> dataImpl = (Map<String, int[]>) data;
+
+		String key = "myMajor";
+		assertTrue(dataImpl.containsKey(key));
+		assertEquals(1, dataImpl.get(key)[0]);
+
+		key = "myMinor";
+		assertTrue(dataImpl.containsKey(key));
+		assertEquals(0, dataImpl.get(key)[0]);
+
+		key = "myPatch";
+		assertTrue(dataImpl.containsKey(key));
+		assertEquals(0, dataImpl.get(key)[0]);
 	}
 }
