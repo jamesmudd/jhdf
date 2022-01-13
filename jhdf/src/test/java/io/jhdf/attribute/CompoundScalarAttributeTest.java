@@ -38,22 +38,22 @@ class CompoundScalarAttributeTest {
 
 	@Test
 	void testReadAttribute() {
-            
+
             Node node = hdfFile.getByPath("GROUP");
             Attribute attribute = node.getAttribute("VERSION");
-            
+
             Object data = attribute.getData();
-            
+
             Map<String,int[]> dataImpl = (Map<String,int[]>)data;
-            
+
             String key = "myMajor";
             assertTrue(dataImpl.containsKey(key));
             assertEquals(1,dataImpl.get(key)[0]);
-            
+
             key = "myMinor";
             assertTrue(dataImpl.containsKey(key));
             assertEquals(0,dataImpl.get(key)[0]);
-            
+
             key = "myPatch";
             assertTrue(dataImpl.containsKey(key));
             assertEquals(0,dataImpl.get(key)[0]);
