@@ -24,7 +24,6 @@ public class ArrayDataType extends DataType {
 	private final DataType baseType;
 	private final int[] arrayTypeDimensions;
 
-
 	public ArrayDataType(ByteBuffer bb) {
 		super(bb);
 
@@ -56,7 +55,11 @@ public class ArrayDataType extends DataType {
 	public DataType getBaseType() {
 		return baseType;
 	}
-
+        
+        /**
+         * Get the instance dimensions
+         * @return instance dimensions
+         */
 	public int[] getArrayTypeDimensions() {
 		return ArrayUtils.clone(arrayTypeDimensions);
 	}
@@ -64,7 +67,6 @@ public class ArrayDataType extends DataType {
 	@Override
 	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
 		int[] mergedDimensions = ArrayUtils.addAll(dimensions, arrayTypeDimensions);
-
 		return DatasetReader.readDataset(getBaseType(), buffer, mergedDimensions, hdfBackingStorage);
 	}
 }
