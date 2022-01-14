@@ -55,7 +55,7 @@ public class ArrayDataType extends DataType {
 	public DataType getBaseType() {
 		return baseType;
 	}
-        
+
         /**
          * Get the instance dimensions
          * @return instance dimensions
