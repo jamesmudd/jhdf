@@ -47,14 +47,20 @@ class MultidimensionalArrayDatasetTest {
             assert (type == NodeType.DATASET);
             Dataset dataset = (Dataset)node;
 
-            Map<String,Object> data = (Map<String,Object>)dataset.getData();
+            Object data = dataset.getData();
+            assertTrue(data instanceof Map);
+
+            Class<?> javaType = dataset.getJavaType();
+            assertEquals(Map.class,javaType);
+
+            Map<String,Object> map = (Map<String,Object>)data;
 
             String memberName;
             Object[][] member;
 
             memberName = "myReferencePoint";
-            assertTrue(data.containsKey(memberName));
-            member = (Object[][])data.get(memberName);
+            assertTrue(map.containsKey(memberName));
+            member = (Object[][])map.get(memberName);
 
             assertEquals(5,member.length);
 
@@ -62,8 +68,8 @@ class MultidimensionalArrayDatasetTest {
             assertArrayEquals(new double[]{ 0., 0., 0.},(double[])member[1][0],1.0E-9);
 
             memberName = "myAxisVectors";
-            assertTrue(data.containsKey(memberName));
-            member = (Object[][])data.get(memberName);
+            assertTrue(map.containsKey(memberName));
+            member = (Object[][])map.get(memberName);
 
             assertEquals(5,member.length);
 
