@@ -55,7 +55,7 @@ class MultidimensionalArrayDatasetTest {
             memberName = "myReferencePoint";
             assertTrue(data.containsKey(memberName));
             member = (Object[][])data.get(memberName);
-            
+
             assertEquals(5,member.length);
 
             assertArrayEquals(new double[]{ 0., 0., 0.},(double[])member[0][0],1.0E-9);
@@ -64,7 +64,7 @@ class MultidimensionalArrayDatasetTest {
             memberName = "myAxisVectors";
             assertTrue(data.containsKey(memberName));
             member = (Object[][])data.get(memberName);
-            
+
             assertEquals(5,member.length);
 
             assertArrayEquals(new double[]{ 1., 0., 0., 0., 1., 0., 0., 0., 1.},(double[])member[0][0],1.0E-9);
@@ -88,7 +88,7 @@ class MultidimensionalArrayDatasetTest {
             memberName = "myUnitDimension";
             assertTrue(data.containsKey(memberName));
             member = (Object[][])data.get(memberName);
-            
+
             assertEquals(8,member.length);
 
             assertArrayEquals(new int[]{ 1, 0, 0, 0, 0, 0, 0},(int[])member[0][0]);
