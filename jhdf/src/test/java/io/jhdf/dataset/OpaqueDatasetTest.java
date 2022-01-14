@@ -10,21 +10,18 @@
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
+import static io.jhdf.TestUtils.loadTestHdfFile;
 import io.jhdf.api.Dataset;
 import io.jhdf.object.datatype.OpaqueDataType;
+import java.nio.ByteBuffer;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import java.time.Instant;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-
-import static io.jhdf.TestUtils.loadTestHdfFile;
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
 class OpaqueDatasetTest {
 
