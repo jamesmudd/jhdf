@@ -49,24 +49,24 @@ public class ArrayDataType extends DataType {
 
 	@Override
 	public Class<?> getJavaType() {
-		return Array.newInstance(baseType.getJavaType(), getArrayTypeDimensions()).getClass();
+		return Array.newInstance(baseType.getJavaType(), 0).getClass();
 	}
 
 	public DataType getBaseType() {
 		return baseType;
 	}
 
-        /**
-         * Get the instance dimensions
-         * @return instance dimensions
-         */
+	/**
+	 * Get the instance dimensions
+	 * @return instance dimensions
+	 */
 	public int[] getArrayTypeDimensions() {
 		return ArrayUtils.clone(arrayTypeDimensions);
 	}
 
 	@Override
 	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
-		int[] mergedDimensions = ArrayUtils.addAll(dimensions, arrayTypeDimensions);
+		final int[] mergedDimensions = ArrayUtils.addAll(dimensions, arrayTypeDimensions);
 		return DatasetReader.readDataset(getBaseType(), buffer, mergedDimensions, hdfBackingStorage);
 	}
 }
