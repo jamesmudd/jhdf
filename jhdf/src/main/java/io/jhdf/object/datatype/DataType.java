@@ -13,6 +13,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
+
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
@@ -100,19 +101,21 @@ public abstract class DataType {
 		return size;
 	}
 
-        /**
-         * Get the {@link Class} of the respective Java type
-         * @return {@link Class} of the respective Java type
-         */
+	/**
+	 * Get the Java {@link Class} of this HDF5 type
+	 *
+	 * @return {@link Class} of this HDF5 type
+	 */
 	public abstract Class<?> getJavaType();
 
-        /**
-         * Fill the {@link Object} with its data
-         * @param buffer {@link ByteBuffer}
-         * @param dimensions Object dimensions
-         * @param hdfBackingStorage {@link HdfBackingStorage}
-         * @return {@link Object} with its data
-         */
+	/**
+	 * Fill the data from buffer into the returned {@link Object} using this {@link DataType}
+	 *
+	 * @param buffer            containing the data
+	 * @param dimensions        dataset dimensions
+	 * @param hdfBackingStorage file containing this data
+	 * @return the read data
+	 */
 	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage);
 
 }
