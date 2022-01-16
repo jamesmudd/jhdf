@@ -11,19 +11,27 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
-import io.jhdf.api.Node;
-import io.jhdf.api.NodeType;
+import io.jhdf.object.datatype.ArrayDataType;
+import io.jhdf.object.datatype.CompoundDataType;
+import io.jhdf.object.datatype.DataType;
+import io.jhdf.object.datatype.FloatingPoint;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Array;
+import java.util.List;
 import java.util.Map;
 
 import static io.jhdf.TestUtils.loadTestHdfFile;
+import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 // https://github.com/jamesmudd/jhdf/issues/341
@@ -45,12 +53,7 @@ class MultidimensionalArrayDatasetTest {
 
 	@Test
 	void testGetData1() {
-
-		Node node = hdfFile.getByPath("GROUP1/GROUP2/DATASET1");
-		NodeType type = node.getType();
-
-		assertThat(type, is(NodeType.DATASET));
-		Dataset dataset = (Dataset) node;
+		Dataset dataset = hdfFile.getDatasetByPath("GROUP1/GROUP2/DATASET1");
 
 		assertThat(dataset.getJavaType(), is(Map.class));
 
@@ -80,13 +83,7 @@ class MultidimensionalArrayDatasetTest {
 
 	@Test
 	void testGetData2() {
-
-		Node node = hdfFile.getByPath("GROUP1/GROUP2/DATASET2");
-		NodeType type = node.getType();
-
-		assertThat(type, is(NodeType.DATASET));
-		Dataset dataset = (Dataset) node;
-
+		Dataset dataset = hdfFile.getDatasetByPath("GROUP1/GROUP2/DATASET2");
 		Map<String, Object> data = (Map<String, Object>) dataset.getData();
 
 		String memberName;
@@ -106,5 +103,29 @@ class MultidimensionalArrayDatasetTest {
 		assertArrayEquals(new int[]{0, 0, 0, 0, 0, 1, 0}, (int[]) member[5][0]);
 		assertArrayEquals(new int[]{0, 0, 0, 0, 0, 0, 1}, (int[]) member[6][0]);
 		assertArrayEquals(new int[]{-1, 1, -2, 0, 0, 0, 0}, (int[]) member[7][0]);
+	}
+
+	@Test
+	void getAccessingArrayDataType() {
+		Dataset dataset = hdfFile.getDatasetByPath("GROUP1/GROUP2/DATASET1");
+		DataType dataType = dataset.getDataType();
+		assertThat(dataType, isA(CompoundDataType.class));
+
+		CompoundDataType compoundDataType = (CompoundDataType) dataType;
+		List<CompoundDataType.CompoundDataMember> members = compoundDataType.getMembers();
+		assertThat(members, hasSize(4));
+
+		CompoundDataType.CompoundDataMember myReferencePointMember = members.get(2);
+		assertThat(myReferencePointMember.getName(), is("myReferencePoint"));
+		assertThat(myReferencePointMember.getDimensionSize(), is(nullValue()));
+		assertThat(myReferencePointMember.getOffset(), is(8));
+
+		DataType myReferencePointMemberDataType = myReferencePointMember.getDataType();
+		assertThat(myReferencePointMemberDataType, isA(ArrayDataType.class));
+		ArrayDataType arrayDataType = (ArrayDataType) myReferencePointMemberDataType;
+		assertThat(toObject(arrayDataType.getArrayTypeDimensions()), arrayContaining(3));
+		assertThat(arrayDataType.getBaseType(), isA(FloatingPoint.class));
+		assertThat(arrayDataType.getJavaType(), is(Array.newInstance(double.class, 0).getClass()));
+
 	}
 }
