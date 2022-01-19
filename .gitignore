@@ -38,3 +38,6 @@ gradle-app.setting
 *.iml
 *.ipr
 *.iws
+
+# Built docs
+/docs/site/

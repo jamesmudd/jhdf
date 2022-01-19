@@ -1,0 +1,13 @@
+site_name: jHDF
+#site_url: https://example.com/
+
+nav:
+    - Home: index.md
+    - Data Types: dataTypes.md
+    - Change Log: CHANGES.md
+
+
+theme:
+    name: mkdocs
+    nav_style: light
+
