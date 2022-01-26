@@ -53,7 +53,7 @@ dependencies {
 
     // Use JUnit 5 test framework
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2'
-    testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.33'
+    testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.35'
 
     // Mocking
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.3.0'
