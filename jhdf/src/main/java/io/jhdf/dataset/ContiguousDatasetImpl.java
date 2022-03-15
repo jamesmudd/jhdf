@@ -61,9 +61,15 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 
 		final int fastestDimLengthBytes = sliceDimensions[sliceDimensions.length - 1] * getDataType().getSize();
 
-		for (int i = 0; i < sliceDimensions.length; i++) {
+		int sectionsToRead = 1;
+		for (int i = 0; i < sliceDimensions.length - 1; i++) {
+			sectionsToRead += sliceDimensions[i] - 1;
+		}
+		int sizeToSkip = getDimensions()[sliceDimensions.length - 1] * getDataType().getSize() - fastestDimLengthBytes;
+
+		for (int i = 0; i < sectionsToRead; i++) {
 			byteBuffer.put(hdfBackingStorage.readBufferFromAddress(fileOffset, fastestDimLengthBytes));
-			fileOffset += getDimensions()[i] - sliceDimensions[i] * getDataType().getSize();
+			fileOffset += sizeToSkip;
 		}
 
 		byteBuffer.flip();
