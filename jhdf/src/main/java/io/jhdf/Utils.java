@@ -300,6 +300,19 @@ public final class Utils {
 		return linear;
 	}
 
+	// TODO add tests
+	public static long dimensionIndexToLinearIndex(long[] index, int[] dimensions) {
+		int linear = 0;
+		for (int i = 0; i < dimensions.length; i++) {
+			long temp = index[i];
+			for (int j = i + 1; j < dimensions.length; j++) {
+				temp *= dimensions[j];
+			}
+			linear += temp;
+		}
+		return linear;
+	}
+
 	/**
 	 * Calculates the chunk offset from a given chunk index
 	 *

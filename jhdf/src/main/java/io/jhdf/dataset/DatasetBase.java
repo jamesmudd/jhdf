@@ -130,6 +130,12 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	}
 
 	@Override
+	public Object getData(long[] offset, int[] sliceDimensions) {
+		ByteBuffer sliceDataBuffer = getSliceDataBuffer(offset, sliceDimensions);
+		return DatasetReader.readDataset(getDataType(), sliceDataBuffer, sliceDimensions, hdfBackingStorage);
+	}
+
+	@Override
 	public boolean isScalar() {
 		return getDimensions().length == 0;
 	}
@@ -151,6 +157,9 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	 * @return the data buffer that holds this dataset
 	 */
 	public abstract ByteBuffer getDataBuffer();
+
+
+	public abstract ByteBuffer getSliceDataBuffer(long[] offset, int[] shape);
 
 	@Override
 	public Object getFillValue() {

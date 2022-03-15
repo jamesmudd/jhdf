@@ -112,6 +112,8 @@ public interface Dataset extends Node {
 	 */
 	Object getData();
 
+	Object getData(long[] offset, int[] sliceDimensions);
+
 	/**
 	 * Gets the Java type that will be used to represent this data.
 	 *

@@ -10,13 +10,16 @@
 package io.jhdf.dataset;
 
 import io.jhdf.ObjectHeader;
+import io.jhdf.Utils;
 import io.jhdf.api.Group;
 import io.jhdf.api.dataset.ContiguousDataset;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.InvalidSliceHdfException;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
 import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import static io.jhdf.Constants.UNDEFINED_ADDRESS;
 
@@ -38,6 +41,33 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 		} catch (Exception e) {
 			throw new HdfException("Failed to map data buffer for dataset '" + getPath() + "'", e);
 		}
+	}
+
+	@Override
+	public ByteBuffer getSliceDataBuffer(long[] sliceOffset, int[] sliceDimensions) {
+		final int numberOfDimensions = getDimensions().length;
+		if (sliceOffset.length != numberOfDimensions || sliceDimensions.length != numberOfDimensions) {
+			// TODO exception message etc
+			throw new InvalidSliceHdfException("TODO", sliceOffset, sliceDimensions, getDimensions());
+		}
+
+		int totalElementsInSlice = Arrays.stream(sliceDimensions).reduce(1, Math::multiplyExact);
+
+		ByteBuffer byteBuffer = ByteBuffer.allocate(totalElementsInSlice * getDataType().getSize());
+		convertToCorrectEndiness(byteBuffer);
+
+		long offsetBytes = Utils.dimensionIndexToLinearIndex(sliceOffset, getDimensions()) * getDataType().getSize();
+		long fileOffset = contiguousDataLayoutMessage.getAddress() + offsetBytes;
+
+		final int fastestDimLengthBytes = sliceDimensions[sliceDimensions.length - 1] * getDataType().getSize();
+
+		for (int i = 0; i < sliceDimensions.length; i++) {
+			byteBuffer.put(hdfBackingStorage.readBufferFromAddress(fileOffset, fastestDimLengthBytes));
+			fileOffset += getDimensions()[i] - sliceDimensions[i] * getDataType().getSize();
+		}
+
+		byteBuffer.flip();
+		return byteBuffer;
 	}
 
 	@Override

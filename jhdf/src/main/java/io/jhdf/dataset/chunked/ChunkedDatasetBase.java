@@ -15,6 +15,7 @@ import io.jhdf.api.Group;
 import io.jhdf.api.dataset.ChunkedDataset;
 import io.jhdf.dataset.DatasetBase;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.filter.FilterManager;
 import io.jhdf.filter.FilterPipeline;
 import io.jhdf.object.message.FilterPipelineMessage;
@@ -193,7 +194,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		final int fastestChunkDim = chunkDimensions[chunkDimensions.length - 1];
 		final int numOfOffsets = Arrays.stream(chunkDimensions)
 			.limit(chunkDimensions.length - 1L)
-			.reduce(1, (a, b) -> a * b);
+			.reduce(1, Math::multiplyExact);
 
 		final int[] chunkOffsets = new int[numOfOffsets];
 		for (int i = 0; i < numOfOffsets; i++) {
@@ -306,5 +307,10 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	@Override
 	public long getStorageInBytes() {
 		return getChunkLookup().values().stream().mapToLong(Chunk::getSize).sum();
+	}
+
+	@Override
+	public ByteBuffer getSliceDataBuffer(long[] offset, int[] shape) {
+		throw new UnsupportedHdfException("Chunked datasets don't support slice reading");
 	}
 }

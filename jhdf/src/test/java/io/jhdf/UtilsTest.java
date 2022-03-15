@@ -408,4 +408,10 @@ class UtilsTest {
 	void testStripLeadingIndex(int[] input, int[] output) {
 		assertThat(Utils.stripLeadingIndex(input), is(output));
 	}
+
+	@Test
+	void testDimensionIndexToLinearIndex() {
+		// TODO add paramertized tests
+		Utils.dimensionIndexToLinearIndex(new int[]{1,1}, new int[]{4,4});
+	}
 }
