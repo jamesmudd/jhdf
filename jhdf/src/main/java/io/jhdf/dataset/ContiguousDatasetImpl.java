@@ -46,9 +46,13 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 	@Override
 	public ByteBuffer getSliceDataBuffer(long[] sliceOffset, int[] sliceDimensions) {
 		final int numberOfDimensions = getDimensions().length;
-		if (sliceOffset.length != numberOfDimensions || sliceDimensions.length != numberOfDimensions) {
+		if (sliceOffset.length != numberOfDimensions
+			|| sliceDimensions.length != numberOfDimensions
+		) {
 			// TODO exception message etc
 			throw new InvalidSliceHdfException("TODO", sliceOffset, sliceDimensions, getDimensions());
+		} else if (sliceDimensions.length == 0) {
+			throw new InvalidSliceHdfException("sliceDimensions must have >0 lentgh", sliceOffset, sliceDimensions, getDimensions());
 		}
 
 		int totalElementsInSlice = Arrays.stream(sliceDimensions).reduce(1, Math::multiplyExact);
@@ -63,17 +67,6 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 
 		long[] currentOffset = sliceOffset.clone();
 		readSlicesToBuffer(-1, sliceOffset, sliceDimensions, currentOffset, byteBuffer);
-
-//		int sectionsToRead = 1;
-//		for (int i = 0; i < sliceDimensions.length - 1; i++) {
-//			sectionsToRead += sliceDimensions[i] - 1;
-//		}
-//		int sizeToSkip = getDimensions()[sliceDimensions.length - 1] * getDataType().getSize() - fastestDimLengthBytes;
-//
-//		for (int i = 0; i < sectionsToRead; i++) {
-//
-//			fileOffset += sizeToSkip;
-//		}
 
 		byteBuffer.flip();
 		return byteBuffer;

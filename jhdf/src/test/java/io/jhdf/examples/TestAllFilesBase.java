@@ -193,6 +193,17 @@ abstract class TestAllFilesBase {
 			assertThat(buffer, is(notNullValue()));
 			assertThat(buffer.capacity(), is(greaterThan(0)));
 			assertThat(contiguousDataset.getDataAddress(), is(greaterThan(0L)));
+
+			// Can't slice scalar datasets
+			if(!dataset.isScalar()) {
+				// Read the whole dataset using the slice method should be the same as the non-sliced
+				long[] sliceOffset = new long[dataset.getDimensions().length];
+				Object slicedData = contiguousDataset.getData(sliceOffset, dataset.getDimensions());
+				// Harder to compare compound. Still read it but don't assert on it
+				if(!dataset.isCompound()) {
+					assertThat(Objects.deepEquals(data, slicedData), is(true));
+				}
+			}
 		}
 
 		if (dataset instanceof ChunkedDataset && !dataset.isEmpty()) {

@@ -14,6 +14,7 @@ import io.jhdf.ObjectHeader;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
+import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.datatype.CompoundDataType;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.OrderedDataType;
@@ -131,6 +132,13 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 	@Override
 	public Object getData(long[] offset, int[] sliceDimensions) {
+		if (isEmpty()) {
+			return null;
+		}
+		if(isScalar()) {
+			throw new HdfException("Cannot slice scalar dataset");
+		}
+
 		ByteBuffer sliceDataBuffer = getSliceDataBuffer(offset, sliceDimensions);
 		return DatasetReader.readDataset(getDataType(), sliceDataBuffer, sliceDimensions, hdfBackingStorage);
 	}

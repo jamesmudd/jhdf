@@ -23,5 +23,7 @@ public class SlicingTest {
 
 		data = (int[][][]) dataset.getData(new long[]{0, 2, 30}, new int[]{1, 3, 15});
 
+		data = (int[][][]) dataset.getData(new long[]{0, 0, 0}, new int[]{2, 5, 10});
+
 	}
 }
