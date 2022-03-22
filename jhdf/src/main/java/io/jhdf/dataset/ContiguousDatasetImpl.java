@@ -61,19 +61,40 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 
 		final int fastestDimLengthBytes = sliceDimensions[sliceDimensions.length - 1] * getDataType().getSize();
 
-		int sectionsToRead = 1;
-		for (int i = 0; i < sliceDimensions.length - 1; i++) {
-			sectionsToRead += sliceDimensions[i] - 1;
-		}
-		int sizeToSkip = getDimensions()[sliceDimensions.length - 1] * getDataType().getSize() - fastestDimLengthBytes;
+		long[] currentOffset = sliceOffset.clone();
+		readSlicesToBuffer(-1, sliceOffset, sliceDimensions, currentOffset, byteBuffer);
 
-		for (int i = 0; i < sectionsToRead; i++) {
-			byteBuffer.put(hdfBackingStorage.readBufferFromAddress(fileOffset, fastestDimLengthBytes));
-			fileOffset += sizeToSkip;
-		}
+//		int sectionsToRead = 1;
+//		for (int i = 0; i < sliceDimensions.length - 1; i++) {
+//			sectionsToRead += sliceDimensions[i] - 1;
+//		}
+//		int sizeToSkip = getDimensions()[sliceDimensions.length - 1] * getDataType().getSize() - fastestDimLengthBytes;
+//
+//		for (int i = 0; i < sectionsToRead; i++) {
+//
+//			fileOffset += sizeToSkip;
+//		}
 
 		byteBuffer.flip();
 		return byteBuffer;
+	}
+
+	private void readSlicesToBuffer(Integer dimensionIndex, long[] sliceOffset, int[] sliceDimensions, long[] currentOffset, ByteBuffer byteBuffer) {
+		dimensionIndex++;
+		if(dimensionIndex < (sliceDimensions.length - 1)) {
+			for (long i = 0; i < sliceDimensions[dimensionIndex]; i++) {
+				currentOffset[dimensionIndex] = sliceOffset[dimensionIndex] + i;
+				readSlicesToBuffer(dimensionIndex, sliceOffset, sliceDimensions, currentOffset, byteBuffer);
+			}
+		} else {
+			// fastest dim so read some data
+			long offsetBytes = Utils.dimensionIndexToLinearIndex(currentOffset, getDimensions()) * getDataType().getSize();
+			long fileOffset = contiguousDataLayoutMessage.getAddress() + offsetBytes;
+
+			final int fastestDimLengthBytes = sliceDimensions[sliceDimensions.length - 1] * getDataType().getSize();
+
+			byteBuffer.put(hdfBackingStorage.readBufferFromAddress(fileOffset, fastestDimLengthBytes));
+		}
 	}
 
 	@Override
