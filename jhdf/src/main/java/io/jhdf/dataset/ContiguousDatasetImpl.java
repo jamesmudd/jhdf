@@ -52,18 +52,13 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 			// TODO exception message etc
 			throw new InvalidSliceHdfException("TODO", sliceOffset, sliceDimensions, getDimensions());
 		} else if (sliceDimensions.length == 0) {
-			throw new InvalidSliceHdfException("sliceDimensions must have >0 lentgh", sliceOffset, sliceDimensions, getDimensions());
+			throw new InvalidSliceHdfException("sliceDimensions must have >0 length", sliceOffset, sliceDimensions, getDimensions());
 		}
 
 		int totalElementsInSlice = Arrays.stream(sliceDimensions).reduce(1, Math::multiplyExact);
 
 		ByteBuffer byteBuffer = ByteBuffer.allocate(totalElementsInSlice * getDataType().getSize());
 		convertToCorrectEndiness(byteBuffer);
-
-		long offsetBytes = Utils.dimensionIndexToLinearIndex(sliceOffset, getDimensions()) * getDataType().getSize();
-		long fileOffset = contiguousDataLayoutMessage.getAddress() + offsetBytes;
-
-		final int fastestDimLengthBytes = sliceDimensions[sliceDimensions.length - 1] * getDataType().getSize();
 
 		long[] currentOffset = sliceOffset.clone();
 		readSlicesToBuffer(-1, sliceOffset, sliceDimensions, currentOffset, byteBuffer);
