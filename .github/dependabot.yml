@@ -13,7 +13,7 @@ updates:
     - "Java dependencies" 
 
   - package-ecosystem: "github-actions"
-    directory: "/.github/"
+    directory: "/"
     schedule:
       interval: "daily"
     labels:
