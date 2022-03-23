@@ -302,7 +302,7 @@ public final class Utils {
 
 	// TODO add tests
 	public static long dimensionIndexToLinearIndex(long[] index, int[] dimensions) {
-		int linear = 0;
+		long linear = 0;
 		for (int i = 0; i < dimensions.length; i++) {
 			long temp = index[i];
 			for (int j = i + 1; j < dimensions.length; j++) {
