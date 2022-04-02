@@ -289,15 +289,9 @@ public final class Utils {
 	}
 
 	public static int dimensionIndexToLinearIndex(int[] index, int[] dimensions) {
-		int linear = 0;
-		for (int i = 0; i < dimensions.length; i++) {
-			int temp = index[i];
-			for (int j = i + 1; j < dimensions.length; j++) {
-				temp *= dimensions[j];
-			}
-			linear += temp;
-		}
-		return linear;
+		long[] indexAsLong = Arrays.stream(index).asLongStream().toArray();
+		long linearLong = dimensionIndexToLinearIndex(indexAsLong, dimensions);
+		return Math.toIntExact(linearLong);
 	}
 
 	// TODO add tests

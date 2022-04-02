@@ -345,7 +345,7 @@ class UtilsTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource
+	@MethodSource("chunkIndexToChunkOffset")
 	void chunkIndexToChunkOffset(int chunkIndex, int[] chunkDimensions, int[] datasetDimensions, int[] expectedChunkOffset) {
 		assertThat(Utils.chunkIndexToChunkOffset(chunkIndex, chunkDimensions, datasetDimensions), is(equalTo(expectedChunkOffset)));
 	}
@@ -401,17 +401,27 @@ class UtilsTest {
 			Arguments.of(new int[]{1, 2, 3}, new int[]{2, 3}),
 			Arguments.of(new int[]{1, 2, 3, 4, 5}, new int[]{2, 3, 4, 5})
 		);
-	}
+}
 
 	@ParameterizedTest
-	@MethodSource
+	@MethodSource("testStripLeadingIndex")
 	void testStripLeadingIndex(int[] input, int[] output) {
 		assertThat(Utils.stripLeadingIndex(input), is(output));
 	}
 
-	@Test
-	void testDimensionIndexToLinearIndex() {
+
+
+	@ParameterizedTest
+	@MethodSource("testDimensionIndexToLinearIndex")
+	void testDimensionIndexToLinearIndex(long[] index, int[] dimensions, long result) {
 		// TODO add paramertized tests
-		Utils.dimensionIndexToLinearIndex(new int[]{1,1}, new int[]{4,4});
+		assertThat(Utils.dimensionIndexToLinearIndex(index, dimensions), is(result));
 	}
+
+	static Stream<Arguments> testDimensionIndexToLinearIndex() {
+		return Stream.of(
+			Arguments.of(new long[]{1,1}, new int[]{4,4}, 5)
+		);
+	}
+
 }
