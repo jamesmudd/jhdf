@@ -67,9 +67,10 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 		return byteBuffer;
 	}
 
-	private void readSlicesToBuffer(Integer dimensionIndex, long[] sliceOffset, int[] sliceDimensions, long[] currentOffset, ByteBuffer byteBuffer) {
+	private void readSlicesToBuffer(int dimensionIndex, long[] sliceOffset, int[] sliceDimensions, long[] currentOffset, ByteBuffer byteBuffer) {
 		dimensionIndex++;
 		if(dimensionIndex < (sliceDimensions.length - 1)) {
+			// Not fastest dimension
 			for (long i = 0; i < sliceDimensions[dimensionIndex]; i++) {
 				currentOffset[dimensionIndex] = sliceOffset[dimensionIndex] + i;
 				readSlicesToBuffer(dimensionIndex, sliceOffset, sliceDimensions, currentOffset, byteBuffer);
