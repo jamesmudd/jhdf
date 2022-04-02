@@ -294,8 +294,19 @@ public final class Utils {
 		return Math.toIntExact(linearLong);
 	}
 
-	// TODO add tests
 	public static long dimensionIndexToLinearIndex(long[] index, int[] dimensions) {
+		if(index.length != dimensions.length) {
+			throw new IllegalArgumentException("Mismatched index and dimension lengths");
+		}
+		for (int i = 0; i < dimensions.length; i++) {
+			if(index[i] < 0 || dimensions[i] < 0) {
+				throw new IllegalArgumentException("Negative index or dimension values");
+			}
+			if(index[i] > dimensions[i]) {
+				throw new IllegalArgumentException("index is greater than dimension size");
+			}
+		}
+
 		long linear = 0;
 		for (int i = 0; i < dimensions.length; i++) {
 			long temp = index[i];
