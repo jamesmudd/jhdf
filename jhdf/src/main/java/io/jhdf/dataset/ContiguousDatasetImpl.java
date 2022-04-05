@@ -14,7 +14,6 @@ import io.jhdf.Utils;
 import io.jhdf.api.Group;
 import io.jhdf.api.dataset.ContiguousDataset;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.InvalidSliceHdfException;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
 import io.jhdf.storage.HdfBackingStorage;
 
@@ -45,16 +44,6 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 
 	@Override
 	public ByteBuffer getSliceDataBuffer(long[] sliceOffset, int[] sliceDimensions) {
-		final int numberOfDimensions = getDimensions().length;
-		if (sliceOffset.length != numberOfDimensions
-			|| sliceDimensions.length != numberOfDimensions
-		) {
-			// TODO exception message etc
-			throw new InvalidSliceHdfException("TODO", sliceOffset, sliceDimensions, getDimensions());
-		} else if (sliceDimensions.length == 0) {
-			throw new InvalidSliceHdfException("sliceDimensions must have >0 length", sliceOffset, sliceDimensions, getDimensions());
-		}
-
 		int totalElementsInSlice = Arrays.stream(sliceDimensions).reduce(1, Math::multiplyExact);
 
 		ByteBuffer byteBuffer = ByteBuffer.allocate(totalElementsInSlice * getDataType().getSize());

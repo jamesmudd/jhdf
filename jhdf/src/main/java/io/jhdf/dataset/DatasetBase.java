@@ -15,6 +15,7 @@ import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.InvalidSliceHdfException;
 import io.jhdf.object.datatype.CompoundDataType;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.OrderedDataType;
@@ -131,7 +132,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	}
 
 	@Override
-	public Object getData(long[] offset, int[] sliceDimensions) {
+	public Object getData(long[] sliceOffset, int[] sliceDimensions) {
 		if (isEmpty()) {
 			throw new HdfException("Cannot slice empty dataset");
 		}
@@ -139,8 +140,31 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 			throw new HdfException("Cannot slice scalar dataset");
 		}
 
-		ByteBuffer sliceDataBuffer = getSliceDataBuffer(offset, sliceDimensions);
+		validateSliceRequest(sliceOffset, sliceDimensions);
+
+		ByteBuffer sliceDataBuffer = getSliceDataBuffer(sliceOffset, sliceDimensions);
 		return DatasetReader.readDataset(getDataType(), sliceDataBuffer, sliceDimensions, hdfBackingStorage);
+	}
+
+	private void validateSliceRequest(long[] sliceOffset, int[] sliceDimensions) {
+		final int numberOfDimensions = getDimensions().length;
+		if (sliceOffset.length != numberOfDimensions
+			|| sliceDimensions.length != numberOfDimensions
+		) {
+			throw new InvalidSliceHdfException("Requested slice does not match dataset dimensions", sliceOffset, sliceDimensions, getDimensions());
+		}
+		for (int i = 0; i < sliceOffset.length; i++) {
+			if(sliceOffset[i] < 0) {
+				throw new InvalidSliceHdfException("Requested sliceOffset has negative value in dimension: " + i, sliceOffset, sliceDimensions, getDimensions());
+			}
+			if(sliceDimensions[i] <= 0) {
+				throw new InvalidSliceHdfException("Requested sliceDimensions has negative or zero value in dimension: " + i, sliceOffset, sliceDimensions, getDimensions());
+			}
+
+			if(sliceOffset[i] + sliceDimensions[i] > getDimensions()[i]) {
+				throw new InvalidSliceHdfException("Requested slice exceeds dataset in dimension: " + i, sliceOffset, sliceDimensions, getDimensions());
+			}
+		}
 	}
 
 	@Override

@@ -12,6 +12,7 @@ package io.jhdf.dataset;
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.InvalidSliceHdfException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -94,6 +95,31 @@ class SlicingTest {
 		assertThat(toObject(slicedData[1][2]), is(subarray(fullData[1][2], 0, 10)));
 		assertThat(toObject(slicedData[1][3]), is(subarray(fullData[1][3], 0, 10)));
 		assertThat(toObject(slicedData[1][4]), is(subarray(fullData[1][4], 0, 10)));
+	}
+
+	@Test
+	void testInvalidSliceRequests() {
+		Dataset dataset = hdfFile.getDatasetByPath("/nD_Datasets/3D_float32");
+
+		// Mismatched dimensions 1D requested on 3D dataset
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{1}, new int[]{3}));
+		// Mismatched dimensions 2D requested on 3D dataset
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{1, 1}, new int[]{3, 3}));
+
+		// Negative values in slice offset specification
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{1, -1, 1}, new int[]{1, 1, 1}));
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{1, 3, -1}, new int[]{1, 1, 1}));
+
+		// Negative or zero values in slice dimensions specification
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{0,0,0}, new int[]{1, -1, 1}));
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{0,0,0}, new int[]{1, 0, 1}));
+
+		// Slice is outside the dataset
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{4, 1, 1}, new int[]{1, 1, 3}));
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{1, 23, 1}, new int[]{1, 1, 3}));
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{1, 23, 101}, new int[]{1, 1, 3}));
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{0, 0, 0}, new int[]{1, 1, 300}));
+
 	}
 
 	@Test
