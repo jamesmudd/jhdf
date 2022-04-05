@@ -1,5 +1,10 @@
 # jHDF Change Log
 
+## v0.6.6
+- Add support for slicing of contiguous datasets. This adds a new method `Dataset#getData(long[] sliceOffset, int[] sliceDimensions)` allowing you to read sections of a dataset that would otherwise be too large in memory. Note: chunked dataset slicing support is still missing.  https://github.com/jamesmudd/jhdf/issues/52 https://github.com/jamesmudd/jhdf/pull/361
+- Fix OSGi `Export-Package` header resulting in API access restriction when running in OSGi. https://github.com/jamesmudd/jhdf/issues/365 https://github.com/jamesmudd/jhdf/pull/367
+- Dependency and CI updates
+
 ## v0.6.5
 - Add support for array type data in multi-dimensional datasets https://github.com/jamesmudd/jhdf/issues/341
 - Fix issue reading compound type attributes https://github.com/jamesmudd/jhdf/issues/338
