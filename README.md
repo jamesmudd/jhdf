@@ -33,7 +33,7 @@ Mostly it's a challenge, HDF5 is a fairly complex file format with lots of flexi
 ## Why should I not use jHDF?
 - If you want to write HDF5 files. Currently, this is not supported. This will be supported in the future, but full read-only compatibility is currently the goal. If you would be intrested in this please comment on, or react to [issue #354](https://github.com/jamesmudd/jhdf/issues/354).
 - If `jHDF` does not yet support a feature you need. If this is the case you should receive a `UnsupportedHdfException`, open an issue and support can be added. For scheduling, the features which will allow the most files to be read are prioritized. If you really want to use a new feature feel free to work on it and open a PR, any help is much appreciated.
-- If you want to read slices of datasets. This is an excellent feature of HDF5, and one reason why it's suited to large datasets. Support will be added in the future, but currently it is not possible. If you would be intrested in this please comment on, or react to [issue #52](https://github.com/jamesmudd/jhdf/issues/52)
+- If you want to read slices of chunked datasets (slicing of contiguous datasets is supported since v0.6.6). This is an excellent feature of HDF5, and one reason why it's suited to large datasets. Support will be added in the future, but currently it is not possible. If you would be interested in this please comment on, or react to [issue #52](https://github.com/jamesmudd/jhdf/issues/52)
 - If you want to read datasets larger than can fit in a Java array (i.e. `Integer.MAX_VALUE` elements). This issue would also be addressed by slicing.
 
 ## Developing jHDF
