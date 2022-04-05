@@ -11,6 +11,7 @@ package io.jhdf.dataset;
 
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
+import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.message.DataLayoutMessage.CompactDataLayoutMessage;
 import io.jhdf.storage.HdfBackingStorage;
 
@@ -27,6 +28,11 @@ public class CompactDataset extends DatasetBase {
 		ByteBuffer data = getHeaderMessage(CompactDataLayoutMessage.class).getDataBuffer();
 		convertToCorrectEndiness(data);
 		return data;
+	}
+
+	@Override
+	public ByteBuffer getSliceDataBuffer(long[] offset, int[] shape) {
+		throw new UnsupportedHdfException("Compact datasets don't support slice reading");
 	}
 
 }

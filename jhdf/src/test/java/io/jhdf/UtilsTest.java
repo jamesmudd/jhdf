@@ -345,7 +345,7 @@ class UtilsTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource
+	@MethodSource("chunkIndexToChunkOffset")
 	void chunkIndexToChunkOffset(int chunkIndex, int[] chunkDimensions, int[] datasetDimensions, int[] expectedChunkOffset) {
 		assertThat(Utils.chunkIndexToChunkOffset(chunkIndex, chunkDimensions, datasetDimensions), is(equalTo(expectedChunkOffset)));
 	}
@@ -401,11 +401,53 @@ class UtilsTest {
 			Arguments.of(new int[]{1, 2, 3}, new int[]{2, 3}),
 			Arguments.of(new int[]{1, 2, 3, 4, 5}, new int[]{2, 3, 4, 5})
 		);
-	}
+}
 
 	@ParameterizedTest
-	@MethodSource
+	@MethodSource("testStripLeadingIndex")
 	void testStripLeadingIndex(int[] input, int[] output) {
 		assertThat(Utils.stripLeadingIndex(input), is(output));
+	}
+
+
+
+	@ParameterizedTest
+	@MethodSource("testDimensionIndexToLinearIndex")
+	void testDimensionIndexToLinearIndex(long[] index, int[] dimensions, long result) {
+		assertThat(Utils.dimensionIndexToLinearIndex(index, dimensions), is(result));
+	}
+
+	static Stream<Arguments> testDimensionIndexToLinearIndex() {
+		return Stream.of(
+			Arguments.of(new long[]{0,0}, new int[]{4,7}, 0),
+			Arguments.of(new long[]{1,1}, new int[]{4,4}, 5),
+			Arguments.of(new long[]{1,1}, new int[]{4,40}, 41),
+			Arguments.of(new long[]{1,1}, new int[]{300,40}, 41),
+			Arguments.of(new long[]{0,1,1}, new int[]{300,40,20}, 21),
+			Arguments.of(new long[]{1,1,1}, new int[]{300,40,20}, 821),
+			Arguments.of(new long[]{0,0,0}, new int[]{300,40,20}, 0),
+			Arguments.of(new long[]{3,0,0}, new int[]{300,40,20}, 40*20*3),
+			Arguments.of(new long[]{3,1,0}, new int[]{300,40,20}, 40*20*3+20),
+			Arguments.of(new long[]{3,1,3}, new int[]{300,40,20}, 40*20*3+20+3)
+		);
+	}
+
+	@Test
+	void testDimensionIndexToLinearIndexExceptions() {
+		// Mismatch argument lengths
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.dimensionIndexToLinearIndex(new int[]{4}, new int[]{1,1}));
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.dimensionIndexToLinearIndex(new int[]{4,4}, new int[]{1}));
+
+		// Negative values
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.dimensionIndexToLinearIndex(new int[]{-4}, new int[]{1}));
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.dimensionIndexToLinearIndex(new int[]{4}, new int[]{-3}));
+
+		// index higher than dimensions
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.dimensionIndexToLinearIndex(new int[]{4}, new int[]{1}));
 	}
 }

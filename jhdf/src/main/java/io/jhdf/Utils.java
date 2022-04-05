@@ -289,9 +289,27 @@ public final class Utils {
 	}
 
 	public static int dimensionIndexToLinearIndex(int[] index, int[] dimensions) {
-		int linear = 0;
+		long[] indexAsLong = Arrays.stream(index).asLongStream().toArray();
+		long linearLong = dimensionIndexToLinearIndex(indexAsLong, dimensions);
+		return Math.toIntExact(linearLong);
+	}
+
+	public static long dimensionIndexToLinearIndex(long[] index, int[] dimensions) {
+		if(index.length != dimensions.length) {
+			throw new IllegalArgumentException("Mismatched index and dimension lengths");
+		}
 		for (int i = 0; i < dimensions.length; i++) {
-			int temp = index[i];
+			if(index[i] < 0 || dimensions[i] < 0) {
+				throw new IllegalArgumentException("Negative index or dimension values");
+			}
+			if(index[i] > dimensions[i]) {
+				throw new IllegalArgumentException("index is greater than dimension size");
+			}
+		}
+
+		long linear = 0;
+		for (int i = 0; i < dimensions.length; i++) {
+			long temp = index[i];
 			for (int j = i + 1; j < dimensions.length; j++) {
 				temp *= dimensions[j];
 			}

@@ -12,6 +12,7 @@ package io.jhdf;
 import io.jhdf.api.Dataset;
 import io.jhdf.dataset.DatasetBase;
 import io.jhdf.object.message.DataLayout;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ import java.nio.ShortBuffer;
 
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -231,4 +233,13 @@ class DatasetImplTest {
 		assertThat(dataset.getData(), is(equalTo(REFERENCE_DOUBLE_DATA)));
 	}
 
+	@Test
+	void testSlicedRead() {
+		Dataset dataset = (Dataset) hdfFile.getByPath(FLOAT64_PATH);
+		double[] dataSlice = (double[]) dataset.getData(new long[]{3}, new int[]{3});
+		assertThat(ArrayUtils.toObject(dataSlice), arrayWithSize(3));
+		double[] fullData = (double[]) dataset.getData();
+
+		assertThat(dataSlice, is(ArrayUtils.subarray(fullData, 3, 6)));
+	}
 }
