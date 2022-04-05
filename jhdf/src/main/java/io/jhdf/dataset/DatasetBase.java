@@ -142,6 +142,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 		validateSliceRequest(sliceOffset, sliceDimensions);
 
+		logger.debug("Getting data slice offset={} dimensions={} for [{}]'...", sliceOffset, sliceDimensions, getPath());
 		ByteBuffer sliceDataBuffer = getSliceDataBuffer(sliceOffset, sliceDimensions);
 		return DatasetReader.readDataset(getDataType(), sliceDataBuffer, sliceDimensions, hdfBackingStorage);
 	}
