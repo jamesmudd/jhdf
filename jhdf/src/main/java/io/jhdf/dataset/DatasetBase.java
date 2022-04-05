@@ -133,7 +133,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	@Override
 	public Object getData(long[] offset, int[] sliceDimensions) {
 		if (isEmpty()) {
-			return null;
+			throw new HdfException("Cannot slice empty dataset");
 		}
 		if(isScalar()) {
 			throw new HdfException("Cannot slice scalar dataset");

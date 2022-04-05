@@ -11,6 +11,7 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
+import io.jhdf.exceptions.HdfException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -20,14 +21,17 @@ import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SlicingTest {
 
 	private static HdfFile hdfFile;
+	private static HdfFile scalarEmptyDatasetsHdfFile;
 
 	@BeforeAll
 	static void beforeAll() {
 		hdfFile = HdfFile.fromInputStream(SlicingTest.class.getResourceAsStream("/hdf5/test_file2.hdf5"));
+		scalarEmptyDatasetsHdfFile = HdfFile.fromInputStream(SlicingTest.class.getResourceAsStream("/hdf5/test_scalar_empty_datasets_latest.hdf5"));
 	}
 
 	@Test
@@ -90,5 +94,17 @@ class SlicingTest {
 		assertThat(toObject(slicedData[1][2]), is(subarray(fullData[1][2], 0, 10)));
 		assertThat(toObject(slicedData[1][3]), is(subarray(fullData[1][3], 0, 10)));
 		assertThat(toObject(slicedData[1][4]), is(subarray(fullData[1][4], 0, 10)));
+	}
+
+	@Test
+	void testEmptyDatasetThrows() {
+		Dataset emptyDataset = scalarEmptyDatasetsHdfFile.getDatasetByPath("empty_uint_32");
+		assertThrows(HdfException.class, () -> emptyDataset.getData(new long[]{3}, new int[]{3}));
+	}
+
+	@Test
+	void testScalarDatasetThrows() {
+		Dataset emptyDataset = scalarEmptyDatasetsHdfFile.getDatasetByPath("scalar_float_64");
+		assertThrows(HdfException.class, () -> emptyDataset.getData(new long[]{3}, new int[]{3}));
 	}
 }
