@@ -42,6 +42,7 @@ public enum FilterManager {
 		addFilter(new ByteShuffleFilter());
 		addFilter(new FletcherChecksumFilter());
 		addFilter(new LzfFilter());
+		addFilter(new BitShuffleFilter());
 
 		// Add dynamically loaded filters
 		ServiceLoader<Filter> serviceLoader = ServiceLoader.load(Filter.class);

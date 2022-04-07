@@ -50,6 +50,12 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     // lzf compression support
     implementation group: 'com.ning', name: 'compress-lzf', version: '1.1'
+    // https://mvnrepository.com/artifact/io.airlift/aircompressor
+    implementation group: 'io.airlift', name: 'aircompressor', version: '0.21'
+    // https://mvnrepository.com/artifact/org.lz4/lz4-java
+    implementation group: 'org.lz4', name: 'lz4-java', version: '1.8.0'
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-compress
+    implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.21'
 
     // Use JUnit 5 test framework
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2'
