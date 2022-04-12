@@ -10,12 +10,12 @@ updates:
     schedule:
       interval: "daily"
     labels:
-    - "Java dependencies" 
+    - "dependencies" 
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
     labels:
-    - "GH actions dependencies"
+    - "dependencies"
       
