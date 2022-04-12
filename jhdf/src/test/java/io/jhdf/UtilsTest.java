@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
@@ -462,8 +463,9 @@ class UtilsTest {
 			Arguments.of(new int[]{31}, Integer.MIN_VALUE),
 			Arguments.of(new int[]{31, 0}, Integer.MIN_VALUE + 1),
 			Arguments.of(new int[]{}, 0),
-			Arguments.of(new int[]{10}, BigInteger.valueOf(2).pow(10).intValue())
-
+			Arguments.of(new int[]{10}, BigInteger.valueOf(2).pow(10).intValue()),
+			Arguments.of(IntStream.range(0, 31).toArray(), Integer.MAX_VALUE),
+			Arguments.of(IntStream.range(0, 32).toArray(), -1)
 		);
 	}
 
@@ -489,5 +491,16 @@ class UtilsTest {
 			Utils.setBit(bytes, bit, false);
 		}
 		assertThat(ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN).getInt(), is(0));
+	}
+
+	@Test
+	void testSetBitException() {
+		byte[] bytes = new byte[5];
+		// Negative bit index
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.setBit(bytes, -3, true));
+		// Bit index larger than array length
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.setBit(bytes, 5*8, true));
 	}
 }
