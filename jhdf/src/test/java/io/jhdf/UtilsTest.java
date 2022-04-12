@@ -14,8 +14,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
@@ -449,5 +452,42 @@ class UtilsTest {
 		// index higher than dimensions
 		assertThrows(IllegalArgumentException.class,
 			() -> Utils.dimensionIndexToLinearIndex(new int[]{4}, new int[]{1}));
+	}
+
+	static Stream<Arguments> testGetSetBit() {
+		return Stream.of(
+			Arguments.of(new int[]{8}, BigInteger.valueOf(2).pow(8).intValue()),
+			Arguments.of(new int[]{8, 0}, BigInteger.valueOf(2).pow(8).intValue() + 1),
+			Arguments.of(new int[]{8, 1}, BigInteger.valueOf(2).pow(8).intValue() + 2),
+			Arguments.of(new int[]{31}, Integer.MIN_VALUE),
+			Arguments.of(new int[]{31, 0}, Integer.MIN_VALUE + 1),
+			Arguments.of(new int[]{}, 0),
+			Arguments.of(new int[]{10}, BigInteger.valueOf(2).pow(10).intValue())
+
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("testGetSetBit")
+	void testGetSetBit(int[] bitsToSet, int expectedIntValue) {
+		byte[] bytes = new byte[4];
+		Set<Integer> bitsSet  = new HashSet<>();
+
+		for (int bit : bitsToSet) {
+			Utils.setBit(bytes, bit, true);
+			assertThat(Utils.getBit(bytes, bit),is(true));
+			bitsSet.add(bit);
+		}
+		assertThat(ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN).getInt(), is(expectedIntValue));
+
+		for (int i = 0; i < bytes.length * 8; i++) {
+			assertThat(Utils.getBit(bytes, i), is(bitsSet.contains(i)));
+		}
+
+		// Unset the bits
+		for (int bit : bitsToSet) {
+			Utils.setBit(bytes, bit, false);
+		}
+		assertThat(ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN).getInt(), is(0));
 	}
 }
