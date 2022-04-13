@@ -1,21 +1,11 @@
 package io.jhdf.filter;
 
-import io.airlift.compress.lz4.Lz4Decompressor;
 import io.airlift.compress.zstd.ZstdDecompressor;
-import net.jpountz.lz4.LZ4DecompressorWithLength;
+import io.jhdf.Utils;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
-import org.apache.commons.compress.compressors.lz4.BlockLZ4CompressorInputStream;
-import org.apache.commons.compress.compressors.lz4.FramedLZ4CompressorInputStream;
-import org.apache.commons.compress.compressors.lz4.FramedLZ4CompressorOutputStream;
-import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.BitSet;
 
 public class BitShuffleFilter implements Filter {
 	@Override public int getId() {
@@ -37,31 +27,65 @@ public class BitShuffleFilter implements Filter {
 			case 2: // LZ4
 				// See https://support.hdfgroup.org/services/filters/HDF5_LZ4.pdf
 				ByteBuffer byteBuffer = ByteBuffer.wrap(encodedData);
-				long tootalDecompressedSize = byteBuffer.getLong();
+				long totalDecompressedSize = byteBuffer.getLong();
 				int decompressedBlockSize = byteBuffer.getInt();
-//				byte[] decompressed = new byte[Math.toIntExact(tootalDecompressedSize)];
-				ByteBuffer decompressed = ByteBuffer.allocate(Math.toIntExact(tootalDecompressedSize));
+				byte[] decompressed = new byte[Math.toIntExact(totalDecompressedSize)];
 				byte[] decomressedBuffer = new byte[decompressedBlockSize];
-				long blocks = (tootalDecompressedSize / decompressedBlockSize);
+				long blocks = (totalDecompressedSize / decompressedBlockSize);
 
 				LZ4FastDecompressor lzz4Decompressor = LZ4Factory.safeInstance().fastDecompressor();
 
+				int offset = 0;
 				for (long i = 0; i < blocks; i++) {
 					int compressedBlockLength = byteBuffer.getInt();
 					byte[] input = new byte[compressedBlockLength];
 					byteBuffer.get(input);
 					lzz4Decompressor.decompress(input, decomressedBuffer);
-					decompressed.put(decomressedBuffer);
+					unshuffle(decomressedBuffer, elementSizeBits, decompressed, offset);
+					offset += decompressedBlockSize;
+//					decompressed.put(decomressedBuffer);
+
 				}
-				break;
+//				decompressed.flip();
+//
+//				BitSet shuffled = BitSet.valueOf(decompressed);
+//				BitSet unshuffled = new BitSet(Math.toIntExact(totalDecompressedSize * 8));
+//
+//				int elements = Math.toIntExact(totalDecompressedSize / filterData[2]);
+//				int pos = 0;
+//				for (int i = 0; i < elementSizeBits; i++) {
+//					for (int j = 0; j < elements; j++) {
+//						unshuffled.set(j * elementSizeBits + i,  shuffled.get(pos));
+//						pos++; // step through the input array
+//					}
+//				}
+//
+//				return unshuffled.toByteArray();
+				return decompressed;
 			case 3: // Zstd
 				ZstdDecompressor zstdDecompressor = new ZstdDecompressor();
 //				zstdDecompressor.decompress(ByteBuffer.wrap(encodedData), decompressed);
 				break;
 		}
 
-		BitSet shuffled = BitSet.valueOf(encodedData);
+
 
 		return encodedData;
+	}
+
+	private void unshuffle(byte[] decomressedBuffer, int elementSizeBits, byte[] decompressed, int offset) {
+		int decompressedByfferBits = decomressedBuffer.length * 8;
+		int elements = decompressedByfferBits / elementSizeBits;
+		for (int i = 0; i < elements; i++) {
+			for (int j = 0; j < elementSizeBits; j++) {
+				boolean bit = Utils.getBit(decomressedBuffer, i);
+				if (bit) {
+					Utils.setBit(decompressed, offset*8 + i, true);
+				}
+
+			}
+		}
+		for (int i = 0; i < decomressedBuffer.length * 8; i++) {
+					}
 	}
 }
