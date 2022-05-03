@@ -358,7 +358,7 @@ public final class Utils {
 	// See https://stackoverflow.com/a/4674035
 	public static void setBit(byte[] bytes, int bit, boolean value) {
 		if(bit < 0 || bit >= bytes.length * 8){
-			throw new IllegalArgumentException("bit index out of range");
+			throw new IllegalArgumentException("bit index out of range. index=" + bit);
 		}
 		final int byteIndex = bit / 8;
 		final int bitInByte = bit % 8;

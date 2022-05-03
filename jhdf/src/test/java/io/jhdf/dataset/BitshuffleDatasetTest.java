@@ -32,7 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 class BitshuffleDatasetTest {
 
 	private static final String HDF5_TEST_FILE_NAME = "bitshuffle_datasets.hdf5";
-	private static final List<String> expectedData = IntStream.of(0,20).boxed().map(Object::toString).collect(Collectors.toList());
+	private static final List<String> expectedData = IntStream.range(0,20).boxed().map(Object::toString).collect(Collectors.toList());
 
 	private static HdfFile hdfFile;
 

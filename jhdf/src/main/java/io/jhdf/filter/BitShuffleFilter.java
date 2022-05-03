@@ -50,7 +50,7 @@ public class BitShuffleFilter implements Filter {
 					byte[] input = new byte[compressedBlockLength];
 					byteBuffer.get(input);
 					lzz4Decompressor.decompress(input, decomressedBuffer);
-					unshuffle(decomressedBuffer, elementSizeBits, decompressed, offset);
+					unshuffle(decomressedBuffer, elementSizeBits, decompressed);
 					offset += decompressedBlockSize;
 //					decompressed.put(decomressedBuffer);
 
@@ -82,19 +82,31 @@ public class BitShuffleFilter implements Filter {
 		return encodedData;
 	}
 
-	private void unshuffle(byte[] decomressedBuffer, int elementSizeBits, byte[] decompressed, int offset) {
+	protected void unshuffle(byte[] decomressedBuffer, int elementSizeBits, byte[] decompressed) {
 		int decompressedByfferBits = decomressedBuffer.length * 8;
 		int elements = decompressedByfferBits / elementSizeBits;
-		for (int i = 0; i < elements; i++) {
-			for (int j = 0; j < elementSizeBits; j++) {
-				boolean bit = Utils.getBit(decomressedBuffer, i);
-				if (bit) {
-					Utils.setBit(decompressed, offset*8 + i, true);
-				}
 
+		if(elements<8) {
+			// https://github.com/xerial/snappy-java/issues/296#issuecomment-964469607
+			System.arraycopy(decomressedBuffer, 0, decompressed, 0, decomressedBuffer.length);
+			return;
+		}
+
+		int elementsToShuffle = elements - elements % 8;
+		int elementsToCopy = elements - elementsToShuffle;
+
+		int pos = 0;
+		for (int i = 0; i < elementSizeBits; i++) {
+			for (int j = 0; j < elementsToShuffle; j++) {
+				boolean bit = Utils.getBit(decomressedBuffer, pos);
+				if (bit) {
+					Utils.setBit(decompressed, j*elementSizeBits + i, true);
+				}
+				pos++; // step through the input array
 			}
 		}
-		for (int i = 0; i < decomressedBuffer.length * 8; i++) {
-					}
+
+		System.arraycopy(decomressedBuffer, elementsToShuffle, decompressed, elementsToShuffle, elementsToCopy);
+
 	}
 }
