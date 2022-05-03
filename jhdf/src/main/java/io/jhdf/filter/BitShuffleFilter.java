@@ -9,8 +9,8 @@
  */
 package io.jhdf.filter;
 
-import io.airlift.compress.zstd.ZstdDecompressor;
 import io.jhdf.Utils;
+import io.jhdf.exceptions.UnsupportedHdfException;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 
@@ -28,10 +28,11 @@ public class BitShuffleFilter implements Filter {
 	@Override public byte[] decode(byte[] encodedData, int[] filterData) {
 		int elementSizeBits = filterData[2] * 8;
 		int blockSize =filterData[3];
-//		ByteBuffer decompressed = ByteBuffer.allocate(encodedData.length * 50);
 		switch (filterData[4]) {
 			case 0: // No compresssion
-				break;
+				byte[] unshuffled = new byte[encodedData.length];
+				unshuffle(encodedData, elementSizeBits, unshuffled);
+				return unshuffled;
 			// https://github.com/kiyo-masui/bitshuffle/blob/master/src/bshuf_h5filter.h#L46
 			case 2: // LZ4
 				// See https://support.hdfgroup.org/services/filters/HDF5_LZ4.pdf
@@ -52,29 +53,11 @@ public class BitShuffleFilter implements Filter {
 					lzz4Decompressor.decompress(input, decomressedBuffer);
 					unshuffle(decomressedBuffer, elementSizeBits, decompressed);
 					offset += decompressedBlockSize;
-//					decompressed.put(decomressedBuffer);
-
 				}
-//				decompressed.flip();
-//
-//				BitSet shuffled = BitSet.valueOf(decompressed);
-//				BitSet unshuffled = new BitSet(Math.toIntExact(totalDecompressedSize * 8));
-//
-//				int elements = Math.toIntExact(totalDecompressedSize / filterData[2]);
-//				int pos = 0;
-//				for (int i = 0; i < elementSizeBits; i++) {
-//					for (int j = 0; j < elements; j++) {
-//						unshuffled.set(j * elementSizeBits + i,  shuffled.get(pos));
-//						pos++; // step through the input array
-//					}
-//				}
-//
-//				return unshuffled.toByteArray();
+
 				return decompressed;
 			case 3: // Zstd
-				ZstdDecompressor zstdDecompressor = new ZstdDecompressor();
-//				zstdDecompressor.decompress(ByteBuffer.wrap(encodedData), decompressed);
-				break;
+				throw new UnsupportedHdfException("Bitshuffle zstd not implemented");
 		}
 
 

@@ -22,7 +22,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -32,7 +31,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 class BitshuffleDatasetTest {
 
 	private static final String HDF5_TEST_FILE_NAME = "bitshuffle_datasets.hdf5";
-	private static final List<String> expectedData = IntStream.range(0,20).boxed().map(Object::toString).collect(Collectors.toList());
+	private static final String[] expectedData = IntStream.range(0,20).boxed().map(Object::toString).toArray(String[]::new);
 
 	private static HdfFile hdfFile;
 
