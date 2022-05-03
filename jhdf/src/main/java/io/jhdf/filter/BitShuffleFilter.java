@@ -12,7 +12,7 @@ package io.jhdf.filter;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import net.jpountz.lz4.LZ4Factory;
-import net.jpountz.lz4.LZ4FastDecompressor;
+import net.jpountz.lz4.LZ4SafeDecompressor;
 
 import java.nio.ByteBuffer;
 
@@ -41,17 +41,21 @@ public class BitShuffleFilter implements Filter {
 				int decompressedBlockSize = byteBuffer.getInt();
 				byte[] decompressed = new byte[Math.toIntExact(totalDecompressedSize)];
 				byte[] decomressedBuffer = new byte[decompressedBlockSize];
-				long blocks = (totalDecompressedSize / decompressedBlockSize);
+				long blocks = (totalDecompressedSize + decompressedBlockSize - 1) / decompressedBlockSize;
 
-				LZ4FastDecompressor lzz4Decompressor = LZ4Factory.safeInstance().fastDecompressor();
+
+				LZ4SafeDecompressor lzz4Decompressor = LZ4Factory.safeInstance().safeDecompressor();
+//				LZ4Factory.safeInstance().safeDecompressor()
 
 				int offset = 0;
 				for (long i = 0; i < blocks; i++) {
 					int compressedBlockLength = byteBuffer.getInt();
 					byte[] input = new byte[compressedBlockLength];
 					byteBuffer.get(input);
-					lzz4Decompressor.decompress(input, decomressedBuffer);
-					unshuffle(decomressedBuffer, elementSizeBits, decompressed);
+					int decompressedBytes = lzz4Decompressor.decompress(input, decomressedBuffer);
+					byte[] decompressedData = new byte[decompressedBytes];
+					System.arraycopy(decomressedBuffer, 0,decompressedData,0,decompressedBytes);
+					unshuffle(decompressedData, elementSizeBits, decompressed);
 					offset += decompressedBlockSize;
 				}
 
