@@ -86,8 +86,9 @@ public class BitShuffleFilter implements Filter {
 	}
 
 	protected void unshuffle(byte[] decomressedBuffer, int elementSizeBits, byte[] decompressed) {
-		int decompressedByfferBits = decomressedBuffer.length * 8;
-		int elements = decompressedByfferBits / elementSizeBits;
+		final int decompressedByfferBits = decomressedBuffer.length * 8;
+		final int elements = decompressedByfferBits / elementSizeBits;
+		final int elementSizeBytes = elementSizeBits /  8;
 
 		if(elements<8) {
 			// https://github.com/xerial/snappy-java/issues/296#issuecomment-964469607
@@ -109,7 +110,7 @@ public class BitShuffleFilter implements Filter {
 			}
 		}
 
-		System.arraycopy(decomressedBuffer, elementsToShuffle, decompressed, elementsToShuffle, elementsToCopy);
+		System.arraycopy(decomressedBuffer, elementsToShuffle * elementSizeBytes, decompressed, elementsToShuffle * elementSizeBytes, elementsToCopy * elementSizeBytes);
 
 	}
 }
