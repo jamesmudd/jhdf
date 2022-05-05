@@ -20,7 +20,7 @@ public class BitShuffleFilter implements Filter {
 
 	// Constants see https://github.com/kiyo-masui/bitshuffle/blob/master/src/bitshuffle_internals.h#L32
 	private static final int BSHUF_MIN_RECOMMEND_BLOCK = 128;
-	private static final int BSHUF_BLOCKED_MULT = 8;    // Block sizes must be multiple of this.
+	private static final int BSHUF_BLOCKED_MULT = 8; // Block sizes must be multiple of this.
 	private static final int BSHUF_TARGET_BLOCK_SIZE_B = 8192;
 
 	@Override public int getId() {
@@ -79,7 +79,15 @@ public class BitShuffleFilter implements Filter {
 					byte[] decompressedData = new byte[decompressedBytes];
 					System.arraycopy(decomressedBuffer, 0,decompressedData,0,decompressedBytes);
 					unshuffle(decompressedData, elementSizeBits, decompressed);
-					offset += decompressedBlockSize;
+					offset += decompressedBytes;
+				}
+
+//				if(offset < decompressed.length) {
+//					int bytesToCopy =
+//					System.arraycopy(encodedData, offset, decompressed, offset, decompressed.length - offset);
+//				}
+				if(byteBuffer.hasRemaining()) {
+					byteBuffer.get(decompressed, offset, byteBuffer.remaining());
 				}
 
 				return decompressed;
