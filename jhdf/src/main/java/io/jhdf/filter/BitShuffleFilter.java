@@ -76,8 +76,10 @@ public class BitShuffleFilter implements Filter {
 					byteBuffer.get(input);
 					int decompressedBytes = lzz4Decompressor.decompress(input, decomressedBuffer);
 					byte[] decompressedData = new byte[decompressedBytes];
+					byte[] unshuffledBlock = new byte[decompressedBytes];
 					System.arraycopy(decomressedBuffer, 0,decompressedData,0,decompressedBytes);
-					unshuffle(decompressedData, elementSizeBits, decompressed);
+					unshuffle(decompressedData, elementSizeBits, unshuffledBlock);
+					System.arraycopy(unshuffledBlock, 0, decompressed, offset, decompressedBytes);
 					offset += decompressedBytes;
 				}
 
