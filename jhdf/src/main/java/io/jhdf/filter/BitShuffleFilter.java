@@ -17,6 +17,12 @@ import net.jpountz.lz4.LZ4SafeDecompressor;
 import java.nio.ByteBuffer;
 
 public class BitShuffleFilter implements Filter {
+
+	// Constants see https://github.com/kiyo-masui/bitshuffle/blob/master/src/bitshuffle_internals.h#L32
+	private static final int BSHUF_MIN_RECOMMEND_BLOCK = 128;
+	private static final int BSHUF_BLOCKED_MULT = 8;    // Block sizes must be multiple of this.
+	private static final int BSHUF_TARGET_BLOCK_SIZE_B = 8192;
+
 	@Override public int getId() {
 		return 32008;
 	}
@@ -27,26 +33,27 @@ public class BitShuffleFilter implements Filter {
 
 	@Override public byte[] decode(byte[] encodedData, int[] filterData) {
 		final int elementSizeBits = filterData[2] * 8;
-		final int blockSize =filterData[3];
+		final int blockSize = filterData[3] == 0 ? getDefaultBlockSize(filterData[2]) : filterData[3];
+		final int blockSizeBytes = blockSize * filterData[2];
 
 		switch (filterData[4]) {
 			case 0: // No compresssion
-				final int blocks = encodedData.length / blockSize;
+				final int blocks = encodedData.length / blockSizeBytes;
 				final byte[] unshuffled = new byte[encodedData.length];
 				for (int i = 0; i < blocks; i++) {
-					byte[] blockData = new byte[blockSize];
-					System.arraycopy(encodedData, i*blockSize, blockData, 0, blockSize);
-					byte[] unshuffledBlock = new byte[blockSize];
+					byte[] blockData = new byte[blockSizeBytes];
+					System.arraycopy(encodedData, i*blockSizeBytes, blockData, 0, blockSizeBytes);
+					byte[] unshuffledBlock = new byte[blockSizeBytes];
 					unshuffle(blockData, elementSizeBits, unshuffledBlock);
-					System.arraycopy(unshuffledBlock, 0, unshuffled, i*blockSize, blockSize);
+					System.arraycopy(unshuffledBlock, 0, unshuffled, i*blockSizeBytes, blockSizeBytes);
 				}
-				if(blocks*blockSize < encodedData.length) {
-					int finalBlockSize = encodedData.length - blocks*blockSize;
+				if(blocks*blockSizeBytes < encodedData.length) {
+					int finalBlockSize = encodedData.length - blocks*blockSizeBytes;
 					byte[] blockData = new byte[finalBlockSize];
-					System.arraycopy(encodedData, blocks*blockSize, blockData, 0, finalBlockSize);
+					System.arraycopy(encodedData, blocks*blockSizeBytes, blockData, 0, finalBlockSize);
 					byte[] unshuffledBlock = new byte[finalBlockSize];
 					unshuffle(blockData, elementSizeBits, unshuffledBlock);
-					System.arraycopy(unshuffledBlock, 0, unshuffled, blocks*blockSize, finalBlockSize);
+					System.arraycopy(unshuffledBlock, 0, unshuffled, blocks*blockSizeBytes, finalBlockSize);
 				}
 				return unshuffled;
 			// https://github.com/kiyo-masui/bitshuffle/blob/master/src/bshuf_h5filter.h#L46
@@ -112,5 +119,14 @@ public class BitShuffleFilter implements Filter {
 
 		System.arraycopy(decomressedBuffer, elementsToShuffle * elementSizeBytes, decompressed, elementsToShuffle * elementSizeBytes, elementsToCopy * elementSizeBytes);
 
+	}
+
+	// https://github.com/kiyo-masui/bitshuffle/blob/master/src/bitshuffle_core.c#L1830
+	// See method bshuf_default_block_size
+	private int getDefaultBlockSize(int elementSize) {
+		int defaultBlockSize = BSHUF_TARGET_BLOCK_SIZE_B / elementSize;
+		// Ensure it is a required multiple.
+		defaultBlockSize = (defaultBlockSize / BSHUF_BLOCKED_MULT) * BSHUF_BLOCKED_MULT;
+		return Integer.max(defaultBlockSize, BSHUF_MIN_RECOMMEND_BLOCK);
 	}
 }
