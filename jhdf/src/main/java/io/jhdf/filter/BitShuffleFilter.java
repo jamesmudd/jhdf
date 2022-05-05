@@ -68,7 +68,6 @@ public class BitShuffleFilter implements Filter {
 
 
 				LZ4SafeDecompressor lzz4Decompressor = LZ4Factory.safeInstance().safeDecompressor();
-//				LZ4Factory.safeInstance().safeDecompressor()
 
 				int offset = 0;
 				for (long i = 0; i < blocks2; i++) {
@@ -82,10 +81,6 @@ public class BitShuffleFilter implements Filter {
 					offset += decompressedBytes;
 				}
 
-//				if(offset < decompressed.length) {
-//					int bytesToCopy =
-//					System.arraycopy(encodedData, offset, decompressed, offset, decompressed.length - offset);
-//				}
 				if(byteBuffer.hasRemaining()) {
 					byteBuffer.get(decompressed, offset, byteBuffer.remaining());
 				}
