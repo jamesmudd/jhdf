@@ -24,6 +24,7 @@ jobs:
               with:
                   java-version: ${{ matrix.java }}
                   distribution: 'temurin'
+                  cache: 'gradle'
 
             - name: Gradle Build
               working-directory: jhdf
