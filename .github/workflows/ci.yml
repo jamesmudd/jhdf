@@ -33,3 +33,7 @@ jobs:
             - name: Gradle Build Jars
               working-directory: jhdf
               run: ./gradlew jar sourcesJar javadocJar
+
+            - name: Gradle Stop Daemon
+              working-directory: jhdf
+              run: ./gradlew --stop
