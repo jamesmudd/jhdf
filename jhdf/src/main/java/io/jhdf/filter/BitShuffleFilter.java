@@ -64,8 +64,12 @@ public class BitShuffleFilter implements Filter {
 				int decompressedBlockSize = byteBuffer.getInt();
 				byte[] decompressed = new byte[Math.toIntExact(totalDecompressedSize)];
 				byte[] decomressedBuffer = new byte[decompressedBlockSize];
-				long blocks2 = (totalDecompressedSize + decompressedBlockSize - 1) / decompressedBlockSize;
-
+				long blocks2;
+				if(decompressedBlockSize > totalDecompressedSize) {
+					blocks2 = 1;
+				} else {
+					blocks2 = totalDecompressedSize / decompressedBlockSize;
+				}
 
 				LZ4SafeDecompressor lzz4Decompressor = LZ4Factory.safeInstance().safeDecompressor();
 
