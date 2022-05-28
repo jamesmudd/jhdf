@@ -24,6 +24,7 @@ jobs:
               with:
                   java-version: ${{ matrix.java }}
                   distribution: 'temurin'
+                  cache: 'gradle'
 
             - name: Gradle Build
               working-directory: jhdf
@@ -32,3 +33,7 @@ jobs:
             - name: Gradle Build Jars
               working-directory: jhdf
               run: ./gradlew jar sourcesJar javadocJar
+
+            - name: Gradle Stop Daemon
+              working-directory: jhdf
+              run: ./gradlew --stop
