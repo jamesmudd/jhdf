@@ -1,3 +1,12 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright (c) 2022 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
 package io.jhdf.filter;
 
 import org.hamcrest.Matchers;
@@ -10,7 +19,6 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 import static org.apache.commons.lang3.ArrayUtils.toObject;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 class BitShuffleFilterTest {
 
