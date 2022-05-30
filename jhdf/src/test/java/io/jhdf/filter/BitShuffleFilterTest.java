@@ -19,6 +19,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 import static org.apache.commons.lang3.ArrayUtils.toObject;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 class BitShuffleFilterTest {
 
