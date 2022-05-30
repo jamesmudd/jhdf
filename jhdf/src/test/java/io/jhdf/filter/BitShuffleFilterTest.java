@@ -9,7 +9,11 @@
  */
 package io.jhdf.filter;
 
+import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.HdfFilterException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.xerial.snappy.BitShuffle;
 import org.xerial.snappy.BitShuffleType;
@@ -20,6 +24,7 @@ import java.nio.ByteBuffer;
 
 import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BitShuffleFilterTest {
 
@@ -45,9 +50,6 @@ class BitShuffleFilterTest {
 		shuffled.get(shufledBytes);
 		byte[] unshufledBytes = new byte[2];
 		bitShuffleFilter.unshuffle(shufledBytes, 8, unshufledBytes);
-
-		System.out.println(new BigInteger(shufledBytes).toString(2));
-		System.out.println(new BigInteger(unshufledBytes).toString(2));
 
 		assertThat(unshufledBytes[0], Matchers.is((byte) 1));
 		assertThat(unshufledBytes[1], Matchers.is((byte) 2));
@@ -76,9 +78,6 @@ class BitShuffleFilterTest {
 		byte[] unshufledBytes = new byte[2];
 		bitShuffleFilter.unshuffle(shufledBytes, 8, unshufledBytes);
 
-		System.out.println(new BigInteger(shufledBytes).toString(2));
-		System.out.println(new BigInteger(unshufledBytes).toString(2));
-
 		assertThat(unshufledBytes[0], Matchers.is((byte) 7));
 		assertThat(unshufledBytes[1], Matchers.is((byte) 45));
 	}
@@ -106,9 +105,6 @@ class BitShuffleFilterTest {
 		byte[] unshufledBytes = new byte[2];
 		bitShuffleFilter.unshuffle(shufledBytes, 16, unshufledBytes);
 
-		System.out.println(new BigInteger(shufledBytes).toString(2));
-		System.out.println(new BigInteger(unshufledBytes).toString(2));
-
 		assertThat(unshufledBytes[0], Matchers.is((byte) 7));
 		assertThat(unshufledBytes[1], Matchers.is((byte) 45));
 	}
@@ -135,9 +131,6 @@ class BitShuffleFilterTest {
 		shuffled.get(shufledBytes);
 		byte[] unshufledBytes = new byte[8];
 		bitShuffleFilter.unshuffle(shufledBytes, 32, unshufledBytes);
-
-		System.out.println(new BigInteger(shufledBytes).toString(2));
-		System.out.println(new BigInteger(unshufledBytes).toString(2));
 
 		ByteBuffer wrap = ByteBuffer.wrap(unshufledBytes);
 		assertThat(wrap.getInt(), Matchers.is(7));
@@ -180,12 +173,6 @@ class BitShuffleFilterTest {
 		byte[] unshufledBytes = new byte[13];
 		bitShuffleFilter.unshuffle(shufledBytes, 8, unshufledBytes);
 
-		System.out.println(new BigInteger(shufledBytes).toString(2));
-		System.out.println(new BigInteger(unshufledBytes).toString(2));
-
-		System.out.println(new BigInteger(shufledBytes).bitCount());
-		System.out.println(new BigInteger(unshufledBytes).bitCount());
-
 		assertThat(unshufledBytes[0], Matchers.is((byte) 1));
 		assertThat(unshufledBytes[1], Matchers.is((byte) 2));
 	}
@@ -225,9 +212,6 @@ class BitShuffleFilterTest {
 		byte[] unshufledBytes = new byte[10];
 		bitShuffleFilter.unshuffle(shufledBytes, 8, unshufledBytes);
 
-		System.out.println(new BigInteger(shufledBytes).toString(2));
-		System.out.println(new BigInteger(unshufledBytes).toString(2));
-
 		assertThat(unshufledBytes[0], Matchers.is((byte) 4));
 		assertThat(unshufledBytes[1], Matchers.is((byte) 4));
 
@@ -238,4 +222,16 @@ class BitShuffleFilterTest {
 		assertThat(toObject(unshufledBytes), Matchers.arrayContaining(toObject(unshuffledReference)));
 	}
 
+	@Test
+	void unsupportedCompressionThrows() {
+		BitShuffleFilter bitShuffleFilter = new BitShuffleFilter();
+
+		// Completely unknown filter type 6
+		final int[] filterData = new int[]{0, 0, 4, 0, 6};
+		assertThrows(HdfFilterException.class, () -> bitShuffleFilter.decode(new byte[0], filterData));
+
+		// Currently, ZSTD is unsupported. Remove when support is added
+		final int[] zstdFilterData = new int[]{0, 0, 4, 0, BitShuffleFilter.ZSTD_COMPRESSION};
+		assertThrows(UnsupportedHdfException.class, () -> bitShuffleFilter.decode(new byte[0], zstdFilterData));
+	}
 }
