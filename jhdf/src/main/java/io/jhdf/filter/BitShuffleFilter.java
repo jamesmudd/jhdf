@@ -10,6 +10,7 @@
 package io.jhdf.filter;
 
 import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4SafeDecompressor;
@@ -22,6 +23,11 @@ public class BitShuffleFilter implements Filter {
 	private static final int BSHUF_MIN_RECOMMEND_BLOCK = 128;
 	private static final int BSHUF_BLOCKED_MULT = 8; // Block sizes must be multiple of this.
 	private static final int BSHUF_TARGET_BLOCK_SIZE_B = 8192;
+
+	public static final int NO_COMPRESSION = 0;
+	public static final int LZ4_COMPRESSION = 1;
+	public static final int ZSTD_COMPRESSION = 2;
+
 
 	@Override public int getId() {
 		return 32008;
@@ -37,7 +43,7 @@ public class BitShuffleFilter implements Filter {
 		final int blockSizeBytes = blockSize * filterData[2];
 
 		switch (filterData[4]) {
-			case 0: // No compresssion
+			case NO_COMPRESSION:
 				final int blocks = encodedData.length / blockSizeBytes;
 				final byte[] unshuffled = new byte[encodedData.length];
 				for (int i = 0; i < blocks; i++) {
@@ -57,7 +63,7 @@ public class BitShuffleFilter implements Filter {
 				}
 				return unshuffled;
 			// https://github.com/kiyo-masui/bitshuffle/blob/master/src/bshuf_h5filter.h#L46
-			case 2: // LZ4
+			case LZ4_COMPRESSION:
 				// See https://support.hdfgroup.org/services/filters/HDF5_LZ4.pdf
 				ByteBuffer byteBuffer = ByteBuffer.wrap(encodedData);
 				long totalDecompressedSize = byteBuffer.getLong();
@@ -92,13 +98,11 @@ public class BitShuffleFilter implements Filter {
 				}
 
 				return decompressed;
-			case 3: // Zstd
+			case ZSTD_COMPRESSION:
 				throw new UnsupportedHdfException("Bitshuffle zstd not implemented");
+			default:
+				throw new HdfException("Unknown compression type: " + filterData[4]);
 		}
-
-
-
-		return encodedData;
 	}
 
 	protected void unshuffle(byte[] decomressedBuffer, int elementSizeBits, byte[] decompressed) {
