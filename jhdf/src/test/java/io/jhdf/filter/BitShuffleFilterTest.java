@@ -9,17 +9,14 @@
  */
 package io.jhdf.filter;
 
-import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfFilterException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.xerial.snappy.BitShuffle;
 import org.xerial.snappy.BitShuffleType;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 import static org.apache.commons.lang3.ArrayUtils.toObject;
@@ -46,13 +43,13 @@ class BitShuffleFilterTest {
 		assertThat(unshuffled.get(), Matchers.is((byte) 2));
 
 		BitShuffleFilter bitShuffleFilter = new BitShuffleFilter();
-		byte[] shufledBytes = new byte[2];
-		shuffled.get(shufledBytes);
-		byte[] unshufledBytes = new byte[2];
-		bitShuffleFilter.unshuffle(shufledBytes, 8, unshufledBytes);
+		byte[] shuffledBytes = new byte[2];
+		shuffled.get(shuffledBytes);
+		byte[] unshuffledBytes = new byte[2];
+		bitShuffleFilter.unshuffle(shuffledBytes, 1, unshuffledBytes);
 
-		assertThat(unshufledBytes[0], Matchers.is((byte) 1));
-		assertThat(unshufledBytes[1], Matchers.is((byte) 2));
+		assertThat(unshuffledBytes[0], Matchers.is((byte) 1));
+		assertThat(unshuffledBytes[1], Matchers.is((byte) 2));
 	}
 
 	@Test
@@ -73,13 +70,13 @@ class BitShuffleFilterTest {
 		assertThat(unshuffled.get(), Matchers.is((byte) 45));
 
 		BitShuffleFilter bitShuffleFilter = new BitShuffleFilter();
-		byte[] shufledBytes = new byte[2];
-		shuffled.get(shufledBytes);
-		byte[] unshufledBytes = new byte[2];
-		bitShuffleFilter.unshuffle(shufledBytes, 8, unshufledBytes);
+		byte[] shuffledBytes = new byte[2];
+		shuffled.get(shuffledBytes);
+		byte[] unshuffledBytes = new byte[2];
+		bitShuffleFilter.unshuffle(shuffledBytes, 1, unshuffledBytes);
 
-		assertThat(unshufledBytes[0], Matchers.is((byte) 7));
-		assertThat(unshufledBytes[1], Matchers.is((byte) 45));
+		assertThat(unshuffledBytes[0], Matchers.is((byte) 7));
+		assertThat(unshuffledBytes[1], Matchers.is((byte) 45));
 	}
 
 	@Test
@@ -100,10 +97,10 @@ class BitShuffleFilterTest {
 		assertThat(unshuffled.get(), Matchers.is((byte) 45));
 
 		BitShuffleFilter bitShuffleFilter = new BitShuffleFilter();
-		byte[] shufledBytes = new byte[2];
-		shuffled.get(shufledBytes);
+		byte[] shuffledBytes = new byte[2];
+		shuffled.get(shuffledBytes);
 		byte[] unshufledBytes = new byte[2];
-		bitShuffleFilter.unshuffle(shufledBytes, 16, unshufledBytes);
+		bitShuffleFilter.unshuffle(shuffledBytes, 2, unshufledBytes);
 
 		assertThat(unshufledBytes[0], Matchers.is((byte) 7));
 		assertThat(unshufledBytes[1], Matchers.is((byte) 45));
@@ -127,10 +124,10 @@ class BitShuffleFilterTest {
 		assertThat(unshuffled.getInt(), Matchers.is(32455));
 
 		BitShuffleFilter bitShuffleFilter = new BitShuffleFilter();
-		byte[] shufledBytes = new byte[8];
-		shuffled.get(shufledBytes);
+		byte[] shuffledBytes = new byte[8];
+		shuffled.get(shuffledBytes);
 		byte[] unshufledBytes = new byte[8];
-		bitShuffleFilter.unshuffle(shufledBytes, 32, unshufledBytes);
+		bitShuffleFilter.unshuffle(shuffledBytes, 4, unshufledBytes);
 
 		ByteBuffer wrap = ByteBuffer.wrap(unshufledBytes);
 		assertThat(wrap.getInt(), Matchers.is(7));
@@ -165,13 +162,12 @@ class BitShuffleFilterTest {
 		for (byte i = 1; i < unshuffled.capacity(); i++) {
 			assertThat(unshuffled.get(), Matchers.is(i));
 		}
-//		assertThat(unshuffled.get(), Matchers.is((byte) 2));
 
 		BitShuffleFilter bitShuffleFilter = new BitShuffleFilter();
-		byte[] shufledBytes = new byte[13];
-		shuffled.get(shufledBytes);
+		byte[] shuffledBytes = new byte[13];
+		shuffled.get(shuffledBytes);
 		byte[] unshufledBytes = new byte[13];
-		bitShuffleFilter.unshuffle(shufledBytes, 8, unshufledBytes);
+		bitShuffleFilter.unshuffle(shuffledBytes, 1, unshufledBytes);
 
 		assertThat(unshufledBytes[0], Matchers.is((byte) 1));
 		assertThat(unshufledBytes[1], Matchers.is((byte) 2));
@@ -210,7 +206,7 @@ class BitShuffleFilterTest {
 		byte[] shufledBytes = new byte[10];
 		shuffled.get(shufledBytes);
 		byte[] unshufledBytes = new byte[10];
-		bitShuffleFilter.unshuffle(shufledBytes, 8, unshufledBytes);
+		bitShuffleFilter.unshuffle(shufledBytes, 1, unshufledBytes);
 
 		assertThat(unshufledBytes[0], Matchers.is((byte) 4));
 		assertThat(unshufledBytes[1], Matchers.is((byte) 4));
