@@ -38,7 +38,6 @@ public class BitShuffleFilter implements Filter {
 	}
 
 	@Override public byte[] decode(byte[] encodedData, int[] filterData) {
-		final int elementSizeBits = filterData[2] * 8;
 		final int blockSize = filterData[3] == 0 ? getDefaultBlockSize(filterData[2]) : filterData[3];
 		final int blockSizeBytes = blockSize * filterData[2];
 
@@ -50,7 +49,7 @@ public class BitShuffleFilter implements Filter {
 					byte[] blockData = new byte[blockSizeBytes];
 					System.arraycopy(encodedData, i*blockSizeBytes, blockData, 0, blockSizeBytes);
 					byte[] unshuffledBlock = new byte[blockSizeBytes];
-					unshuffle(blockData, elementSizeBits, unshuffledBlock);
+					unshuffle(blockData, filterData[2], unshuffledBlock);
 					System.arraycopy(unshuffledBlock, 0, unshuffled, i*blockSizeBytes, blockSizeBytes);
 				}
 				if(blocks*blockSizeBytes < encodedData.length) {
@@ -58,7 +57,7 @@ public class BitShuffleFilter implements Filter {
 					byte[] blockData = new byte[finalBlockSize];
 					System.arraycopy(encodedData, blocks*blockSizeBytes, blockData, 0, finalBlockSize);
 					byte[] unshuffledBlock = new byte[finalBlockSize];
-					unshuffle(blockData, elementSizeBits, unshuffledBlock);
+					unshuffle(blockData, filterData[2], unshuffledBlock);
 					System.arraycopy(unshuffledBlock, 0, unshuffled, blocks*blockSizeBytes, finalBlockSize);
 				}
 				return unshuffled;
@@ -66,11 +65,14 @@ public class BitShuffleFilter implements Filter {
 			case LZ4_COMPRESSION:
 				// See https://support.hdfgroup.org/services/filters/HDF5_LZ4.pdf
 				ByteBuffer byteBuffer = ByteBuffer.wrap(encodedData);
+
 				final long totalDecompressedSize = Utils.readBytesAsUnsignedLong(byteBuffer, 8);
-				final int decompressedBlockSize = Utils.readBytesAsUnsignedInt(byteBuffer, 4);
 				final byte[] decompressed = new byte[Math.toIntExact(totalDecompressedSize)];
+
+				final int decompressedBlockSize = Utils.readBytesAsUnsignedInt(byteBuffer, 4);
 				final byte[] decomressedBuffer = new byte[decompressedBlockSize];
 				final byte[] compressedBuffer = new byte[decompressedBlockSize * 2]; // Assume compression never inflates by more than 2x
+
 				long blocks2;
 				if(decompressedBlockSize > totalDecompressedSize) {
 					blocks2 = 1;
@@ -85,11 +87,7 @@ public class BitShuffleFilter implements Filter {
 					final int compressedBlockLength = byteBuffer.getInt();
 					byteBuffer.get(compressedBuffer, 0, compressedBlockLength);
 					final int decompressedBytes = lzz4Decompressor.decompress(compressedBuffer, 0, compressedBlockLength, decomressedBuffer, 0);
-					byte[] decompressedData = new byte[decompressedBytes];
-					byte[] unshuffledBlock = new byte[decompressedBytes];
-					System.arraycopy(decomressedBuffer, 0,decompressedData,0,decompressedBytes);
-					unshuffle(decompressedData, elementSizeBits, unshuffledBlock);
-					System.arraycopy(unshuffledBlock, 0, decompressed, offset, decompressedBytes);
+					unshuffle(decomressedBuffer, decompressedBytes, decompressed, offset, filterData[2]);
 					offset += decompressedBytes;
 				}
 
@@ -105,33 +103,36 @@ public class BitShuffleFilter implements Filter {
 		}
 	}
 
-	protected void unshuffle(byte[] decomressedBuffer, int elementSizeBits, byte[] decompressed) {
-		final int decompressedByfferBits = decomressedBuffer.length * 8;
-		final int elements = decompressedByfferBits / elementSizeBits;
-		final int elementSizeBytes = elementSizeBits /  8;
+	protected void unshuffle(byte[] shuffledBuffer, int elementSize, byte[] unshuffledBuffer) {
+		unshuffle(shuffledBuffer, shuffledBuffer.length, unshuffledBuffer, 0, elementSize);
+	}
+
+	protected void unshuffle(byte[] shuffledBuffer, int shuffledLength, byte[] unshuffledBuffer, int unshuffledOffset, int elementSize) {
+		final int elements = shuffledLength / elementSize;
+		final int elementSizeBits = elementSize * 8;
+		final int unshuffledOffsetBits = unshuffledOffset * 8;
 
 		if(elements<8) {
 			// https://github.com/xerial/snappy-java/issues/296#issuecomment-964469607
-			System.arraycopy(decomressedBuffer, 0, decompressed, 0, decomressedBuffer.length);
+			System.arraycopy(shuffledBuffer, 0, unshuffledBuffer, 0, shuffledLength);
 			return;
 		}
 
-		int elementsToShuffle = elements - elements % 8;
-		int elementsToCopy = elements - elementsToShuffle;
+		final int elementsToShuffle = elements - elements % 8;
+		final int elementsToCopy = elements - elementsToShuffle;
 
 		int pos = 0;
 		for (int i = 0; i < elementSizeBits; i++) {
 			for (int j = 0; j < elementsToShuffle; j++) {
-				boolean bit = Utils.getBit(decomressedBuffer, pos);
+				boolean bit = Utils.getBit(shuffledBuffer, pos);
 				if (bit) {
-					Utils.setBit(decompressed, j*elementSizeBits + i, true);
+					Utils.setBit(unshuffledBuffer, unshuffledOffsetBits + j*elementSizeBits + i, true);
 				}
 				pos++; // step through the input array
 			}
 		}
 
-		System.arraycopy(decomressedBuffer, elementsToShuffle * elementSizeBytes, decompressed, elementsToShuffle * elementSizeBytes, elementsToCopy * elementSizeBytes);
-
+		System.arraycopy(shuffledBuffer, elementsToShuffle * elementSize, unshuffledBuffer, elementsToShuffle * elementSize, elementsToCopy * elementSize);
 	}
 
 	// https://github.com/kiyo-masui/bitshuffle/blob/master/src/bitshuffle_core.c#L1830
