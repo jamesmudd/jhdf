@@ -354,4 +354,24 @@ public final class Utils {
 	public static int[] stripLeadingIndex(int[] dims) {
 		return Arrays.copyOfRange(dims, 1, dims.length);
 	}
+
+	// See https://stackoverflow.com/a/4674035
+	public static void setBit(byte[] bytes, int bit, boolean value) {
+		if(bit < 0 || bit >= bytes.length * 8){
+			throw new IllegalArgumentException("bit index out of range. index=" + bit);
+		}
+		final int byteIndex = bit / 8;
+		final int bitInByte = bit % 8;
+		if(value) {
+			bytes[byteIndex] |= 1 << bitInByte;
+		} else {
+			bytes[byteIndex] &= ~(1 << bitInByte);
+		}
+	}
+
+	public static boolean getBit(byte[] bytes, int bit) {
+		final int byteIndex = bit / 8;
+		final int bitInByte = bit % 8;
+		return ((bytes[byteIndex]  >> bitInByte) & 1) == 1;
+	}
 }
