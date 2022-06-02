@@ -11,6 +11,7 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
+import io.jhdf.filter.FilterPipeline;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
@@ -74,6 +75,7 @@ class ChunkedDatasetTest {
 	private Executable createTest(HdfFile hdfFile, String datasetPath) {
 		return () -> {
 			Dataset dataset = hdfFile.getDatasetByPath(datasetPath);
+			assertThat(dataset.getFilters(), is(FilterPipeline.NO_FILTERS));
 			Object data = dataset.getData();
 			assertThat(getDimensions(data), is(equalTo(new int[]{7, 5, 3})));
 			Object[] flatData = flatten(data);

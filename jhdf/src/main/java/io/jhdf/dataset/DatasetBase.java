@@ -16,6 +16,7 @@ import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.InvalidSliceHdfException;
+import io.jhdf.filter.FilterPipeline;
 import io.jhdf.object.datatype.CompoundDataType;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.OrderedDataType;
@@ -222,5 +223,10 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	@Override
 	public long getStorageInBytes() {
 		return getSizeInBytes();
+	}
+
+	@Override
+	public FilterPipeline getFilters() {
+		return FilterPipeline.NO_FILTERS;
 	}
 }

@@ -235,7 +235,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		try {
 			final FilterPipeline pipeline = this.lazyPipeline.get();
 
-			if (pipeline == null) {
+			if (pipeline == FilterPipeline.NO_FILTERS) {
 				// No filters
 				return encodedBytes;
 			}
@@ -273,7 +273,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 			} else {
 				// No filters
 				logger.debug("No filters for [{}]", getPath());
-				return null;
+				return FilterPipeline.NO_FILTERS;
 			}
 		}
 	}
@@ -312,5 +312,14 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	@Override
 	public ByteBuffer getSliceDataBuffer(long[] offset, int[] shape) {
 		throw new UnsupportedHdfException("Chunked datasets don't support slice reading");
+	}
+
+	@Override
+	public FilterPipeline getFilters() {
+		try {
+			return lazyPipeline.get();
+		} catch (ConcurrentException e) {
+			throw new HdfException("Failed to create filter pipeline", e);
+		}
 	}
 }

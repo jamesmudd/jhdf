@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
  */
 public class FilterPipeline {
 
+	public static final FilterPipeline NO_FILTERS = new FilterPipeline();
+
 	private static class PipelineFilterWithData {
 
 		private final Filter filter;
@@ -40,10 +42,7 @@ public class FilterPipeline {
 
 		@Override
 		public String toString() {
-			return "{" +
-				"filter=" + filter.getName() +
-				", filterData=" + Arrays.toString(filterData) +
-				'}';
+			return "{" + filter.getName() + Arrays.toString(filterData) + "}";
 		}
 	}
 
@@ -75,6 +74,9 @@ public class FilterPipeline {
 
 	@Override
 	public String toString() {
+		if(filters.isEmpty()){
+			return "none";
+		}
 		return "FilterPipeline{" +
 			filters.stream().map(Objects::toString).collect(Collectors.joining(" -> ")) +
 			'}';

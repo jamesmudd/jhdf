@@ -11,6 +11,7 @@ package io.jhdf.api;
 
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.InvalidSliceHdfException;
+import io.jhdf.filter.FilterPipeline;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataLayout;
 
@@ -149,5 +150,7 @@ public interface Dataset extends Node {
 	 * @return the fill value of the dataset or <code>null</code> if not defined
 	 */
 	Object getFillValue();
+
+	FilterPipeline getFilters();
 
 }
