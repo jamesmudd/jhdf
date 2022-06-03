@@ -1,3 +1,12 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright (c) 2022 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
@@ -5,9 +14,7 @@ import io.jhdf.TestUtils;
 import io.jhdf.api.Dataset;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.filter.PipelineFilterWithData;
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
@@ -20,16 +27,14 @@ import java.util.List;
 import static io.jhdf.TestUtils.flatten;
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-public class CompactDatasetTest {
+class CompactDatasetTest {
 
 	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "test_compact_datasets_earliest.hdf5";
 	private static final String HDF5_TEST_LATEST_FILE_NAME = "test_compact_datasets_latest.hdf5";
@@ -75,9 +80,7 @@ public class CompactDatasetTest {
 		return () -> {
 			Dataset dataset = hdfFile.getDatasetByPath(datasetPath);
 
-			assertThrows(UnsupportedHdfException.class, () -> {
-				dataset.getData(new long[]{0}, new int[]{3});
-			});
+			assertThrows(UnsupportedHdfException.class, () -> dataset.getData(new long[]{0}, new int[]{3}));
 
 			// Check filters
 			List<PipelineFilterWithData> filters = dataset.getFilters();
