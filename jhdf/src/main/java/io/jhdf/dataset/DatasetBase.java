@@ -16,7 +16,7 @@ import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.InvalidSliceHdfException;
-import io.jhdf.filter.FilterPipeline;
+import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.CompoundDataType;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.OrderedDataType;
@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
@@ -225,8 +227,4 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		return getSizeInBytes();
 	}
 
-	@Override
-	public FilterPipeline getFilters() {
-		return FilterPipeline.NO_FILTERS;
-	}
 }

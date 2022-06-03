@@ -18,6 +18,7 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.filter.FilterManager;
 import io.jhdf.filter.FilterPipeline;
+import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.message.FilterPipelineMessage;
 import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static java.lang.Math.toIntExact;
@@ -315,9 +317,9 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	}
 
 	@Override
-	public FilterPipeline getFilters() {
+	public List<PipelineFilterWithData> getFilters() {
 		try {
-			return lazyPipeline.get();
+			return lazyPipeline.get().getFilters();
 		} catch (ConcurrentException e) {
 			throw new HdfException("Failed to create filter pipeline", e);
 		}

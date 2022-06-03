@@ -11,9 +11,11 @@ package io.jhdf.api;
 
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.InvalidSliceHdfException;
-import io.jhdf.filter.FilterPipeline;
+import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataLayout;
+
+import java.util.List;
 
 /**
  * HDF5 dataset. Datasets contain the real data within a HDF5 file.
@@ -151,6 +153,6 @@ public interface Dataset extends Node {
 	 */
 	Object getFillValue();
 
-	FilterPipeline getFilters();
+	List<PipelineFilterWithData> getFilters();
 
 }

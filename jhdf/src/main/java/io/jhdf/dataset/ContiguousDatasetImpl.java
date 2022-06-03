@@ -14,11 +14,14 @@ import io.jhdf.Utils;
 import io.jhdf.api.Group;
 import io.jhdf.api.dataset.ContiguousDataset;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
 import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static io.jhdf.Constants.UNDEFINED_ADDRESS;
 
@@ -88,5 +91,10 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 	@Override
 	public boolean isEmpty() {
 		return contiguousDataLayoutMessage.getAddress() == UNDEFINED_ADDRESS;
+	}
+
+	@Override
+	public List<PipelineFilterWithData> getFilters() {
+		return Collections.emptyList(); // Contiguous datasets don't have filters
 	}
 }

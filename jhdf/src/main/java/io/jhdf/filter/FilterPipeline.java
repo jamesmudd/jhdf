@@ -12,7 +12,7 @@ package io.jhdf.filter;
 import io.jhdf.exceptions.HdfFilterException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -25,26 +25,6 @@ import java.util.stream.Collectors;
 public class FilterPipeline {
 
 	public static final FilterPipeline NO_FILTERS = new FilterPipeline();
-
-	private static class PipelineFilterWithData {
-
-		private final Filter filter;
-		private final int[] filterData;
-
-		private PipelineFilterWithData(Filter filter, int[] filterData) {
-			this.filter = filter;
-			this.filterData = filterData;
-		}
-
-		private byte[] decode(byte[] data) {
-			return filter.decode(data, filterData);
-		}
-
-		@Override
-		public String toString() {
-			return "{" + filter.getName() + Arrays.toString(filterData) + "}";
-		}
-	}
 
 	private final List<PipelineFilterWithData> filters = new ArrayList<>();
 
@@ -80,5 +60,9 @@ public class FilterPipeline {
 		return "FilterPipeline{" +
 			filters.stream().map(Objects::toString).collect(Collectors.joining(" -> ")) +
 			'}';
+	}
+
+	public List<PipelineFilterWithData> getFilters() {
+		return Collections.unmodifiableList(filters);
 	}
 }
