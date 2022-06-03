@@ -10,7 +10,9 @@
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
+import io.jhdf.TestUtils;
 import io.jhdf.api.Dataset;
+import io.jhdf.filter.PipelineFilterWithData;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,7 +29,9 @@ import java.util.List;
 import static io.jhdf.TestUtils.flatten;
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
@@ -57,25 +61,34 @@ class ByteShuffleChunkedDatasetTest {
 		// List of all the datasetPaths
 		return Arrays.asList(
 			dynamicContainer(HDF5_TEST_EARLIEST_FILE_NAME, Arrays.asList(
-				dynamicTest("float32", createTest(earliestHdfFile, "/float/float32")),
-				dynamicTest("float64", createTest(earliestHdfFile, "/float/float64")),
-				dynamicTest("int8", createTest(earliestHdfFile, "/int/int8")),
-				dynamicTest("int16", createTest(earliestHdfFile, "/int/int16")),
-				dynamicTest("int32", createTest(earliestHdfFile, "/int/int32")))),
+				dynamicTest("float32", createTest(earliestHdfFile, "/float/float32", 4)),
+				dynamicTest("float64", createTest(earliestHdfFile, "/float/float64", 9)),
+				dynamicTest("int8", createTest(earliestHdfFile, "/int/int8", 4)),
+				dynamicTest("int16", createTest(earliestHdfFile, "/int/int16", 1)),
+				dynamicTest("int32", createTest(earliestHdfFile, "/int/int32", 7)))),
 
 			dynamicContainer(HDF5_TEST_LATEST_FILE_NAME, Arrays.asList(
-				dynamicTest("float32", createTest(latestHdfFile, "/float/float32")),
-				dynamicTest("float64", createTest(latestHdfFile, "/float/float64")),
-				dynamicTest("int8", createTest(latestHdfFile, "/int/int8")),
-				dynamicTest("int16", createTest(latestHdfFile, "/int/int16")),
-				dynamicTest("int32", createTest(latestHdfFile, "/int/int32")))));
+				dynamicTest("float32", createTest(latestHdfFile, "/float/float32", 4)),
+				dynamicTest("float64", createTest(latestHdfFile, "/float/float64", 9)),
+				dynamicTest("int8", createTest(latestHdfFile, "/int/int8", 4)),
+				dynamicTest("int16", createTest(latestHdfFile, "/int/int16",1)),
+				dynamicTest("int32", createTest(latestHdfFile, "/int/int32", 7)))));
 	}
 
-	private Executable createTest(HdfFile hdfFile, String datasetPath) {
+	private Executable createTest(HdfFile hdfFile, String datasetPath, int compressionLevel) {
 		return () -> {
 			Dataset dataset = hdfFile.getDatasetByPath(datasetPath);
+
+			// Check filters
+			List<PipelineFilterWithData> filters = dataset.getFilters();
+			assertThat(filters,hasSize(2));
+			assertThat(filters.get(0).getName(), is("deflate"));
+			assertThat(ArrayUtils.toObject(filters.get(0).getFilterData()), is(arrayContaining(compressionLevel)));
+			assertThat(filters.get(1).getName(), is("shuffle"));
+			assertThat(ArrayUtils.toObject(filters.get(1).getFilterData()), is(arrayContaining(dataset.getDataType().getSize())));
+
 			Object data = dataset.getData();
-			assertThat(getDimensions(data), is(equalTo(new int[]{7, 5})));
+			assertThat(TestUtils.getDimensions(data), is(equalTo(new int[]{7, 5})));
 			Object[] flatData = flatten(data);
 			for (int i = 0; i < flatData.length; i++) {
 				// Do element comparison as there are all different primitive numeric types
@@ -85,14 +98,4 @@ class ByteShuffleChunkedDatasetTest {
 		};
 	}
 
-	private int[] getDimensions(Object data) {
-		List<Integer> dims = new ArrayList<>();
-		dims.add(Array.getLength(data));
-
-		while (Array.get(data, 0).getClass().isArray()) {
-			data = Array.get(data, 0);
-			dims.add(Array.getLength(data));
-		}
-		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
-	}
 }
