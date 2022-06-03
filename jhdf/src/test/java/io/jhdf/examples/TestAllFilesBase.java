@@ -41,6 +41,7 @@ import static io.jhdf.TestUtils.getDimensions;
 import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -193,6 +194,7 @@ abstract class TestAllFilesBase {
 			assertThat(buffer, is(notNullValue()));
 			assertThat(buffer.capacity(), is(greaterThan(0)));
 			assertThat(contiguousDataset.getDataAddress(), is(greaterThan(0L)));
+			assertThat(contiguousDataset.getFilters(), is(empty()));
 
 			// Can't slice scalar datasets
 			if(!dataset.isScalar()) {
@@ -212,6 +214,7 @@ abstract class TestAllFilesBase {
 			ByteBuffer buffer = chunkedDataset.getRawChunkBuffer(new int[dataset.getDimensions().length]);
 			assertThat(buffer, is(notNullValue()));
 			assertThat(buffer.capacity(), is(greaterThan(0)));
+			assertThat(chunkedDataset.getFilters(),is(notNullValue()));
 		}
 
 		Object fillValue = dataset.getFillValue(); // Should return fill value or null if not present
