@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a placeholder for the checksum filter. Currently a no-op allows datasets with a checksum to be read but the
+ * This is a placeholder for the checksum filter. Currently, a no-op allows datasets with a checksum to be read but the
  * checksum is not validated.
  *
  * @author James Mudd

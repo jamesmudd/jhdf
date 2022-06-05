@@ -11,6 +11,7 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
+import io.jhdf.filter.PipelineFilterWithData;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
@@ -27,7 +28,12 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.jhdf.TestUtils.loadTestHdfFile;
+import static io.jhdf.filter.BitShuffleFilter.LZ4_COMPRESSION;
+import static io.jhdf.filter.BitShuffleFilter.NO_COMPRESSION;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.oneOf;
 
 class BitshuffleDatasetTest {
 
@@ -56,11 +62,23 @@ class BitshuffleDatasetTest {
 	@ParameterizedTest
 	@MethodSource
 	void testBitfieldDataset(Dataset dataset) {
+		// Check the filter
+		List<PipelineFilterWithData> filters = dataset.getFilters();
+		assertThat(filters, hasSize(1));
+		PipelineFilterWithData bitshuffleFilter = filters.get(0);
+		assertThat(bitshuffleFilter.getId(), is(32008));
+		assertThat(bitshuffleFilter.getName(), is("bitshuffle"));
+		int[] filterData = bitshuffleFilter.getFilterData();
+		assertThat(filterData[2], is(dataset.getDataType().getSize()));
+		assertThat(filterData[4], is(oneOf(NO_COMPRESSION, LZ4_COMPRESSION)));
+
 		// Now check the data
 		Object data = dataset.getData();
 
 		// convert Data to string list
-		List<Double> dataAsDouble = Arrays.asList(StringUtils.split(ArrayUtils.toString(data), ",{}")).stream().map(Double::parseDouble).collect(Collectors.toList());
+		List<Double> dataAsDouble = Arrays.stream(StringUtils.split(ArrayUtils.toString(data), ",{}"))
+			.map(Double::parseDouble)
+			.collect(Collectors.toList());
 		assertThat(dataAsDouble, Matchers.contains(EXPECTED_DATA_DOUBLE));
 	}
 
