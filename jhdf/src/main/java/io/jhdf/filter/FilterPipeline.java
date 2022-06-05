@@ -44,9 +44,10 @@ public class FilterPipeline {
 	 */
 	public byte[] decode(byte[] encodedData) {
 
-		// Apply the filters
-		for (PipelineFilterWithData b : filters) {
-			encodedData = b.decode(encodedData);
+		// Apply the filters, decoding so reverse order
+		for (int i = filters.size() -1; i >= 0; i--) {
+			PipelineFilterWithData filter = filters.get(i);
+			encodedData = filter.decode(encodedData);
 		}
 
 		return encodedData;

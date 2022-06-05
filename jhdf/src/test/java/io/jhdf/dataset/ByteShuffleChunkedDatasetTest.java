@@ -82,12 +82,12 @@ class ByteShuffleChunkedDatasetTest {
 			// Check filters
 			List<PipelineFilterWithData> filters = dataset.getFilters();
 			assertThat(filters,hasSize(2));
-			assertThat(filters.get(0).getName(), is("deflate"));
-			assertThat(filters.get(0).getId(), is(1));
-			assertThat(ArrayUtils.toObject(filters.get(0).getFilterData()), is(arrayContaining(compressionLevel)));
-			assertThat(filters.get(1).getName(), is("shuffle"));
-			assertThat(filters.get(1).getId(), is(2));
-			assertThat(ArrayUtils.toObject(filters.get(1).getFilterData()), is(arrayContaining(dataset.getDataType().getSize())));
+			assertThat(filters.get(0).getName(), is("shuffle"));
+			assertThat(filters.get(0).getId(), is(2));
+			assertThat(ArrayUtils.toObject(filters.get(0).getFilterData()), is(arrayContaining(dataset.getDataType().getSize())));
+			assertThat(filters.get(1).getName(), is("deflate"));
+			assertThat(filters.get(1).getId(), is(1));
+			assertThat(ArrayUtils.toObject(filters.get(1).getFilterData()), is(arrayContaining(compressionLevel)));
 
 			Object data = dataset.getData();
 			assertThat(TestUtils.getDimensions(data), is(equalTo(new int[]{7, 5})));

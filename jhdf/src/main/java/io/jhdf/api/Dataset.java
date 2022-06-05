@@ -153,6 +153,12 @@ public interface Dataset extends Node {
 	 */
 	Object getFillValue();
 
+	/**
+	 * Gets the filters applied to this dataset with the corresponding filter data.
+	 * The order of the filters is as applied when writing the dataset e.g. shuffle then deflate.
+	 *
+	 * @return the filters applied to this dataset
+	 */
 	List<PipelineFilterWithData> getFilters();
 
 }
