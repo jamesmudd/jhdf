@@ -15,6 +15,7 @@ import io.jhdf.api.Node;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 /**
  * Example application for reading an attribute from HDF5
@@ -27,9 +28,7 @@ public class ReadAttribute {
 	 * @param args ["path/to/file.hdf5", "path/to/node", "attributeName"]
 	 */
 	public static void main(String[] args) {
-		File file = new File(args[0]);
-
-		try (HdfFile hdfFile = new HdfFile(file)) {
+		try (HdfFile hdfFile = new HdfFile(Paths.get(args[0]))) {
 			Node node = hdfFile.getByPath(args[1]);
 			Attribute attribute = node.getAttribute(args[2]);
 			Object attributeData = attribute.getData();

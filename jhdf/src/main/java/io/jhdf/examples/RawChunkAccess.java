@@ -16,6 +16,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.nio.file.Paths;
 
 /**
  * Example application for raw chunk access from HDF5
@@ -24,9 +25,7 @@ import java.nio.ByteBuffer;
  */
 public class RawChunkAccess {
 	public static void main(String[] args) {
-		File file = new File(args[0]);
-
-		try (HdfFile hdfFile = new HdfFile(file)) {
+		try (HdfFile hdfFile = new HdfFile(Paths.get(args[0]))) {
 			Dataset dataset = hdfFile.getDatasetByPath(args[1]);
 			if (dataset instanceof ChunkedDataset) {
 				ChunkedDataset chunkedDataset = (ChunkedDataset) dataset;

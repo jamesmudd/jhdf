@@ -15,6 +15,7 @@ import io.jhdf.api.Node;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 /**
  * An example of recursively parsing a HDF5 file tree and printing it to the
@@ -30,10 +31,8 @@ public class PrintTree {
 	 * @param args ["path/to/file.hdf5""]
 	 */
 	public static void main(String[] args) {
-		File file = new File(args[0]);
-		System.out.println(file.getName());
-
-		try (HdfFile hdfFile = new HdfFile(file)) {
+		try (HdfFile hdfFile = new HdfFile(Paths.get(args[0]))) {
+			System.out.println(hdfFile.getFile().getName());
 			recursivePrintGroup(hdfFile, 0);
 		}
 	}
