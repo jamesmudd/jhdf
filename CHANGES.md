@@ -1,5 +1,10 @@
 # jHDF Change Log
 
+## v0.6.7
+- Add support for Bitshuffle filter https://github.com/jamesmudd/jhdf/issues/366
+- Add ability to get filter data `Dataset#getFilters();` https://github.com/jamesmudd/jhdf/issues/378
+- Dependency and CI updates
+
 ## v0.6.6
 - Add support for slicing of contiguous datasets. This adds a new method `Dataset#getData(long[] sliceOffset, int[] sliceDimensions)` allowing you to read sections of a dataset that would otherwise be too large in memory. Note: chunked dataset slicing support is still missing.  https://github.com/jamesmudd/jhdf/issues/52 https://github.com/jamesmudd/jhdf/pull/361
 - Fix OSGi `Export-Package` header resulting in API access restriction when running in OSGi. https://github.com/jamesmudd/jhdf/issues/365 https://github.com/jamesmudd/jhdf/pull/367
