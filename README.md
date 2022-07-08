@@ -8,8 +8,7 @@ The intention is to make a clean Java API to access HDF5 data. Currently, the pr
 Here is an example of reading a dataset with `jHDF` (see [ReadDataset.java](jhdf/src/main/java/io/jhdf/examples/ReadDataset.java))
 
 ```java
-File file = new File("/path/to/file.hdf5");
-try (HdfFile hdfFile = new HdfFile(file)) {
+try (HdfFile hdfFile = new HdfFile(Paths.get("/path/to/file.hdf5")) {
 	Dataset dataset = hdfFile.getDatasetByPath("/path/to/dataset");
 	// data will be a Java array with the dimensions of the HDF5 dataset
 	Object data = dataset.getData();
