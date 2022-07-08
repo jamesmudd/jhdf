@@ -14,7 +14,6 @@ import io.jhdf.api.Attribute;
 import io.jhdf.api.Node;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.File;
 import java.nio.file.Paths;
 
 /**
@@ -32,7 +31,7 @@ public class ReadAttribute {
 			Node node = hdfFile.getByPath(args[1]);
 			Attribute attribute = node.getAttribute(args[2]);
 			Object attributeData = attribute.getData();
-			System.out.println(ArrayUtils.toString(attributeData));
+			System.out.println(ArrayUtils.toString(attributeData)); //NOSONAR - sout in example
 		}
 	}
 }

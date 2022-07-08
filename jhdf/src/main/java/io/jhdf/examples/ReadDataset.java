@@ -13,7 +13,6 @@ import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.File;
 import java.nio.file.Paths;
 
 /**
@@ -27,7 +26,7 @@ public class ReadDataset {
 			Dataset dataset = hdfFile.getDatasetByPath(args[1]);
 			// data will be a java array of the dimensions of the HDF5 dataset
 			Object data = dataset.getData();
-			System.out.println(ArrayUtils.toString(data));
+			System.out.println(ArrayUtils.toString(data)); //NOSONAR - sout in example
 		}
 	}
 }
