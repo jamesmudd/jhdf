@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2021 James Mudd
+ * Copyright (c) 2022 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -289,9 +289,27 @@ public final class Utils {
 	}
 
 	public static int dimensionIndexToLinearIndex(int[] index, int[] dimensions) {
-		int linear = 0;
+		long[] indexAsLong = Arrays.stream(index).asLongStream().toArray();
+		long linearLong = dimensionIndexToLinearIndex(indexAsLong, dimensions);
+		return Math.toIntExact(linearLong);
+	}
+
+	public static long dimensionIndexToLinearIndex(long[] index, int[] dimensions) {
+		if(index.length != dimensions.length) {
+			throw new IllegalArgumentException("Mismatched index and dimension lengths");
+		}
 		for (int i = 0; i < dimensions.length; i++) {
-			int temp = index[i];
+			if(index[i] < 0 || dimensions[i] < 0) {
+				throw new IllegalArgumentException("Negative index or dimension values");
+			}
+			if(index[i] > dimensions[i]) {
+				throw new IllegalArgumentException("index is greater than dimension size");
+			}
+		}
+
+		long linear = 0;
+		for (int i = 0; i < dimensions.length; i++) {
+			long temp = index[i];
 			for (int j = i + 1; j < dimensions.length; j++) {
 				temp *= dimensions[j];
 			}
@@ -335,5 +353,25 @@ public final class Utils {
 	 */
 	public static int[] stripLeadingIndex(int[] dims) {
 		return Arrays.copyOfRange(dims, 1, dims.length);
+	}
+
+	// See https://stackoverflow.com/a/4674035
+	public static void setBit(byte[] bytes, int bit, boolean value) {
+		if(bit < 0 || bit >= bytes.length * 8){
+			throw new IllegalArgumentException("bit index out of range. index=" + bit);
+		}
+		final int byteIndex = bit / 8;
+		final int bitInByte = bit % 8;
+		if(value) {
+			bytes[byteIndex] |= 1 << bitInByte;
+		} else {
+			bytes[byteIndex] &= ~(1 << bitInByte);
+		}
+	}
+
+	public static boolean getBit(byte[] bytes, int bit) {
+		final int byteIndex = bit / 8;
+		final int bitInByte = bit % 8;
+		return ((bytes[byteIndex]  >> bitInByte) & 1) == 1;
 	}
 }

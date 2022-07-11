@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2021 James Mudd
+ * Copyright (c) 2022 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -14,8 +14,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
@@ -345,7 +349,7 @@ class UtilsTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource
+	@MethodSource("chunkIndexToChunkOffset")
 	void chunkIndexToChunkOffset(int chunkIndex, int[] chunkDimensions, int[] datasetDimensions, int[] expectedChunkOffset) {
 		assertThat(Utils.chunkIndexToChunkOffset(chunkIndex, chunkDimensions, datasetDimensions), is(equalTo(expectedChunkOffset)));
 	}
@@ -401,11 +405,102 @@ class UtilsTest {
 			Arguments.of(new int[]{1, 2, 3}, new int[]{2, 3}),
 			Arguments.of(new int[]{1, 2, 3, 4, 5}, new int[]{2, 3, 4, 5})
 		);
+}
+
+	@ParameterizedTest
+	@MethodSource("testStripLeadingIndex")
+	void testStripLeadingIndex(int[] input, int[] output) {
+		assertThat(Utils.stripLeadingIndex(input), is(output));
+	}
+
+
+
+	@ParameterizedTest
+	@MethodSource("testDimensionIndexToLinearIndex")
+	void testDimensionIndexToLinearIndex(long[] index, int[] dimensions, long result) {
+		assertThat(Utils.dimensionIndexToLinearIndex(index, dimensions), is(result));
+	}
+
+	static Stream<Arguments> testDimensionIndexToLinearIndex() {
+		return Stream.of(
+			Arguments.of(new long[]{0,0}, new int[]{4,7}, 0),
+			Arguments.of(new long[]{1,1}, new int[]{4,4}, 5),
+			Arguments.of(new long[]{1,1}, new int[]{4,40}, 41),
+			Arguments.of(new long[]{1,1}, new int[]{300,40}, 41),
+			Arguments.of(new long[]{0,1,1}, new int[]{300,40,20}, 21),
+			Arguments.of(new long[]{1,1,1}, new int[]{300,40,20}, 821),
+			Arguments.of(new long[]{0,0,0}, new int[]{300,40,20}, 0),
+			Arguments.of(new long[]{3,0,0}, new int[]{300,40,20}, 40*20*3),
+			Arguments.of(new long[]{3,1,0}, new int[]{300,40,20}, 40*20*3+20),
+			Arguments.of(new long[]{3,1,3}, new int[]{300,40,20}, 40*20*3+20+3)
+		);
+	}
+
+	@Test
+	void testDimensionIndexToLinearIndexExceptions() {
+		// Mismatch argument lengths
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.dimensionIndexToLinearIndex(new int[]{4}, new int[]{1,1}));
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.dimensionIndexToLinearIndex(new int[]{4,4}, new int[]{1}));
+
+		// Negative values
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.dimensionIndexToLinearIndex(new int[]{-4}, new int[]{1}));
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.dimensionIndexToLinearIndex(new int[]{4}, new int[]{-3}));
+
+		// index higher than dimensions
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.dimensionIndexToLinearIndex(new int[]{4}, new int[]{1}));
+	}
+
+	static Stream<Arguments> testGetSetBit() {
+		return Stream.of(
+			Arguments.of(new int[]{8}, BigInteger.valueOf(2).pow(8).intValue()),
+			Arguments.of(new int[]{8, 0}, BigInteger.valueOf(2).pow(8).intValue() + 1),
+			Arguments.of(new int[]{8, 1}, BigInteger.valueOf(2).pow(8).intValue() + 2),
+			Arguments.of(new int[]{31}, Integer.MIN_VALUE),
+			Arguments.of(new int[]{31, 0}, Integer.MIN_VALUE + 1),
+			Arguments.of(new int[]{}, 0),
+			Arguments.of(new int[]{10}, BigInteger.valueOf(2).pow(10).intValue()),
+			Arguments.of(IntStream.range(0, 31).toArray(), Integer.MAX_VALUE),
+			Arguments.of(IntStream.range(0, 32).toArray(), -1)
+		);
 	}
 
 	@ParameterizedTest
-	@MethodSource
-	void testStripLeadingIndex(int[] input, int[] output) {
-		assertThat(Utils.stripLeadingIndex(input), is(output));
+	@MethodSource("testGetSetBit")
+	void testGetSetBit(int[] bitsToSet, int expectedIntValue) {
+		byte[] bytes = new byte[4];
+		Set<Integer> bitsSet  = new HashSet<>();
+
+		for (int bit : bitsToSet) {
+			Utils.setBit(bytes, bit, true);
+			assertThat(Utils.getBit(bytes, bit),is(true));
+			bitsSet.add(bit);
+		}
+		assertThat(ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN).getInt(), is(expectedIntValue));
+
+		for (int i = 0; i < bytes.length * 8; i++) {
+			assertThat(Utils.getBit(bytes, i), is(bitsSet.contains(i)));
+		}
+
+		// Unset the bits
+		for (int bit : bitsToSet) {
+			Utils.setBit(bytes, bit, false);
+		}
+		assertThat(ByteBuffer.wrap(bytes).order(LITTLE_ENDIAN).getInt(), is(0));
+	}
+
+	@Test
+	void testSetBitException() {
+		byte[] bytes = new byte[5];
+		// Negative bit index
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.setBit(bytes, -3, true));
+		// Bit index larger than array length
+		assertThrows(IllegalArgumentException.class,
+			() -> Utils.setBit(bytes, 5*8, true));
 	}
 }

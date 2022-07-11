@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2021 James Mudd
+ * Copyright (c) 2022 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -14,6 +14,8 @@ import io.jhdf.ObjectHeader;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
+import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.InvalidSliceHdfException;
 import io.jhdf.object.datatype.CompoundDataType;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.OrderedDataType;
@@ -130,6 +132,43 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	}
 
 	@Override
+	public Object getData(long[] sliceOffset, int[] sliceDimensions) {
+		if (isEmpty()) {
+			throw new HdfException("Cannot slice empty dataset");
+		}
+		if(isScalar()) {
+			throw new HdfException("Cannot slice scalar dataset");
+		}
+
+		validateSliceRequest(sliceOffset, sliceDimensions);
+
+		logger.debug("Getting data slice offset={} dimensions={} for [{}]'...", sliceOffset, sliceDimensions, getPath());
+		ByteBuffer sliceDataBuffer = getSliceDataBuffer(sliceOffset, sliceDimensions);
+		return DatasetReader.readDataset(getDataType(), sliceDataBuffer, sliceDimensions, hdfBackingStorage);
+	}
+
+	private void validateSliceRequest(long[] sliceOffset, int[] sliceDimensions) {
+		final int numberOfDimensions = getDimensions().length;
+		if (sliceOffset.length != numberOfDimensions
+			|| sliceDimensions.length != numberOfDimensions
+		) {
+			throw new InvalidSliceHdfException("Requested slice does not match dataset dimensions", sliceOffset, sliceDimensions, getDimensions());
+		}
+		for (int i = 0; i < sliceOffset.length; i++) {
+			if(sliceOffset[i] < 0) {
+				throw new InvalidSliceHdfException("Requested sliceOffset has negative value in dimension: " + i, sliceOffset, sliceDimensions, getDimensions());
+			}
+			if(sliceDimensions[i] <= 0) {
+				throw new InvalidSliceHdfException("Requested sliceDimensions has negative or zero value in dimension: " + i, sliceOffset, sliceDimensions, getDimensions());
+			}
+
+			if(sliceOffset[i] + sliceDimensions[i] > getDimensions()[i]) {
+				throw new InvalidSliceHdfException("Requested slice exceeds dataset in dimension: " + i, sliceOffset, sliceDimensions, getDimensions());
+			}
+		}
+	}
+
+	@Override
 	public boolean isScalar() {
 		return getDimensions().length == 0;
 	}
@@ -151,6 +190,9 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	 * @return the data buffer that holds this dataset
 	 */
 	public abstract ByteBuffer getDataBuffer();
+
+
+	public abstract ByteBuffer getSliceDataBuffer(long[] offset, int[] shape);
 
 	@Override
 	public Object getFillValue() {
@@ -181,4 +223,5 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	public long getStorageInBytes() {
 		return getSizeInBytes();
 	}
+
 }

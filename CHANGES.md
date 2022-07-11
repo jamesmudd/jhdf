@@ -1,5 +1,20 @@
 # jHDF Change Log
 
+## v0.6.7
+- Add support for Bitshuffle filter https://github.com/jamesmudd/jhdf/issues/366
+- Add ability to get filter data `Dataset#getFilters();` https://github.com/jamesmudd/jhdf/issues/378
+- Dependency and CI updates
+
+## v0.6.6
+- Add support for slicing of contiguous datasets. This adds a new method `Dataset#getData(long[] sliceOffset, int[] sliceDimensions)` allowing you to read sections of a dataset that would otherwise be too large in memory. Note: chunked dataset slicing support is still missing.  https://github.com/jamesmudd/jhdf/issues/52 https://github.com/jamesmudd/jhdf/pull/361
+- Fix OSGi `Export-Package` header resulting in API access restriction when running in OSGi. https://github.com/jamesmudd/jhdf/issues/365 https://github.com/jamesmudd/jhdf/pull/367
+- Dependency and CI updates
+
+## v0.6.5
+- Add support for array type data in multi-dimensional datasets https://github.com/jamesmudd/jhdf/issues/341
+- Fix issue reading compound type attributes https://github.com/jamesmudd/jhdf/issues/338
+- Dependency updates
+
 ## v0.6.4
 - Fix issue with byte shuffle filter when data length is not a multiple of element length. https://github.com/jamesmudd/jhdf/issues/318
 - Improve testing of byte shuffle and deflate filters
@@ -7,7 +22,7 @@
 
 ## v0.6.3
 - Improve support for NIO Path. Allows jHDF to open files on non-default file systems such as zip files or remote storage systems. Thanks, @tbrunsch for this contribution https://github.com/jamesmudd/jhdf/pull/304
-- Fix accessing a missing fill value could cause and exception https://github.com/jamesmudd/jhdf/pull/307
+- Fix accessing a missing fill value could cause an exception https://github.com/jamesmudd/jhdf/pull/307
 - Dependency updates
 - CI and release process improvements
 

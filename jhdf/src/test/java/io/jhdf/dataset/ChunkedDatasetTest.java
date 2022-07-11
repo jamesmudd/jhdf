@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2021 James Mudd
+ * Copyright (c) 2022 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -11,6 +11,7 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
+import io.jhdf.filter.FilterPipeline;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
@@ -24,6 +25,7 @@ import static io.jhdf.TestUtils.flatten;
 import static io.jhdf.TestUtils.getDimensions;
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
@@ -74,6 +76,7 @@ class ChunkedDatasetTest {
 	private Executable createTest(HdfFile hdfFile, String datasetPath) {
 		return () -> {
 			Dataset dataset = hdfFile.getDatasetByPath(datasetPath);
+			assertThat(dataset.getFilters(), is(empty()));
 			Object data = dataset.getData();
 			assertThat(getDimensions(data), is(equalTo(new int[]{7, 5, 3})));
 			Object[] flatData = flatten(data);

@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2021 James Mudd
+ * Copyright (c) 2022 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -13,7 +13,7 @@ import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.File;
+import java.nio.file.Paths;
 
 /**
  * Example application for reading a dataset from HDF5
@@ -22,13 +22,11 @@ import java.io.File;
  */
 public class ReadDataset {
 	public static void main(String[] args) {
-		File file = new File(args[0]);
-
-		try (HdfFile hdfFile = new HdfFile(file)) {
+		try (HdfFile hdfFile = new HdfFile(Paths.get(args[0]))) {
 			Dataset dataset = hdfFile.getDatasetByPath(args[1]);
 			// data will be a java array of the dimensions of the HDF5 dataset
 			Object data = dataset.getData();
-			System.out.println(ArrayUtils.toString(data));
+			System.out.println(ArrayUtils.toString(data)); //NOSONAR - sout in example
 		}
 	}
 }

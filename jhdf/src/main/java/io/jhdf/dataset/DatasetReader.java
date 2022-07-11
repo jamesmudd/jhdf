@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2021 James Mudd
+ * Copyright (c) 2022 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -11,7 +11,6 @@ package io.jhdf.dataset;
 
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.storage.HdfBackingStorage;
-
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 
@@ -63,7 +62,7 @@ public final class DatasetReader {
 
 		final Object data = type.fillData(buffer, dimensions, hdfBackingStorage);
 
-		if (isScalar) {
+		if (isScalar && data.getClass().isArray()) {
 			return Array.get(data, 0);
 		} else {
 			return data;

@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2021 James Mudd
+ * Copyright (c) 2022 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -16,7 +16,6 @@ import io.jhdf.object.message.FilterPipelineMessage.FilterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +41,7 @@ public enum FilterManager {
 		addFilter(new ByteShuffleFilter());
 		addFilter(new FletcherChecksumFilter());
 		addFilter(new LzfFilter());
+		addFilter(new BitShuffleFilter());
 
 		// Add dynamically loaded filters
 		ServiceLoader<Filter> serviceLoader = ServiceLoader.load(Filter.class);
@@ -89,9 +89,6 @@ public enum FilterManager {
 			throw new HdfFilterException("A required filter is not available: name='" + missingFilterInfo.getName()
 				+ "' id=" + missingFilterInfo.getId());
 		}
-
-		// Decoding so reverse order
-		Collections.reverse(filters);
 
 		// Make the new pipeline
 		FilterPipeline pipeline = new FilterPipeline();

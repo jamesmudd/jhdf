@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2021 James Mudd
+ * Copyright (c) 2022 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -15,8 +15,10 @@ import io.jhdf.api.Group;
 import io.jhdf.api.dataset.ChunkedDataset;
 import io.jhdf.dataset.DatasetBase;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.filter.FilterManager;
 import io.jhdf.filter.FilterPipeline;
+import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.message.FilterPipelineMessage;
 import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static java.lang.Math.toIntExact;
@@ -193,7 +196,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		final int fastestChunkDim = chunkDimensions[chunkDimensions.length - 1];
 		final int numOfOffsets = Arrays.stream(chunkDimensions)
 			.limit(chunkDimensions.length - 1L)
-			.reduce(1, (a, b) -> a * b);
+			.reduce(1, Math::multiplyExact);
 
 		final int[] chunkOffsets = new int[numOfOffsets];
 		for (int i = 0; i < numOfOffsets; i++) {
@@ -234,7 +237,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		try {
 			final FilterPipeline pipeline = this.lazyPipeline.get();
 
-			if (pipeline == null) {
+			if (pipeline == FilterPipeline.NO_FILTERS) {
 				// No filters
 				return encodedBytes;
 			}
@@ -272,7 +275,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 			} else {
 				// No filters
 				logger.debug("No filters for [{}]", getPath());
-				return null;
+				return FilterPipeline.NO_FILTERS;
 			}
 		}
 	}
@@ -306,5 +309,19 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	@Override
 	public long getStorageInBytes() {
 		return getChunkLookup().values().stream().mapToLong(Chunk::getSize).sum();
+	}
+
+	@Override
+	public ByteBuffer getSliceDataBuffer(long[] offset, int[] shape) {
+		throw new UnsupportedHdfException("Chunked datasets don't support slice reading");
+	}
+
+	@Override
+	public List<PipelineFilterWithData> getFilters() {
+		try {
+			return lazyPipeline.get().getFilters();
+		} catch (ConcurrentException e) {
+			throw new HdfException("Failed to create filter pipeline", e);
+		}
 	}
 }

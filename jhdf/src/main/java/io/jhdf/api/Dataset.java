@@ -3,14 +3,19 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2021 James Mudd
+ * Copyright (c) 2022 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.api;
 
+import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.InvalidSliceHdfException;
+import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataLayout;
+
+import java.util.List;
 
 /**
  * HDF5 dataset. Datasets contain the real data within a HDF5 file.
@@ -113,6 +118,20 @@ public interface Dataset extends Node {
 	Object getData();
 
 	/**
+	 * Gets a slice of data from the HDF5 dataset and converts it to a Java object.
+	 * <p>
+	 * The returned object will be an array with the dimensions specified by <code>sliceDimensions</code> and type of
+	 * the array will be the return value of {@link #getJavaType()}.
+	 *
+	 * @param sliceOffset the position in the dataset the slice starts. Must have length equal to number of dimensions
+	 * @param sliceDimensions the dimensions of the slice to return. Must have length equal to number of dimensions
+	 * @return the slice of data from the dataset as a Java object
+	 * @throws InvalidSliceHdfException if the <code>sliceOffset</code> or <code>sliceDimensions</code> are invalid
+	 * @throws HdfException if the dataset can't be sliced
+	 */
+	Object getData(long[] sliceOffset, int[] sliceDimensions);
+
+	/**
 	 * Gets the Java type that will be used to represent this data.
 	 *
 	 * @return the Java type used to represent this dataset
@@ -133,5 +152,13 @@ public interface Dataset extends Node {
 	 * @return the fill value of the dataset or <code>null</code> if not defined
 	 */
 	Object getFillValue();
+
+	/**
+	 * Gets the filters applied to this dataset with the corresponding filter data.
+	 * The order of the filters is as applied when writing the dataset e.g. shuffle then deflate.
+	 *
+	 * @return the filters applied to this dataset
+	 */
+	List<PipelineFilterWithData> getFilters();
 
 }

@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2021 James Mudd
+ * Copyright (c) 2022 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -101,8 +101,21 @@ public abstract class DataType {
 		return size;
 	}
 
+	/**
+	 * Get the Java {@link Class} of this HDF5 type
+	 *
+	 * @return {@link Class} of this HDF5 type
+	 */
 	public abstract Class<?> getJavaType();
 
+	/**
+	 * Fill the data from buffer into the returned {@link Object} using this {@link DataType}
+	 *
+	 * @param buffer            containing the data
+	 * @param dimensions        dataset dimensions
+	 * @param hdfBackingStorage file containing this data
+	 * @return the read data
+	 */
 	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage);
 
 }
