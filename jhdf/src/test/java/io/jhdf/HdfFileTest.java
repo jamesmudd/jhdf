@@ -14,6 +14,7 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Link;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
+import io.jhdf.dataset.NoParent;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
 import io.jhdf.exceptions.InMemoryHdfException;
@@ -35,16 +36,8 @@ import java.nio.file.Paths;
 import java.util.Iterator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class HdfFileTest {
@@ -374,5 +367,26 @@ class HdfFileTest {
 		HdfFile hdfFile = HdfFile.fromBytes(bytes);
 		HdfBackingStorage hdfBackingStorage = hdfFile.getHdfBackingStorage();
 		assertThrows(InMemoryHdfException.class, hdfBackingStorage::getFileChannel);
+	}
+
+	@Test
+	void testGettingNodesByAddress() {
+		try (HdfFile hdfFile = new HdfFile(new File(testFileUrl))) {
+			Node groupNode = hdfFile.getNodeByAddress(800L);
+			assertThat(groupNode.getAddress(), is(800L));
+			assertThat(groupNode, isA(Group.class));
+			assertThat(groupNode.getName(), is("__ADDRESS__800"));
+			assertThat(groupNode.getParent(), isA(NoParent.class));
+			Group group = (Group) groupNode;
+			assertDoesNotThrow(() -> group.getChildren());
+
+			Node datasetNode = hdfFile.getNodeByAddress(7272L);
+			assertThat(datasetNode.getAddress(), is(7272L));
+			assertThat(datasetNode, isA(Dataset.class));
+			assertThat(datasetNode.getName(), is("__ADDRESS__" + 7272));
+			assertThat(datasetNode.getParent(), isA(NoParent.class));
+			Dataset dataset1 = (Dataset) datasetNode;
+			assertDoesNotThrow(() -> dataset1.getData());
+		}
 	}
 }
