@@ -94,7 +94,7 @@ class HdfFileTest {
 
 	@Test
 	void testOpeningInvalidFile() {
-		HdfException ex = assertThrows(HdfException.class, () -> {try(HdfFile hdfFile = new HdfFile(nonHdfFilePath)) {}} );
+		HdfException ex = assertThrows(HdfException.class, () -> new HdfFile(nonHdfFilePath));
 		assertThat(ex.getMessage(), is(equalTo("No valid HDF5 signature found")));
 	}
 
@@ -356,9 +356,7 @@ class HdfFileTest {
 	@Test
 	void testReadingFromEmptyByteArrayFails() {
 		byte[] bytes = new byte[0];
-		assertThrows(HdfException.class, () -> {
-			try(HdfFile hdfFile = HdfFile.fromBytes(bytes)) {}
-		});
+		assertThrows(HdfException.class, () -> HdfFile.fromBytes(bytes));
 	}
 
 	@Test
