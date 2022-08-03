@@ -9,6 +9,7 @@
  */
 package io.jhdf.examples;
 
+import io.jhdf.TestUtils;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -37,6 +38,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.jhdf.TestUtils.flatten;
 import static io.jhdf.TestUtils.getDimensions;
 import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -173,9 +175,18 @@ abstract class TestAllFilesBase {
 		} else if (dataset.isCompound()) {
 			// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future...
 			assertThat(data, is(instanceOf(Map.class)));
-			assertThat((Map<String, Object>) data, is(not(anEmptyMap())));
+			Map<String, Object> mapData = (Map<String, Object>) data;
+			Map<String, Object> flatMapData = (Map<String, Object>) dataFlat;
+			assertThat(mapData, is(not(anEmptyMap())));
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 			assertThat(dataset.getSize(), is(greaterThan(0L)));
+			for (String key : mapData.keySet()) {
+				// Don't check nested compound
+				if(mapData.get(key).getClass().isArray()) {
+					assertThat(flatten(mapData.get(key)), is(equalTo(flatten(flatMapData.get(key)))));
+				}
+			}
+
 		} else if (dataset.isVariableLength()) {
 			assertThat(getDimensions(data)[0], is(equalTo(dims[0])));
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
@@ -192,6 +203,7 @@ abstract class TestAllFilesBase {
 			// Should have some size
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 			assertThat(dataset.getSize(), is(greaterThan(0L)));
+			assertThat(flatten(data), is(equalTo(flatten(dataFlat))));
 		}
 
 		if (dataset instanceof ContiguousDataset && !dataset.isEmpty()) {
