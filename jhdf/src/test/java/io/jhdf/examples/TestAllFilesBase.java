@@ -152,18 +152,24 @@ abstract class TestAllFilesBase {
 		dataset.getData();
 		final Object data = dataset.getData();
 
+		final Object dataFlat = dataset.getDataFlat();
+
 		if (dataset.isEmpty()) {
 			assertThat(data, is(nullValue()));
 			// Empty so should have 0 size
 			assertThat(dataset.getStorageInBytes(), is(equalTo(0L)));
 			// Could still have non-zero size in case no storage is allocated
 			assertThat(dataset.getStorageInBytes(), is(greaterThanOrEqualTo(0L)));
+			assertThat((Object[]) dataFlat, is(emptyArray()));
+			assertThat(getDimensions(dataFlat), is(new int[]{0}));
 		} else if (dataset.isScalar()) {
 			assertThat(toObject(dataset.getDimensions()), is(emptyArray()));
 			assertThat(data.getClass(), is(equalTo(dataset.getJavaType())));
 			// Should have some size
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 			assertThat(dataset.getSize(), is(equalTo(1L)));
+			assertThat(getDimensions(dataFlat), is(new int[]{1}));
+			assertThat(Array.get(dataFlat, 0), is(data));
 		} else if (dataset.isCompound()) {
 			// Compound datasets are currently returned as maps, maybe a custom CompoundDataset might be better in the future...
 			assertThat(data, is(instanceOf(Map.class)));

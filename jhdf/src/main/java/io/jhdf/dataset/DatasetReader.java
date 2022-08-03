@@ -68,4 +68,8 @@ public final class DatasetReader {
 			return data;
 		}
 	}
+
+	public static Object readDataset(DataType type, ByteBuffer buffer, int elements, HdfBackingStorage hdfBackingStorage) {
+		return type.fillData(buffer, new int[]{elements}, hdfBackingStorage);
+	}
 }

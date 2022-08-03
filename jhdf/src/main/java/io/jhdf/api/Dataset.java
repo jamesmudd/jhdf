@@ -117,6 +117,8 @@ public interface Dataset extends Node {
 	 */
 	Object getData();
 
+	Object getDataFlat();
+
 	/**
 	 * Gets a slice of data from the HDF5 dataset and converts it to a Java object.
 	 * <p>
