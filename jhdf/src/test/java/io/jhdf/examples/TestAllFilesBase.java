@@ -31,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -191,12 +192,14 @@ abstract class TestAllFilesBase {
 			assertThat(getDimensions(data)[0], is(equalTo(dims[0])));
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 			assertThat(dataset.getSize(), is(greaterThan(0L)));
+			assertThat(getDimensions(dataFlat)[0], is(Arrays.stream(dataset.getDimensions()).reduce(1, Math::multiplyExact)));
 		} else if (dataset.getJavaType().isArray()) {
 			// e.g. Opaque dataset
 			assertThat(getType(data), is(equalTo(dataset.getJavaType().getComponentType())));
 			// Should have some size
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 			assertThat(dataset.getSize(), is(greaterThan(0L)));
+			assertThat(getDimensions(dataFlat)[0], is(Arrays.stream(dataset.getDimensions()).reduce(1, Math::multiplyExact)));
 		} else {
 			assertThat(getDimensions(data), is(equalTo(dims)));
 			assertThat(getType(data), is(equalTo(dataset.getJavaType())));
@@ -204,6 +207,8 @@ abstract class TestAllFilesBase {
 			assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
 			assertThat(dataset.getSize(), is(greaterThan(0L)));
 			assertThat(flatten(data), is(equalTo(flatten(dataFlat))));
+			assertThat(getDimensions(dataFlat).length, is(1));
+			assertThat(getDimensions(dataFlat)[0], is(Arrays.stream(dataset.getDimensions()).reduce(1, Math::multiplyExact)));
 		}
 
 		if (dataset instanceof ContiguousDataset && !dataset.isEmpty()) {
