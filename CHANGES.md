@@ -1,5 +1,10 @@
 # jHDF Change Log
 
+## v0.6.8
+- Add support for getting flat data `Dataset#getDataFlat()` https://github.com/jamesmudd/jhdf/issues/397
+- Add support for dereferencing addresses/ids `HdfFile.getNodeByAddress(long address) ` https://github.com/jamesmudd/jhdf/issues/316
+- Dependency updates
+
 ## v0.6.7
 - Add support for Bitshuffle filter https://github.com/jamesmudd/jhdf/issues/366
 - Add ability to get filter data `Dataset#getFilters();` https://github.com/jamesmudd/jhdf/issues/378
