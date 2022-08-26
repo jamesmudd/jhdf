@@ -27,6 +27,8 @@ import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.DataTypeMessage;
 import io.jhdf.object.message.FillValueMessage;
 import io.jhdf.storage.HdfBackingStorage;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,10 +127,34 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 			return null;
 		}
 
+		final StopWatch stopWatch = StopWatch.createStarted();
+
 		final ByteBuffer bb = getDataBuffer();
 		final DataType type = getDataType();
 
-		return DatasetReader.readDataset(type, bb, getDimensions(), hdfBackingStorage);
+		final Object data = DatasetReader.readDataset(type, bb, getDimensions(), hdfBackingStorage);
+		logger.debug("Finished getting data for '{}' took '{}'", getPath(), stopWatch.getNanoTime());
+		return data;
+	}
+
+	@Override
+	public Object getDataFlat() {
+		logger.debug("Getting flat data for '{}'...", getPath());
+
+		if (isEmpty()) {
+			return ArrayUtils.EMPTY_OBJECT_ARRAY;
+		}
+
+		final StopWatch stopWatch = StopWatch.createStarted();
+
+		final ByteBuffer bb = getDataBuffer();
+		final DataType type = getDataType();
+
+		int elements = Math.toIntExact(getSize());
+
+		final Object data = DatasetReader.readDataset(type, bb, elements, hdfBackingStorage);
+		logger.debug("Finished getting flat data for '{}' took '{}'", getPath(), stopWatch.getNanoTime());
+		return data;
 	}
 
 	@Override

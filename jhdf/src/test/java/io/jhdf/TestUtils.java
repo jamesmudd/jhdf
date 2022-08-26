@@ -51,9 +51,10 @@ public final class TestUtils {
 
 	public static int[] getDimensions(Object data) {
 		List<Integer> dims = new ArrayList<>();
-		dims.add(Array.getLength(data));
+		int dimLength = Array.getLength(data);
+		dims.add(dimLength);
 
-		while (Array.get(data, 0).getClass().isArray()) {
+		while (dimLength > 0 && Array.get(data, 0).getClass().isArray()) {
 			data = Array.get(data, 0);
 			dims.add(Array.getLength(data));
 		}
