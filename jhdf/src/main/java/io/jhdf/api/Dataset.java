@@ -121,10 +121,12 @@ public interface Dataset extends Node {
 	 * Gets the data from the HDF5 dataset and converts it to a Java object, it differs from {@link #getData()} as the
 	 * data will be flat (i.e. 1D). Can offer improved performance over {@link #getData()} for multiple dimension
 	 * arrays.
-	 * The type of the returned array will be that retuned by {@link #getJavaType()}. The size of the array returned will be the product of the dataset dimensions. For empty datasets an empty array
-	 * will be returned. For scalar datasets a array with a single element will be returned.
+	 * <p>
+	 * The type of the returned array will be that returned by {@link #getJavaType()}. The size of the array returned
+	 * will be the product of the dataset dimensions. For empty datasets an empty array will be returned. For scalar
+	 * datasets an array with a single element will be returned.
 	 *
-	 * @return the data in a 1D Java array
+	 * @return the data as a 1D array
 	 */
 	Object getDataFlat();
 
