@@ -21,7 +21,7 @@ jobs:
 
             - name: Set up JDK (arm64)
               uses: actions/setup-java@v3
-              if: {{ contains(matrix.os, "ARM64") }}
+              if: contains(matrix.os, "ARM64")
               with:
                   java-version: ${{ matrix.java }}
                   architecture: 'arm64'
@@ -30,7 +30,7 @@ jobs:
 
             - name: Set up JDK (x86)
               uses: actions/setup-java@v3
-              if: {{ !contains(matrix.os, "ARM64") }}
+              if: !contains(matrix.os, "ARM64")
               with:
                   java-version: ${{ matrix.java }}
                   architecture: 'x86'
