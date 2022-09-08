@@ -19,10 +19,21 @@ jobs:
         steps:
             - uses: actions/checkout@v3
 
-            - name: Set up JDK
+            - name: Set up JDK (arm64)
               uses: actions/setup-java@v3
+              if: {{ contains(matrix.os, "ARM64") }}
               with:
                   java-version: ${{ matrix.java }}
+                  architecture: 'arm64'
+                  distribution: 'temurin'
+                  cache: 'gradle'
+
+            - name: Set up JDK (x86)
+              uses: actions/setup-java@v3
+              if: {{ !contains(matrix.os, "ARM64") }}
+              with:
+                  java-version: ${{ matrix.java }}
+                  architecture: 'x86'
                   distribution: 'temurin'
                   cache: 'gradle'
 
