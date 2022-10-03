@@ -11,7 +11,7 @@ package io.jhdf.filter;
 
 import io.jhdf.Utils;
 import net.jpountz.lz4.LZ4Factory;
-import net.jpountz.lz4.LZ4SafeDecompressor;
+import net.jpountz.lz4.LZ4FastDecompressor;
 
 import java.nio.ByteBuffer;
 
@@ -46,8 +46,8 @@ public class Lz4Filter implements Filter {
 		final byte[] decompressed = new byte[Math.toIntExact(totalDecompressedSize)];
 
 		final int decompressedBlockSize = Utils.readBytesAsUnsignedInt(byteBuffer, 4);
-		final byte[] decomressedBuffer = new byte[decompressedBlockSize];
-		final byte[] compressedBuffer = new byte[decompressedBlockSize * 2]; // Assume compression never inflates by more than 2x
+		final byte[] decompressedBlock = new byte[decompressedBlockSize];
+		final byte[] compressedBlock = new byte[decompressedBlockSize * 2]; // Assume compression never inflates by more than 2x
 
 		long blocks2;
 		if(decompressedBlockSize > totalDecompressedSize) {
@@ -56,13 +56,21 @@ public class Lz4Filter implements Filter {
 			blocks2 = totalDecompressedSize / decompressedBlockSize;
 		}
 
-		final LZ4SafeDecompressor lzz4Decompressor = LZ4Factory.safeInstance().safeDecompressor();
+		final LZ4FastDecompressor lzz4Decompressor = LZ4Factory.fastestJavaInstance().fastDecompressor();
 
 		int offset = 0;
 		for (long i = 0; i < blocks2; i++) {
-			final int compressedBlockLength = byteBuffer.getInt();
-			byteBuffer.get(compressedBuffer, 0, compressedBlockLength);
-			final int decompressedBytes = lzz4Decompressor.decompress(compressedBuffer, 0, compressedBlockLength, decomressedBuffer, 0);
+			final int compressedBlockSize = byteBuffer.getInt();
+			byteBuffer.get(compressedBlock, 0, compressedBlockSize);
+			final int decompressedBytes;
+			if (compressedBlockSize == decompressedBlockSize) {
+				for (int j = 0; j < compressedBlockSize; j++) {
+					decompressedBlock[j] = compressedBlock[j];
+				}
+				decompressedBytes = compressedBlockSize;
+			} else {
+				decompressedBytes = lzz4Decompressor.decompress(compressedBlock, decompressedBlock, decompressedBlockSize);
+			}
 			offset += decompressedBytes;
 		}
 
@@ -70,6 +78,6 @@ public class Lz4Filter implements Filter {
 			byteBuffer.get(decompressed, offset, byteBuffer.remaining());
 		}
 
-		return decompressed;
+		return decompressedBlock;
 	}
 }
