@@ -17,6 +17,8 @@ import java.nio.ByteBuffer;
 
 public class Lz4Filter implements Filter {
 
+	private final LZ4FastDecompressor lzz4Decompressor = LZ4Factory.fastestJavaInstance().fastDecompressor();
+
 	/**
 	 * Id defined in <a href="https://support.hdfgroup.org/services/filters.html">...</a>
 	 *
@@ -28,9 +30,9 @@ public class Lz4Filter implements Filter {
 	}
 
 	/**
-	 * The name of this filter, "lzf
+	 * The name of this filter, "lz4"
 	 *
-	 * @return "lzf"
+	 * @return "lz4"
 	 */
 	@Override
 	public String getName() {
@@ -47,7 +49,7 @@ public class Lz4Filter implements Filter {
 
 		final int decompressedBlockSize = Utils.readBytesAsUnsignedInt(byteBuffer, 4);
 		final byte[] decompressedBlock = new byte[decompressedBlockSize];
-		final byte[] compressedBlock = new byte[decompressedBlockSize * 2]; // Assume compression never inflates by more than 2x
+		byte[] compressedBlock = new byte[decompressedBlockSize];
 
 		long blocks2;
 		if(decompressedBlockSize > totalDecompressedSize) {
@@ -56,16 +58,17 @@ public class Lz4Filter implements Filter {
 			blocks2 = totalDecompressedSize / decompressedBlockSize;
 		}
 
-		final LZ4FastDecompressor lzz4Decompressor = LZ4Factory.fastestJavaInstance().fastDecompressor();
-
 		int offset = 0;
 		for (long i = 0; i < blocks2; i++) {
 			final int compressedBlockSize = byteBuffer.getInt();
+			if(compressedBlockSize > compressedBlock.length) {
+				compressedBlock = new byte[compressedBlockSize];
+			}
 			byteBuffer.get(compressedBlock, 0, compressedBlockSize);
 			final int decompressedBytes;
 			if (compressedBlockSize == decompressedBlockSize) {
 				for (int j = 0; j < compressedBlockSize; j++) {
-					decompressedBlock[j] = compressedBlock[j];
+					decompressed[offset + j] = compressedBlock[j];
 				}
 				decompressedBytes = compressedBlockSize;
 			} else {
