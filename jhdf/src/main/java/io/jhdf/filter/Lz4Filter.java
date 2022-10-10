@@ -77,7 +77,8 @@ public class Lz4Filter implements Filter {
 		}
 
 		if(byteBuffer.hasRemaining()) {
-			byteBuffer.get(decompressed, offset, Math.min(decompressed.length -offset, byteBuffer.remaining()));
+			byteBuffer.position(byteBuffer.limit() - (decompressed.length -offset));
+			byteBuffer.get(decompressed, offset, byteBuffer.remaining());
 		}
 
 		return decompressed;
