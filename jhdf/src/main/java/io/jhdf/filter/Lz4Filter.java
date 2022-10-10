@@ -48,8 +48,7 @@ public class Lz4Filter implements Filter {
 		final byte[] decompressed = new byte[Math.toIntExact(totalDecompressedSize)];
 
 		final int decompressedBlockSize = Utils.readBytesAsUnsignedInt(byteBuffer, 4);
-		final byte[] decompressedBlock = new byte[decompressedBlockSize];
-		byte[] compressedBlock = new byte[decompressedBlockSize];
+		byte[] compressedBlock = new byte[0];
 
 		long blocks2;
 		if(decompressedBlockSize > totalDecompressedSize) {
@@ -67,20 +66,20 @@ public class Lz4Filter implements Filter {
 			byteBuffer.get(compressedBlock, 0, compressedBlockSize);
 			final int decompressedBytes;
 			if (compressedBlockSize == decompressedBlockSize) {
-				for (int j = 0; j < compressedBlockSize; j++) {
-					decompressed[offset + j] = compressedBlock[j];
-				}
+				System.arraycopy(compressedBlock, 0, decompressed, offset, compressedBlockSize);
 				decompressedBytes = compressedBlockSize;
 			} else {
-				decompressedBytes = lzz4Decompressor.decompress(compressedBlock, decompressedBlock, decompressedBlockSize);
+				decompressedBytes = lzz4Decompressor.decompress(compressedBlock, 0,
+					decompressed, offset,
+					decompressedBlockSize);
 			}
 			offset += decompressedBytes;
 		}
 
 		if(byteBuffer.hasRemaining()) {
-			byteBuffer.get(decompressed, offset, byteBuffer.remaining());
+			byteBuffer.get(decompressed, offset, Math.min(decompressed.length -offset, byteBuffer.remaining()));
 		}
 
-		return decompressedBlock;
+		return decompressed;
 	}
 }
