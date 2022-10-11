@@ -64,16 +64,16 @@ public class Lz4Filter implements Filter {
 				compressedBlock = new byte[compressedBlockSize];
 			}
 			byteBuffer.get(compressedBlock, 0, compressedBlockSize);
-			final int decompressedBytes;
+
 			if (compressedBlockSize == decompressedBlockSize) {
 				System.arraycopy(compressedBlock, 0, decompressed, offset, compressedBlockSize);
-				decompressedBytes = compressedBlockSize;
+				offset += compressedBlockSize;
 			} else {
-				decompressedBytes = lzz4Decompressor.decompress(compressedBlock, 0,
+				lzz4Decompressor.decompress(compressedBlock, 0,
 					decompressed, offset,
 					decompressedBlockSize);
+				offset += decompressedBlockSize;
 			}
-			offset += decompressedBytes;
 		}
 
 		if(byteBuffer.hasRemaining()) {
