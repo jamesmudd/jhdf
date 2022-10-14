@@ -50,35 +50,31 @@ public class Lz4Filter implements Filter {
 		final int decompressedBlockSize = Utils.readBytesAsUnsignedInt(byteBuffer, 4);
 		byte[] compressedBlock = new byte[0];
 
-		long blocks2;
-		if(decompressedBlockSize > totalDecompressedSize) {
-			blocks2 = 1;
+		long blocks;
+		if (decompressedBlockSize > totalDecompressedSize) {
+			blocks = 1;
 		} else {
-			blocks2 = totalDecompressedSize / decompressedBlockSize;
+			blocks = (totalDecompressedSize + decompressedBlockSize - 1) / decompressedBlockSize;
 		}
 
 		int offset = 0;
-		for (long i = 0; i < blocks2; i++) {
+		for (long i = 0; i < blocks; i++) {
 			final int compressedBlockSize = byteBuffer.getInt();
-			if(compressedBlockSize > compressedBlock.length) {
+			if (compressedBlockSize > compressedBlock.length) {
 				compressedBlock = new byte[compressedBlockSize];
 			}
 			byteBuffer.get(compressedBlock, 0, compressedBlockSize);
 
-			if (compressedBlockSize == decompressedBlockSize) {
-				System.arraycopy(compressedBlock, 0, decompressed, offset, compressedBlockSize);
-				offset += compressedBlockSize;
+			final int blockSize = Math.min(decompressed.length - offset, decompressedBlockSize);
+
+			if (compressedBlockSize == blockSize) {
+				System.arraycopy(compressedBlock, 0, decompressed, offset, blockSize);
 			} else {
 				lzz4Decompressor.decompress(compressedBlock, 0,
 					decompressed, offset,
-					decompressedBlockSize);
-				offset += decompressedBlockSize;
+					blockSize);
 			}
-		}
-
-		if(byteBuffer.hasRemaining()) {
-			byteBuffer.position(byteBuffer.limit() - (decompressed.length -offset));
-			byteBuffer.get(decompressed, offset, byteBuffer.remaining());
+			offset += blockSize;
 		}
 
 		return decompressed;
