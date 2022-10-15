@@ -10,14 +10,22 @@
 package io.jhdf.filter;
 
 import io.jhdf.Utils;
+import io.jhdf.exceptions.HdfFilterException;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
 
 import java.nio.ByteBuffer;
 
 public class Lz4Filter implements Filter {
 
-	private final LZ4FastDecompressor lzz4Decompressor = LZ4Factory.fastestJavaInstance().fastDecompressor();
+	private final LazyInitializer<LZ4FastDecompressor> lzz4Decompressor = new LazyInitializer<LZ4FastDecompressor>() {
+		@Override
+		protected LZ4FastDecompressor initialize() {
+			return LZ4Factory.fastestJavaInstance().fastDecompressor();
+		}
+	};
 
 	/**
 	 * Id defined in <a href="https://support.hdfgroup.org/services/filters.html">...</a>
@@ -66,9 +74,13 @@ public class Lz4Filter implements Filter {
 			if (compressedBlockSize == blockSize) {
 				System.arraycopy(compressedBlock, 0, decompressed, offset, blockSize);
 			} else {
-				lzz4Decompressor.decompress(compressedBlock, 0,
-					decompressed, offset,
-					blockSize);
+				try {
+					lzz4Decompressor.get().decompress(compressedBlock, 0,
+						decompressed, offset,
+						blockSize);
+				} catch (ConcurrentException e) {
+					throw new HdfFilterException("Failed to get LZ4 decompressor", e);
+				}
 			}
 			offset += blockSize;
 		}
