@@ -13,7 +13,6 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfFilterException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import net.jpountz.lz4.LZ4Factory;
-import net.jpountz.lz4.LZ4FastDecompressor;
 import net.jpountz.lz4.LZ4SafeDecompressor;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
@@ -83,7 +82,7 @@ public class BitShuffleFilter implements Filter {
 
 				final int decompressedBlockSize = Utils.readBytesAsUnsignedInt(byteBuffer, 4);
 				final byte[] decomressedBuffer = new byte[decompressedBlockSize];
-				final byte[] compressedBuffer = new byte[decompressedBlockSize * 2]; // Assume compression never inflates by more than 2x
+				byte[] compressedBuffer = new byte[0];
 
 				long blocks2;
 				if (decompressedBlockSize > totalDecompressedSize) {
@@ -95,6 +94,9 @@ public class BitShuffleFilter implements Filter {
 				int offset = 0;
 				for (long i = 0; i < blocks2; i++) {
 					final int compressedBlockLength = byteBuffer.getInt();
+					if(compressedBlockLength > compressedBuffer.length) {
+						compressedBuffer = new byte[compressedBlockLength];
+					}
 					byteBuffer.get(compressedBuffer, 0, compressedBlockLength);
 
 					try {
