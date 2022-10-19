@@ -13,7 +13,6 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfFilterException;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 
 import java.nio.ByteBuffer;
@@ -78,8 +77,8 @@ public class Lz4Filter implements Filter {
 					lzz4Decompressor.get().decompress(compressedBlock, 0,
 						decompressed, offset,
 						blockSize);
-				} catch (ConcurrentException e) {
-					throw new HdfFilterException("Failed to get LZ4 decompressor", e);
+				} catch (Exception e) {
+					throw new HdfFilterException("Failed LZ4 decompression", e);
 				}
 			}
 			offset += blockSize;

@@ -103,8 +103,8 @@ public class BitShuffleFilter implements Filter {
 						final int decompressedBytes = lzz4Decompressor.get().decompress(compressedBuffer, 0, compressedBlockLength, decomressedBuffer, 0);
 						unshuffle(decomressedBuffer, decompressedBytes, decompressed, offset, filterData[2]);
 						offset += decompressedBytes;
-					} catch (ConcurrentException e) {
-						throw new HdfFilterException("Failed to get LZ4 decompressor", e);
+					} catch (Exception e) {
+						throw new HdfFilterException("Failed LZ4 decompression", e);
 					}
 
 				}
