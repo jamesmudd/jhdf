@@ -242,11 +242,12 @@ class BitShuffleFilterTest {
 		buffer.putLong(64); // Total size
 		buffer.putInt(16); // Block size
 		buffer.putInt(8); // first block size
+		byte[] bytes = buffer.array();
 
 		try(MockedStatic<LZ4Factory> lz4FactoryMock = mockStatic(LZ4Factory.class)) {
 			lz4FactoryMock.when(LZ4Factory::fastestJavaInstance).thenThrow(new RuntimeException("test"));
 			BitShuffleFilter bitShuffleFilter = new BitShuffleFilter();
-			assertThrows(HdfFilterException.class, () -> bitShuffleFilter.decode(buffer.array(), new int[]{0,0,1,16, LZ4_COMPRESSION}));
+			assertThrows(HdfFilterException.class, () -> bitShuffleFilter.decode(bytes, new int[]{0,0,1,16, LZ4_COMPRESSION}));
 		}
 	}
 }
