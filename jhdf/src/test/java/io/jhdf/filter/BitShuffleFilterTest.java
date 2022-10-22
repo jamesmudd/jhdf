@@ -11,17 +11,22 @@ package io.jhdf.filter;
 
 import io.jhdf.exceptions.HdfFilterException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import net.jpountz.lz4.LZ4Factory;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.xerial.snappy.BitShuffle;
 import org.xerial.snappy.BitShuffleType;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import static io.jhdf.filter.BitShuffleFilter.LZ4_COMPRESSION;
 import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mockStatic;
 
 class BitShuffleFilterTest {
 
@@ -229,5 +234,20 @@ class BitShuffleFilterTest {
 		// Currently, ZSTD is unsupported. Remove when support is added
 		final int[] zstdFilterData = new int[]{0, 0, 4, 0, BitShuffleFilter.ZSTD_COMPRESSION};
 		assertThrows(UnsupportedHdfException.class, () -> bitShuffleFilter.decode(new byte[0], zstdFilterData));
+	}
+
+	@Test
+	void testLazyInitFailure() {
+		ByteBuffer buffer = ByteBuffer.allocate(64);
+		buffer.putLong(64); // Total size
+		buffer.putInt(16); // Block size
+		buffer.putInt(8); // first block size
+		byte[] bytes = buffer.array();
+
+		try(MockedStatic<LZ4Factory> lz4FactoryMock = mockStatic(LZ4Factory.class)) {
+			lz4FactoryMock.when(LZ4Factory::fastestJavaInstance).thenThrow(new RuntimeException("test"));
+			BitShuffleFilter bitShuffleFilter = new BitShuffleFilter();
+			assertThrows(HdfFilterException.class, () -> bitShuffleFilter.decode(bytes, new int[]{0,0,1,16, LZ4_COMPRESSION}));
+		}
 	}
 }
