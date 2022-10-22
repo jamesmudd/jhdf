@@ -26,6 +26,7 @@ public class BitShuffleFilter implements Filter {
 	private static final int BSHUF_TARGET_BLOCK_SIZE_B = 8192;
 
 	public static final int NO_COMPRESSION = 0;
+	// https://github.com/kiyo-masui/bitshuffle/blob/master/src/bshuf_h5filter.h#L46
 	public static final int LZ4_COMPRESSION = 2;
 	public static final int ZSTD_COMPRESSION = 3;
 
@@ -53,71 +54,78 @@ public class BitShuffleFilter implements Filter {
 
 		switch (filterData[4]) {
 			case NO_COMPRESSION:
-				final int blocks = encodedData.length / blockSizeBytes;
-				final byte[] unshuffled = new byte[encodedData.length];
-				for (int i = 0; i < blocks; i++) {
-					byte[] blockData = new byte[blockSizeBytes];
-					System.arraycopy(encodedData, i * blockSizeBytes, blockData, 0, blockSizeBytes);
-					byte[] unshuffledBlock = new byte[blockSizeBytes];
-					unshuffle(blockData, filterData[2], unshuffledBlock);
-					System.arraycopy(unshuffledBlock, 0, unshuffled, i * blockSizeBytes, blockSizeBytes);
-				}
-				if (blocks * blockSizeBytes < encodedData.length) {
-					int finalBlockSize = encodedData.length - blocks * blockSizeBytes;
-					byte[] blockData = new byte[finalBlockSize];
-					System.arraycopy(encodedData, blocks * blockSizeBytes, blockData, 0, finalBlockSize);
-					byte[] unshuffledBlock = new byte[finalBlockSize];
-					unshuffle(blockData, filterData[2], unshuffledBlock);
-					System.arraycopy(unshuffledBlock, 0, unshuffled, blocks * blockSizeBytes, finalBlockSize);
-				}
-				return unshuffled;
-			// https://github.com/kiyo-masui/bitshuffle/blob/master/src/bshuf_h5filter.h#L46
+				return noCompression(encodedData, filterData, blockSizeBytes);
 			case LZ4_COMPRESSION:
 				// See https://support.hdfgroup.org/services/filters/HDF5_LZ4.pdf
-				ByteBuffer byteBuffer = ByteBuffer.wrap(encodedData);
-
-				final long totalDecompressedSize = Utils.readBytesAsUnsignedLong(byteBuffer, 8);
-				final byte[] decompressed = new byte[Math.toIntExact(totalDecompressedSize)];
-
-				final int decompressedBlockSize = Utils.readBytesAsUnsignedInt(byteBuffer, 4);
-				final byte[] decomressedBuffer = new byte[decompressedBlockSize];
-				byte[] compressedBuffer = new byte[0];
-
-				long blocks2;
-				if (decompressedBlockSize > totalDecompressedSize) {
-					blocks2 = 1;
-				} else {
-					blocks2 = totalDecompressedSize / decompressedBlockSize;
-				}
-
-				int offset = 0;
-				for (long i = 0; i < blocks2; i++) {
-					final int compressedBlockLength = byteBuffer.getInt();
-					if(compressedBlockLength > compressedBuffer.length) {
-						compressedBuffer = new byte[compressedBlockLength];
-					}
-					byteBuffer.get(compressedBuffer, 0, compressedBlockLength);
-
-					try {
-						final int decompressedBytes = lzz4Decompressor.get().decompress(compressedBuffer, 0, compressedBlockLength, decomressedBuffer, 0);
-						unshuffle(decomressedBuffer, decompressedBytes, decompressed, offset, filterData[2]);
-						offset += decompressedBytes;
-					} catch (Exception e) {
-						throw new HdfFilterException("Failed LZ4 decompression", e);
-					}
-
-				}
-
-				if (byteBuffer.hasRemaining()) {
-					byteBuffer.get(decompressed, offset, byteBuffer.remaining());
-				}
-
-				return decompressed;
+				return lz4Compression(encodedData, filterData);
 			case ZSTD_COMPRESSION:
 				throw new UnsupportedHdfException("Bitshuffle zstd not implemented");
 			default:
 				throw new HdfFilterException("Unknown compression type: " + filterData[4]);
 		}
+	}
+
+	private byte[] lz4Compression(byte[] encodedData, int[] filterData) {
+		ByteBuffer byteBuffer = ByteBuffer.wrap(encodedData);
+
+		final long totalDecompressedSize = Utils.readBytesAsUnsignedLong(byteBuffer, 8);
+		final byte[] decompressed = new byte[Math.toIntExact(totalDecompressedSize)];
+
+		final int decompressedBlockSize = Utils.readBytesAsUnsignedInt(byteBuffer, 4);
+		final byte[] decomressedBuffer = new byte[decompressedBlockSize];
+		byte[] compressedBuffer = new byte[0];
+
+		long blocks2;
+		if (decompressedBlockSize > totalDecompressedSize) {
+			blocks2 = 1;
+		} else {
+			blocks2 = totalDecompressedSize / decompressedBlockSize;
+		}
+
+		int offset = 0;
+		for (long i = 0; i < blocks2; i++) {
+			final int compressedBlockLength = byteBuffer.getInt();
+			if(compressedBlockLength > compressedBuffer.length) {
+				compressedBuffer = new byte[compressedBlockLength];
+			}
+			byteBuffer.get(compressedBuffer, 0, compressedBlockLength);
+
+			try {
+				final int decompressedBytes = lzz4Decompressor.get().decompress(compressedBuffer, 0, compressedBlockLength, decomressedBuffer, 0);
+				unshuffle(decomressedBuffer, decompressedBytes, decompressed, offset, filterData[2]);
+				offset += decompressedBytes;
+			} catch (Exception e) {
+				throw new HdfFilterException("Failed LZ4 decompression", e);
+			}
+
+		}
+
+		if (byteBuffer.hasRemaining()) {
+			byteBuffer.get(decompressed, offset, byteBuffer.remaining());
+		}
+
+		return decompressed;
+	}
+
+	private byte[] noCompression(byte[] encodedData, int[] filterData, int blockSizeBytes) {
+		final int blocks = encodedData.length / blockSizeBytes;
+		final byte[] unshuffled = new byte[encodedData.length];
+		for (int i = 0; i < blocks; i++) {
+			byte[] blockData = new byte[blockSizeBytes];
+			System.arraycopy(encodedData, i * blockSizeBytes, blockData, 0, blockSizeBytes);
+			byte[] unshuffledBlock = new byte[blockSizeBytes];
+			unshuffle(blockData, filterData[2], unshuffledBlock);
+			System.arraycopy(unshuffledBlock, 0, unshuffled, i * blockSizeBytes, blockSizeBytes);
+		}
+		if (blocks * blockSizeBytes < encodedData.length) {
+			int finalBlockSize = encodedData.length - blocks * blockSizeBytes;
+			byte[] blockData = new byte[finalBlockSize];
+			System.arraycopy(encodedData, blocks * blockSizeBytes, blockData, 0, finalBlockSize);
+			byte[] unshuffledBlock = new byte[finalBlockSize];
+			unshuffle(blockData, filterData[2], unshuffledBlock);
+			System.arraycopy(unshuffledBlock, 0, unshuffled, blocks * blockSizeBytes, finalBlockSize);
+		}
+		return unshuffled;
 	}
 
 	protected void unshuffle(byte[] shuffledBuffer, int elementSize, byte[] unshuffledBuffer) {
