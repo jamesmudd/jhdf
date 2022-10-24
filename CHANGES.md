@@ -1,5 +1,11 @@
 # jHDF Change Log
 
+## v0.6.9
+- Add support for LZ4 compressed datasets https://github.com/jamesmudd/jhdf/issues/415
+- Improve BitShuffle performance and reduce memory usage
+- Add CI on ARM64 architecture
+- Build and dependency updates
+
 ## v0.6.8
 - Add support for getting flat data `Dataset#getDataFlat()` https://github.com/jamesmudd/jhdf/issues/397
 - Add support for dereferencing addresses/ids `HdfFile.getNodeByAddress(long address) ` https://github.com/jamesmudd/jhdf/issues/316
