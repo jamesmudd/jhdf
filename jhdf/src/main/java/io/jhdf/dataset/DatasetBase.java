@@ -37,6 +37,7 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 
 public abstract class DatasetBase extends AbstractNode implements Dataset {
@@ -121,7 +122,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 	@Override
 	public Object getData() {
-		logger.debug("Getting data for '{}'...", getPath());
+		logger.info("Getting data for '{}'...", getPath());
 
 		if (isEmpty()) {
 			return null;
@@ -133,13 +134,15 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		final DataType type = getDataType();
 
 		final Object data = DatasetReader.readDataset(type, bb, getDimensions(), hdfBackingStorage);
-		logger.debug("Finished getting data for '{}' took '{}'", getPath(), stopWatch.getNanoTime());
+		stopWatch.stop();
+
+		logger.info("Finished getting data for [{}] took [{}ms]", getPath(), stopWatch.getTime(MILLISECONDS));
 		return data;
 	}
 
 	@Override
 	public Object getDataFlat() {
-		logger.debug("Getting flat data for '{}'...", getPath());
+		logger.info("Getting flat data for [{}]...", getPath());
 
 		if (isEmpty()) {
 			return ArrayUtils.EMPTY_OBJECT_ARRAY;
@@ -153,7 +156,9 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		int elements = Math.toIntExact(getSize());
 
 		final Object data = DatasetReader.readDataset(type, bb, elements, hdfBackingStorage);
-		logger.debug("Finished getting flat data for '{}' took '{}'", getPath(), stopWatch.getNanoTime());
+		stopWatch.stop();
+
+		logger.info("Finished getting flat data for [{}] took [{}ms]", getPath(), stopWatch.getTime(MILLISECONDS));
 		return data;
 	}
 
