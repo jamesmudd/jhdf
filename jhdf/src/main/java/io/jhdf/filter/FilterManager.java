@@ -50,7 +50,7 @@ public enum FilterManager {
 			addFilter(pipelineFilter);
 		}
 
-		logger.info("Initialized HDF5 filters");
+		logger.info("Initialized [{}] HDF5 filters", ID_TO_FILTER.size());
 	}
 
 	/**
