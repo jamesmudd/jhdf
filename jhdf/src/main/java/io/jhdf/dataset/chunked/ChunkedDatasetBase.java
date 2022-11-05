@@ -14,25 +14,31 @@ import io.jhdf.Utils;
 import io.jhdf.api.Group;
 import io.jhdf.api.dataset.ChunkedDataset;
 import io.jhdf.dataset.DatasetBase;
+import io.jhdf.dataset.DatasetReader;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.filter.FilterManager;
 import io.jhdf.filter.FilterPipeline;
 import io.jhdf.filter.PipelineFilterWithData;
+import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.FilterPipelineMessage;
 import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static io.jhdf.Utils.stripLeadingIndex;
 import static java.lang.Math.toIntExact;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedDataset {
 	private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetBase.class);
@@ -42,6 +48,63 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	public ChunkedDatasetBase(HdfBackingStorage hdfBackingStorage, long address, String name, Group parent, ObjectHeader oh) {
 		super(hdfBackingStorage, address, name, parent, oh);
 		lazyPipeline = new FilterPipelineLazyInitializer();
+	}
+
+	@Override
+	public Object getData() {
+		logger.info("Getting data for '{}'...", getPath());
+
+		if (isEmpty()) {
+			return null;
+		}
+
+		final StopWatch stopWatch = StopWatch.createStarted();
+
+		final DataType type = getDataType();
+		final Object data = Array.newInstance(type.getJavaType(), getDimensions());
+
+		for (Chunk chunk : getAllChunks()) {
+
+			fillDataFromChunk(chunk, type, data);
+
+
+		}
+
+//
+//		final ByteBuffer bb = getDataBuffer();
+//
+//
+//		final Object data = DatasetReader.readDataset(type, bb, getDimensions(), hdfBackingStorage);
+		stopWatch.stop();
+
+		logger.info("Finished getting data for [{}] took [{}ms]", getPath(), stopWatch.getTime(MILLISECONDS));
+		return data;
+	}
+
+	private void fillDataFromChunk(Chunk chunk, DataType type, Object data) {
+		if(!isPartialChunk(chunk)) {
+//			Object chunkData = Array.newInstance(getJavaType(), getChunkDimensions());
+			// TODO flat or shaped?
+			Object chunkData = DatasetReader.readDataset(type, ByteBuffer.wrap(decompressChunk(chunk)), Arrays.stream(getChunkDimensions()).reduce(1, Math::multiplyExact), hdfBackingStorage);
+			// Now need to copy this chunk into the main dataset
+			chunk.getChunkOffset();
+			copyData(data, chunkData, getChunkDimensions(), chunk.getChunkOffset(), 0);
+		} else {
+			// TODO handle the odd bits
+		}
+	}
+
+	private void copyData(Object data, Object chunkData, int[] chunkDimension, int[] chunkOffset, Integer chunkDataPos) {
+		if (chunkDimension.length > 1) {
+			for (int i = 0; i < chunkDimension[0]; i++) {
+//				Object chunkDataSlice = Array.get(chunkData, i);
+				Object dataSlice = Array.get(data, chunkOffset[i]); // Should use chunk offset
+				copyData(dataSlice, chunkData, stripLeadingIndex(chunkDimension), stripLeadingIndex(chunkOffset), i*chunkDimension[1]);
+			}
+		} else {
+			System.arraycopy(chunkData, chunkDataPos, data, 0, chunkDimension[0]);
+//			chunkDataPos += chunkDimension[0];
+		}
 	}
 
 	protected void fillDataFromChunk(final Chunk chunk,
