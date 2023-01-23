@@ -16,7 +16,6 @@ import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -37,13 +36,13 @@ public class MemoryMapBenchmark {
 	private Path tempFile;
 
 	@Param({
-//		"32",
-//		"64",
-//		"128",
-//		"1024", // 1k
-//		"10240", // 10k
-//		"1048576", // 1m
-//		"5242880", // 5m
+		"32",
+		"64",
+		"128",
+		"1024", // 1k
+		"10240", // 10k
+		"1048576", // 1m
+		"5242880", // 5m
 		"10485760" // 10m
 	})
 	public int readSize;
@@ -53,7 +52,7 @@ public class MemoryMapBenchmark {
 		Random random = new Random();
 		tempFile = Files.createTempFile("randomData", ".bin");
 		System.out.println("Temp file: " + tempFile.toAbsolutePath());
-		byte[] bytes = new byte[102400];
+		byte[] bytes = new byte[10485760];
 		random.nextBytes(bytes);
 		Files.write(tempFile, bytes);
 	}
@@ -64,9 +63,6 @@ public class MemoryMapBenchmark {
 	}
 
 	@Benchmark
-//	@BenchmarkMode(Mode.SampleTime)
-//	@Warmup(time = 5, iterations = 2)
-//	@Measurement(time = 5, batchSize = 5, timeUnit = TimeUnit.MICROSECONDS)
 	public void plainRead(Blackhole blackhole) throws IOException {
 		try (FileInputStream fileInputStream = new FileInputStream(tempFile.toFile())) {
 			byte[] bytes = new byte[readSize];
@@ -76,9 +72,6 @@ public class MemoryMapBenchmark {
 	}
 
 	@Benchmark
-//	@BenchmarkMode(Mode.SampleTime)
-//	@Warmup(time = 5, iterations = 2)
-//	@Measurement(time = 5, batchSize = 5, timeUnit = TimeUnit.MICROSECONDS)
 	public void memoryMappedRead(Blackhole blackhole) throws IOException {
 		try (FileChannel fileInputStream = FileChannel.open(tempFile, StandardOpenOption.READ)) {
 			MappedByteBuffer map = fileInputStream.map(FileChannel.MapMode.READ_ONLY, 0, readSize);
