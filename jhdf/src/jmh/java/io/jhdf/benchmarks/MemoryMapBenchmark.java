@@ -26,26 +26,32 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
-@Warmup(iterations = 2, time = 5)
+@Warmup(iterations = 3, time = 5)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
-@Measurement(time = 3, batchSize = 2, iterations = 2)
-@Fork(2)
+@Measurement(iterations = 10, batchSize = 5)
+@Fork(3)
 public class MemoryMapBenchmark {
 
 	private Path tempFile;
-
 	@Param({
 		"32",
 		"64",
 		"128",
+		"512",
 		"1024", // 1k
 		"10240", // 10k
+		"51200", // 50k
+		"102400", // 100k
+		"204800", // 20 k
+		"512000", // 500k
+		"716800", // 700k
 		"1048576", // 1m
 		"5242880", // 5m
 		"10485760" // 10m
 	})
 	public int readSize;
+
 
 	@Setup(Level.Trial)
 	public void setUp() throws IOException {
