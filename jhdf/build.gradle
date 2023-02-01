@@ -50,7 +50,7 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     // lzf compression support
-    implementation group: 'com.ning', name: 'compress-lzf', version: '1.1'
+    implementation group: 'com.ning', name: 'compress-lzf', version: '1.1.2'
     // lz5 support https://mvnrepository.com/artifact/org.lz4/lz4-java
     implementation group: 'org.lz4', name: 'lz4-java', version: '1.8.0'
 
@@ -64,7 +64,7 @@ dependencies {
     // Matchers
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
     // Alternative bitshuffle impl to check results against
-    testImplementation 'org.xerial.snappy:snappy-java:1.1.8.4'
+    testImplementation 'org.xerial.snappy:snappy-java:1.1.9.1'
 }
 
 test {
