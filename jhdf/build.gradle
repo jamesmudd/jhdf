@@ -63,7 +63,7 @@ dependencies {
     // Matchers
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
     // Alternative bitshuffle impl to check results against
-    testImplementation 'org.xerial.snappy:snappy-java:1.1.8.4'
+    testImplementation 'org.xerial.snappy:snappy-java:1.1.9.1'
 }
 
 test {
