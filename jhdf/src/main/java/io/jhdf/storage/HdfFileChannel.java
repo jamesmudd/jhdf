@@ -34,6 +34,8 @@ public class HdfFileChannel implements HdfBackingStorage {
 	private final Superblock sb;
 	private boolean memoryMappingFailed;
 
+	private static final int MEMORY_MAP_MIN_SIZE_BYTES = Integer.getInteger("io.jhdf.storage.memoryMapMinSizeBytes", 1024*250);
+
 	public HdfFileChannel(FileChannel fileChannel, Superblock superblock) {
 		this.fc = fileChannel;
 		this.sb = superblock;
@@ -69,7 +71,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 	@Override
 	public ByteBuffer mapNoOffset(long address, long length) {
 		try {
-			if (!memoryMappingFailed) {
+			if (length > MEMORY_MAP_MIN_SIZE_BYTES && !memoryMappingFailed) {
 				try {
 					return fc.map(MapMode.READ_ONLY, address, length);
 				} catch (UnsupportedOperationException e) {
@@ -77,7 +79,6 @@ public class HdfFileChannel implements HdfBackingStorage {
 					memoryMappingFailed = true;
 				}
 			}
-			assert memoryMappingFailed;
 			// read channel into buffer instead of mapping it to memory
 			return readBufferNoOffset(address, Math.toIntExact(length));
 		} catch (IOException e) {
