@@ -33,6 +33,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class HdfFileChannelTest {
@@ -86,7 +90,36 @@ class HdfFileChannelTest {
 		MappedByteBuffer mockMappedByteBuffer = mock(MappedByteBuffer.class);
 		when(fc.map(any(MapMode.class), anyLong(), anyLong())).thenReturn(mockMappedByteBuffer);
 
-		assertThat(hdfFc.map(20, 10), is(sameInstance(mockMappedByteBuffer)));
+		// Force to always map
+		System.setProperty("io.jhdf.storage.memoryMapMinSizeBytes", "0");
+		HdfFileChannel hdfFcAlwaysMap = new HdfFileChannel(fc, sb);
+
+		assertThat(hdfFcAlwaysMap.map(20, 10), is(sameInstance(mockMappedByteBuffer)));
+
+		System.clearProperty("io.jhdf.storage.memoryMapMinSizeBytes"); // Reset property
+	}
+
+	@Test
+	void testNotMappedWhenSmallRead() throws IOException {
+		MappedByteBuffer mockMappedByteBuffer = mock(MappedByteBuffer.class);
+		when(fc.map(any(MapMode.class), anyLong(), anyLong())).thenReturn(mockMappedByteBuffer);
+		when(fc.read(any(ByteBuffer.class), anyLong())).thenReturn(15);
+
+		// Force to always map
+		System.setProperty("io.jhdf.storage.memoryMapMinSizeBytes", "20");
+		HdfFileChannel hdfFileChannel = new HdfFileChannel(fc, sb);
+
+		// Read a size below the min map size
+		hdfFileChannel.map(23, 15);
+		verify(fc, times(1)).read(any(ByteBuffer.class), anyLong());
+		verifyNoMoreInteractions(fc);
+
+		// Now read a size larger than min map so should be mapped
+		hdfFileChannel.map(23, 25);
+		verify(fc, times(1)).map(any(MapMode.class), anyLong(), anyLong());
+		verifyNoMoreInteractions(fc);
+
+		System.clearProperty("io.jhdf.storage.memoryMapMinSizeBytes"); // Reset property
 	}
 
 	@Test
