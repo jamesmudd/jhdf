@@ -123,6 +123,24 @@ class HdfFileChannelTest {
 	}
 
 	@Test
+	void testReadingMultipleTimesWorks() throws IOException {
+		// Only read 5 bytes each time
+		when(fc.read(any(ByteBuffer.class), anyLong())).thenReturn(5);
+
+		// Force to always map
+		System.setProperty("io.jhdf.storage.memoryMapMinSizeBytes", "20");
+		HdfFileChannel hdfFileChannel = new HdfFileChannel(fc, sb);
+
+		// Read a size below the min map size
+		hdfFileChannel.map(23, 15);
+		// Should be called 3 times 3*5=15
+		verify(fc, times(3)).read(any(ByteBuffer.class), anyLong());
+		verifyNoMoreInteractions(fc);
+
+		System.clearProperty("io.jhdf.storage.memoryMapMinSizeBytes"); // Reset property
+	}
+
+	@Test
 	void testMapThrows() throws IOException {
 		when(fc.map(any(MapMode.class), anyLong(), anyLong())).thenThrow(IOException.class);
 
