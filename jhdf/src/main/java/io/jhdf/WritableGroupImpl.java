@@ -64,7 +64,11 @@ public class WritableGroupImpl implements WritableGroup {
 
 	@Override
 	public String getPath() {
-		return parent.getPath() + "/";
+		if (parent == null) {
+			return "/" + getName();
+		} else {
+			return parent.getPath() + "/" + getName();
+		}
 	}
 
 	@Override
@@ -123,8 +127,10 @@ public class WritableGroupImpl implements WritableGroup {
 	}
 
 	@Override
-	public void putGroup(String name) {
-		children.put(name, new WritableGroupImpl(this, name));
+	public WritableGroup putGroup(String name) {
+		WritableGroupImpl newGroup = new WritableGroupImpl(this, name);
+		children.put(name, newGroup);
+		return newGroup;
 	}
 
 	@Override

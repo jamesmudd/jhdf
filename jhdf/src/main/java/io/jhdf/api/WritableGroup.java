@@ -4,5 +4,5 @@ public interface WritableGroup extends Group {
 
 	void putDataset(String name, Object data);
 
-	void putGroup(String name);
+	WritableGroup putGroup(String name);
 }
