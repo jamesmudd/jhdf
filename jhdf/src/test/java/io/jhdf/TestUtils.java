@@ -9,8 +9,6 @@
  */
 package io.jhdf;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.lang.reflect.Array;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -49,15 +47,4 @@ public final class TestUtils {
 		}
 	}
 
-	public static int[] getDimensions(Object data) {
-		List<Integer> dims = new ArrayList<>();
-		int dimLength = Array.getLength(data);
-		dims.add(dimLength);
-
-		while (dimLength > 0 && Array.get(data, 0).getClass().isArray()) {
-			data = Array.get(data, 0);
-			dims.add(Array.getLength(data));
-		}
-		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
-	}
 }

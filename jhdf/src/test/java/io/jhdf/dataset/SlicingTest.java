@@ -16,7 +16,7 @@ import io.jhdf.exceptions.InvalidSliceHdfException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static io.jhdf.TestUtils.getDimensions;
+import static io.jhdf.Utils.getDimensions;
 import static org.apache.commons.lang3.ArrayUtils.subarray;
 import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;

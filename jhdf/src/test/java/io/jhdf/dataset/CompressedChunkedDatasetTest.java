@@ -11,6 +11,7 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.TestUtils;
+import io.jhdf.Utils;
 import io.jhdf.api.Dataset;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -75,7 +76,7 @@ class CompressedChunkedDatasetTest {
 		return () -> {
 			Dataset dataset = hdfFile.getDatasetByPath(datasetPath);
 			Object data = dataset.getData();
-			assertThat(TestUtils.getDimensions(data), is(equalTo(new int[]{7, 5})));
+			assertThat(Utils.getDimensions(data), is(equalTo(new int[]{7, 5})));
 			Object[] flatData = TestUtils.flatten(data);
 			for (int i = 0; i < flatData.length; i++) {
 				// Do element comparison as there are all different primitive numeric types

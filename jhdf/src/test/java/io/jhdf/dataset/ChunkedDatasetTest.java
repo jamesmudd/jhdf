@@ -11,7 +11,6 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
-import io.jhdf.filter.FilterPipeline;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
@@ -22,7 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static io.jhdf.TestUtils.flatten;
-import static io.jhdf.TestUtils.getDimensions;
+import static io.jhdf.Utils.getDimensions;
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
