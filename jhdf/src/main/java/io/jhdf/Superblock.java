@@ -12,6 +12,7 @@ package io.jhdf;
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.storage.HdfFileChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -425,6 +426,8 @@ public abstract class Superblock {
 		private final long endOfFileAddress;
 		private final long rootGroupObjectHeaderAddress;
 
+		private ObjectHeader superblockExtension;
+
 		private SuperblockV2V3(FileChannel fc, final long address) {
 			try {
 
@@ -461,9 +464,7 @@ public abstract class Superblock {
 				superblockExtensionAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
 				logger.trace("addressOfGlobalFreeSpaceIndex = {}", superblockExtensionAddress);
 
-				if (superblockExtensionAddress != Constants.UNDEFINED_ADDRESS) {
-					throw new UnsupportedHdfException("Superblock extension is not supported");
-				}
+				this.superblockExtension = readExtension(fc, superblockExtensionAddress);
 
 				// End of File Address
 				endOfFileAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
@@ -529,6 +530,14 @@ public abstract class Superblock {
 			ChecksumUtils.validateChecksum(byteBuffer);
 
 			logger.debug("Finished reading Superblock");
+		}
+
+		private ObjectHeader readExtension(FileChannel fc, long superblockExtensionAddress) {
+			if(superblockExtensionAddress == Constants.UNDEFINED_ADDRESS) {
+				return null;
+			}
+			logger.trace("Reading superblock extension");
+			return ObjectHeader.readObjectHeader(new HdfFileChannel(fc, this), superblockExtensionAddress);
 		}
 
 		/**
