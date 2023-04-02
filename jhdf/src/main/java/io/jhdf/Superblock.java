@@ -15,6 +15,7 @@ import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.storage.HdfInMemoryByteBuffer;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,6 +143,8 @@ public abstract class Superblock {
 					"Superblock version is not supported. Detected version = " + versionOfSuperblock);
 		}
 	}
+
+	public abstract Optional<ObjectHeader> getExtension();
 
 	public static class SuperblockV0V1 extends Superblock {
 
@@ -405,6 +408,11 @@ public abstract class Superblock {
 			return endOfFileAddress;
 		}
 
+		@Override
+		public Optional<ObjectHeader> getExtension() {
+			return Optional.empty();
+		}
+
 		/**
 		 * @return the driverInformationBlockAddress
 		 */
@@ -586,6 +594,15 @@ public abstract class Superblock {
 		@Override
 		public long getEndOfFileAddress() {
 			return endOfFileAddress;
+		}
+
+		@Override
+		public Optional<ObjectHeader> getExtension() {
+			try {
+				return Optional.ofNullable(superblockExtension.get());
+			} catch (ConcurrentException e) {
+				throw new HdfException("Failed to read superblock extension", e);
+			}
 		}
 
 		/**
