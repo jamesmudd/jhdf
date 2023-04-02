@@ -12,7 +12,10 @@ package io.jhdf;
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
+import io.jhdf.storage.HdfInMemoryByteBuffer;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +23,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static io.jhdf.Utils.toHex;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
@@ -426,7 +430,7 @@ public abstract class Superblock {
 		private final long endOfFileAddress;
 		private final long rootGroupObjectHeaderAddress;
 
-		private ObjectHeader superblockExtension;
+		private LazyInitializer<ObjectHeader> superblockExtension;
 
 		private SuperblockV2V3(FileChannel fc, final long address) {
 			try {
@@ -464,7 +468,7 @@ public abstract class Superblock {
 				superblockExtensionAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
 				logger.trace("addressOfGlobalFreeSpaceIndex = {}", superblockExtensionAddress);
 
-				this.superblockExtension = readExtension(fc, superblockExtensionAddress);
+				this.superblockExtension = readExtension(new HdfFileChannel(fc, this), superblockExtensionAddress);
 
 				// End of File Address
 				endOfFileAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
@@ -512,9 +516,7 @@ public abstract class Superblock {
 			superblockExtensionAddress = Utils.readBytesAsUnsignedLong(byteBuffer, sizeOfOffsets);
 			logger.trace("addressOfGlobalFreeSpaceIndex = {}", superblockExtensionAddress);
 
-			if (superblockExtensionAddress != Constants.UNDEFINED_ADDRESS) {
-				throw new UnsupportedHdfException("Superblock extension is not supported");
-			}
+			this.superblockExtension = readExtension(new HdfInMemoryByteBuffer(byteBuffer, this), superblockExtensionAddress);
 
 			// End of File Address
 			endOfFileAddress = Utils.readBytesAsUnsignedLong(byteBuffer, sizeOfOffsets);
@@ -532,12 +534,11 @@ public abstract class Superblock {
 			logger.debug("Finished reading Superblock");
 		}
 
-		private ObjectHeader readExtension(FileChannel fc, long superblockExtensionAddress) {
-			if(superblockExtensionAddress == Constants.UNDEFINED_ADDRESS) {
+		private static LazyInitializer<ObjectHeader> readExtension(HdfBackingStorage hdfFileChannel, long superblockExtensionAddress) {
+			if (superblockExtensionAddress == Constants.UNDEFINED_ADDRESS) {
 				return null;
 			}
-			logger.trace("Reading superblock extension");
-			return ObjectHeader.readObjectHeader(new HdfFileChannel(fc, this), superblockExtensionAddress);
+			return ObjectHeader.lazyReadObjectHeader(hdfFileChannel, superblockExtensionAddress);
 		}
 
 		/**
