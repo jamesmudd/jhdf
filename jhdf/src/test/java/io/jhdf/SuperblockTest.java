@@ -20,10 +20,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SuperblockTest {
@@ -63,6 +66,7 @@ class SuperblockTest {
 		assertThat(sbV0.getAddressOfGlobalFreeSpaceIndex(), is(equalTo(Constants.UNDEFINED_ADDRESS)));
 		assertThat(sbV0.getDriverInformationBlockAddress(), is(equalTo(Constants.UNDEFINED_ADDRESS)));
 		assertThat(sbV0.getRootGroupSymbolTableAddress(), is(equalTo(56L)));
+		assertThat(sbV0.getExtension(), is(Optional.empty()));
 	}
 
 	@Test
@@ -79,4 +83,18 @@ class SuperblockTest {
 	void testReadSuperblockThrowsWhenGivenInvalidOffset() {
 		assertThrows(HdfException.class, () -> Superblock.readSuperblock(fc, 5));
 	}
+
+	@Test
+	void testReadingSuperblockExtension() throws FileNotFoundException {
+		final String testFileUrl = this.getClass().getResource("/hdf5/superblock-extension.hdf5").getFile();
+		raf = new RandomAccessFile(new File(testFileUrl), "r");
+		fc = raf.getChannel();
+		Superblock superblock = Superblock.SuperblockV2V3.readSuperblock(fc, 0);
+		Optional<ObjectHeader> superblockExtension = superblock.getExtension();
+		assertThat(superblockExtension, is(not(Optional.empty())));
+
+		ObjectHeader objectHeader = superblockExtension.get();
+		assertThat(objectHeader.messages, hasSize(4));
+	}
+
 }
