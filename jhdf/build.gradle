@@ -27,7 +27,7 @@ plugins {
 
 // Variables
 group = 'io.jhdf'
-version = '0.6.9'
+version = '0.6.10'
 
 compileJava {
     sourceCompatibility = "1.8"
