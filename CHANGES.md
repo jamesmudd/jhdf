@@ -1,5 +1,9 @@
 # jHDF Change Log
 
+##  v0.6.10
+- Add support for files containing superblock extensions https://github.com/jamesmudd/jhdf/issues/462
+- Build and dependency updates
+
 ## v0.6.9
 - Add support for LZ4 compressed datasets https://github.com/jamesmudd/jhdf/issues/415
 - Improve BitShuffle performance and reduce memory usage
