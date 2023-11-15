@@ -3,7 +3,7 @@ trigger:
 - master
 pr:
 - master
-    
+
 jobs:
 - job: Linux
   pool:
@@ -17,14 +17,14 @@ jobs:
       Java 11:
         java.version: '1.11'
   steps:
-  
+
   # Build using a Gradle wrapper script
   - task: Gradle@2
     displayName: Build + Test
     inputs:
       gradleWrapperFile: 'jhdf/gradlew'
       workingDirectory: jhdf
-      tasks: 'clean build jacocoTestReport' 
+      tasks: 'clean build jacocoTestReport'
       publishJUnitResults: true
       testResultsFiles: 'jhdf/build/test-results/test/TEST-*.xml'
       testRunTitle: $(osName) $(Agent.JobName)
@@ -47,36 +47,6 @@ jobs:
       tasks: 'sourcesJar javadocJar'
       jdkVersionOption: $(java.version)
       publishJUnitResults: false
-  
-  # SonarQube
-  - task: Gradle@2
-    # Only run for Java 1.8 and not for PR
-    condition: and(eq(variables['java.version'], '1.11'), ne(variables['Build.Reason'], 'PullRequest'))
-    displayName: SonarQube
-    inputs:
-      gradleWrapperFile: 'jhdf/gradlew'
-      workingDirectory: jhdf
-      tasks: 'sonarqube'
-      jdkVersionOption: $(java.version)
-      publishJUnitResults: false
-      gradleOptions: '-Dsonar.login=$(sonar.login)'
-
-  # SonarQube for Pull requests
-  - task: Gradle@2
-    # Only run for Java 1.8 and PR
-    condition: and(eq(variables['java.version'], '1.11'), eq(variables['Build.Reason'], 'PullRequest'))
-    displayName: SonarQube PR
-    inputs:
-      gradleWrapperFile: 'jhdf/gradlew'
-      workingDirectory: jhdf
-      tasks: 'sonarqube'
-      jdkVersionOption: $(java.version)
-      publishJUnitResults: false
-      gradleOptions: '-Dsonar.login=$(sonar.login)
-        -Dsonar.pullrequest.branch=$(Build.SourceBranch)
-        -Dsonar.pullrequest.key=$(System.PullRequest.PullRequestNumber)
-        -Dsonar.pullrequest.base=$(System.PullRequest.TargetBranch)
-        -Dsonar.pullrequest.github.repository=$(Build.Repository.Uri)'
 
 - job: Windows
   pool:
@@ -90,14 +60,14 @@ jobs:
       Java 11:
         java.version: '1.11'
   steps:
-  
+
   # Build using a Gradle wrapper script
   - task: Gradle@2
     displayName: Build/Test
     inputs:
       gradleWrapperFile: 'jhdf/gradlew'
       workingDirectory: jhdf
-      tasks: 'build' 
+      tasks: 'build'
       publishJUnitResults: true
       testResultsFiles: 'jhdf/build/test-results/test/TEST-*.xml'
       testRunTitle: $(osName) $(Agent.JobName)
@@ -125,14 +95,14 @@ jobs:
       Java 11:
         java.version: '1.11'
   steps:
-  
+
   # Build using a Gradle wrapper script
   - task: Gradle@2
     displayName: Build/Test
     inputs:
       gradleWrapperFile: 'jhdf/gradlew'
       workingDirectory: jhdf
-      tasks: 'build' 
+      tasks: 'build'
       publishJUnitResults: true
       testResultsFiles: 'jhdf/build/test-results/test/TEST-*.xml'
       testRunTitle: $(osName) $(Agent.JobName)
