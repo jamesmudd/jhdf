@@ -30,10 +30,10 @@ jobs:
               if: github.event_name == 'pull_request'
               working-directory: jhdf
               run: >
-                ./gradlew test sonar
+                ./gradlew
                   -Dsonar.token=${{ secrets.SONAR_TOKEN }}
                   -Dsonar.pullrequest.branch=${{ github.ref }}
                   -Dsonar.pullrequest.key=${{ github.ref.name }}
                   -Dsonar.pullrequest.base=${{ github.base.ref }}
                   -Dsonar.pullrequest.github.repository=${{ github.server_url }}/${{ github.repository }}
-
+                  checkstyle spotbugs jacocoTestReport sonar
