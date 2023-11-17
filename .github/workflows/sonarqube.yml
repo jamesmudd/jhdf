@@ -36,4 +36,4 @@ jobs:
                   -Dsonar.pullrequest.key=${{ github.ref.name }} \
                   -Dsonar.pullrequest.base=${{ github.base.ref }} \
                   -Dsonar.pullrequest.github.repository=${{ github.server_url }}/${{ github.repository }} \
-                  checkstyle spotbugs jacocoTestReport sonar
+                  checkstyleMain checkstyleTest spotbugsMain spotbugsTest jacocoTestReport sonar
