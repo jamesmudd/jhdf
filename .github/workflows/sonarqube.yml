@@ -38,9 +38,9 @@ jobs:
               working-directory: jhdf
               run: ./gradlew spotbugsMain spotbugsTest
 
-            -   name: Jacoco Coverage Report
-                working-directory: jhdf
-                run: ./gradlew jacocoTestReport
+            - name: Jacoco Coverage Report
+              working-directory: jhdf
+              run: ./gradlew jacocoTestReport
 
             - name: Sonar
               working-directory: jhdf
