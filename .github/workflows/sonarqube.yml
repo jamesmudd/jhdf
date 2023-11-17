@@ -26,10 +26,26 @@ jobs:
                   distribution: 'temurin'
                   cache: 'gradle'
 
-            - name: Build and analyze
+            - name: Build
+              working-directory: jhdf
+              run: ./gradlew build
+
+            - name: Checkstyle
+              working-directory: jhdf
+              run: ./gradlew checkstyleMain checkstyleTest
+
+            - name: SpotBugs
+              working-directory: jhdf
+              run: ./gradlew spotbugsMain spotbugsTest
+
+            -   name: Jacoco Coverage Report
+                working-directory: jhdf
+                run: ./gradlew jacocoTestReport
+
+            - name: Sonar
               working-directory: jhdf
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
                   SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-              run: ./gradlew build checkstyleMain checkstyleTest spotbugsMain spotbugsTest jacocoTestReport sonar --info
+              run: ./gradlew sonar --info
