@@ -26,14 +26,9 @@ jobs:
                   distribution: 'temurin'
                   cache: 'gradle'
 
-            - name: SonarQube PR
-              if: github.event_name == 'pull_request'
-              working-directory: jhdf
-              run: |
-                ./gradlew \
-                  -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
-                  -Dsonar.pullrequest.branch=${{ github.ref }} \
-                  -Dsonar.pullrequest.key=${{ github.event.number }} \
-                  -Dsonar.pullrequest.base=${{ github.base.ref }} \
-                  -Dsonar.pullrequest.github.repository=${{ github.server_url }}/${{ github.repository }} \
-                  checkstyleMain checkstyleTest spotbugsMain spotbugsTest jacocoTestReport sonar
+            - name: Build and analyze
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+                  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+              run: ./gradlew build checkstyleMain checkstyleTest spotbugsMain spotbugsTest jacocoTestReport sonar --info
