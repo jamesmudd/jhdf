@@ -114,8 +114,7 @@ jar {
 
 jacocoTestReport {
     reports {
-        // Enable XML for Azure pipelines
-        xml.enabled true
+        xml.required = true
     }
 }
 
