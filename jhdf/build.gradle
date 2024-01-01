@@ -21,7 +21,7 @@ plugins {
 
     // Community plugins (need versions)
     id 'org.sonarqube' version '4.0.0.2929' // Code quality
-    id "com.github.spotbugs" version "5.2.3" // Static analysis
+    id "com.github.spotbugs" version "6.0.4" // Static analysis
     id "me.champeau.jmh" version "0.7.2" // JMH support
 }
 
@@ -187,10 +187,12 @@ signing {
     sign publishing.publications.maven
 }
 
+import com.github.spotbugs.snom.Confidence
+import com.github.spotbugs.snom.Effort
 spotbugs {
     ignoreFailures = true // Allow build to continue with errors
-    effort = "max"
-    reportLevel = "low" // Report all issues even low priority
+    effort = Effort.valueOf('MAX')
+    reportLevel = Confidence.valueOf('LOW') // Report all issues even low priority
     reportsDir = file("$buildDir/reports/spotbugs")
 }
 
