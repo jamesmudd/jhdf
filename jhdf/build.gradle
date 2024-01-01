@@ -191,8 +191,8 @@ import com.github.spotbugs.snom.Confidence
 import com.github.spotbugs.snom.Effort
 spotbugs {
     ignoreFailures = true // Allow build to continue with errors
-    effort = Effort.MAX
-    reportLevel = Confidence.LOW // Report all issues even low priority
+    effort = Effort.valueOf('MAX')
+    reportLevel = Confidence.valueOf('LOW') // Report all issues even low priority
     reportsDir = file("$buildDir/reports/spotbugs")
 }
 
