@@ -6,6 +6,7 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.WritableGroup;
+import io.jhdf.api.WritiableDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +84,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 
 	@Override
 	public File getFile() {
-		return rootGroup.getFile();
+		return path.toFile();
 	}
 
 	@Override
@@ -112,8 +113,8 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	}
 
 	@Override
-	public void putDataset(String name, Object data) {
-		rootGroup.putDataset(name, data);
+	public WritiableDataset putDataset(String name, Object data) {
+		return rootGroup.putDataset(name, data);
 	}
 
 	@Override

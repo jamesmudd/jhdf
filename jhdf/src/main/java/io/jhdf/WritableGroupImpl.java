@@ -6,6 +6,7 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.WritableGroup;
+import io.jhdf.api.WritiableDataset;
 import io.jhdf.exceptions.UnsupportedHdfException;
 
 import java.io.File;
@@ -122,8 +123,10 @@ public class WritableGroupImpl implements WritableGroup {
 	}
 
 	@Override
-	public void putDataset(String name, Object data) {
-		children.put(name, new WritableDatasetImpl(data, name, this));
+	public WritiableDataset putDataset(String name, Object data) {
+		WritableDatasetImpl writableDataset = new WritableDatasetImpl(data, name, this);
+		children.put(name, writableDataset);
+		return writableDataset;
 	}
 
 	@Override
