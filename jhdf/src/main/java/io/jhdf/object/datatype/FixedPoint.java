@@ -48,10 +48,11 @@ public class FixedPoint extends DataType implements OrderedDataType {
 		bitPrecision = bb.getShort();
 	}
 
-	public FixedPoint(short bitPrecision) {
+	public FixedPoint(int bitPrecision) {
+		// TODO arg validation
 		super(1, bitPrecision * 8);
 		this.order = ByteOrder.nativeOrder();
-		this.bitPrecision = bitPrecision;
+		this.bitPrecision = (short) bitPrecision;
 		this.lowPadding = false;
 		this.highPadding = false;
 		this.signed = true;
