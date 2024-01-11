@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2022 James Mudd
+ * Copyright (c) 2023 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -12,6 +12,11 @@ package io.jhdf;
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
+import io.jhdf.storage.HdfInMemoryByteBuffer;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +24,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static io.jhdf.Utils.toHex;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
@@ -137,6 +143,8 @@ public abstract class Superblock {
 					"Superblock version is not supported. Detected version = " + versionOfSuperblock);
 		}
 	}
+
+	public abstract Optional<ObjectHeader> getExtension();
 
 	public static class SuperblockV0V1 extends Superblock {
 
@@ -400,6 +408,11 @@ public abstract class Superblock {
 			return endOfFileAddress;
 		}
 
+		@Override
+		public Optional<ObjectHeader> getExtension() {
+			return Optional.empty();
+		}
+
 		/**
 		 * @return the driverInformationBlockAddress
 		 */
@@ -424,6 +437,8 @@ public abstract class Superblock {
 		private final long superblockExtensionAddress;
 		private final long endOfFileAddress;
 		private final long rootGroupObjectHeaderAddress;
+
+		private LazyInitializer<ObjectHeader> superblockExtension;
 
 		public SuperblockV2V3() {
 			versionOfSuperblock = 2;
@@ -471,9 +486,7 @@ public abstract class Superblock {
 				superblockExtensionAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
 				logger.trace("addressOfGlobalFreeSpaceIndex = {}", superblockExtensionAddress);
 
-				if (superblockExtensionAddress != Constants.UNDEFINED_ADDRESS) {
-					throw new UnsupportedHdfException("Superblock extension is not supported");
-				}
+				this.superblockExtension = readExtension(new HdfFileChannel(fc, this), superblockExtensionAddress);
 
 				// End of File Address
 				endOfFileAddress = Utils.readBytesAsUnsignedLong(header, sizeOfOffsets);
@@ -521,9 +534,7 @@ public abstract class Superblock {
 			superblockExtensionAddress = Utils.readBytesAsUnsignedLong(byteBuffer, sizeOfOffsets);
 			logger.trace("addressOfGlobalFreeSpaceIndex = {}", superblockExtensionAddress);
 
-			if (superblockExtensionAddress != Constants.UNDEFINED_ADDRESS) {
-				throw new UnsupportedHdfException("Superblock extension is not supported");
-			}
+			this.superblockExtension = readExtension(new HdfInMemoryByteBuffer(byteBuffer, this), superblockExtensionAddress);
 
 			// End of File Address
 			endOfFileAddress = Utils.readBytesAsUnsignedLong(byteBuffer, sizeOfOffsets);
@@ -539,6 +550,13 @@ public abstract class Superblock {
 			ChecksumUtils.validateChecksum(byteBuffer);
 
 			logger.debug("Finished reading Superblock");
+		}
+
+		private static LazyInitializer<ObjectHeader> readExtension(HdfBackingStorage hdfFileChannel, long superblockExtensionAddress) {
+			if (superblockExtensionAddress == Constants.UNDEFINED_ADDRESS) {
+				return null;
+			}
+			return ObjectHeader.lazyReadObjectHeader(hdfFileChannel, superblockExtensionAddress);
 		}
 
 		public SuperblockV2V3(long baseAddressByte, long rootGroupObjectHeaderAddress) {
@@ -596,6 +614,15 @@ public abstract class Superblock {
 		@Override
 		public long getEndOfFileAddress() {
 			return endOfFileAddress;
+		}
+
+		@Override
+		public Optional<ObjectHeader> getExtension() {
+			try {
+				return Optional.ofNullable(superblockExtension.get());
+			} catch (ConcurrentException e) {
+				throw new HdfException("Failed to read superblock extension", e);
+			}
 		}
 
 		/**

@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2022 James Mudd
+ * Copyright (c) 2023 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -42,6 +42,7 @@ public enum FilterManager {
 		addFilter(new FletcherChecksumFilter());
 		addFilter(new LzfFilter());
 		addFilter(new BitShuffleFilter());
+		addFilter(new Lz4Filter());
 
 		// Add dynamically loaded filters
 		ServiceLoader<Filter> serviceLoader = ServiceLoader.load(Filter.class);
@@ -49,7 +50,7 @@ public enum FilterManager {
 			addFilter(pipelineFilter);
 		}
 
-		logger.info("Initialized HDF5 filters");
+		logger.info("Initialized [{}] HDF5 filters", ID_TO_FILTER.size());
 	}
 
 	/**

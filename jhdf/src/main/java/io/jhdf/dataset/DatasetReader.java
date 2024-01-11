@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2022 James Mudd
+ * Copyright (c) 2023 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -67,5 +67,9 @@ public final class DatasetReader {
 		} else {
 			return data;
 		}
+	}
+
+	public static Object readDataset(DataType type, ByteBuffer buffer, int elements, HdfBackingStorage hdfBackingStorage) {
+		return type.fillData(buffer, new int[]{elements}, hdfBackingStorage);
 	}
 }

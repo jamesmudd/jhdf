@@ -3,13 +3,11 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2022 James Mudd
+ * Copyright (c) 2023 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.net.URL;
@@ -49,14 +47,4 @@ public final class TestUtils {
 		}
 	}
 
-	public static int[] getDimensions(Object data) {
-		List<Integer> dims = new ArrayList<>();
-		dims.add(Array.getLength(data));
-
-		while (Array.get(data, 0).getClass().isArray()) {
-			data = Array.get(data, 0);
-			dims.add(Array.getLength(data));
-		}
-		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
-	}
 }

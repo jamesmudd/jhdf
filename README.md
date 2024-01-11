@@ -26,6 +26,7 @@ For an example of traversing the tree inside a HDF5 file see [PrintTree.java](jh
 - Integration with Java logging via SLF4J
 - Performance? Maybe, the library uses Java NIO `MappedByteBuffer`s which should provide fast file access. In addition, when accessing chunked datasets the library is parallelized to take advantage of modern CPUs. `jHDF` will also allow parallel reading of multiple datasets or multiple files. I have seen cases where `jHDF` is significantly faster than the C libraries, but as with all performance issues, it is case specific, so you will need to do your own tests on the cases you care about. If you do run tests please post the results so everyone can benefit, here are some results I am aware of:
     - [Peter Kirkham - Parallel IO Improvements](http://pkirkham.github.io/pyrus/parallel-io-improvements/)
+- Security - jHDF is pure Java and therefore benefits from the memory safety provided by the JVM. The HDF5 Group library is written using non-memory safe languages, therefore susceptible to [memory related security bugs](https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=hdf5).
 
 ## Why should I not use jHDF?
 - If you want to write HDF5 files. Currently, this is not supported. This will be supported in the future, but full read-only compatibility is currently the goal. If you would be intrested in this please comment on, or react to [issue #354](https://github.com/jamesmudd/jhdf/issues/354).

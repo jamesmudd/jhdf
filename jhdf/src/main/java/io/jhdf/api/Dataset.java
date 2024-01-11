@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2022 James Mudd
+ * Copyright (c) 2023 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -118,16 +118,29 @@ public interface Dataset extends Node {
 	Object getData();
 
 	/**
+	 * Gets the data from the HDF5 dataset and converts it to a Java object, it differs from {@link #getData()} as the
+	 * data will be flat (i.e. 1D). Can offer improved performance over {@link #getData()} for multiple dimension
+	 * arrays.
+	 * <p>
+	 * The type of the returned array will be that returned by {@link #getJavaType()}. The size of the array returned
+	 * will be the product of the dataset dimensions. For empty datasets an empty array will be returned. For scalar
+	 * datasets an array with a single element will be returned.
+	 *
+	 * @return the data as a 1D array
+	 */
+	Object getDataFlat();
+
+	/**
 	 * Gets a slice of data from the HDF5 dataset and converts it to a Java object.
 	 * <p>
 	 * The returned object will be an array with the dimensions specified by <code>sliceDimensions</code> and type of
 	 * the array will be the return value of {@link #getJavaType()}.
 	 *
-	 * @param sliceOffset the position in the dataset the slice starts. Must have length equal to number of dimensions
+	 * @param sliceOffset     the position in the dataset the slice starts. Must have length equal to number of dimensions
 	 * @param sliceDimensions the dimensions of the slice to return. Must have length equal to number of dimensions
 	 * @return the slice of data from the dataset as a Java object
 	 * @throws InvalidSliceHdfException if the <code>sliceOffset</code> or <code>sliceDimensions</code> are invalid
-	 * @throws HdfException if the dataset can't be sliced
+	 * @throws HdfException             if the dataset can't be sliced
 	 */
 	Object getData(long[] sliceOffset, int[] sliceDimensions);
 

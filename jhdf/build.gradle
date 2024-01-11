@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2022 James Mudd
+ * Copyright (c) 2023 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -20,13 +20,14 @@ plugins {
     id 'checkstyle' // Code style checks
 
     // Community plugins (need versions)
-    id 'org.sonarqube' version '3.4.0.2513' // Code quality
-    id "com.github.spotbugs" version "5.0.9" // Static analysis
+    id 'org.sonarqube' version '4.0.0.2929' // Code quality
+    id "com.github.spotbugs" version "6.0.4" // Static analysis
+    id "me.champeau.jmh" version "0.7.2" // JMH support
 }
 
 // Variables
 group = 'io.jhdf'
-version = '0.6.7'
+version = '0.6.10'
 
 compileJava {
     sourceCompatibility = "1.8"
@@ -47,23 +48,24 @@ repositories {
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0'
     // lzf compression support
-    implementation group: 'com.ning', name: 'compress-lzf', version: '1.1'
+    implementation group: 'com.ning', name: 'compress-lzf', version: '1.1.2'
     // lz5 support https://mvnrepository.com/artifact/org.lz4/lz4-java
     implementation group: 'org.lz4', name: 'lz4-java', version: '1.8.0'
 
     // Use JUnit 5 test framework
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.10.1'
     testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 
     // Mocking
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.6.1'
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.11.0'
     testImplementation group: 'org.powermock', name: 'powermock-core', version: '2.0.9'
     // Matchers
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.25.1'
     // Alternative bitshuffle impl to check results against
-    testImplementation 'org.xerial.snappy:snappy-java:1.1.8.4'
+    testImplementation 'org.xerial.snappy:snappy-java:1.1.10.5'
 }
 
 test {
@@ -113,8 +115,7 @@ jar {
 
 jacocoTestReport {
     reports {
-        // Enable XML for Azure pipelines
-        xml.enabled true
+        xml.required = true
     }
 }
 
@@ -187,10 +188,12 @@ signing {
     sign publishing.publications.maven
 }
 
+import com.github.spotbugs.snom.Confidence
+import com.github.spotbugs.snom.Effort
 spotbugs {
     ignoreFailures = true // Allow build to continue with errors
-    effort = "max"
-    reportLevel = "low" // Report all issues even low priority
+    effort = Effort.valueOf('MAX')
+    reportLevel = Confidence.valueOf('LOW') // Report all issues even low priority
     reportsDir = file("$buildDir/reports/spotbugs")
 }
 

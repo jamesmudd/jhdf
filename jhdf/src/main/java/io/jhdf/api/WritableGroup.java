@@ -1,6 +1,8 @@
 package io.jhdf.api;
 
-public interface WritableGroup {
+public interface WritableGroup extends Group {
 
-	WritableGroup newGroup(String name);
+	WritiableDataset putDataset(String name, Object data);
+
+	WritableGroup putGroup(String name);
 }

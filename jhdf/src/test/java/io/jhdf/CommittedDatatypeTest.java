@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2022 James Mudd
+ * Copyright (c) 2023 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -14,6 +14,7 @@ import io.jhdf.api.NodeType;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.OrderedDataType;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -25,6 +26,7 @@ import static io.jhdf.TestUtils.loadTestHdfFile;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 
 class CommittedDatatypeTest {
 
@@ -54,5 +56,12 @@ class CommittedDatatypeTest {
 			Arguments.of("int32_LE", int.class, LITTLE_ENDIAN, 4),
 			Arguments.of("int32_BE", int.class, LITTLE_ENDIAN, 4)
 		);
+	}
+
+	@Test
+	void testGettingCommittedDatatypeByAddress() {
+		Node node = hdfFile.getNodeByAddress(1208L);
+		assertThat(node, isA(CommittedDatatype.class));
+		assertThat(node.getType(), is(NodeType.COMMITTED_DATATYPE));
 	}
 }

@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2022 James Mudd
+ * Copyright (c) 2023 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -19,6 +19,7 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
+import java.util.BitSet;
 
 import static io.jhdf.Utils.stripLeadingIndex;
 
@@ -45,6 +46,17 @@ public class FixedPoint extends DataType implements OrderedDataType {
 
 		bitOffset = bb.getShort();
 		bitPrecision = bb.getShort();
+	}
+
+	public FixedPoint(int bitPrecision) {
+		// TODO arg validation
+		super(1, bitPrecision * 8);
+		this.order = ByteOrder.nativeOrder();
+		this.bitPrecision = (short) bitPrecision;
+		this.lowPadding = false;
+		this.highPadding = false;
+		this.signed = true;
+		this.bitOffset = 0; // TODO ok?
 	}
 
 	@Override

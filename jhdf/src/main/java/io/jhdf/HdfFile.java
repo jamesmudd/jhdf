@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2022 James Mudd
+ * Copyright (c) 2023 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -16,9 +16,13 @@ import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
+import io.jhdf.dataset.DatasetLoader;
+import io.jhdf.dataset.NoParent;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfWritingExcpetion;
 import io.jhdf.exceptions.InMemoryHdfException;
+import io.jhdf.object.message.DataSpaceMessage;
+import io.jhdf.object.message.DataTypeMessage;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.storage.HdfInMemoryByteBuffer;
@@ -420,5 +424,25 @@ public class HdfFile implements Group, AutoCloseable {
 	 */
 	public boolean inMemory() {
 		return hdfBackingStorage.inMemory();
+	}
+
+	public Node getNodeByAddress(long address) {
+		ObjectHeader objectHeader = ObjectHeader.readObjectHeader(hdfBackingStorage, address);
+		final String name = "__ADDRESS__" + address;
+		final Node node;
+		if (objectHeader.hasMessageOfType(DataSpaceMessage.class)) {
+			// Its a a Dataset
+			logger.trace("Creating dataset [{}]", name);
+			node = DatasetLoader.createDataset(hdfBackingStorage, objectHeader, name, NoParent.INSTANCE);
+		} else if (objectHeader.hasMessageOfType(DataTypeMessage.class)) {
+			// Has a datatype but no dataspace so its a committed datatype
+			logger.trace("Creating committed data type [{}]", name);
+			node = new CommittedDatatype(hdfBackingStorage, address, name, NoParent.INSTANCE);
+		} else {
+			// Its a group
+			logger.trace("Creating group [{}]", name);
+			node = GroupImpl.createGroup(hdfBackingStorage, address, name, NoParent.INSTANCE);
+		}
+		return node;
 	}
 }

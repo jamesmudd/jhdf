@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2022 James Mudd
+ * Copyright (c) 2023 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -15,6 +15,7 @@ import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.BitSet;
 
 public abstract class DataType {
@@ -23,6 +24,13 @@ public abstract class DataType {
 	private final int dataClass;
 	private final int size; // In bytes
 	protected final BitSet classBits;
+
+	public DataType(int dataClass, int size) {
+		this.version = 0;
+		this.dataClass = dataClass;
+		this.size = size;
+		this.classBits = new BitSet(8); // TODO check size
+	}
 
 	public static DataType readDataType(ByteBuffer bb) {
 		// Mark buffer position
@@ -82,6 +90,21 @@ public abstract class DataType {
 
 		// Size
 		size = Utils.readBytesAsUnsignedInt(bb, 4);
+	}
+
+	public static DataType fromObject(Object data) {
+		if (data.getClass().isArray()) {
+			Class<?> type = Utils.getArrayType(data);
+			if (type.equals(int.class)) {
+				return new FixedPoint((short) 4);
+			} else if (type.equals(double.class)) {
+				return new FloatingPoint(8);
+			}
+			throw new HdfException("Error");
+
+		} else {
+			throw new UnsupportedHdfException("Only arrays can be written at the moment");
+		}
 	}
 
 	public int getVersion() {
