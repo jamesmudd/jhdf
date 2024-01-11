@@ -4,6 +4,9 @@ import io.jhdf.Superblock;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 class LinkMessageTest {
 
 	@Test
@@ -13,6 +16,9 @@ class LinkMessageTest {
 		ByteBuffer buffer = linkMessage.toBuffer();
 
 		LinkMessage linkMessageReadBack = new LinkMessage(buffer, new Superblock.SuperblockV2V3(), null);
-//		assertThat.
+
+		assertThat(linkMessageReadBack).usingRecursiveComparison()
+			.withStrictTypeChecking()
+			.isEqualTo(linkMessage);
 	}
 }

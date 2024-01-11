@@ -278,10 +278,12 @@ public class LinkMessage extends Message {
 	}
 
 	public static LinkMessage create(String name, long address) {
+		BitSet flags = new BitSet(1);
+		flags.set(LINK_CHARACTER_SET_PRESENT);
 		return new LinkMessage(
 			new BitSet(1),
 			(byte) 1,
-			new BitSet(1),
+			flags,
 			LinkType.HARD,
 			-1,
 			UTF_8,
