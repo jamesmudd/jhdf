@@ -155,6 +155,17 @@ public class LinkMessage extends Message {
 		}
 	}
 
+	private LinkMessage(BitSet messageFlags, byte version, BitSet flags, LinkType linkType, long creationOrder, Charset linkNameCharset, String linkName, long hardLinkAddress) {
+		super(messageFlags);
+		this.version = version;
+		this.flags = flags;
+		this.linkType = linkType;
+		this.creationOrder = creationOrder;
+		this.linkNameCharset = linkNameCharset;
+		this.linkName = linkName;
+		this.hardLinkAddress = hardLinkAddress;
+	}
+
 	private int getSizeOfLengthOfLinkName() {
 		final int sizeOfLengthOfLinkNameIndex = Utils.bitsToInt(flags, 0, 2);
 		final int sizeOfLengthOfLinkName;
@@ -264,5 +275,18 @@ public class LinkMessage extends Message {
 		}
 
 		return bufferBuilder.build();
+	}
+
+	public static LinkMessage create(String name, long address) {
+		return new LinkMessage(
+			new BitSet(1),
+			(byte) 1,
+			new BitSet(1),
+			LinkType.HARD,
+			-1,
+			UTF_8,
+			name,
+			address
+		);
 	}
 }
