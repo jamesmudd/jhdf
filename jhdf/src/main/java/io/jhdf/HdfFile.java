@@ -239,12 +239,7 @@ public class HdfFile implements Group, AutoCloseable {
 	}
 
 	public static WritableHdfFile write(Path path) {
-		try {
-			FileChannel fc = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-			return new WritableHdfFile(fc);
-		} catch (IOException e) {
-			throw new HdfWritingExcpetion("Failed to ope file: " + path.toAbsolutePath(), e);
-		}
+		return new WritableHdfFile(path);
 	}
 
 	/**

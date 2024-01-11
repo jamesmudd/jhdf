@@ -15,7 +15,7 @@ class WritableApiTest {
 	@Test
 	void testBuildingFile() throws Exception {
 		Path path = Paths.get("writing.hdf5");
-		try (WritableHdfFile file = new WritableHdfFile(path)) {
+		try (WritableHdfFile file = HdfFile.write(path)) {
 
 			assertThat(file.getParent()).isNull();
 			assertThat(file.getFile()).hasName("writing.hdf5");

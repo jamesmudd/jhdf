@@ -4,9 +4,6 @@ import io.jhdf.Superblock;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 class LinkMessageTest {
 
 	@Test
@@ -16,6 +13,6 @@ class LinkMessageTest {
 		ByteBuffer buffer = linkMessage.toBuffer();
 
 		LinkMessage linkMessageReadBack = new LinkMessage(buffer, new Superblock.SuperblockV2V3(), null);
-		System.out.println(linkMessageReadBack);
+//		assertThat.
 	}
 }
