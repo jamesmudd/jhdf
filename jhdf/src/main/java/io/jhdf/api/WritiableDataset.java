@@ -1,5 +1,5 @@
 package io.jhdf.api;
 
-public interface WritiableDataset extends Dataset {
+public interface WritiableDataset extends Dataset, WritableNode {
 
 }

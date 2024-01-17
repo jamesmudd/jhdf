@@ -9,6 +9,7 @@ import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataLayout;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -181,5 +182,10 @@ public class WritableDatasetImpl implements WritiableDataset {
 	@Override
 	public boolean isAttributeCreationOrderTracked() {
 		return false;
+	}
+
+	@Override
+	public long write(HdfFileChannel hdfFileChannel, long position) {
+		throw new UnsupportedOperationException();
 	}
 }

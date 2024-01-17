@@ -6,19 +6,30 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.WritableGroup;
+import io.jhdf.api.WritableNode;
 import io.jhdf.api.WritiableDataset;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.object.message.GroupInfoMessage;
+import io.jhdf.object.message.LinkInfoMessage;
+import io.jhdf.object.message.LinkMessage;
+import io.jhdf.object.message.Message;
+import io.jhdf.storage.HdfFileChannel;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WritableGroupImpl implements WritableGroup {
 
-	private final Map<String, Node> children = new ConcurrentHashMap<>();
+	private final Map<String, WritableNode> children = new ConcurrentHashMap<>();
 
 	private final Group parent;
 	private final String name; // TODO Node superclass
@@ -138,6 +149,47 @@ public class WritableGroupImpl implements WritableGroup {
 
 	@Override
 	public Iterator<Node> iterator() {
-		return children.values().iterator();
+		Collection<Node> values = Collections.unmodifiableCollection(children.values());
+		return values.iterator();
+	}
+
+	public long write(HdfFileChannel hdfFileChannel, long position) {
+
+		List<Message> messages = new ArrayList<>();
+		GroupInfoMessage groupInfoMessage = GroupInfoMessage.createBasic();
+		messages.add(groupInfoMessage);
+		LinkInfoMessage linkInfoMessage = LinkInfoMessage.createBasic();
+		messages.add(linkInfoMessage);
+
+		Map<String, Long> childAddresses = new HashMap<>();
+		for (Map.Entry<String, WritableNode> child : children.entrySet()) {
+			LinkMessage linkMessage = LinkMessage.create(child.getKey(), 0L);
+			childAddresses.put(child.getKey(), 0L);
+		}
+
+		ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
+
+
+		ByteBuffer tempBuffer = objectHeader.toBuffer();
+		int objectHeaderSize = tempBuffer.limit();
+		// Upto here just finding out the size of the OH can be much improved
+
+		// Start building another OH
+		messages = new ArrayList<>();
+		messages.add(groupInfoMessage);
+		messages.add(linkInfoMessage);
+
+		long nextChildAddress = position + objectHeaderSize;
+
+		for (Map.Entry<String, WritableNode> child : children.entrySet()) {
+			LinkMessage linkMessage = LinkMessage.create(child.getKey(), nextChildAddress);
+			messages.add(linkMessage);
+			long bytesWritten = child.getValue().write(hdfFileChannel, nextChildAddress);
+			nextChildAddress += bytesWritten;
+		}
+
+		objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
+
+		return hdfFileChannel.write(objectHeader.toBuffer(), position);
 	}
 }

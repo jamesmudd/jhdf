@@ -6,13 +6,14 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.WritableGroup;
+import io.jhdf.api.WritableNode;
 import io.jhdf.api.WritiableDataset;
 import io.jhdf.exceptions.HdfWritingExcpetion;
 import io.jhdf.object.message.GroupInfoMessage;
 import io.jhdf.object.message.LinkInfoMessage;
-import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.Message;
 import io.jhdf.object.message.NilMessage;
+import io.jhdf.storage.HdfFileChannel;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +22,6 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +35,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	private final Path path;
 	private final FileChannel fileChannel;
 	private final Superblock.SuperblockV2V3 superblock;
+	private final HdfFileChannel hdfFileChannel;
 	private ObjectHeader.ObjectHeaderV2 rootGroupObjectHeader;
 
 	private final WritableGroup rootGroup;
@@ -47,32 +48,43 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 			throw new HdfWritingExcpetion("Failed to ope file: " + path.toAbsolutePath(), e);
 		}
 		this.superblock = new Superblock.SuperblockV2V3();
+		this.hdfFileChannel = new HdfFileChannel(this.fileChannel, this.superblock);
+
 		this.rootGroup = new WritableGroupImpl(null, "/");
-		createRootGroup();
-		try {
-			fileChannel.write(superblock.toBuffer());
-			fileChannel.write(rootGroupObjectHeader.toBuffer(), ROOT_GROUP_ADDRESS);
-			fileChannel.write(ByteBuffer.wrap(new byte[]{1}), 250);
-		} catch (IOException e) {
-			throw new HdfWritingExcpetion("Failed to write superblock", e);
-		}
+//		createRootGroup();
+//		try {
+//			hdfFileChannel.write(superblock.toBuffer(), 0L);
+//			long endOfFile = rootGroup.write(hdfFileChannel, ROOT_GROUP_ADDRESS);
+////			hdfFileChannel.write(rootGroup.(), ROOT_GROUP_ADDRESS);
+//			hdfFileChannel.write(ByteBuffer.wrap(new byte[]{1}), 250);
+//		} catch (IOException e) {
+//			throw new HdfWritingExcpetion("Failed to write superblock", e);
+//		}
 	}
 
-	private void createRootGroup() {
-		List<Message> messages = new ArrayList<>();
-		messages.add(LinkInfoMessage.createBasic());
-		messages.add(GroupInfoMessage.createBasic());
-		messages.add(NilMessage.create());
-		this.rootGroupObjectHeader = new ObjectHeader.ObjectHeaderV2(ROOT_GROUP_ADDRESS, messages);
-	}
+//	private void createRootGroup() {
+//		List<Message> messages = new ArrayList<>();
+//		messages.add(LinkInfoMessage.createBasic());
+//		messages.add(GroupInfoMessage.createBasic());
+//		messages.add(NilMessage.create());
+//		this.rootGroupObjectHeader = new ObjectHeader.ObjectHeaderV2(ROOT_GROUP_ADDRESS, messages);
+//	}
 
 	@Override
 	public void close() {
 		try {
+			flush();
 			fileChannel.close();
 		} catch (IOException e) {
 			throw new HdfWritingExcpetion("Failed to close file", e);
 		}
+	}
+
+	private void flush() {
+		hdfFileChannel.write(superblock.toBuffer(), 0L);
+		long endOfFile = rootGroup.write(hdfFileChannel, ROOT_GROUP_ADDRESS);
+//			hdfFileChannel.write(rootGroup.(), ROOT_GROUP_ADDRESS);
+		hdfFileChannel.write(ByteBuffer.wrap(new byte[]{1}), 250);
 	}
 
 	@Override
@@ -188,5 +200,11 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	@Override
 	public Spliterator<Node> spliterator() {
 		return rootGroup.spliterator();
+	}
+
+	@Override
+	public long write(HdfFileChannel hdfFileChannel, long position) {
+		// TODO restructure interfaces to remove this method
+		throw new UnsupportedOperationException();
 	}
 }
