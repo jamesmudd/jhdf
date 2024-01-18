@@ -346,7 +346,7 @@ public abstract class ObjectHeader {
 				bufferBuilder.writeByte(message.getMessageType())
 					.writeShort(messageBuffer.capacity())
 					.writeBytes(message.flagsToBytes())
-					.writeBuffer(message.toBuffer());
+					.writeBuffer(messageBuffer);
 			}
 			return bufferBuilder.build();
 		}
