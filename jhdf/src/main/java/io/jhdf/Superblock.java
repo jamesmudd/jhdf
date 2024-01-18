@@ -446,7 +446,7 @@ public abstract class Superblock {
 			sizeOfLengths = 8;
 			baseAddressByte = 0;
 			superblockExtensionAddress = Constants.UNDEFINED_ADDRESS;
-			endOfFileAddress = 250; // TODO
+			endOfFileAddress = 500; // TODO
 			rootGroupObjectHeaderAddress = 48;
 		}
 

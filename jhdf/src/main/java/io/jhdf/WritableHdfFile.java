@@ -84,7 +84,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		hdfFileChannel.write(superblock.toBuffer(), 0L);
 		long endOfFile = rootGroup.write(hdfFileChannel, ROOT_GROUP_ADDRESS);
 //			hdfFileChannel.write(rootGroup.(), ROOT_GROUP_ADDRESS);
-		hdfFileChannel.write(ByteBuffer.wrap(new byte[]{1}), 250);
+		hdfFileChannel.write(ByteBuffer.wrap(new byte[]{1}), 500);
 	}
 
 	@Override

@@ -17,7 +17,9 @@ public class SimpleWritingTest {
 		WritableGroup testGroup = writableHdfFile.putGroup("testGroup");
 		testGroup.putGroup("nested1");
 		writableHdfFile.putGroup("testGroup2");
-		writableHdfFile.putGroup("testGroup3");
+		WritableGroup testGroup3 = writableHdfFile.putGroup("testGroup3");
+		testGroup3.putGroup("nested3");
+
 
 		writableHdfFile.close();
 
