@@ -10,8 +10,14 @@
 package io.jhdf;
 
 import io.jhdf.ObjectHeader.ObjectHeaderV2;
+import io.jhdf.object.message.GroupInfoMessage;
+import io.jhdf.object.message.LinkInfoMessage;
+import io.jhdf.object.message.LinkMessage;
+import io.jhdf.object.message.Message;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
+import io.jhdf.storage.HdfInMemoryByteBuffer;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +29,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -195,6 +205,28 @@ class ObjectHeaderV2Test {
 		assertThat(oh.isAttributeCreationOrderTracked(), is(true));
 
 		hdfBackingStorage.close();
+	}
+
+	@Test
+	void roundtrip() {
+		GroupInfoMessage groupInfoMessage = GroupInfoMessage.createBasic();
+		LinkInfoMessage linkInfoMessage = LinkInfoMessage.createBasic();
+		LinkMessage linkMessage = LinkMessage.create("Group", 99);
+
+		List<Message> messages = new ArrayList<>();
+		messages.add(groupInfoMessage);
+		messages.add(linkInfoMessage);
+		messages.add(linkMessage);
+		ObjectHeaderV2 objectHeader = new ObjectHeaderV2(0, messages);
+
+		ByteBuffer buffer = objectHeader.toBuffer();
+
+		HdfInMemoryByteBuffer hdfBackingStorage = new HdfInMemoryByteBuffer(buffer, new Superblock.SuperblockV2V3());
+		ObjectHeader readObjectHeader = ObjectHeader.readObjectHeader(hdfBackingStorage, 0);
+
+		Assertions.assertThat(readObjectHeader).usingRecursiveComparison()
+			.withStrictTypeChecking()
+			.isEqualTo(objectHeader);
 	}
 
 }
