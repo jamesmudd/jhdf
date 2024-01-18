@@ -164,6 +164,7 @@ public class WritableGroupImpl implements WritableGroup {
 		Map<String, Long> childAddresses = new HashMap<>();
 		for (Map.Entry<String, WritableNode> child : children.entrySet()) {
 			LinkMessage linkMessage = LinkMessage.create(child.getKey(), 0L);
+			messages.add(linkMessage);
 			childAddresses.put(child.getKey(), 0L);
 		}
 

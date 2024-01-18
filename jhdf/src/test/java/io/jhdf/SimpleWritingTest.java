@@ -15,7 +15,7 @@ public class SimpleWritingTest {
 		Path tempFile = Files.createTempFile(null, ".hdf5");
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 		WritableGroup testGroup = writableHdfFile.putGroup("testGroup");
-//		testGroup.putGroup("nested1");
+		testGroup.putGroup("nested1");
 		writableHdfFile.putGroup("testGroup2");
 		writableHdfFile.putGroup("testGroup3");
 
@@ -23,7 +23,7 @@ public class SimpleWritingTest {
 
 		// Now read it back
 		HdfFile hdfFile = new HdfFile(tempFile);
-		hdfFile.getChildren();
+//		hdfFile.getChildren();
 
 		System.out.println(hdfFile.getFile().getAbsoluteFile().getPath());
 
