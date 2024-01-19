@@ -253,7 +253,7 @@ public class LinkMessage extends Message {
 		if (flags.get(LINK_CHARACTER_SET_PRESENT) && (linkNameCharset.equals(UTF_8)))
 				{bufferBuilder.writeByte(1);
 		}
-		byte[] encodedLinkName = linkNameCharset.encode(linkName).array();
+		byte[] encodedLinkName = linkName.getBytes(linkNameCharset);
 		bufferBuilder.writeShortestRepresentation(encodedLinkName.length);
 		bufferBuilder.writeBytes(encodedLinkName);
 
