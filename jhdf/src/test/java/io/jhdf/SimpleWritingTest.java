@@ -10,6 +10,7 @@
 
 package io.jhdf;
 
+import io.jhdf.api.Node;
 import io.jhdf.api.WritableGroup;
 import org.junit.jupiter.api.Test;
 
@@ -17,8 +18,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
-public class SimpleWritingTest {
+import static org.assertj.core.api.Assertions.assertThat;
+
+class SimpleWritingTest {
 
 	@Test
 	void writeSimpleFile() throws Exception {
@@ -39,11 +43,11 @@ public class SimpleWritingTest {
 
 		// Now read it back
 		HdfFile hdfFile = new HdfFile(tempFile);
-		hdfFile.getChildren();
+		Map<String, Node> children = hdfFile.getChildren();
 
-		System.out.println(hdfFile.getFile().getAbsoluteFile().getPath());
+		assertThat(children).containsKeys("testGroup", "testGroup2", "testGroup3");
 
 		// Cleanup
-//		Files.delete(tempFile);
+		Files.delete(tempFile);
 	}
 }

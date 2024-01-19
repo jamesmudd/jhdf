@@ -206,7 +206,7 @@ public class WritableGroupImpl implements WritableGroup {
 		}
 
 		objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
-		int bytesWritten = hdfFileChannel.write(objectHeader.toBuffer(), position);
+		hdfFileChannel.write(objectHeader.toBuffer(), position);
 
 		logger.info("Finished writing group [{}]", getPath());
 		return nextChildAddress;

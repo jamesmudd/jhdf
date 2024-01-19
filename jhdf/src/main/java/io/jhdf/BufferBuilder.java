@@ -25,12 +25,12 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 public class BufferBuilder {
 
-	public final long UNSIGNED_BYTE_MAX = Byte.MAX_VALUE * 2;
-	public final long UNSIGNED_SHORT_MAX = Short.MAX_VALUE * 2;
+	public static final long UNSIGNED_BYTE_MAX = Byte.MAX_VALUE * 2L;
+	public static final long UNSIGNED_SHORT_MAX = Short.MAX_VALUE * 2L;
+	private static final ByteOrder BYTE_ORDER = LITTLE_ENDIAN;
 
 	private final ByteArrayOutputStream byteArrayOutputStream;
 	private final DataOutputStream dataOutputStream; // Note always big endian
-	private final ByteOrder byteOrder = LITTLE_ENDIAN;
 
 	public BufferBuilder() {
 		this.byteArrayOutputStream = new ByteArrayOutputStream();
@@ -58,7 +58,7 @@ public class BufferBuilder {
 	public BufferBuilder writeShort(int i) {
 		try {
 			short s = (short) i;
-			if(byteOrder == LITTLE_ENDIAN) {
+			if(BYTE_ORDER == LITTLE_ENDIAN) {
 				s = Short.reverseBytes(s);
 			}
 			dataOutputStream.writeShort(s);
@@ -70,7 +70,7 @@ public class BufferBuilder {
 
 	public BufferBuilder writeInt(int i) {
 		try {
-			if(byteOrder == LITTLE_ENDIAN) {
+			if(BYTE_ORDER == LITTLE_ENDIAN) {
 				i = Integer.reverseBytes(i);
 			}
 			dataOutputStream.writeInt(i);
@@ -82,7 +82,7 @@ public class BufferBuilder {
 
 	public BufferBuilder writeLong(long l) {
 		try {
-			if(byteOrder == LITTLE_ENDIAN) {
+			if(BYTE_ORDER == LITTLE_ENDIAN) {
 				l = Long.reverseBytes(l);
 			}
 			dataOutputStream.writeLong(l);
@@ -95,7 +95,7 @@ public class BufferBuilder {
 	public ByteBuffer build() {
 		try {
 			ByteBuffer byteBuffer = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
-			byteBuffer.order(byteOrder);
+			byteBuffer.order(BYTE_ORDER);
 			dataOutputStream.close();
 			byteArrayOutputStream.close();
 			return byteBuffer;

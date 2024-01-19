@@ -14,15 +14,12 @@ import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.WritiableDataset;
-import io.jhdf.dataset.DatasetBase;
 import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataLayout;
-import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
 
 import java.io.File;
-import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
