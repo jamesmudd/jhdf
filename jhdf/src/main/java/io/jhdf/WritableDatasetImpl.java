@@ -196,6 +196,7 @@ public class WritableDatasetImpl implements WritiableDataset {
 
 	@Override
 	public long write(HdfFileChannel hdfFileChannel, long position) {
-		throw new UnsupportedOperationException();
+		return 0;
+//		throw new UnsupportedOperationException();
 	}
 }
