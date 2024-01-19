@@ -1,16 +1,22 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright (c) 2023 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
+
 package io.jhdf;
 
 import io.jhdf.api.WritableGroup;
-import io.jhdf.dataset.NoParent;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.jupiter.api.Assertions.*;
 
 class WritableGroupImplTest {
 

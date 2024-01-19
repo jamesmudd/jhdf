@@ -17,11 +17,9 @@ import io.jhdf.exceptions.UnsupportedHdfException;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,14 +45,14 @@ public class LinkMessage extends Message {
 			return value;
 		}
 
-		private static final Map<Integer, LinkType> lookupMap;
+		private static final Map<Integer, LinkType> LOOKUP_MAP;
 		static {
-			lookupMap = Arrays.stream(values())
+			LOOKUP_MAP = Arrays.stream(values())
 				.collect(Collectors.toMap(LinkType::getValue, Function.identity()));
 		}
 
 		private static LinkType fromValue(int value) {
-			LinkType linkType = lookupMap.get(value);
+			LinkType linkType = LOOKUP_MAP.get(value);
 			if (linkType == null) {
 				throw new HdfException("Unrecognized link type: " + value);
 			}

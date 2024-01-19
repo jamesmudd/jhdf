@@ -1,6 +1,14 @@
-package io.jhdf.api;
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright (c) 2023 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
 
-import java.util.Map;
+package io.jhdf.api;
 
 public interface WritableGroup extends Group, WritableNode {
 

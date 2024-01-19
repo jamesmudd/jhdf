@@ -19,7 +19,6 @@ import io.jhdf.api.NodeType;
 import io.jhdf.dataset.DatasetLoader;
 import io.jhdf.dataset.NoParent;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.HdfWritingExcpetion;
 import io.jhdf.exceptions.InMemoryHdfException;
 import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.DataTypeMessage;

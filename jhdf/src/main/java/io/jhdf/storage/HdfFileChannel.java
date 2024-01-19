@@ -12,7 +12,7 @@ package io.jhdf.storage;
 import io.jhdf.HdfFile;
 import io.jhdf.Superblock;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.HdfWritingExcpetion;
+import io.jhdf.exceptions.HdfWritingException;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -155,7 +155,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 		try {
 			return fc.write(buffer, position);
 		} catch (IOException e) {
-			throw new HdfWritingExcpetion("Exception writing at position: " + position, e);
+			throw new HdfWritingException("Exception writing at position: " + position, e);
 		}
 	}
 }

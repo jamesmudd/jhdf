@@ -1,3 +1,13 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright (c) 2023 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
+
 package io.jhdf;
 
 import io.jhdf.api.Attribute;
@@ -6,26 +16,18 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.WritableGroup;
-import io.jhdf.api.WritableNode;
 import io.jhdf.api.WritiableDataset;
-import io.jhdf.exceptions.HdfWritingExcpetion;
-import io.jhdf.object.message.GroupInfoMessage;
-import io.jhdf.object.message.LinkInfoMessage;
-import io.jhdf.object.message.Message;
-import io.jhdf.object.message.NilMessage;
+import io.jhdf.exceptions.HdfWritingException;
 import io.jhdf.storage.HdfFileChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.function.Consumer;
@@ -50,7 +52,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		try {
 			this.fileChannel = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 		} catch (IOException e) {
-			throw new HdfWritingExcpetion("Failed to ope file: " + path.toAbsolutePath(), e);
+			throw new HdfWritingException("Failed to ope file: " + path.toAbsolutePath(), e);
 		}
 		this.superblock = new Superblock.SuperblockV2V3();
 		this.hdfFileChannel = new HdfFileChannel(this.fileChannel, this.superblock);
@@ -81,7 +83,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 			flush();
 			fileChannel.close();
 		} catch (IOException e) {
-			throw new HdfWritingExcpetion("Failed to close file", e);
+			throw new HdfWritingException("Failed to close file", e);
 		}
 	}
 
@@ -93,7 +95,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 			hdfFileChannel.write(superblock.toBuffer(endOfFile), 0L);
 			logger.info("Flushed to disk [{}] file is [{}] bytes", path.toAbsolutePath(), endOfFile);
 		} catch (IOException e) {
-			throw new HdfWritingExcpetion("Error getting file size", e);
+			throw new HdfWritingException("Error getting file size", e);
 		}
 	}
 
