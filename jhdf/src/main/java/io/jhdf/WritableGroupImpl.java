@@ -14,6 +14,8 @@ import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.Message;
 import io.jhdf.storage.HdfFileChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -28,6 +30,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WritableGroupImpl implements WritableGroup {
+
+	private static final Logger logger = LoggerFactory.getLogger(WritableGroupImpl.class);
 
 	private final Map<String, WritableNode> children = new ConcurrentHashMap<>();
 
@@ -137,6 +141,7 @@ public class WritableGroupImpl implements WritableGroup {
 	public WritiableDataset putDataset(String name, Object data) {
 		WritableDatasetImpl writableDataset = new WritableDatasetImpl(data, name, this);
 		children.put(name, writableDataset);
+		logger.info("Added dataset [{}] to group [{}]", name, getPath());
 		return writableDataset;
 	}
 
@@ -144,6 +149,7 @@ public class WritableGroupImpl implements WritableGroup {
 	public WritableGroup putGroup(String name) {
 		WritableGroupImpl newGroup = new WritableGroupImpl(this, name);
 		children.put(name, newGroup);
+		logger.info("Added group [{}] to group [{}]", name, getPath());
 		return newGroup;
 	}
 
@@ -154,6 +160,7 @@ public class WritableGroupImpl implements WritableGroup {
 	}
 
 	public long write(HdfFileChannel hdfFileChannel, long position) {
+		logger.info("Writing group [{}] at position [{}]", getPath(), position);
 
 		List<Message> messages = new ArrayList<>();
 		GroupInfoMessage groupInfoMessage = GroupInfoMessage.createBasic();
@@ -170,7 +177,6 @@ public class WritableGroupImpl implements WritableGroup {
 
 		ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
 
-
 		ByteBuffer tempBuffer = objectHeader.toBuffer();
 		int objectHeaderSize = tempBuffer.limit();
 		// Upto here just finding out the size of the OH can be much improved
@@ -185,12 +191,14 @@ public class WritableGroupImpl implements WritableGroup {
 		for (Map.Entry<String, WritableNode> child : children.entrySet()) {
 			LinkMessage linkMessage = LinkMessage.create(child.getKey(), nextChildAddress);
 			messages.add(linkMessage);
-			long bytesWritten = child.getValue().write(hdfFileChannel, nextChildAddress);
-			nextChildAddress += bytesWritten;
+			long endPosition = child.getValue().write(hdfFileChannel, nextChildAddress);
+			nextChildAddress = endPosition;
 		}
 
 		objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
+		int bytesWritten = hdfFileChannel.write(objectHeader.toBuffer(), position);
 
-		return hdfFileChannel.write(objectHeader.toBuffer(), position);
+		logger.info("Finished writing group [{}]", getPath());
+		return nextChildAddress;
 	}
 }

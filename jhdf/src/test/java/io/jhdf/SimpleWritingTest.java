@@ -16,16 +16,20 @@ public class SimpleWritingTest {
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 		WritableGroup testGroup = writableHdfFile.putGroup("testGroup");
 		testGroup.putGroup("nested1");
-		writableHdfFile.putGroup("testGroup2");
+		WritableGroup testGroup2 = writableHdfFile.putGroup("testGroup2");
+		WritableGroup hello = testGroup2.putGroup("hello");
+		WritableGroup hello2 = hello.putGroup("hello2");
+		hello2.putGroup("hello3");
 		WritableGroup testGroup3 = writableHdfFile.putGroup("testGroup3");
 		testGroup3.putGroup("nested3");
-
+		testGroup3.putGroup("nested33");
+		testGroup3.putGroup("nested333");
 
 		writableHdfFile.close();
 
 		// Now read it back
 		HdfFile hdfFile = new HdfFile(tempFile);
-//		hdfFile.getChildren();
+		hdfFile.getChildren();
 
 		System.out.println(hdfFile.getFile().getAbsoluteFile().getPath());
 

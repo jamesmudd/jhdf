@@ -632,7 +632,7 @@ public abstract class Superblock {
 			return rootGroupObjectHeaderAddress;
 		}
 
-		public ByteBuffer toBuffer() {
+		public ByteBuffer toBuffer(long endOfFileAddress) {
 
 			BufferBuilder bufferBuilder = new BufferBuilder()
 					.writeBytes(HDF5_FILE_SIGNATURE)

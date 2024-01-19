@@ -80,7 +80,7 @@ class SuperblockV3Test {
 		long startPos = fc.position();
 		Superblock sb = Superblock.readSuperblock(fc, 0);
 
-		ByteBuffer buffer = ((Superblock.SuperblockV2V3) sb).toBuffer();
+		ByteBuffer buffer = ((Superblock.SuperblockV2V3) sb).toBuffer(sb.getEndOfFileAddress());
 
 		ByteBuffer originalSuperblockBuffer = ByteBuffer.allocate(buffer.capacity());
 		fc.position(startPos);

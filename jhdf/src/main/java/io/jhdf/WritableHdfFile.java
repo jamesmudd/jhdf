@@ -14,6 +14,8 @@ import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.Message;
 import io.jhdf.object.message.NilMessage;
 import io.jhdf.storage.HdfFileChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +32,8 @@ import java.util.function.Consumer;
 
 public class WritableHdfFile implements WritableGroup, AutoCloseable {
 
+	private static final Logger logger = LoggerFactory.getLogger(WritableHdfFile.class);
+
 	private static final long ROOT_GROUP_ADDRESS = 48;
 
 	private final Path path;
@@ -41,6 +45,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	private final WritableGroup rootGroup;
 
 	public WritableHdfFile(Path path) {
+		logger.info("Writing HDF5 file to [{}]", path.toAbsolutePath());
 		this.path = path;
 		try {
 			this.fileChannel = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
@@ -81,10 +86,15 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	}
 
 	private void flush() {
-		hdfFileChannel.write(superblock.toBuffer(), 0L);
-		long endOfFile = rootGroup.write(hdfFileChannel, ROOT_GROUP_ADDRESS);
-//			hdfFileChannel.write(rootGroup.(), ROOT_GROUP_ADDRESS);
-		hdfFileChannel.write(ByteBuffer.wrap(new byte[]{1}), 500);
+		logger.info("Flushing to disk [{}]...", path.toAbsolutePath());
+		try {
+			rootGroup.write(hdfFileChannel, ROOT_GROUP_ADDRESS);
+			long endOfFile = hdfFileChannel.getFileChannel().size();
+			hdfFileChannel.write(superblock.toBuffer(endOfFile), 0L);
+			logger.info("Flushed to disk [{}] file is [{}] bytes", path.toAbsolutePath(), endOfFile);
+		} catch (IOException e) {
+			throw new HdfWritingExcpetion("Error getting file size", e);
+		}
 	}
 
 	@Override
