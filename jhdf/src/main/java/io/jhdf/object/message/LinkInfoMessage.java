@@ -9,6 +9,8 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.BufferBuilder;
+import io.jhdf.Constants;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 
@@ -16,6 +18,8 @@ import java.nio.ByteBuffer;
 import java.util.BitSet;
 
 public class LinkInfoMessage extends Message {
+
+	public static final int MESSAGE_TYPE = 2;
 
 	private static final int CREATION_ORDER_TRACKED = 0;
 	private static final int CREATION_ORDER_INDEXED = 1;
@@ -72,5 +76,43 @@ public class LinkInfoMessage extends Message {
 
 	public boolean isLinkCreationOrderTracked() {
 		return flags.get(CREATION_ORDER_TRACKED);
+	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
+	@Override
+	public ByteBuffer toBuffer() {
+		BufferBuilder bufferBuilder = new BufferBuilder()
+			.writeByte(version)
+			.writeBitSet(flags, 1);
+
+		if(flags.get(CREATION_ORDER_TRACKED)) {
+			bufferBuilder.writeLong(maximumCreationIndex);
+		}
+
+		bufferBuilder.writeLong(fractalHeapAddress)
+			.writeLong(bTreeNameIndexAddress);
+
+		if(flags.get(CREATION_ORDER_INDEXED)) {
+			bufferBuilder.writeLong(bTreeCreationOrderIndexAddress);
+		}
+		return bufferBuilder.build();
+	}
+
+	private LinkInfoMessage() {
+		super(new BitSet(1));
+		this.flags = new BitSet(1);
+		this.version  = 0;
+		this.maximumCreationIndex = Constants.UNDEFINED_ADDRESS;
+		this.fractalHeapAddress = Constants.UNDEFINED_ADDRESS;
+		this.bTreeNameIndexAddress = Constants.UNDEFINED_ADDRESS;
+		this.bTreeCreationOrderIndexAddress = Constants.UNDEFINED_ADDRESS;
+	}
+
+	public static LinkInfoMessage createBasic() {
+		return new LinkInfoMessage();
 	}
 }

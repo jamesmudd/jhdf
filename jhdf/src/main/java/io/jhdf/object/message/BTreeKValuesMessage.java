@@ -29,6 +29,8 @@ import java.util.BitSet;
  */
 public class BTreeKValuesMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 19;
+
 	private final short indexedStorageInternalNodeK;
 	private final short groupInternalNodeK;
 	private final short groupLeafNodeK;
@@ -57,5 +59,11 @@ public class BTreeKValuesMessage extends Message {
 	public short getGroupLeafNodeK() {
 		return groupLeafNodeK;
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
 
 }

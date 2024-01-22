@@ -29,6 +29,8 @@ import java.util.BitSet;
  */
 public class FillValueOldMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 4;
+
 	private final ByteBuffer fillValue;
 
 	/* package */ FillValueOldMessage(ByteBuffer bb, BitSet flags) {
@@ -47,5 +49,11 @@ public class FillValueOldMessage extends Message {
 	public ByteBuffer getFillValue() {
 		return fillValue.asReadOnlyBuffer();
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
 
 }

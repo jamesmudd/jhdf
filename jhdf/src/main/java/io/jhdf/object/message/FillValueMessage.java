@@ -30,6 +30,8 @@ import java.util.BitSet;
  */
 public class FillValueMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 5;
+
 	private static final int FILL_VALUE_DEFINED_BIT = 5;
 
 	private final int spaceAllocationTime;
@@ -91,4 +93,11 @@ public class FillValueMessage extends Message {
 	public ByteBuffer getFillValue() {
 		return fillValue.asReadOnlyBuffer();
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
+
 }

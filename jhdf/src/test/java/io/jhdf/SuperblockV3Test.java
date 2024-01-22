@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -44,7 +45,7 @@ class SuperblockV3Test {
 	}
 
 	@Test
-	void testExtractV0SuperblockFromFile() throws IOException {
+	void testExtractV2V3SuperblockFromFile() throws IOException {
 		Superblock sb = Superblock.readSuperblock(fc, 0);
 		// Test version independent methods
 		assertThat(sb.getVersionOfSuperblock(), is(equalTo(3)));
@@ -72,5 +73,19 @@ class SuperblockV3Test {
 	@Test
 	void testReadSuperblockThrowsWhenGivenInvalidOffset() {
 		assertThrows(HdfException.class, () -> Superblock.readSuperblock(fc, 5));
+	}
+
+	@Test
+	void testReadingAndWritingBackASuperblock() throws IOException {
+		long startPos = fc.position();
+		Superblock sb = Superblock.readSuperblock(fc, 0);
+
+		ByteBuffer buffer = ((Superblock.SuperblockV2V3) sb).toBuffer(sb.getEndOfFileAddress());
+
+		ByteBuffer originalSuperblockBuffer = ByteBuffer.allocate(buffer.capacity());
+		fc.position(startPos);
+		fc.read(originalSuperblockBuffer);
+
+		assertThat(buffer.array(), is(originalSuperblockBuffer.array()));
 	}
 }

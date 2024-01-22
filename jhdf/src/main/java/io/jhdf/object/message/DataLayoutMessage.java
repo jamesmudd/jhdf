@@ -21,6 +21,8 @@ import java.util.BitSet;
 
 public abstract class DataLayoutMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 8;
+
 	public DataLayoutMessage(BitSet flags) {
 		super(flags);
 	}
@@ -125,6 +127,11 @@ public abstract class DataLayoutMessage extends Message {
 		public ByteBuffer getDataBuffer() {
 			return dataBuffer.slice();
 		}
+
+		@Override
+		public ByteBuffer toBuffer() {
+			return null;
+		}
 	}
 
 	public static class ContiguousDataLayoutMessage extends DataLayoutMessage {
@@ -158,6 +165,11 @@ public abstract class DataLayoutMessage extends Message {
 		 */
 		public long getSize() {
 			return size;
+		}
+
+		@Override
+		public ByteBuffer toBuffer() {
+			return null;
 		}
 	}
 
@@ -200,6 +212,11 @@ public abstract class DataLayoutMessage extends Message {
 
 		public int[] getChunkDimensions() {
 			return ArrayUtils.clone(chunkDimensions);
+		}
+
+		@Override
+		public ByteBuffer toBuffer() {
+			return null;
 		}
 	}
 
@@ -343,6 +360,17 @@ public abstract class DataLayoutMessage extends Message {
 		public boolean isFilteredSingleChunk() {
 			return isFilteredSingleChunk;
 		}
+
+		@Override
+		public ByteBuffer toBuffer() {
+			return null;
+		}
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
 
 }

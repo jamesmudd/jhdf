@@ -9,7 +9,6 @@
  */
 package io.jhdf.examples;
 
-import io.jhdf.TestUtils;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -40,7 +39,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.jhdf.TestUtils.flatten;
-import static io.jhdf.TestUtils.getDimensions;
+import static io.jhdf.Utils.getDimensions;
 import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;

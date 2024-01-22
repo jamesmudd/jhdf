@@ -32,6 +32,8 @@ import java.util.BitSet;
  */
 public class ObjectModificationTimeMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 18;
+
 	private final long unixEpocSecond;
 
 	/* package */ ObjectModificationTimeMessage(ByteBuffer bb, BitSet flags) {
@@ -56,5 +58,11 @@ public class ObjectModificationTimeMessage extends Message {
 	public long getUnixEpocSecond() {
 		return unixEpocSecond;
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
 
 }

@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static io.jhdf.TestUtils.flatten;
-import static io.jhdf.TestUtils.getDimensions;
+import static io.jhdf.Utils.getDimensions;
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.lang3.ArrayUtils.toObject;

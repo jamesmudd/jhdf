@@ -72,6 +72,27 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		exponentBias = bb.getInt();
 	}
 
+	public FloatingPoint(int bitPrecision) {
+		// TODO Arg validation
+		super(1, bitPrecision * 8);
+		this.order = ByteOrder.nativeOrder();
+		this.bitPrecision = (short) bitPrecision;
+		this.lowPadding = false;
+		this.highPadding = false;
+		this.internalPadding = false;
+
+
+		// TODO check these
+		this.bitOffset = 0; // TODO ok?
+		this.exponentLocation = 0;
+		this.exponentSize = 0;
+		this.mantissaLocation = 0;
+		this.mantissaSize = 0;
+		this.mantissaNormalization = 0;
+		this.exponentBias = 0;
+		this.signLocation = 0;
+	}
+
 	@Override
 	public ByteOrder getByteOrder() {
 		return order;

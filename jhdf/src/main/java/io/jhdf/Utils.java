@@ -11,13 +11,16 @@ package io.jhdf;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.List;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
@@ -373,5 +376,26 @@ public final class Utils {
 		final int byteIndex = bit / 8;
 		final int bitInByte = bit % 8;
 		return ((bytes[byteIndex]  >> bitInByte) & 1) == 1;
+	}
+
+	public static int[] getDimensions(Object data) {
+		List<Integer> dims = new ArrayList<>();
+		int dimLength = Array.getLength(data);
+		dims.add(dimLength);
+
+		while (dimLength > 0 && Array.get(data, 0).getClass().isArray()) {
+			data = Array.get(data, 0);
+			dims.add(Array.getLength(data));
+		}
+		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
+	}
+
+	public static Class<?> getArrayType(Object array) {
+		Object element = Array.get(array, 0);
+		if (element.getClass().isArray()) {
+			return getArrayType(element);
+		} else {
+			return array.getClass().getComponentType();
+		}
 	}
 }

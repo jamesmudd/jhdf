@@ -237,6 +237,10 @@ public class HdfFile implements Group, AutoCloseable {
 		return offset * 2;
 	}
 
+	public static WritableHdfFile write(Path path) {
+		return new WritableHdfFile(path);
+	}
+
 	/**
 	 * Gets the size of the user block of this file.
 	 *

@@ -440,6 +440,16 @@ public abstract class Superblock {
 
 		private LazyInitializer<ObjectHeader> superblockExtension;
 
+		public SuperblockV2V3() {
+			versionOfSuperblock = 2;
+			sizeOfOffsets = 8;
+			sizeOfLengths = 8;
+			baseAddressByte = 0;
+			superblockExtensionAddress = Constants.UNDEFINED_ADDRESS;
+			endOfFileAddress = 500; // TODO
+			rootGroupObjectHeaderAddress = 48;
+		}
+
 		private SuperblockV2V3(FileChannel fc, final long address) {
 			try {
 
@@ -549,6 +559,16 @@ public abstract class Superblock {
 			return ObjectHeader.lazyReadObjectHeader(hdfFileChannel, superblockExtensionAddress);
 		}
 
+		public SuperblockV2V3(long baseAddressByte, long rootGroupObjectHeaderAddress) {
+			this.versionOfSuperblock = 3;
+			this.sizeOfOffsets = 8;
+			this.sizeOfLengths = 8;
+			this.baseAddressByte = baseAddressByte;
+			this.rootGroupObjectHeaderAddress = rootGroupObjectHeaderAddress;
+			this.superblockExtensionAddress = Constants.UNDEFINED_ADDRESS;
+			this.endOfFileAddress = Constants.UNDEFINED_ADDRESS;
+		}
+
 		/**
 		 * @return the versionOfSuperblock
 		 */
@@ -610,6 +630,23 @@ public abstract class Superblock {
 		 */
 		public long getRootGroupObjectHeaderAddress() {
 			return rootGroupObjectHeaderAddress;
+		}
+
+		public ByteBuffer toBuffer(long endOfFileAddress) {
+
+			BufferBuilder bufferBuilder = new BufferBuilder()
+					.writeBytes(HDF5_FILE_SIGNATURE)
+					.writeByte(versionOfSuperblock)
+					.writeByte(sizeOfOffsets)
+					.writeByte(sizeOfLengths)
+					.writeByte(0) // file consistency flags
+					.writeLong(baseAddressByte)
+					.writeLong(superblockExtensionAddress)
+					.writeLong(endOfFileAddress)
+					.writeLong(rootGroupObjectHeaderAddress)
+					.appendChecksum();
+
+			return bufferBuilder.build();
 		}
 	}
 }

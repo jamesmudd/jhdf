@@ -29,6 +29,8 @@ import java.util.BitSet;
  */
 public class ObjectCommentMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 13;
+
 	private final String comment;
 
 	/* package */ ObjectCommentMessage(ByteBuffer bb, BitSet flags) {
@@ -40,5 +42,11 @@ public class ObjectCommentMessage extends Message {
 	public String getComment() {
 		return comment;
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
 
 }

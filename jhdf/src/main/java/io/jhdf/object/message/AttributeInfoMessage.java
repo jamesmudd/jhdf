@@ -31,6 +31,8 @@ import java.util.BitSet;
  */
 public class AttributeInfoMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 21;
+
 	private static final int MAXIMUM_CREATION_INDEX_PRESENT = 0;
 	private static final int ATTRIBUTE_CREATION_ORDER_PRESENT = 1;
 
@@ -81,5 +83,11 @@ public class AttributeInfoMessage extends Message {
 	public long getAttributeCreationOrderBTreeAddress() {
 		return attributeCreationOrderBTreeAddress;
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
 
 }
