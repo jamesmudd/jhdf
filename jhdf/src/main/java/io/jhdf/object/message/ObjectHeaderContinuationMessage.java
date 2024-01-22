@@ -55,8 +55,5 @@ public class ObjectHeaderContinuationMessage extends Message {
 		return MESSAGE_TYPE;
 	}
 
-	@Override
-	public ByteBuffer toBuffer() {
-		return null;
-	}
+
 }

@@ -372,8 +372,5 @@ public abstract class DataLayoutMessage extends Message {
 		return MESSAGE_TYPE;
 	}
 
-	@Override
-	public ByteBuffer toBuffer() {
-		return null;
-	}
+
 }

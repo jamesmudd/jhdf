@@ -99,8 +99,5 @@ public class FillValueMessage extends Message {
 		return MESSAGE_TYPE;
 	}
 
-	@Override
-	public ByteBuffer toBuffer() {
-		return null;
-	}
+
 }

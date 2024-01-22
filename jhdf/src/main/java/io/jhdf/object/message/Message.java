@@ -35,7 +35,7 @@ public abstract class Message {
 
 	private final BitSet flags;
 
-	public Message(BitSet flags) {
+	Message(BitSet flags) {
 		this.flags = flags;
 	}
 
@@ -177,6 +177,8 @@ public abstract class Message {
 		return Arrays.copyOf(flags.toByteArray(), 1);
 	}
 
-	public abstract ByteBuffer toBuffer();
+	public ByteBuffer toBuffer() {
+		throw new UnsupportedHdfException("Writing of message is not supported");
+	}
 
 }

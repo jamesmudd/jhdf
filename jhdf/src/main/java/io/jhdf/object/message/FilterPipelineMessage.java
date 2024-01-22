@@ -145,8 +145,5 @@ public class FilterPipelineMessage extends Message {
 		return MESSAGE_TYPE;
 	}
 
-	@Override
-	public ByteBuffer toBuffer() {
-		return null;
-	}
+
 }

@@ -73,8 +73,5 @@ public class OldObjectModificationTimeMessage extends Message {
 		return MESSAGE_TYPE;
 	}
 
-	@Override
-	public ByteBuffer toBuffer() {
-		return null;
-	}
+
 }
