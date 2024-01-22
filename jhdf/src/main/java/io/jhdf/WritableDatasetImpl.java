@@ -16,10 +16,15 @@ import io.jhdf.api.WritiableDataset;
 import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataLayout;
+import io.jhdf.object.message.DataLayoutMessage;
+import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
+import io.jhdf.object.message.DataTypeMessage;
+import io.jhdf.object.message.Message;
 import io.jhdf.storage.HdfFileChannel;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -161,7 +166,17 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 	@Override
 	public long write(HdfFileChannel hdfFileChannel, long position) {
+		List<Message> messages = new ArrayList<>();
+		messages.add(DataTypeMessage.create(this.dataType));
+
+		ContiguousDataLayoutMessage layoutMessage = ContiguousDataLayoutMessage.create(1L, 1L);
+
+		ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
+		hdfFileChannel.write(objectHeader.toBuffer(), position);
+
 		return 0;
+
+
 //		throw new UnsupportedOperationException();
 	}
 }

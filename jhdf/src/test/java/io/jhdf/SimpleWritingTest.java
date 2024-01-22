@@ -10,6 +10,7 @@
 
 package io.jhdf;
 
+import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
 import io.jhdf.api.WritableGroup;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,26 @@ class SimpleWritingTest {
 		Map<String, Node> children = hdfFile.getChildren();
 
 		assertThat(children).containsKeys("testGroup", "testGroup2", "testGroup3");
+
+		// Cleanup
+		Files.delete(tempFile);
+	}	@Test
+
+	void writeSimpleFileWithDataset() throws Exception {
+		Path tempFile = Files.createTempFile(null, ".hdf5");
+		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
+		WritableGroup testGroup = writableHdfFile.putGroup("testGroup");
+		int[] data = new int[]{-5, -4, -3, -2, -1, 0, 1,2,3,4,5 };
+		testGroup.putDataset("myData", data);
+
+		writableHdfFile.close();
+
+		// Now read it back
+		HdfFile hdfFile = new HdfFile(tempFile);
+		Map<String, Node> children = hdfFile.getChildren();
+		assertThat(children).containsKeys("testGroup");
+
+		Dataset dataset = hdfFile.getDatasetByPath("/testGroup/myData");
 
 		// Cleanup
 		Files.delete(tempFile);

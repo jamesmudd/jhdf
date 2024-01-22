@@ -32,8 +32,13 @@ public abstract class Message {
 	private static final int OBJECT_MODIFIED_WITHOUT_UNDERSTANDING_MESSAGE = 5;
 	private static final int MESSAGE_CAN_BE_SHARED = 6;
 	private static final int ALWAYS_FAIL_ON_UNKNOWN_MESSAGE_TYPE = 7;
+	public static final BitSet BASIC_FLAGS = new BitSet(1);
 
 	private final BitSet flags;
+
+	Message() {
+		this.flags = BASIC_FLAGS;
+	}
 
 	Message(BitSet flags) {
 		this.flags = flags;
@@ -178,7 +183,7 @@ public abstract class Message {
 	}
 
 	public ByteBuffer toBuffer() {
-		throw new UnsupportedHdfException("Writing of message is not supported");
+		throw new UnsupportedHdfException("Writing of message [" + getClass().getSimpleName() + "] is not supported");
 	}
 
 }

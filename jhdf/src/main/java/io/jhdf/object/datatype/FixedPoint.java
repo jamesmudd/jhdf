@@ -9,6 +9,8 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.BufferBuilder;
+import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.storage.HdfBackingStorage;
 
@@ -23,7 +25,7 @@ import java.util.BitSet;
 
 import static io.jhdf.Utils.stripLeadingIndex;
 
-public class FixedPoint extends DataType implements OrderedDataType {
+public class FixedPoint extends DataType implements OrderedDataType, WritableDataType {
 	private final ByteOrder order;
 	private final boolean lowPadding;
 	private final boolean highPadding;
@@ -273,5 +275,15 @@ public class FixedPoint extends DataType implements OrderedDataType {
 				bigIntData[i] = new BigInteger(1, tempByteBuffer.array());
 			}
 		}
+	}
+
+	@Override
+	public ByteBuffer toBuffer() {
+		return  new BufferBuilder()
+			.writeByte(super.getVersion())
+			.writeBitSet(super.classBits, 1) // TODO wrong?
+			.writeShort(bitOffset)
+			.writeShort(bitPrecision)
+			.build();
 	}
 }

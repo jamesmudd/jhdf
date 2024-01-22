@@ -151,6 +151,10 @@ public abstract class DataLayoutMessage extends Message {
 			size = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 		}
 
+		public static ContiguousDataLayoutMessage create(long address, long size) {
+			return new ContiguousDataLayoutMessage(Message.BASIC_FLAGS, address, size);
+		}
+
 		@Override
 		public DataLayout getDataLayout() {
 			return DataLayout.CONTIGUOUS;
