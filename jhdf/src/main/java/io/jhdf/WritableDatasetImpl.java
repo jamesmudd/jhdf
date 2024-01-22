@@ -10,7 +10,6 @@
 
 package io.jhdf;
 
-import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.WritiableDataset;
@@ -23,22 +22,16 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-public class WritableDatasetImpl implements WritiableDataset {
+public class WritableDatasetImpl extends AbstractWritableNode implements WritiableDataset {
 
 	private final Object data;
-	private final String name;
-
 	private final DataType dataType;
 
-	private final Group parent;
-
 	public WritableDatasetImpl(Object data, String name, Group parent) {
+		super(parent, name);
 		this.data = data;
-		this.name = name;
 		this.dataType = DataType.fromObject(data);
-		this.parent = parent;
 	}
 
 	@Override
@@ -123,32 +116,7 @@ public class WritableDatasetImpl implements WritiableDataset {
 
 	@Override
 	public List<PipelineFilterWithData> getFilters() {
-		return null; // TODO empty list
-	}
-
-	@Override
-	public Group getParent() {
-		return parent;
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public String getPath() {
-		return parent.getPath(); // TODO add name?;
-	}
-
-	@Override
-	public Map<String, Attribute> getAttributes() {
-		return Collections.emptyMap();
-	}
-
-	@Override
-	public Attribute getAttribute(String name) {
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override

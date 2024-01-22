@@ -10,7 +10,6 @@
 
 package io.jhdf;
 
-import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
@@ -27,30 +26,23 @@ import io.jhdf.storage.HdfFileChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.nio.ByteBuffer;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class WritableGroupImpl implements WritableGroup {
+public class WritableGroupImpl extends AbstractWritableNode implements WritableGroup {
 
 	private static final Logger logger = LoggerFactory.getLogger(WritableGroupImpl.class);
 
 	private final Map<String, WritableNode> children = new ConcurrentHashMap<>();
 
-	private final Group parent;
-	private final String name; // TODO Node superclass
-
 	public WritableGroupImpl(Group parent, String name) {
-		this.parent = parent;
-		this.name = name;
+		super(parent, name);
 	}
 
 	@Override
@@ -79,35 +71,6 @@ public class WritableGroupImpl implements WritableGroup {
 	}
 
 	@Override
-	public Group getParent() {
-		return parent;
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public String getPath() {
-		if (parent == null) {
-			return "/" + getName();
-		} else {
-			return parent.getPath() + "/" + getName();
-		}
-	}
-
-	@Override
-	public Map<String, Attribute> getAttributes() {
-		return Collections.emptyMap();
-	}
-
-	@Override
-	public Attribute getAttribute(String name) {
-		return null;
-	}
-
-	@Override
 	public NodeType getType() {
 		return NodeType.GROUP;
 	}
@@ -115,21 +78,6 @@ public class WritableGroupImpl implements WritableGroup {
 	@Override
 	public boolean isGroup() {
 		return true;
-	}
-
-	@Override
-	public File getFile() {
-		return null;
-	}
-
-	@Override
-	public Path getFileAsPath() {
-		return null;
-	}
-
-	@Override
-	public HdfFile getHdfFile() {
-		return null;
 	}
 
 	@Override
@@ -178,11 +126,9 @@ public class WritableGroupImpl implements WritableGroup {
 		LinkInfoMessage linkInfoMessage = LinkInfoMessage.createBasic();
 		messages.add(linkInfoMessage);
 
-		Map<String, Long> childAddresses = new HashMap<>();
 		for (Map.Entry<String, WritableNode> child : children.entrySet()) {
 			LinkMessage linkMessage = LinkMessage.create(child.getKey(), 0L);
 			messages.add(linkMessage);
-			childAddresses.put(child.getKey(), 0L);
 		}
 
 		ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
