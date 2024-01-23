@@ -167,8 +167,8 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 	public long write(HdfFileChannel hdfFileChannel, long position) {
 		List<Message> messages = new ArrayList<>();
 		messages.add(DataTypeMessage.create(this.dataType));
-
-		ContiguousDataLayoutMessage layoutMessage = ContiguousDataLayoutMessage.create(1L, 1L);
+		// TODO figure out where to write to
+		messages.add(ContiguousDataLayoutMessage.create(2423L, 987L));
 
 		ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
 		int written = hdfFileChannel.write(objectHeader.toBuffer(), position);
