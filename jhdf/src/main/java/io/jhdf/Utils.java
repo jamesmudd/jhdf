@@ -398,4 +398,17 @@ public final class Utils {
 			return array.getClass().getComponentType();
 		}
 	}
+
+	public static void writeIntToBits(int value, BitSet bits, int start, int length) {
+		if(value < 0) {
+			throw new IllegalArgumentException("Value cannot be negative");
+		}
+		BigInteger bi = BigInteger.valueOf(value);
+		if(bi.bitLength() > length) {
+			throw new IllegalArgumentException("Value [" + value + "] to high to convert to bits");
+		}
+		for (int i = 0; i < length; i++) {
+			bits.set(start + i, bi.testBit(i));
+		}
+	}
 }
