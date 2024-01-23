@@ -9,13 +9,13 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.BufferBuilder;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.BitSet;
 
 public abstract class DataType {
@@ -25,11 +25,11 @@ public abstract class DataType {
 	private final int size; // In bytes
 	protected final BitSet classBits;
 
-	public DataType(int dataClass, int size) {
+	protected DataType(int dataClass, int size) {
 		this.version = 0;
 		this.dataClass = dataClass;
 		this.size = size;
-		this.classBits = new BitSet(8); // TODO check size
+		this.classBits = new BitSet(24);
 	}
 
 	public static DataType readDataType(ByteBuffer bb) {
@@ -141,4 +141,14 @@ public abstract class DataType {
 	 */
 	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage);
 
+	protected BufferBuilder toBufferBuilder() {
+		BitSet classAndVersion = new BitSet(8);
+		Utils.writeIntToBits(dataClass, classAndVersion, 0, 4);
+		Utils.writeIntToBits(version, classAndVersion, 4, 4);
+
+		return new BufferBuilder()
+			.writeBitSet(classAndVersion,1)
+			.writeBitSet(classBits, 3)
+			.writeInt(getSize());
+	}
 }

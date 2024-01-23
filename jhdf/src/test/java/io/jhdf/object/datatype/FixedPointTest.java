@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.Utils;
 import io.jhdf.object.message.DataTypeMessage;
 import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
@@ -23,6 +24,7 @@ import org.mockito.Mockito;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.BitSet;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
