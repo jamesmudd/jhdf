@@ -16,7 +16,6 @@ import io.jhdf.api.WritiableDataset;
 import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataLayout;
-import io.jhdf.object.message.DataLayoutMessage;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
 import io.jhdf.object.message.DataTypeMessage;
 import io.jhdf.object.message.Message;
@@ -172,11 +171,9 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 		ContiguousDataLayoutMessage layoutMessage = ContiguousDataLayoutMessage.create(1L, 1L);
 
 		ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
-		hdfFileChannel.write(objectHeader.toBuffer(), position);
+		int written = hdfFileChannel.write(objectHeader.toBuffer(), position);
 
-		return 0;
+		return position + written;
 
-
-//		throw new UnsupportedOperationException();
 	}
 }

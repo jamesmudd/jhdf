@@ -43,6 +43,8 @@ public class DataTypeMessage extends Message {
 		return MESSAGE_TYPE;
 	}
 
-
-
+	@Override
+	public ByteBuffer toBuffer() {
+		return dataType.toBuffer();
+	}
 }

@@ -24,6 +24,7 @@ import static io.jhdf.Utils.stripLeadingIndex;
 
 public class FixedPoint extends DataType implements OrderedDataType, WritableDataType {
 
+	public static final int CLASS_ID = 0;
 	private static final int ORDER_BIT = 0;
 	private static final int LOW_PADDING_BIT = 1;
 	private static final int HIGH_PADDING_BIT = 2;
@@ -54,7 +55,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 
 	public FixedPoint(int bitPrecision) {
 		// TODO arg validation
-		super(1, bitPrecision * 8);
+		super(CLASS_ID, bitPrecision * 8);
 		this.order = ByteOrder.nativeOrder();
 		this.bitPrecision = (short) bitPrecision;
 		this.lowPadding = false;

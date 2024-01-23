@@ -26,7 +26,7 @@ public abstract class DataType {
 	protected final BitSet classBits;
 
 	protected DataType(int dataClass, int size) {
-		this.version = 0;
+		this.version = 1;
 		this.dataClass = dataClass;
 		this.size = size;
 		this.classBits = new BitSet(24);
@@ -49,7 +49,7 @@ public abstract class DataType {
 		bb.reset();
 
 		switch (dataClass) {
-			case 0: // Fixed point
+			case FixedPoint.CLASS_ID: // Fixed point
 				return new FixedPoint(bb);
 			case 1: // Floating point
 				return new FloatingPoint(bb);
@@ -140,6 +140,11 @@ public abstract class DataType {
 	 * @return the read data
 	 */
 	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage);
+
+	// TODO could be abstract when there are more impls
+	public ByteBuffer toBuffer() {
+		throw new UnsupportedHdfException("Data type [" + getClass().getSimpleName() + "] does not support writing");
+	}
 
 	protected BufferBuilder toBufferBuilder() {
 		BitSet classAndVersion = new BitSet(8);
