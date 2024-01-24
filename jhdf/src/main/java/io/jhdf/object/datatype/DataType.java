@@ -96,9 +96,9 @@ public abstract class DataType {
 		if (data.getClass().isArray()) {
 			Class<?> type = Utils.getArrayType(data);
 			if (type.equals(int.class)) {
-				return new FixedPoint((short) 32);
+				return new FixedPoint(4);
 			} else if (type.equals(double.class)) {
-				return new FloatingPoint(64);
+				return new FloatingPoint(8);
 			}
 			throw new HdfException("Error");
 

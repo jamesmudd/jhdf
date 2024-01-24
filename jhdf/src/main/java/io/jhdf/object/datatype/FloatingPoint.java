@@ -74,7 +74,7 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 
 	public FloatingPoint(int bitPrecision) {
 		// TODO Arg validation
-		super(1, bitPrecision * 8);
+		super(1, bitPrecision / 8);
 		this.order = ByteOrder.nativeOrder();
 		this.bitPrecision = (short) bitPrecision;
 		this.lowPadding = false;

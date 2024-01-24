@@ -59,6 +59,9 @@ class SimpleWritingTest {
 		int[] data = new int[]{-5, -4, -3, -2, -1, 0, 1,2,3,4,5 };
 		testGroup.putDataset("myData", data);
 
+		int[] data2 = new int[]{-500, -412, -399, -211, -54, 7, 23, 222, 34245, 412, 5656575 };
+		writableHdfFile.putDataset("myData2", data2);
+
 		writableHdfFile.close();
 
 		// Now read it back
@@ -67,6 +70,12 @@ class SimpleWritingTest {
 		assertThat(children).containsKeys("testGroup");
 
 		Dataset dataset = hdfFile.getDatasetByPath("/testGroup/myData");
+		Object dataReadBack = dataset.getData();
+		assertThat(dataReadBack).isEqualTo(data);
+
+		Dataset datasetMyData2 = hdfFile.getDatasetByPath("/myData2");
+		Object data2ReadBack = datasetMyData2.getData();
+		assertThat(data2ReadBack).isEqualTo(data2);
 
 		// Cleanup
 		Files.delete(tempFile);

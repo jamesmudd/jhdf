@@ -27,7 +27,6 @@ public class DataSpace {
 	private final int[] dimensions;
 	private final long[] maxSizes;
 	private final byte type; // TODO enum SCALAR SIMPLE NULL
-	private final long totalLength;
 
 	private DataSpace(ByteBuffer bb, Superblock sb) {
 
@@ -68,16 +67,6 @@ public class DataSpace {
 			maxSizes = ArrayUtils.EMPTY_LONG_ARRAY;
 		}
 
-		// If type == 2 then it's an empty dataset and totalLength should be 0
-		if (type == 2) {
-			totalLength = 0;
-		} else {
-			// Calculate the total length by multiplying all dimensions
-			totalLength = IntStream.of(dimensions)
-				.mapToLong(Long::valueOf) // Convert to long to avoid int overflow
-				.reduce(1, Math::multiplyExact);
-		}
-
 		// Permutation indices - Note never implemented in HDF library!
 	}
 
@@ -87,7 +76,6 @@ public class DataSpace {
 		this.dimensions = dimensions;
 		this.maxSizes = maxSizes;
 		this.type = type;
-		this.totalLength = totalLength;
 	}
 
 	public static DataSpace readDataSpace(ByteBuffer bb, Superblock sb) {
@@ -109,7 +97,15 @@ public class DataSpace {
 	 * @return the total number of elements in this dataspace
 	 */
 	public long getTotalLength() {
-		return totalLength;
+		// If type == 2 then it's an empty dataset and totalLength should be 0
+		if (type == 2) {
+			return  0;
+		} else {
+			// Calculate the total length by multiplying all dimensions
+			return IntStream.of(dimensions)
+				.mapToLong(Long::valueOf) // Convert to long to avoid int overflow
+				.reduce(1, Math::multiplyExact);
+		}
 	}
 
 	public int getType() {

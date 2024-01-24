@@ -13,6 +13,7 @@ package io.jhdf;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.WritiableDataset;
+import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataLayout;
@@ -24,6 +25,9 @@ import io.jhdf.object.message.Message;
 import io.jhdf.storage.HdfFileChannel;
 
 import java.io.File;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -172,14 +176,41 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 	public long write(HdfFileChannel hdfFileChannel, long position) {
 		List<Message> messages = new ArrayList<>();
 		messages.add(DataTypeMessage.create(this.dataType));
-		// TODO figure out where to write to
-		messages.add(ContiguousDataLayoutMessage.create(2423L, 987L));
 		messages.add(DataSpaceMessage.create(this.dataSpace));
+		// TODO will have know fixed size so don't really need these objects but for now...
+		ContiguousDataLayoutMessage placeholder = ContiguousDataLayoutMessage.create(Constants.UNDEFINED_ADDRESS, Constants.UNDEFINED_ADDRESS);
+		messages.add(placeholder);
 
 		ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
-		int written = hdfFileChannel.write(objectHeader.toBuffer(), position);
+		int ohSize = objectHeader.toBuffer().limit();
 
-		return position + written;
+		// Now know where we will write the data
+		long dataAddress = position + ohSize;
+		long dataSize = writeData(hdfFileChannel, dataAddress);
 
+		// Now switch placeholder for real data layout message
+		messages.add(ContiguousDataLayoutMessage.create(dataAddress, dataSize));
+		messages.remove(placeholder);
+
+		objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
+
+		hdfFileChannel.write(objectHeader.toBuffer(), position);
+
+		return dataAddress + dataSize;
+	}
+
+	private long writeData(HdfFileChannel hdfFileChannel, long dataAddress) {
+		Class<?> arrayType = Utils.getArrayType(this.data);
+		long totalBytes = dataSpace.getTotalLength() * dataType.getSize();
+		ByteBuffer buffer = ByteBuffer.allocate(Math.toIntExact(totalBytes)).order(ByteOrder.LITTLE_ENDIAN);
+//		ByteBuffer mapped = hdfFileChannel.map(dataAddress, totalBytes, FileChannel.MapMode.READ_WRITE);
+		if(arrayType.equals(int.class)) {
+			// TODO handle multi-dimensional
+			buffer.asIntBuffer().put((int[]) data);
+			hdfFileChannel.write(buffer, dataAddress);
+		} else {
+			throw new UnsupportedHdfException("Writing [" + arrayType.getSimpleName() + "] is not supported");
+		}
+		return totalBytes;
 	}
 }

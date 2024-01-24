@@ -50,9 +50,9 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		logger.info("Writing HDF5 file to [{}]", path.toAbsolutePath());
 		this.path = path;
 		try {
-			this.fileChannel = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+			this.fileChannel = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 		} catch (IOException e) {
-			throw new HdfWritingException("Failed to ope file: " + path.toAbsolutePath(), e);
+			throw new HdfWritingException("Failed to open file: " + path.toAbsolutePath(), e);
 		}
 		this.superblock = new Superblock.SuperblockV2V3();
 		this.hdfFileChannel = new HdfFileChannel(this.fileChannel, this.superblock);

@@ -64,15 +64,23 @@ public class HdfFileChannel implements HdfBackingStorage {
 
 	@Override
 	public ByteBuffer map(long address, long length) {
+		return map(address, length, MapMode.READ_ONLY);
+	}
+
+	public ByteBuffer map(long address, long length, MapMode mode) {
 		return mapNoOffset(address + sb.getBaseAddressByte(), length);
 	}
 
 	@Override
 	public ByteBuffer mapNoOffset(long address, long length) {
+		return mapNoOffset(address, length, MapMode.READ_ONLY);
+	}
+
+	public ByteBuffer mapNoOffset(long address, long length, MapMode mode) {
 		try {
 			if (!memoryMappingFailed) {
 				try {
-					return fc.map(MapMode.READ_ONLY, address, length);
+					return fc.map(mode, address, length);
 				} catch (UnsupportedOperationException e) {
 					// many file systems do not support memory mapping
 					memoryMappingFailed = true;
