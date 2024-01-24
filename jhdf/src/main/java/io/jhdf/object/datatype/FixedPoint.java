@@ -55,7 +55,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 
 	public FixedPoint(int bitPrecision) {
 		// TODO arg validation
-		super(CLASS_ID, bitPrecision * 8);
+		super(CLASS_ID, bitPrecision);
 		this.order = ByteOrder.nativeOrder();
 		this.bitPrecision = (short) bitPrecision;
 		this.lowPadding = false;
@@ -114,7 +114,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 				case 64:
 					return BigInteger.class;
 				default:
-					throw new HdfTypeException("Unsupported signed fixed point data type");
+					throw new HdfTypeException("Unsupported unsigned fixed point data type");
 			}
 		}
 	}
