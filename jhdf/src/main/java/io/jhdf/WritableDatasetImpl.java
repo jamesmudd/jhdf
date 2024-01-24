@@ -17,6 +17,8 @@ import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataLayout;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
+import io.jhdf.object.message.DataSpace;
+import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.DataTypeMessage;
 import io.jhdf.object.message.Message;
 import io.jhdf.storage.HdfFileChannel;
@@ -32,10 +34,13 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 	private final Object data;
 	private final DataType dataType;
 
+	private final DataSpace dataSpace;
+
 	public WritableDatasetImpl(Object data, String name, Group parent) {
 		super(parent, name);
 		this.data = data;
 		this.dataType = DataType.fromObject(data);
+		this.dataSpace = DataSpace.fromObject(data);
 	}
 
 	@Override
@@ -169,6 +174,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 		messages.add(DataTypeMessage.create(this.dataType));
 		// TODO figure out where to write to
 		messages.add(ContiguousDataLayoutMessage.create(2423L, 987L));
+		messages.add(DataSpaceMessage.create(this.dataSpace));
 
 		ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
 		int written = hdfFileChannel.write(objectHeader.toBuffer(), position);

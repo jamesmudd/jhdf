@@ -104,12 +104,12 @@ public class BufferBuilder {
 		}
 	}
 
-	public BufferBuilder writeBitSet(BitSet bitSet, int length) {
-		if(bitSet.toByteArray().length > length) {
+	public BufferBuilder writeBitSet(BitSet bitSet, int lengthBytes) {
+		if(bitSet.toByteArray().length > lengthBytes) {
 			throw new IllegalArgumentException("BitSet is longer than length provided");
 		}
 		try {
-			final byte[] bytes = Arrays.copyOf(bitSet.toByteArray(), length); // Ensure empty Bitset are not shortened
+			final byte[] bytes = Arrays.copyOf(bitSet.toByteArray(), lengthBytes); // Ensure empty Bitset are not shortened
 			dataOutputStream.write(bytes);
 			return this;
 		} catch (IOException e) {

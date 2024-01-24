@@ -39,6 +39,14 @@ public class DataSpaceMessage extends Message {
 		dataSpace = DataSpace.readDataSpace(bb, sb);
 	}
 
+	public DataSpaceMessage(DataSpace dataSpace) {
+		this.dataSpace = dataSpace;
+	}
+
+	public static Message create(DataSpace dataSpace) {
+		return new DataSpaceMessage(dataSpace);
+	}
+
 	public DataSpace getDataSpace() {
 		return dataSpace;
 	}
@@ -48,5 +56,8 @@ public class DataSpaceMessage extends Message {
 		return MESSAGE_TYPE;
 	}
 
-
+	@Override
+	public ByteBuffer toBuffer() {
+		return dataSpace.toBuffer();
+	}
 }
