@@ -55,27 +55,37 @@ class SimpleWritingTest {
 	void writeSimpleFileWithDataset() throws Exception {
 		Path tempFile = Files.createTempFile(null, ".hdf5");
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
-		WritableGroup testGroup = writableHdfFile.putGroup("testGroup");
-		int[] data = new int[]{-5, -4, -3, -2, -1, 0, 1,2,3,4,5 };
-		testGroup.putDataset("myData", data);
+		WritableGroup intGroup = writableHdfFile.putGroup("intGroup");
+		int[] intData1 = new int[]{-5, -4, -3, -2, -1, 0, 1,2,3,4,5 };
+		intGroup.putDataset("intData1", intData1);
 
-		int[] data2 = new int[]{-500, -412, -399, -211, -54, 7, 23, 222, 34245, 412, 5656575 };
-		writableHdfFile.putDataset("myData2", data2);
+		int[] intData2 = new int[]{-500, -412, -399, -211, -54, 7, 23, 222, 34245, 412, 5656575 };
+		intGroup.putDataset("intData2", intData2);
+
+		int[][] intData3 = new int[][]{
+			{-500, -412, -399, -211},
+			{-54, 7, 23, -34245},
+			{412, 5656575, 23, 9909}};
+		intGroup.putDataset("intData3", intData3);
 
 		writableHdfFile.close();
 
 		// Now read it back
 		HdfFile hdfFile = new HdfFile(tempFile);
 		Map<String, Node> children = hdfFile.getChildren();
-		assertThat(children).containsKeys("testGroup");
+		assertThat(children).containsKeys("intGroup");
 
-		Dataset dataset = hdfFile.getDatasetByPath("/testGroup/myData");
-		Object dataReadBack = dataset.getData();
-		assertThat(dataReadBack).isEqualTo(data);
+		Dataset intData1Dataset = hdfFile.getDatasetByPath("/intGroup/intData1");
+		Object intData1ReadBack = intData1Dataset.getData();
+		assertThat(intData1ReadBack).isEqualTo(intData1);
 
-		Dataset datasetMyData2 = hdfFile.getDatasetByPath("/myData2");
-		Object data2ReadBack = datasetMyData2.getData();
-		assertThat(data2ReadBack).isEqualTo(data2);
+		Dataset intData2Dataset = hdfFile.getDatasetByPath("intGroup/intData2");
+		Object intData2ReadBack = intData2Dataset.getData();
+		assertThat(intData2ReadBack).isEqualTo(intData2);
+
+		Dataset intData3Dataset = hdfFile.getDatasetByPath("intGroup/intData3");
+		Object intData3Data = intData3Dataset.getData();
+		assertThat(intData3Data).isEqualTo(intData3);
 
 		// Cleanup
 		Files.delete(tempFile);

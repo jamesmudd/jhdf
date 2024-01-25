@@ -25,13 +25,17 @@ import io.jhdf.object.message.Message;
 import io.jhdf.storage.HdfFileChannel;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static io.jhdf.Utils.stripLeadingIndex;
 
 public class WritableDatasetImpl extends AbstractWritableNode implements WritiableDataset {
 
@@ -202,15 +206,34 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 	private long writeData(HdfFileChannel hdfFileChannel, long dataAddress) {
 		Class<?> arrayType = Utils.getArrayType(this.data);
 		long totalBytes = dataSpace.getTotalLength() * dataType.getSize();
-		ByteBuffer buffer = ByteBuffer.allocate(Math.toIntExact(totalBytes)).order(ByteOrder.LITTLE_ENDIAN);
-//		ByteBuffer mapped = hdfFileChannel.map(dataAddress, totalBytes, FileChannel.MapMode.READ_WRITE);
+
+		int[] dimensions = dataSpace.getDimensions();
+		int fastDimSize = dimensions[dimensions.length - 1];
+		ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * dataType.getSize()).order(ByteOrder.LITTLE_ENDIAN);
+
+		// TODO move out into data types?
 		if(arrayType.equals(int.class)) {
+//			writeData(data, dimensions, buffer.asIntBuffer());
 			// TODO handle multi-dimensional
-			buffer.asIntBuffer().put((int[]) data);
-			hdfFileChannel.write(buffer, dataAddress);
+//			buffer.asIntBuffer().put((int[]) data);
+			hdfFileChannel.position(dataAddress);
+			writeData(data, dimensions, buffer, hdfFileChannel);
 		} else {
 			throw new UnsupportedHdfException("Writing [" + arrayType.getSimpleName() + "] is not supported");
 		}
 		return totalBytes;
+	}
+
+	private static void writeData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
+			}
+		} else {
+			buffer.asIntBuffer().put((int[]) data);
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
 	}
 }

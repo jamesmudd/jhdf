@@ -166,4 +166,20 @@ public class HdfFileChannel implements HdfBackingStorage {
 			throw new HdfWritingException("Exception writing at position: " + position, e);
 		}
 	}
+	public int write(ByteBuffer buffer) {
+		// TODO check if writable
+		try {
+			return fc.write(buffer);
+		} catch (IOException e) {
+			throw new HdfWritingException("Exception writing", e);
+		}
+	}
+
+	public void position(long dataAddress) {
+		try {
+			fc.position(dataAddress);
+		} catch (IOException e) {
+			throw new HdfWritingException("Exception writing", e);
+		}
+	}
 }
