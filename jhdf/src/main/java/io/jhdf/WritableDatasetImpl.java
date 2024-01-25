@@ -209,29 +209,40 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 		int[] dimensions = dataSpace.getDimensions();
 		int fastDimSize = dimensions[dimensions.length - 1];
-		ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * dataType.getSize()).order(ByteOrder.LITTLE_ENDIAN);
+		ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * dataType.getSize()).order(ByteOrder.nativeOrder());
+		hdfFileChannel.position(dataAddress);
 
 		// TODO move out into data types?
 		if(arrayType.equals(int.class)) {
-//			writeData(data, dimensions, buffer.asIntBuffer());
-			// TODO handle multi-dimensional
-//			buffer.asIntBuffer().put((int[]) data);
-			hdfFileChannel.position(dataAddress);
-			writeData(data, dimensions, buffer, hdfFileChannel);
+			writeIntData(data, dimensions, buffer, hdfFileChannel);
+		} else if (arrayType.equals(double.class)) {
+			writeDoubleData(data, dimensions, buffer, hdfFileChannel);
 		} else {
 			throw new UnsupportedHdfException("Writing [" + arrayType.getSimpleName() + "] is not supported");
 		}
 		return totalBytes;
 	}
 
-	private static void writeData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
+	private static void writeIntData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				writeData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
+				writeIntData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
 			}
 		} else {
 			buffer.asIntBuffer().put((int[]) data);
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
+	}
+	private static void writeDoubleData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeDoubleData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
+			}
+		} else {
+			buffer.asDoubleBuffer().put((double[]) data);
 			hdfFileChannel.write(buffer);
 			buffer.clear();
 		}

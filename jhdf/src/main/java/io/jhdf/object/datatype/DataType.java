@@ -48,10 +48,11 @@ public abstract class DataType {
 		// Move the buffer back to the start of the data type message
 		bb.reset();
 
+		// TODO all class IDs
 		switch (dataClass) {
 			case FixedPoint.CLASS_ID: // Fixed point
 				return new FixedPoint(bb);
-			case 1: // Floating point
+			case FloatingPoint.CLASS_ID: // Floating point
 				return new FloatingPoint(bb);
 			case 2: // Time
 				throw new UnsupportedHdfException("Time data type is not yet supported");
@@ -98,7 +99,7 @@ public abstract class DataType {
 			if (type.equals(int.class)) {
 				return new FixedPoint(4);
 			} else if (type.equals(double.class)) {
-				return new FloatingPoint(8);
+				return FloatingPoint.DOUBLE;
 			}
 			throw new HdfException("Error");
 

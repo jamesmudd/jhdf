@@ -50,11 +50,13 @@ class SimpleWritingTest {
 
 		// Cleanup
 		Files.delete(tempFile);
-	}	@Test
+	}
 
-	void writeSimpleFileWithDataset() throws Exception {
+	@Test
+	void writeSimpleFileWithDatasets() throws Exception {
 		Path tempFile = Files.createTempFile(null, ".hdf5");
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
+
 		WritableGroup intGroup = writableHdfFile.putGroup("intGroup");
 		int[] intData1 = new int[]{-5, -4, -3, -2, -1, 0, 1,2,3,4,5 };
 		intGroup.putDataset("intData1", intData1);
@@ -68,6 +70,20 @@ class SimpleWritingTest {
 			{412, 5656575, 23, 9909}};
 		intGroup.putDataset("intData3", intData3);
 
+		WritableGroup doubleGroup = writableHdfFile.putGroup("doubleGroup");
+		double[] doubleData1 = new double[]{-5.5, -4.4, -3.3, -2.2, -11, 0, 1.1,2.2,3.3,4.4,5.5 };
+		doubleGroup.putDataset("doubleData1", doubleData1);
+
+//		int[] intData2 = new int[]{-500, -412, -399, -211, -54, 7, 23, 222, 34245, 412, 5656575 };
+//		intGroup.putDataset("intData2", intData2);
+//
+//		int[][] intData3 = new int[][]{
+//			{-500, -412, -399, -211},
+//			{-54, 7, 23, -34245},
+//			{412, 5656575, 23, 9909}};
+//		intGroup.putDataset("intData3", intData3);
+
+		// Actually flush and write everything
 		writableHdfFile.close();
 
 		// Now read it back
@@ -87,7 +103,11 @@ class SimpleWritingTest {
 		Object intData3Data = intData3Dataset.getData();
 		assertThat(intData3Data).isEqualTo(intData3);
 
+		Dataset doubleData1Dataset = hdfFile.getDatasetByPath("doubleGroup/doubleData1");
+		Object doubleData1ReadBack = doubleData1Dataset.getData();
+		assertThat(doubleData1ReadBack).isEqualTo(doubleData1);
+
 		// Cleanup
-		Files.delete(tempFile);
+//		Files.delete(tempFile);
 	}
 }
