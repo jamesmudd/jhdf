@@ -21,8 +21,11 @@ import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
 import io.jhdf.object.message.DataSpace;
 import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.DataTypeMessage;
+import io.jhdf.object.message.FillValueMessage;
 import io.jhdf.object.message.Message;
 import io.jhdf.storage.HdfFileChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -38,6 +41,8 @@ import java.util.List;
 import static io.jhdf.Utils.stripLeadingIndex;
 
 public class WritableDatasetImpl extends AbstractWritableNode implements WritiableDataset {
+
+	private static final Logger logger = LoggerFactory.getLogger(WritableDatasetImpl.class);
 
 	private final Object data;
 	private final DataType dataType;
@@ -178,9 +183,11 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 	@Override
 	public long write(HdfFileChannel hdfFileChannel, long position) {
+		logger.info("Writing dataset [{}] at position [{}]", getPath(), position);
 		List<Message> messages = new ArrayList<>();
 		messages.add(DataTypeMessage.create(this.dataType));
 		messages.add(DataSpaceMessage.create(this.dataSpace));
+		messages.add(FillValueMessage.NO_FILL);
 		// TODO will have know fixed size so don't really need these objects but for now...
 		ContiguousDataLayoutMessage placeholder = ContiguousDataLayoutMessage.create(Constants.UNDEFINED_ADDRESS, Constants.UNDEFINED_ADDRESS);
 		messages.add(placeholder);
@@ -204,6 +211,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 	}
 
 	private long writeData(HdfFileChannel hdfFileChannel, long dataAddress) {
+		logger.info("Writing data for dataset [{}] at position [{}]", getPath(), dataAddress);
 		Class<?> arrayType = Utils.getArrayType(this.data);
 		long totalBytes = dataSpace.getTotalLength() * dataType.getSize();
 

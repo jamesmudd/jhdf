@@ -291,15 +291,15 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		(byte) 127);
 
 	public static final FloatingPoint DOUBLE = new FloatingPoint(
-		8,
-		2,
-		63,
-		(short) 0,
-		(byte) 64,
-		(byte) 52,
-		(byte) 11,
-		(byte) 0,
-		(byte) 52,
-		(byte) 1023);
+		8, // size
+		2,      // mantissa normalisation
+		63,     // Sign location
+		(short) 0,   // bit offset
+		(byte) 64,   // bit precision
+		(byte) 52,  // exponent location
+		(byte) 11,    // exponent size
+		(byte) 0,      // mantissa location
+		(byte) 52,     // mantissa size
+		(byte) 1023);   // exponent bias
 
 }

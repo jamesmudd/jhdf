@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.BufferBuilder;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 
@@ -38,6 +39,9 @@ public class FillValueMessage extends Message {
 	private final int fillValueWriteTime;
 	private final boolean fillValueDefined;
 	private final ByteBuffer fillValue;
+
+	public static final FillValueMessage NO_FILL =
+		new FillValueMessage(1, 0, false, null);
 
 	/* package */ FillValueMessage(ByteBuffer bb, BitSet messageFlags) {
 		super(messageFlags);
@@ -78,6 +82,13 @@ public class FillValueMessage extends Message {
 		}
 	}
 
+	private FillValueMessage(int spaceAllocationTime, int fillValueWriteTime, boolean fillValueDefined, ByteBuffer fillValue) {
+		this.spaceAllocationTime = spaceAllocationTime;
+		this.fillValueWriteTime = fillValueWriteTime;
+		this.fillValueDefined = fillValueDefined;
+		this.fillValue = fillValue;
+	}
+
 	public boolean isFillValueDefined() {
 		return fillValueDefined;
 	}
@@ -99,5 +110,18 @@ public class FillValueMessage extends Message {
 		return MESSAGE_TYPE;
 	}
 
+	@Override
+	public ByteBuffer toBuffer() {
+		BitSet flags = new BitSet(8);
+		Utils.writeIntToBits(spaceAllocationTime, flags, 0, 2);
+		Utils.writeIntToBits(fillValueWriteTime, flags, 2, 2);
+		Utils.writeIntToBits(fillValueDefined ? 0 : 1, flags, 4, 1);
+		Utils.writeIntToBits(fillValueDefined ? 1 : 0, flags, 5, 1);
+		return new BufferBuilder()
+			.writeByte(3) // version
+			.writeBitSet(flags, 1)
+			// TODO Size + fill vale here
+			.build();
+	}
 
 }

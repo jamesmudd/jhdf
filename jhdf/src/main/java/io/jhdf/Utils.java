@@ -94,6 +94,13 @@ public final class Utils {
 		bb.position(pos + (8 - (pos % 8)));
 	}
 
+	public static long nextMultipleOfEight(long value) {
+		if (value % 8 == 0) {
+			return value; // Already on a 8 byte multiple
+		}
+		return value + (8 - (value % 8));
+	}
+
 	/**
 	 * This reads the requested number of bytes from the buffer and returns the data
 	 * as an unsigned <code>int</code>. After this call the buffer position will be
