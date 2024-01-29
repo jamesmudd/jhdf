@@ -71,7 +71,8 @@ class SimpleWritingTest {
 		intGroup.putDataset("intData3", intData3);
 
 		WritableGroup doubleGroup = writableHdfFile.putGroup("doubleGroup");
-		double[] doubleData1 = new double[]{-5.5, -4.4, -3.3, -2.2, -11, 0, 1.1,2.2,3.3,4.4,5.5 };
+//		double[] doubleData1 = new double[]{-5.5, -4.4, -3.3, -2.2, -11, 0, 1.1,2.2,3.3,4.4,5.5 };
+		double[] doubleData1 = new double[]{-3300000.0,44000.0,3.0,10.0,20.0};
 		doubleGroup.putDataset("doubleData1", doubleData1);
 
 //		int[] intData2 = new int[]{-500, -412, -399, -211, -54, 7, 23, 222, 34245, 412, 5656575 };

@@ -100,6 +100,13 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		this.mantissaLocation = mantissaLocation;
 		this.mantissaSize = mantissaSize;
 		this.exponentBias = exponentBias;
+
+		classBits.set(ORDER_BIT, order.equals(ByteOrder.BIG_ENDIAN));
+		classBits.set(LOW_PADDING_BIT, false);
+		classBits.set(HIGH_PADDING_BIT, false);
+		classBits.set(INTERNAL_PADDING_BIT, false);
+		Utils.writeIntToBits(mantissaNormalization, classBits, 4, 2);
+		Utils.writeIntToBits(signLocation, classBits, 8, 8);
 	}
 
 	@Override
@@ -259,14 +266,6 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 
 	@Override
 	public ByteBuffer toBuffer() {
-		classBits.set(ORDER_BIT, order.equals(ByteOrder.BIG_ENDIAN));
-		classBits.set(LOW_PADDING_BIT, lowPadding);
-		classBits.set(HIGH_PADDING_BIT, highPadding);
-		classBits.set(INTERNAL_PADDING_BIT, internalPadding);
-
-		Utils.writeIntToBits(mantissaNormalization, classBits, 4, 2);
-		Utils.writeIntToBits(signLocation, classBits, 8, 8);
-
 		return  super.toBufferBuilder()
 			.writeShort(bitOffset)
 			.writeShort(bitPrecision)
@@ -283,23 +282,23 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		2,
 		31,
 		(short) 0,
-		(byte) 32,
+		(short) 32,
 		(byte) 23,
 		(byte) 8,
 		(byte) 0,
 		(byte) 23,
-		(byte) 127);
+		127);
 
 	public static final FloatingPoint DOUBLE = new FloatingPoint(
 		8, // size
 		2,      // mantissa normalisation
 		63,     // Sign location
 		(short) 0,   // bit offset
-		(byte) 64,   // bit precision
+		(short) 64,   // bit precision
 		(byte) 52,  // exponent location
 		(byte) 11,    // exponent size
 		(byte) 0,      // mantissa location
 		(byte) 52,     // mantissa size
-		(byte) 1023);   // exponent bias
+		1023);   // exponent bias
 
 }
