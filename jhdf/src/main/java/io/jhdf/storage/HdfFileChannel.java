@@ -64,10 +64,6 @@ public class HdfFileChannel implements HdfBackingStorage {
 
 	@Override
 	public ByteBuffer map(long address, long length) {
-		return map(address, length, MapMode.READ_ONLY);
-	}
-
-	public ByteBuffer map(long address, long length, MapMode mode) {
 		return mapNoOffset(address + sb.getBaseAddressByte(), length);
 	}
 

@@ -70,7 +70,7 @@ public class DataSpace {
 		// Permutation indices - Note never implemented in HDF library!
 	}
 
-	private DataSpace(byte version, boolean maxSizesPresent, int[] dimensions, long[] maxSizes, byte type, long totalLength) {
+	private DataSpace(byte version, boolean maxSizesPresent, int[] dimensions, long[] maxSizes, byte type) {
 		this.version = version;
 		this.maxSizesPresent = maxSizesPresent;
 		this.dimensions = dimensions;
@@ -87,8 +87,8 @@ public class DataSpace {
 			false,
 			Utils.getDimensions(data),
 			ArrayUtils.EMPTY_LONG_ARRAY,
-			(byte) 1,
-			0L);
+			(byte) 1
+		);
 	}
 
 	/**
