@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -502,5 +503,29 @@ class UtilsTest {
 		// Bit index larger than array length
 		assertThrows(IllegalArgumentException.class,
 			() -> Utils.setBit(bytes, 5*8, true));
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15})
+	void testWritingToBits(int value) {
+		BitSet bits = new BitSet(8);
+		Utils.writeIntToBits(value, bits, 0, 4);
+
+		int readBack = Utils.bitsToInt(bits, 0, 4);
+		assertThat(readBack, is(equalTo(value)));
+
+		bits.clear();
+		Utils.writeIntToBits(value, bits, 4, 4);
+
+		int readBack2 = Utils.bitsToInt(bits, 4, 4);
+		assertThat(readBack2, is(equalTo(value)));
+	}
+	@Test
+	void testWritingToBitsExceptions() {
+		BitSet bits = new BitSet(8);
+
+		assertThrows(IllegalArgumentException.class, () -> Utils.writeIntToBits(-3, bits, 0, 4));
+
+		assertThrows(IllegalArgumentException.class, () -> Utils.writeIntToBits(18, bits, 0, 4));
 	}
 }

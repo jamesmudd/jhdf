@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.BufferBuilder;
 import io.jhdf.Constants;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
@@ -151,6 +152,10 @@ public abstract class DataLayoutMessage extends Message {
 			size = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 		}
 
+		public static ContiguousDataLayoutMessage create(long address, long size) {
+			return new ContiguousDataLayoutMessage(Message.BASIC_FLAGS, address, size);
+		}
+
 		@Override
 		public DataLayout getDataLayout() {
 			return DataLayout.CONTIGUOUS;
@@ -169,7 +174,12 @@ public abstract class DataLayoutMessage extends Message {
 
 		@Override
 		public ByteBuffer toBuffer() {
-			return null;
+			return new BufferBuilder()
+				.writeByte(3) // Version
+				.writeByte(1) // Contiguous Storage
+				.writeLong(address)
+				.writeLong(size)
+				.build();
 		}
 	}
 

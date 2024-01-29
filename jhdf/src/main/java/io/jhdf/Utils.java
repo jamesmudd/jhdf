@@ -94,6 +94,13 @@ public final class Utils {
 		bb.position(pos + (8 - (pos % 8)));
 	}
 
+	public static long nextMultipleOfEight(long value) {
+		if (value % 8 == 0) {
+			return value; // Already on a 8 byte multiple
+		}
+		return value + (8 - (value % 8));
+	}
+
 	/**
 	 * This reads the requested number of bytes from the buffer and returns the data
 	 * as an unsigned <code>int</code>. After this call the buffer position will be
@@ -396,6 +403,19 @@ public final class Utils {
 			return getArrayType(element);
 		} else {
 			return array.getClass().getComponentType();
+		}
+	}
+
+	public static void writeIntToBits(int value, BitSet bits, int start, int length) {
+		if(value < 0) {
+			throw new IllegalArgumentException("Value cannot be negative");
+		}
+		BigInteger bi = BigInteger.valueOf(value);
+		if(bi.bitLength() > length) {
+			throw new IllegalArgumentException("Value [" + value + "] to high to convert to bits");
+		}
+		for (int i = 0; i < length; i++) {
+			bits.set(start + i, bi.testBit(i));
 		}
 	}
 }

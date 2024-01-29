@@ -9,13 +9,13 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.BufferBuilder;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.BitSet;
 
 public abstract class DataType {
@@ -25,11 +25,11 @@ public abstract class DataType {
 	private final int size; // In bytes
 	protected final BitSet classBits;
 
-	public DataType(int dataClass, int size) {
-		this.version = 0;
+	protected DataType(int dataClass, int size) {
+		this.version = 1;
 		this.dataClass = dataClass;
 		this.size = size;
-		this.classBits = new BitSet(8); // TODO check size
+		this.classBits = new BitSet(24);
 	}
 
 	public static DataType readDataType(ByteBuffer bb) {
@@ -48,10 +48,11 @@ public abstract class DataType {
 		// Move the buffer back to the start of the data type message
 		bb.reset();
 
+		// TODO all class IDs
 		switch (dataClass) {
-			case 0: // Fixed point
+			case FixedPoint.CLASS_ID: // Fixed point
 				return new FixedPoint(bb);
-			case 1: // Floating point
+			case FloatingPoint.CLASS_ID: // Floating point
 				return new FloatingPoint(bb);
 			case 2: // Time
 				throw new UnsupportedHdfException("Time data type is not yet supported");
@@ -96,9 +97,9 @@ public abstract class DataType {
 		if (data.getClass().isArray()) {
 			Class<?> type = Utils.getArrayType(data);
 			if (type.equals(int.class)) {
-				return new FixedPoint((short) 4);
+				return new FixedPoint(4);
 			} else if (type.equals(double.class)) {
-				return new FloatingPoint(8);
+				return FloatingPoint.DOUBLE;
 			}
 			throw new HdfException("Error");
 
@@ -141,4 +142,19 @@ public abstract class DataType {
 	 */
 	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage);
 
+	// TODO could be abstract when there are more impls
+	public ByteBuffer toBuffer() {
+		throw new UnsupportedHdfException("Data type [" + getClass().getSimpleName() + "] does not support writing");
+	}
+
+	protected BufferBuilder toBufferBuilder() {
+		BitSet classAndVersion = new BitSet(8);
+		Utils.writeIntToBits(dataClass, classAndVersion, 0, 4);
+		Utils.writeIntToBits(version, classAndVersion, 4, 4);
+
+		return new BufferBuilder()
+			.writeBitSet(classAndVersion,1)
+			.writeBitSet(classBits, 3)
+			.writeInt(getSize());
+	}
 }

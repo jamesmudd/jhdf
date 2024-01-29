@@ -26,6 +26,14 @@ public class DataTypeMessage extends Message {
 		dataType = DataType.readDataType(bb);
 	}
 
+	private DataTypeMessage(DataType dataType) {
+		this.dataType = dataType;
+	}
+
+	public static DataTypeMessage create(DataType dataType) {
+		return new DataTypeMessage(dataType);
+	}
+
 	public DataType getDataType() {
 		return dataType;
 	}
@@ -35,6 +43,8 @@ public class DataTypeMessage extends Message {
 		return MESSAGE_TYPE;
 	}
 
-
-
+	@Override
+	public ByteBuffer toBuffer() {
+		return dataType.toBuffer();
+	}
 }

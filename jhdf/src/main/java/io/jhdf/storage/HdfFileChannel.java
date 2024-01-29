@@ -69,10 +69,14 @@ public class HdfFileChannel implements HdfBackingStorage {
 
 	@Override
 	public ByteBuffer mapNoOffset(long address, long length) {
+		return mapNoOffset(address, length, MapMode.READ_ONLY);
+	}
+
+	public ByteBuffer mapNoOffset(long address, long length, MapMode mode) {
 		try {
 			if (!memoryMappingFailed) {
 				try {
-					return fc.map(MapMode.READ_ONLY, address, length);
+					return fc.map(mode, address, length);
 				} catch (UnsupportedOperationException e) {
 					// many file systems do not support memory mapping
 					memoryMappingFailed = true;
@@ -156,6 +160,22 @@ public class HdfFileChannel implements HdfBackingStorage {
 			return fc.write(buffer, position);
 		} catch (IOException e) {
 			throw new HdfWritingException("Exception writing at position: " + position, e);
+		}
+	}
+	public int write(ByteBuffer buffer) {
+		// TODO check if writable
+		try {
+			return fc.write(buffer);
+		} catch (IOException e) {
+			throw new HdfWritingException("Exception writing", e);
+		}
+	}
+
+	public void position(long dataAddress) {
+		try {
+			fc.position(dataAddress);
+		} catch (IOException e) {
+			throw new HdfWritingException("Exception writing", e);
 		}
 	}
 }
