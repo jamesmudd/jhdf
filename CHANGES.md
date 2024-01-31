@@ -1,7 +1,7 @@
 # jHDF Change Log
 
 ## v0.7.0-alpha
-- Add initial HDF5 writing support! https://github.com/jamesmudd/jhdf/issues/354 Special thanks to @thadguidry for sponsoring this work. See io/jhdf/examples/WriteHdf5.java for example usage.
+- Add initial HDF5 writing support! https://github.com/jamesmudd/jhdf/issues/354. Special thanks to [@thadguidry](https://github.com/thadguidry) for sponsoring this work. See [WriteHdf5.java](jhdf/src/main/java/io/jhdf/examples/WriteHdf5.java) for example usage.
 - Build and dependency updates
 
 ##  v0.6.10
