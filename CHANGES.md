@@ -1,5 +1,9 @@
 # jHDF Change Log
 
+## v0.7.0-alpha
+- Add initial HDF5 writing support! https://github.com/jamesmudd/jhdf/issues/354 Special thanks to @thadguidry for sponsoring this work. See io/jhdf/examples/WriteHdf5.java for example usage.
+- Build and dependency updates
+
 ##  v0.6.10
 - Add support for files containing superblock extensions https://github.com/jamesmudd/jhdf/issues/462
 - Build and dependency updates
