@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -42,11 +42,10 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	private final FileChannel fileChannel;
 	private final Superblock.SuperblockV2V3 superblock;
 	private final HdfFileChannel hdfFileChannel;
-	private ObjectHeader.ObjectHeaderV2 rootGroupObjectHeader;
-
 	private final WritableGroup rootGroup;
 
-	public WritableHdfFile(Path path) {
+	WritableHdfFile(Path path) {
+		logger.warn("Writing files is in alpha. Check files carefully!");
 		logger.info("Writing HDF5 file to [{}]", path.toAbsolutePath());
 		this.path = path;
 		try {
@@ -58,24 +57,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		this.hdfFileChannel = new HdfFileChannel(this.fileChannel, this.superblock);
 
 		this.rootGroup = new WritableGroupImpl(null, "/");
-//		createRootGroup();
-//		try {
-//			hdfFileChannel.write(superblock.toBuffer(), 0L);
-//			long endOfFile = rootGroup.write(hdfFileChannel, ROOT_GROUP_ADDRESS);
-////			hdfFileChannel.write(rootGroup.(), ROOT_GROUP_ADDRESS);
-//			hdfFileChannel.write(ByteBuffer.wrap(new byte[]{1}), 250);
-//		} catch (IOException e) {
-//			throw new HdfWritingExcpetion("Failed to write superblock", e);
-//		}
 	}
-
-//	private void createRootGroup() {
-//		List<Message> messages = new ArrayList<>();
-//		messages.add(LinkInfoMessage.createBasic());
-//		messages.add(GroupInfoMessage.createBasic());
-//		messages.add(NilMessage.create());
-//		this.rootGroupObjectHeader = new ObjectHeader.ObjectHeaderV2(ROOT_GROUP_ADDRESS, messages);
-//	}
 
 	@Override
 	public void close() {
