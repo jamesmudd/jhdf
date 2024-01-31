@@ -27,7 +27,7 @@ plugins {
 
 // Variables
 group = 'io.jhdf'
-version = '0.6.10'
+version = '0.7.0-alpha'
 
 compileJava {
     sourceCompatibility = "1.8"
@@ -157,6 +157,10 @@ publishing {
                     connection = 'scm:git:git://github.com/jamesmudd/jhdf.git'
                     developerConnection = 'scm:git:git://github.com/jamesmudd/jhdf.git'
                     url = 'https://github.com/jamesmudd/jhdf.git'
+                }
+                issueManagement {
+                    system = 'github'
+                    url = 'https://github.com/jamesmudd/jhdf/issues'
                 }
             }
         }
