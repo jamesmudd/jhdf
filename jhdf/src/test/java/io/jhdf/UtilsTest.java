@@ -14,9 +14,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import sun.nio.cs.UTF_8;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,6 +51,15 @@ class UtilsTest {
 		bb.put(b);
 		bb.rewind();
 		assertThat(Utils.readUntilNull(bb), is(equalTo("HDF")));
+	}	@Test
+
+	void testReadUntilNullUtf8() {
+		ByteBuffer bb = ByteBuffer.allocate(10);
+		bb.put("数".getBytes(StandardCharsets.UTF_8));
+		bb.put("据".getBytes(StandardCharsets.UTF_8));
+		bb.put(Constants.NULL);
+		bb.rewind();
+		assertThat(Utils.readUntilNull(bb), is(equalTo("数据")));
 	}
 
 	@Test
