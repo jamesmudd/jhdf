@@ -14,7 +14,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import sun.nio.cs.UTF_8;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -54,7 +53,7 @@ class UtilsTest {
 		assertThat(bb.position(),is(equalTo(4)));
 	}
 
-	@Test
+	@Test // For https://github.com/jamesmudd/jhdf/issues/539
 	void testReadUntilNullUtf8() {
 		ByteBuffer bb = ByteBuffer.allocate(7);
 		bb.put("数".getBytes(StandardCharsets.UTF_8)); // 3 bytes
