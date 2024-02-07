@@ -51,15 +51,18 @@ class UtilsTest {
 		bb.put(b);
 		bb.rewind();
 		assertThat(Utils.readUntilNull(bb), is(equalTo("HDF")));
-	}	@Test
+		assertThat(bb.position(),is(equalTo(4)));
+	}
 
+	@Test
 	void testReadUntilNullUtf8() {
-		ByteBuffer bb = ByteBuffer.allocate(10);
-		bb.put("数".getBytes(StandardCharsets.UTF_8));
-		bb.put("据".getBytes(StandardCharsets.UTF_8));
-		bb.put(Constants.NULL);
+		ByteBuffer bb = ByteBuffer.allocate(7);
+		bb.put("数".getBytes(StandardCharsets.UTF_8)); // 3 bytes
+		bb.put("据".getBytes(StandardCharsets.UTF_8)); // 3 bytes
+		bb.put(Constants.NULL); // 1 byte
 		bb.rewind();
 		assertThat(Utils.readUntilNull(bb), is(equalTo("数据")));
+		assertThat(bb.position(),is(equalTo(7)));
 	}
 
 	@Test
