@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,6 +50,18 @@ class UtilsTest {
 		bb.put(b);
 		bb.rewind();
 		assertThat(Utils.readUntilNull(bb), is(equalTo("HDF")));
+		assertThat(bb.position(),is(equalTo(4)));
+	}
+
+	@Test // For https://github.com/jamesmudd/jhdf/issues/539
+	void testReadUntilNullUtf8() {
+		ByteBuffer bb = ByteBuffer.allocate(7);
+		bb.put("数".getBytes(StandardCharsets.UTF_8)); // 3 bytes
+		bb.put("据".getBytes(StandardCharsets.UTF_8)); // 3 bytes
+		bb.put(Constants.NULL); // 1 byte
+		bb.rewind();
+		assertThat(Utils.readUntilNull(bb), is(equalTo("数据")));
+		assertThat(bb.position(),is(equalTo(7)));
 	}
 
 	@Test

@@ -45,7 +45,7 @@ public final class Utils {
 	}
 
 	/**
-	 * Reads ASCII string from the buffer until a null character is reached. This
+	 * Reads UTF8 string from the buffer until a null character is reached. This
 	 * will read from the buffers current position. After the method the buffer
 	 * position will be after the null character.
 	 *
@@ -55,13 +55,19 @@ public final class Utils {
 	 *                                  and null terminator
 	 */
 	public static String readUntilNull(ByteBuffer buffer) {
-		StringBuilder sb = new StringBuilder(buffer.remaining());
+		buffer.mark();
+		int length = 0;
+		// Step through the buffer while NULL is not found
 		while (buffer.hasRemaining()) {
 			byte b = buffer.get();
 			if (b == Constants.NULL) {
-				return sb.toString();
+				buffer.reset();
+				byte[] bytes = new byte[length];
+				buffer.get(bytes);
+				buffer.get(); // Step over the NULL again to position the buffer
+				return new String(bytes, StandardCharsets.UTF_8);
 			}
-			sb.append((char) b);
+			length++;
 		}
 		throw new IllegalArgumentException("End of buffer reached before NULL");
 	}
