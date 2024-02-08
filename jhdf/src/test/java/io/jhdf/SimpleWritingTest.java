@@ -10,9 +10,14 @@
 
 package io.jhdf;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import h5dump.HDF5File;
+import h5dump.RootGroup;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
 import io.jhdf.api.WritableGroup;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -108,6 +113,19 @@ class SimpleWritingTest {
 		Object doubleData1ReadBack = doubleData1Dataset.getData();
 		assertThat(doubleData1ReadBack).isEqualTo(doubleData1);
 
+		ProcessBuilder processBuilder = new ProcessBuilder();
+		processBuilder.command("h5dump",
+		"--xml",
+				tempFile.toAbsolutePath().toString());
+		Process start = processBuilder.start();
+		String string = IOUtils.toString(start.getInputStream());
+
+
+		System.out.println(string);
+
+		XmlMapper xmlMapper = new XmlMapper();
+		xmlMapper.disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES);
+		xmlMapper.readValue(string, HDF5File.class);
 		// Cleanup
 //		Files.delete(tempFile);
 	}
