@@ -71,18 +71,12 @@ class SimpleWritingTest {
 		intGroup.putDataset("intData3", intData3);
 
 		WritableGroup doubleGroup = writableHdfFile.putGroup("doubleGroup");
-//		double[] doubleData1 = new double[]{-5.5, -4.4, -3.3, -2.2, -11, 0, 1.1,2.2,3.3,4.4,5.5 };
 		double[] doubleData1 = new double[]{-3300000.0,44000.0,3.0,10.0,20.0};
 		doubleGroup.putDataset("doubleData1", doubleData1);
 
-//		int[] intData2 = new int[]{-500, -412, -399, -211, -54, 7, 23, 222, 34245, 412, 5656575 };
-//		intGroup.putDataset("intData2", intData2);
-//
-//		int[][] intData3 = new int[][]{
-//			{-500, -412, -399, -211},
-//			{-54, 7, 23, -34245},
-//			{412, 5656575, 23, 9909}};
-//		intGroup.putDataset("intData3", intData3);
+		WritableGroup byteGroup = writableHdfFile.putGroup("byteGroup");
+		byte [] byteData1 = new byte[]{-10, -5, 0, 5, 10, 20};
+		byteGroup.putDataset("byteData1", byteData1);
 
 		// Actually flush and write everything
 		writableHdfFile.close();
@@ -104,11 +98,15 @@ class SimpleWritingTest {
 		Object intData3Data = intData3Dataset.getData();
 		assertThat(intData3Data).isEqualTo(intData3);
 
+		Dataset byteData1Dataset = hdfFile.getDatasetByPath("byteGroup/byteData1");
+		Object byteData1Data = byteData1Dataset.getData();
+		assertThat(byteData1Data).isEqualTo(byteData1);
+
 		Dataset doubleData1Dataset = hdfFile.getDatasetByPath("doubleGroup/doubleData1");
 		Object doubleData1ReadBack = doubleData1Dataset.getData();
 		assertThat(doubleData1ReadBack).isEqualTo(doubleData1);
 
 		// Cleanup
-//		Files.delete(tempFile);
+		Files.delete(tempFile);
 	}
 }
