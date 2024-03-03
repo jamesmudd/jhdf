@@ -96,7 +96,9 @@ public abstract class DataType {
 	public static DataType fromObject(Object data) {
 		if (data.getClass().isArray()) {
 			Class<?> type = Utils.getArrayType(data);
-			if (type.equals(int.class)) {
+			if(type.equals(byte.class)) {
+				return new FixedPoint(1);
+			} else if (type.equals(int.class)) {
 				return new FixedPoint(4);
 			} else if (type.equals(double.class)) {
 				return FloatingPoint.DOUBLE;

@@ -219,7 +219,9 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 		hdfFileChannel.position(dataAddress);
 
 		// TODO move out into data types?
-		if(arrayType.equals(int.class)) {
+		if(arrayType.equals(byte.class)) {
+			writeByteData(data, dimensions, buffer, hdfFileChannel);
+		} else if(arrayType.equals(int.class)) {
 			writeIntData(data, dimensions, buffer, hdfFileChannel);
 		} else if (arrayType.equals(double.class)) {
 			writeDoubleData(data, dimensions, buffer, hdfFileChannel);
@@ -229,6 +231,19 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 		return totalBytes;
 	}
 
+	private static void writeByteData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeByteData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
+			}
+		} else {
+			buffer.put((byte[]) data);
+			buffer.rewind();
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
+	}
 	private static void writeIntData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
