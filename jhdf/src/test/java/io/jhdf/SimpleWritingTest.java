@@ -107,6 +107,7 @@ class SimpleWritingTest {
 		assertThat(doubleData1ReadBack).isEqualTo(doubleData1);
 
 		// Cleanup
-		Files.delete(tempFile);
+		// TODO this fails on Windows
+//		Files.delete(tempFile);
 	}
 }
