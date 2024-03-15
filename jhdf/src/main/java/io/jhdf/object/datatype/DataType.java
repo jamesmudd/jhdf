@@ -12,13 +12,16 @@ package io.jhdf.object.datatype;
 import io.jhdf.BufferBuilder;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
 public abstract class DataType {
+
+	private static final Logger logger = LoggerFactory.getLogger(DataType.class);
 
 	private final int version;
 	private final int dataClass;
@@ -41,7 +44,9 @@ public abstract class DataType {
 		int version = Utils.bitsToInt(classAndVersion, 4, 4);
 		int dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
 
-		if (version == 0 || version > 3) {
+		if (version == 0) {
+			logger.warn("Data type version 0 detected. This is out of spec");
+		} else if (version > 3) {
 			throw new HdfException("Unrecognized datatype version '" + version + "' detected");
 		}
 
@@ -55,7 +60,7 @@ public abstract class DataType {
 			case FloatingPoint.CLASS_ID: // Floating point
 				return new FloatingPoint(bb);
 			case 2: // Time
-				throw new UnsupportedHdfException("Time data type is not yet supported");
+				return new TimeDataType(bb);
 			case 3: // String
 				return new StringData(bb);
 			case 4: // Bit field
