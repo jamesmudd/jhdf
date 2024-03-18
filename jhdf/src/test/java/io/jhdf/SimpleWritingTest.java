@@ -12,18 +12,15 @@ package io.jhdf;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import h5dump.HDF5File;
-import h5dump.RootGroup;
+import h5dump.HDF5FileXml;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
 import io.jhdf.api.WritableGroup;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -125,7 +122,10 @@ class SimpleWritingTest {
 
 		XmlMapper xmlMapper = new XmlMapper();
 		xmlMapper.disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES);
-		xmlMapper.readValue(string, HDF5File.class);
+		xmlMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		HDF5FileXml hdf5File = xmlMapper.readValue(string, HDF5FileXml.class);
+
+		System.out.println(hdf5File);
 		// Cleanup
 //		Files.delete(tempFile);
 	}
