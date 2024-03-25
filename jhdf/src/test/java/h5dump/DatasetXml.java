@@ -15,4 +15,6 @@ public class DatasetXml extends NodeXml {
 	@JacksonXmlProperty(localName = "Data")
 	String data;
 
+	@JacksonXmlProperty(localName = "Dataspace")
+	DataspaceXml dataspace;
 }
