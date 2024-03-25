@@ -2,6 +2,7 @@ package h5dump;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.StringUtils;
 
 public class NodeXml {
 
@@ -10,5 +11,9 @@ public class NodeXml {
 
 	@JsonProperty("H5Path")
 	String path;
+
+	int getObjectId() {
+		return Integer.parseInt(StringUtils.removeStart(objId, "xid_"));
+	}
 
 }
