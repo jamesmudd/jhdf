@@ -12,6 +12,7 @@ package io.jhdf;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import h5dump.H5Dump;
 import h5dump.HDF5FileXml;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
@@ -110,22 +111,9 @@ class SimpleWritingTest {
 		Object doubleData1ReadBack = doubleData1Dataset.getData();
 		assertThat(doubleData1ReadBack).isEqualTo(doubleData1);
 
-		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.command("h5dump",
-		"--xml",
-				tempFile.toAbsolutePath().toString());
-		Process start = processBuilder.start();
-		String string = IOUtils.toString(start.getInputStream());
+		HDF5FileXml hdf5FileXml = H5Dump.dumpAndParse(tempFile);
+		H5Dump.compareXmlToFile(hdf5FileXml, hdfFile);
 
-
-		System.out.println(string);
-
-		XmlMapper xmlMapper = new XmlMapper();
-		xmlMapper.disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES);
-		xmlMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		HDF5FileXml hdf5File = xmlMapper.readValue(string, HDF5FileXml.class);
-
-		System.out.println(hdf5File);
 		// Cleanup
 //		Files.delete(tempFile);
 	}

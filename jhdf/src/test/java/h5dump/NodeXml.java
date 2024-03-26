@@ -12,6 +12,9 @@ public class NodeXml {
 	@JsonProperty("H5Path")
 	String path;
 
+	@JsonProperty("Name")
+	String name;
+
 	int getObjectId() {
 		return Integer.parseInt(StringUtils.removeStart(objId, "xid_"));
 	}

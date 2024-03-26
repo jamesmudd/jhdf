@@ -9,6 +9,8 @@
  */
 package io.jhdf;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.lang.reflect.Array;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -45,6 +47,10 @@ public final class TestUtils {
 				flat.add(element);
 			}
 		}
+	}
+
+	public static String[] toStringArray(Object data) {
+		return ArrayUtils.toStringArray(flatten(data));
 	}
 
 }
