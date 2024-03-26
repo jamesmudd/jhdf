@@ -45,7 +45,8 @@ public class H5Dump {
 
 	public static void compareGroups(GroupXml groupXml, Group group) {
 		// First validate the group size
-		assertThat(groupXml.children(), is(group.getChildren().size()));
+		assertThat(groupXml.children(), is(equalTo(group.getChildren().size())));
+		assertThat(groupXml.getObjectId(), is(equalTo(group.getAddress())));
 		for (GroupXml childGroup : groupXml.groups) {
 			compareGroups(childGroup, (Group) group.getChild(childGroup.name));
 		}
@@ -57,6 +58,7 @@ public class H5Dump {
 	}
 
 	private static void compareDatasets(DatasetXml datasetXml, Dataset dataset) {
+		assertThat(datasetXml.getObjectId(), is(equalTo(dataset.getAddress())));
 		assertThat(datasetXml.getDimensions(), is(equalTo(dataset.getDimensions())));
 		assertThat(datasetXml.getData(), is(equalTo(TestUtils.toStringArray(dataset.getData()))));
 

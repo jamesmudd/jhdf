@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 
+import static org.apache.commons.lang3.StringUtils.removeStart;
+
 public class NodeXml {
 
 	@JsonProperty("OBJ-XID")
@@ -15,8 +17,8 @@ public class NodeXml {
 	@JsonProperty("Name")
 	String name;
 
-	int getObjectId() {
-		return Integer.parseInt(StringUtils.removeStart(objId, "xid_"));
+	public long getObjectId() {
+		return Long.parseLong(removeStart(objId, "xid_"));
 	}
 
 }
