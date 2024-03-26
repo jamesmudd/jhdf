@@ -10,15 +10,18 @@
 
 package io.jhdf;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import h5dump.H5Dump;
+import h5dump.HDF5FileXml;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
 import io.jhdf.api.WritableGroup;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -105,6 +108,9 @@ class SimpleWritingTest {
 		Dataset doubleData1Dataset = hdfFile.getDatasetByPath("doubleGroup/doubleData1");
 		Object doubleData1ReadBack = doubleData1Dataset.getData();
 		assertThat(doubleData1ReadBack).isEqualTo(doubleData1);
+
+		HDF5FileXml hdf5FileXml = H5Dump.dumpAndParse(tempFile);
+		H5Dump.compareXmlToFile(hdf5FileXml, hdfFile);
 
 		// Cleanup
 		// TODO this fails on Windows
