@@ -6,17 +6,12 @@ import io.jhdf.HdfFile;
 import io.jhdf.TestUtils;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
-import io.jhdf.api.Node;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
-import static org.apache.commons.lang3.ArrayUtils.toStringArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -53,15 +48,12 @@ public class H5Dump {
 		for (DatasetXml dataset : groupXml.datasets) {
 			compareDatasets(dataset, (Dataset) group.getChild(dataset.name));
 		}
-
-
 	}
 
 	private static void compareDatasets(DatasetXml datasetXml, Dataset dataset) {
 		assertThat(datasetXml.getObjectId(), is(equalTo(dataset.getAddress())));
 		assertThat(datasetXml.getDimensions(), is(equalTo(dataset.getDimensions())));
 		assertThat(datasetXml.getData(), is(equalTo(TestUtils.toStringArray(dataset.getData()))));
-
 	}
 
 }

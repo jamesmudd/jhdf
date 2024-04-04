@@ -51,8 +51,8 @@ class SimpleWritingTest {
 
 		assertThat(children).containsKeys("testGroup", "testGroup2", "testGroup3");
 
-		// Cleanup
-		Files.delete(tempFile);
+		HDF5FileXml hdf5FileXml = H5Dump.dumpAndParse(tempFile);
+		H5Dump.compareXmlToFile(hdf5FileXml, hdfFile);
 	}
 
 	@Test
@@ -74,18 +74,8 @@ class SimpleWritingTest {
 		intGroup.putDataset("intData3", intData3);
 
 		WritableGroup doubleGroup = writableHdfFile.putGroup("doubleGroup");
-//		double[] doubleData1 = new double[]{-5.5, -4.4, -3.3, -2.2, -11, 0, 1.1,2.2,3.3,4.4,5.5 };
 		double[] doubleData1 = new double[]{-3300000.0,44000.0,3.0,10.0,20.0};
 		doubleGroup.putDataset("doubleData1", doubleData1);
-
-//		int[] intData2 = new int[]{-500, -412, -399, -211, -54, 7, 23, 222, 34245, 412, 5656575 };
-//		intGroup.putDataset("intData2", intData2);
-//
-//		int[][] intData3 = new int[][]{
-//			{-500, -412, -399, -211},
-//			{-54, 7, 23, -34245},
-//			{412, 5656575, 23, 9909}};
-//		intGroup.putDataset("intData3", intData3);
 
 		// Actually flush and write everything
 		writableHdfFile.close();
@@ -113,8 +103,5 @@ class SimpleWritingTest {
 
 		HDF5FileXml hdf5FileXml = H5Dump.dumpAndParse(tempFile);
 		H5Dump.compareXmlToFile(hdf5FileXml, hdfFile);
-
-		// Cleanup
-//		Files.delete(tempFile);
 	}
 }
