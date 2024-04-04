@@ -47,7 +47,9 @@ jobs:
                   tar -xzf hdf5-1.14.1-2-Std-ubuntu2204_64.tar.gz
                   ./hdf/HDF5-1.14.1-Linux.sh --skip-license
                   echo "./hdf/HDF_Group/HDF5/1.14.1/bin/" >> $GITHUB_PATH
-                  h5dump --version
+
+            - name: h5dump version
+              run: h5dump --version
 
             - name: Gradle Build
               working-directory: jhdf
