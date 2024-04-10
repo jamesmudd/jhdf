@@ -10,14 +10,11 @@
 
 package io.jhdf;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import h5dump.H5Dump;
-import h5dump.HDF5FileXml;
+import io.jhdf.h5dump.H5Dump;
+import io.jhdf.h5dump.HDF5FileXml;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
 import io.jhdf.api.WritableGroup;
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;

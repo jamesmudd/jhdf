@@ -1,4 +1,13 @@
-package h5dump;
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright (c) 2024 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
+package io.jhdf.h5dump;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -18,19 +27,19 @@ import static org.hamcrest.Matchers.is;
 
 public class H5Dump {
 
-	private static final XmlMapper xmlMapper;
+	private static final XmlMapper XML_MAPPER;
 	static {
-		xmlMapper =  new XmlMapper();
-		xmlMapper.disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES);
-		xmlMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		XML_MAPPER =  new XmlMapper();
+		XML_MAPPER.disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES);
+		XML_MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 	}
 
 	public static HDF5FileXml dumpAndParse(Path path) throws IOException {
 		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.command("h5dump", "--format=%.1lf", "--xml", path.toAbsolutePath().toString());
+		processBuilder.command("io/jhdf/h5dump", "--format=%.1lf", "--xml", path.toAbsolutePath().toString());
 		Process start = processBuilder.start();
 		String xmlString = IOUtils.toString(start.getInputStream(), StandardCharsets.UTF_8);
-        return xmlMapper.readValue(xmlString, HDF5FileXml.class);
+        return XML_MAPPER.readValue(xmlString, HDF5FileXml.class);
 	}
 
 	public static void compareXmlToFile(HDF5FileXml hdf5FileXml, HdfFile hdfFile) {
