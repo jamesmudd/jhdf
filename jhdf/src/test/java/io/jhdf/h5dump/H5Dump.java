@@ -36,7 +36,7 @@ public class H5Dump {
 
 	public static HDF5FileXml dumpAndParse(Path path) throws IOException {
 		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.command("io/jhdf/h5dump", "--format=%.1lf", "--xml", path.toAbsolutePath().toString());
+		processBuilder.command("h5dump", "--format=%.1lf", "--xml", path.toAbsolutePath().toString());
 		Process start = processBuilder.start();
 		String xmlString = IOUtils.toString(start.getInputStream(), StandardCharsets.UTF_8);
         return XML_MAPPER.readValue(xmlString, HDF5FileXml.class);
