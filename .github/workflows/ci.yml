@@ -67,3 +67,9 @@ jobs:
             - name: Gradle Stop Daemon
               working-directory: jhdf
               run: ./gradlew --stop
+
+            - name: Archive junit results
+              uses: actions/upload-artifact@v4
+              with:
+                name: junit-report
+                path: jhdf/build/reports/tests/test
