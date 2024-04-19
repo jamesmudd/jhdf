@@ -65,7 +65,7 @@ class SimpleWritingTest {
 	@Test
 	@Order(2) // first test writes the file
 	@EnabledIfH5DumpAvailable
-	void readSimpleFileWithH5Dump() throws IOException {
+	void readSimpleFileWithH5Dump() throws Exception {
 		// Read with jhdf
 		HdfFile hdfFile = new HdfFile(tempFile);
 		// Read with h5dump
@@ -76,7 +76,7 @@ class SimpleWritingTest {
 
 	@Test
 	@Order(3)
-	void writeSimpleFileWithDatasets() throws Exception {
+	void writeSimpleFileWithDatasets() {
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 
 		WritableGroup intGroup = writableHdfFile.putGroup("intGroup");
@@ -132,7 +132,7 @@ class SimpleWritingTest {
 	@Test
 	@Order(4) // 3rd test writes the file
 	@EnabledIfH5DumpAvailable
-	void readSimpleFileWithDatasetsWithH5Dump() throws IOException {
+	void readSimpleFileWithDatasetsWithH5Dump() throws Exception {
 		// Read with jhdf
 		HdfFile hdfFile = new HdfFile(tempFile);
 		// Read with h5dump

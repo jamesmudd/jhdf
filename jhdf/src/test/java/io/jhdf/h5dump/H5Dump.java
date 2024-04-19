@@ -16,14 +16,18 @@ import io.jhdf.TestUtils;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.MatcherAssert;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.blankString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 public class H5Dump {
 
@@ -34,11 +38,13 @@ public class H5Dump {
 		XML_MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 	}
 
-	public static HDF5FileXml dumpAndParse(Path path) throws IOException {
+	public static HDF5FileXml dumpAndParse(Path path) throws IOException, InterruptedException {
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.command("h5dump", "--format=%.1lf", "--xml", path.toAbsolutePath().toString());
-		Process start = processBuilder.start();
-		String xmlString = IOUtils.toString(start.getInputStream(), StandardCharsets.UTF_8);
+		Process process = processBuilder.start();
+		process.waitFor();
+		String xmlString = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+		assertThat(xmlString, is(not(blankOrNullString())));
         return XML_MAPPER.readValue(xmlString, HDF5FileXml.class);
 	}
 
