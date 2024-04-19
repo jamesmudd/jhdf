@@ -10,24 +10,37 @@
 
 package io.jhdf;
 
-import io.jhdf.h5dump.H5Dump;
-import io.jhdf.h5dump.HDF5FileXml;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
 import io.jhdf.api.WritableGroup;
+import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
+import io.jhdf.h5dump.H5Dump;
+import io.jhdf.h5dump.HDF5FileXml;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@TestMethodOrder(OrderAnnotation.class)
 class SimpleWritingTest {
+	private static Path tempFile;
+
+	@BeforeAll
+	static void beforeAll() throws IOException {
+		tempFile = Files.createTempFile(null, ".hdf5");
+	}
 
 	@Test
-	void writeSimpleFile() throws Exception {
-		Path tempFile = Files.createTempFile(null, ".hdf5");
+	@Order(1)
+	void writeSimpleFile() {
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 		WritableGroup testGroup = writableHdfFile.putGroup("testGroup");
 		testGroup.putGroup("nested1");
@@ -47,14 +60,23 @@ class SimpleWritingTest {
 		Map<String, Node> children = hdfFile.getChildren();
 
 		assertThat(children).containsKeys("testGroup", "testGroup2", "testGroup3");
-
-		HDF5FileXml hdf5FileXml = H5Dump.dumpAndParse(tempFile);
-		H5Dump.compareXmlToFile(hdf5FileXml, hdfFile);
 	}
 
 	@Test
+	@Order(2) // first test writes the file
+	@EnabledIfH5DumpAvailable
+	void readSimpleFileWithH5Dump() throws IOException {
+		// Read with jhdf
+		HdfFile hdfFile = new HdfFile(tempFile);
+		// Read with h5dump
+		HDF5FileXml hdf5FileXml = H5Dump.dumpAndParse(tempFile);
+		// Compare
+		H5Dump.assetXmlAndHdfFileMatch(hdf5FileXml, hdfFile);
+	}
+
+	@Test
+	@Order(3)
 	void writeSimpleFileWithDatasets() throws Exception {
-		Path tempFile = Files.createTempFile(null, ".hdf5");
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 
 		WritableGroup intGroup = writableHdfFile.putGroup("intGroup");
@@ -105,8 +127,17 @@ class SimpleWritingTest {
 		Dataset doubleData1Dataset = hdfFile.getDatasetByPath("doubleGroup/doubleData1");
 		Object doubleData1ReadBack = doubleData1Dataset.getData();
 		assertThat(doubleData1ReadBack).isEqualTo(doubleData1);
+	}
 
+	@Test
+	@Order(4) // 3rd test writes the file
+	@EnabledIfH5DumpAvailable
+	void readSimpleFileWithDatasetsWithH5Dump() throws IOException {
+		// Read with jhdf
+		HdfFile hdfFile = new HdfFile(tempFile);
+		// Read with h5dump
 		HDF5FileXml hdf5FileXml = H5Dump.dumpAndParse(tempFile);
-		H5Dump.compareXmlToFile(hdf5FileXml, hdfFile);
+		// Compare
+		H5Dump.assetXmlAndHdfFileMatch(hdf5FileXml, hdfFile);
 	}
 }

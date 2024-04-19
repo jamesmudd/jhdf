@@ -42,7 +42,7 @@ public class H5Dump {
         return XML_MAPPER.readValue(xmlString, HDF5FileXml.class);
 	}
 
-	public static void compareXmlToFile(HDF5FileXml hdf5FileXml, HdfFile hdfFile) {
+	public static void assetXmlAndHdfFileMatch(HDF5FileXml hdf5FileXml, HdfFile hdfFile) {
 		// First validate the root group size
 		compareGroups(hdf5FileXml.rootGroup, hdfFile);
 	}
