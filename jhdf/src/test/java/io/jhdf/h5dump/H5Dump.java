@@ -43,6 +43,7 @@ public class H5Dump {
 		processBuilder.command("h5dump", "--format=%.1lf", "--xml", path.toAbsolutePath().toString());
 		Process process = processBuilder.start();
 		process.waitFor();
+		assertThat(process.exitValue(), is(equalTo(0)));
 		String xmlString = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
 		assertThat(xmlString, is(not(blankOrNullString())));
         return XML_MAPPER.readValue(xmlString, HDF5FileXml.class);
