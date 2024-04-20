@@ -15,8 +15,11 @@ import io.jhdf.HdfFile;
 import io.jhdf.TestUtils;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
+import io.jhdf.dataset.DatasetBase;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +34,8 @@ import static org.hamcrest.Matchers.not;
 
 public class H5Dump {
 
+	private static final Logger logger = LoggerFactory.getLogger(H5Dump.class);
+
 	private static final XmlMapper XML_MAPPER;
 	static {
 		XML_MAPPER =  new XmlMapper();
@@ -43,9 +48,12 @@ public class H5Dump {
 		processBuilder.command("h5dump", "--format=%.1lf", "--xml", path.toAbsolutePath().toString());
 		Process process = processBuilder.start();
 		process.waitFor();
-		assertThat(process.exitValue(), is(equalTo(0)));
 		String xmlString = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+		logger.info("h5dump return [{}] output [{}]", process.exitValue(), xmlString);
+		// Validate
+		assertThat(process.exitValue(), is(equalTo(0)));
 		assertThat(xmlString, is(not(blankOrNullString())));
+		// Parse the XML
         return XML_MAPPER.readValue(xmlString, HDF5FileXml.class);
 	}
 
