@@ -43,11 +43,10 @@ jobs:
                   runner.arch != 'ARM64' &&
                   runner.os == 'Linux'
               run: >
-                wget -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.1/bin/unix/hdf5-1.14.1-2-Std-ubuntu2204_64.tar.gz
-                  tar -xzf hdf5-1.14.1-2-Std-ubuntu2204_64.tar.gz
-                  ./hdf/HDF5-1.14.1-Linux.sh --skip-license
-                  ls -la
-                  echo "$GITHUB_WORKSPACE/HDF_Group/HDF5/1.14.1/bin" >> $GITHUB_PATH
+                wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.2/hdf5-1.14.4-2-ubuntu-2204_gcc.tar.gz
+                  tar -xzf hdf5-1.14.4-2-ubuntu-2204_gcc.tar.gz
+                  tar -xzf hdf5/HDF5-1.14.4.2-Linux.tar.gz
+                  echo "$GITHUB_WORKSPACE/HDF5-1.14.4.2-Linux/HDF_Group/HDF5/1.14.4.2/bin/" >> $GITHUB_PATH
                   echo $GITHUB_PATH
 
             - name: h5dump version
