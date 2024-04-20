@@ -38,6 +38,23 @@ jobs:
                   distribution: 'temurin'
                   cache: 'gradle'
 
+            - name: Install HDF5
+              if: |
+                  runner.arch != 'ARM64' &&
+                  runner.os == 'Linux'
+              run: >
+                wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.2/hdf5-1.14.4-2-ubuntu-2204_gcc.tar.gz
+                  tar -xzf hdf5-1.14.4-2-ubuntu-2204_gcc.tar.gz
+                  tar -xzf hdf5/HDF5-1.14.4.2-Linux.tar.gz
+                  echo "$GITHUB_WORKSPACE/HDF5-1.14.4.2-Linux/HDF_Group/HDF5/1.14.4.2/bin/" >> $GITHUB_PATH
+                  echo $GITHUB_PATH
+
+            - name: h5dump version
+              if: |
+                  runner.arch != 'ARM64' &&
+                  runner.os == 'Linux'
+              run: h5dump --version
+
             - name: Gradle Build
               working-directory: jhdf
               run: ./gradlew build
@@ -49,3 +66,11 @@ jobs:
             - name: Gradle Stop Daemon
               working-directory: jhdf
               run: ./gradlew --stop
+
+            - name: Archive junit results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                name: junit-report-${{ matrix.os }}-${{ matrix.java }}
+                path: jhdf/build/reports/tests/test
+                if-no-files-found: error
