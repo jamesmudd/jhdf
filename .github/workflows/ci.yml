@@ -69,7 +69,9 @@ jobs:
               run: ./gradlew --stop
 
             - name: Archive junit results
+              if: always()
               uses: actions/upload-artifact@v4
               with:
                 name: junit-report-${{ matrix.os }}-${{ matrix.java }}
                 path: jhdf/build/reports/tests/test
+                if-no-files-found: error
