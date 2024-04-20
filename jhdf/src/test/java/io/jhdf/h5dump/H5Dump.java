@@ -46,6 +46,7 @@ public class H5Dump {
 	public static HDF5FileXml dumpAndParse(Path path) throws IOException, InterruptedException {
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.command("h5dump", "--format=%.1lf", "--xml", path.toAbsolutePath().toString());
+		processBuilder.redirectErrorStream(true); // get stderr as well
 		Process process = processBuilder.start();
 		process.waitFor();
 		String xmlString = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
