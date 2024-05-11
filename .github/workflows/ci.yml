@@ -39,9 +39,7 @@ jobs:
                   cache: 'gradle'
 
             - name: Install HDF5 (Linux)
-              if: |
-                  runner.arch != 'ARM64' &&
-                  runner.os == 'Linux'
+              if: runner.arch != 'ARM64' && runner.os == 'Linux'
               run: >
                 wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.2/hdf5-1.14.4-2-ubuntu-2204_gcc.tar.gz
                   tar -xzf hdf5-1.14.4-2-ubuntu-2204_gcc.tar.gz
@@ -50,20 +48,16 @@ jobs:
                   echo $GITHUB_PATH
 
             - name: Install HDF5 (Mac)
-              if: |
-                  runner.arch != 'ARM64' &&
-                  runner.os == 'Linux'
+              if: runner.arch != 'ARM64' && runner.os == 'macOS'
               run: >
-                wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.2/hdf5-1.14.4-2-ubuntu-2204_gcc.tar.gz
-                  tar -xzf hdf5-1.14.4-2-ubuntu-2204_gcc.tar.gz
-                  tar -xzf hdf5/HDF5-1.14.4.2-Linux.tar.gz
-                  echo "$GITHUB_WORKSPACE/HDF5-1.14.4.2-Linux/HDF_Group/HDF5/1.14.4.2/bin/" >> $GITHUB_PATH
+                wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.2/hdf5-1.14.4-2-osx12.tar.gz
+                  tar -xzf hdf5-1.14.4-2-osx12.tar.gz
+                  tar -xzf hdf5/HDF5-1.14.4.2-Darwin.tar.gz
+                  echo "$GITHUB_WORKSPACE/HDF5-1.14.4.2-Darwin/HDF_Group/HDF5/1.14.4.2/bin/" >> $GITHUB_PATH
                   echo $GITHUB_PATH
 
             - name: h5dump version
-              if: |
-                  runner.arch != 'ARM64' &&
-                  runner.os == 'Linux'
+              continue-on-error: true
               run: h5dump --version
 
             - name: Gradle Build
