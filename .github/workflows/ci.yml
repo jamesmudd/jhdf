@@ -61,8 +61,8 @@ jobs:
               shell: bash
               run: >
                   curl.exe --remote-name https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.2/hdf5-1.14.4-2-win-vs2022_cl.zip
-                    unzip hdf5-1.14.4-2-win-vs2022_cl.zip
-                    unzip hdf5/HDF5-1.14.4-win64.zip
+                    tar -xzf hdf5-1.14.4-2-win-vs2022_cl.zip
+                    tar -xzf hdf5/HDF5-1.14.4-win64.zip
                     echo "$GITHUB_WORKSPACE/HDF5-1.14.4-win64/bin/" >> $GITHUB_PATH
                     echo $GITHUB_PATH
 
