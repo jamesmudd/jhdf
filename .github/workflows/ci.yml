@@ -48,7 +48,7 @@ jobs:
                   echo $GITHUB_PATH
 
             - name: Install HDF5 (Mac)
-              if: runner.arch != 'ARM64' && runner.os == 'macOS'
+              if: runner.os == 'macOS'
               run: >
                 wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.2/hdf5-1.14.4-2-osx12.tar.gz
                   tar -xzf hdf5-1.14.4-2-osx12.tar.gz
