@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
@@ -48,7 +49,7 @@ public class H5Dump {
 		processBuilder.command("h5dump", "--format=%.1lf", "--xml", path.toAbsolutePath().toString());
 		processBuilder.redirectErrorStream(true); // get stderr as well
 		Process process = processBuilder.start();
-		process.waitFor();
+		process.waitFor(30, TimeUnit.SECONDS);
 		String xmlString = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
 		logger.info("h5dump return [{}] output [{}]", process.exitValue(), xmlString);
 		// Validate
