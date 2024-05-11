@@ -56,6 +56,16 @@ jobs:
                   echo "$GITHUB_WORKSPACE/HDF5-1.14.4.2-Darwin/HDF_Group/HDF5/1.14.4.2/bin/" >> $GITHUB_PATH
                   echo $GITHUB_PATH
 
+            - name: Install HDF5 (Windows)
+              if: runner.os == 'Windows'
+              shell: bash
+              run: >
+                  wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.2/hdf5-1.14.4-2-win-vs2022_cl.zip
+                    unzip hdf5-1.14.4-2-win-vs2022_cl.zip
+                    unzip hdf5/HDF5-1.14.4-win64.zip
+                    echo "$GITHUB_WORKSPACE/HDF5-1.14.4-win64/bin/" >> $GITHUB_PATH
+                    echo $GITHUB_PATH
+
             - name: h5dump version
               continue-on-error: true
               run: h5dump --version
