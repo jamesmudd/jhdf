@@ -59,9 +59,8 @@ public class HdfFile implements Group, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(HdfFile.class);
 
 	static {
-		final String versionStr = HdfFile.class.getPackage().getImplementationVersion();
-		if (versionStr != null) {
-			logger.info("jHDF version: {}", HdfFile.class.getPackage().getImplementationVersion());
+		if (JhdfInfo.VERSION != null) {
+			logger.info("jHDF version: {}", JhdfInfo.VERSION);
 		} else {
 			logger.warn("Using development version of jHDF");
 		}
