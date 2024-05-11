@@ -447,7 +447,7 @@ public abstract class Superblock {
 			baseAddressByte = 0;
 			superblockExtensionAddress = Constants.UNDEFINED_ADDRESS;
 			endOfFileAddress = 500; // TODO
-			rootGroupObjectHeaderAddress = 48;
+			rootGroupObjectHeaderAddress = WritableHdfFile.ROOT_GROUP_ADDRESS;
 		}
 
 		private SuperblockV2V3(FileChannel fc, final long address) {

@@ -24,7 +24,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Iterator;
@@ -36,7 +38,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(WritableHdfFile.class);
 
-	private static final long ROOT_GROUP_ADDRESS = 48;
+	public static final long ROOT_GROUP_ADDRESS = 64;
 
 	private final Path path;
 	private final FileChannel fileChannel;
@@ -73,12 +75,18 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		logger.info("Flushing to disk [{}]...", path.toAbsolutePath());
 		try {
 			rootGroup.write(hdfFileChannel, ROOT_GROUP_ADDRESS);
+			hdfFileChannel.write(getJHdfInfo());
 			long endOfFile = hdfFileChannel.getFileChannel().size();
 			hdfFileChannel.write(superblock.toBuffer(endOfFile), 0L);
 			logger.info("Flushed to disk [{}] file is [{}] bytes", path.toAbsolutePath(), endOfFile);
 		} catch (IOException e) {
 			throw new HdfWritingException("Error getting file size", e);
 		}
+	}
+
+	private ByteBuffer getJHdfInfo() {
+		final String info = "jHDF - " + JhdfInfo.VERSION + " - " + JhdfInfo.OS + " - " + JhdfInfo.ARCH + " - " + JhdfInfo.BYTE_ORDER;
+		return ByteBuffer.wrap(info.getBytes(StandardCharsets.UTF_8));
 	}
 
 	@Override
