@@ -1,5 +1,14 @@
 # jHDF Change Log
 
+## v0.7.0 - May 2024
+- Release adding HDF5 writing support! https://github.com/jamesmudd/jhdf/issues/354. Special thanks to [@thadguidry](https://github.com/thadguidry) for sponsoring this work. See [WriteHdf5.java](jhdf/src/main/java/io/jhdf/examples/WriteHdf5.java) for example usage. Supports
+  - Groups
+  - n-dimensional `byte`, `int` and `double` datasets
+- Fix UTF-8 groups names https://github.com/jamesmudd/jhdf/issues/539
+- Java 21 now officially supported
+- Adds `h5dump` to CI builds to perform compatability tests.
+- Build and dependency updates
+
 ## v0.7.0-alpha
 - Add initial HDF5 writing support! https://github.com/jamesmudd/jhdf/issues/354. Special thanks to [@thadguidry](https://github.com/thadguidry) for sponsoring this work. See [WriteHdf5.java](jhdf/src/main/java/io/jhdf/examples/WriteHdf5.java) for example usage.
 - Build and dependency updates
