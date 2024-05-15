@@ -35,7 +35,7 @@ jobs:
               with:
                   java-version: ${{ matrix.java }}
                   architecture: 'aarch64'
-                  distribution: 'temurin'
+                  distribution: 'zulu'
                   cache: 'gradle'
 
             - name: Install HDF5 (Linux)
