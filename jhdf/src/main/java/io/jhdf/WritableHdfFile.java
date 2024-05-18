@@ -15,7 +15,6 @@ import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
-import io.jhdf.api.WritableAttributeImpl;
 import io.jhdf.api.WritableGroup;
 import io.jhdf.api.WritiableDataset;
 import io.jhdf.exceptions.HdfWritingException;
