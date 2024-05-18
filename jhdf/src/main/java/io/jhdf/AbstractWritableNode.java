@@ -24,7 +24,7 @@ public abstract class AbstractWritableNode implements WritableNode {
 	private final Group parent;
 	private final String name;
 
-	private final Map<String, WritableAttributeImpl> attributes = new HashMap<>();
+	private final Map<String, Attribute> attributes = new HashMap<>();
 
 	AbstractWritableNode(Group parent, String name) {
 		this.parent = parent;
