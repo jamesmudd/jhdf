@@ -16,5 +16,6 @@ public interface WritableNode extends Node {
 
 	long write(HdfFileChannel hdfFileChannel, long position);
 
-	Attribute putAttribute(String name, Object attribute);
+	Attribute putAttribute(String name, Object data);
+	Attribute removeAttribute(String name);
 }

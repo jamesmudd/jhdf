@@ -15,6 +15,7 @@ import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
+import io.jhdf.api.WritableAttributeImpl;
 import io.jhdf.api.WritableGroup;
 import io.jhdf.api.WritiableDataset;
 import io.jhdf.exceptions.HdfWritingException;
@@ -147,6 +148,16 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	@Override
 	public Attribute getAttribute(String name) {
 		return rootGroup.getAttribute(name);
+	}
+
+	@Override
+	public Attribute putAttribute(String name, Object data) {
+		return rootGroup.putAttribute(name, data);
+	}
+
+	@Override
+	public Attribute removeAttribute(String name) {
+		return rootGroup.removeAttribute(name);
 	}
 
 	@Override

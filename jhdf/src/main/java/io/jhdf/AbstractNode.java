@@ -13,6 +13,7 @@ import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
+import io.jhdf.api.WritableAttributeImpl;
 import io.jhdf.btree.BTreeV2;
 import io.jhdf.btree.record.AttributeNameForIndexedAttributesRecord;
 import io.jhdf.exceptions.HdfException;
