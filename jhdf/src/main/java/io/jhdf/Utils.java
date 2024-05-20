@@ -424,4 +424,22 @@ public final class Utils {
 			bits.set(start + i, bi.testBit(i));
 		}
 	}
+
+    public static Object[] flatten(Object data) {
+        List<Object> flat = new ArrayList<>();
+        flattenInternal(data, flat);
+        return flat.toArray();
+    }
+
+	private static void flattenInternal(Object data, List<Object> flat) {
+		int length = Array.getLength(data);
+		for (int i = 0; i < length; i++) {
+			Object element = Array.get(data, i);
+			if (element.getClass().isArray()) {
+				flattenInternal(element, flat);
+			} else {
+				flat.add(element);
+			}
+		}
+	}
 }

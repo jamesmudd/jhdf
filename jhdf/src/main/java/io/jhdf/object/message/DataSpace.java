@@ -16,6 +16,7 @@ import io.jhdf.exceptions.HdfException;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.stream.IntStream;
 
@@ -64,7 +65,7 @@ public class DataSpace {
 				maxSizes[i] = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 			}
 		} else {
-			maxSizes = ArrayUtils.EMPTY_LONG_ARRAY;
+			maxSizes = Arrays.stream(dimensions).asLongStream().toArray();
 		}
 
 		// Permutation indices - Note never implemented in HDF library!
@@ -83,10 +84,11 @@ public class DataSpace {
 	}
 
 	public static DataSpace fromObject(Object data) {
+		int[] dimensions1 = Utils.getDimensions(data);
 		return new DataSpace((byte) 2,
 			false,
-			Utils.getDimensions(data),
-			ArrayUtils.EMPTY_LONG_ARRAY,
+			dimensions1,
+			Arrays.stream(dimensions1).asLongStream().toArray(),
 			(byte) 1
 		);
 	}

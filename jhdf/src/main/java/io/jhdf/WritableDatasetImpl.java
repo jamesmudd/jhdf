@@ -13,6 +13,7 @@ package io.jhdf;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.WritiableDataset;
+import io.jhdf.exceptions.HdfWritingException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.stripLeadingIndex;
 
 public class WritableDatasetImpl extends AbstractWritableNode implements WritiableDataset {
@@ -56,17 +58,18 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 	@Override
 	public long getSize() {
-		return 0;
+		return dataSpace.getTotalLength();
 	}
 
 	@Override
 	public long getSizeInBytes() {
-		return 0;
+		return getSize() * dataType.getSize();
 	}
 
 	@Override
 	public long getStorageInBytes() {
-		return 0;
+		// As there is no compression this is correct ATM
+		return getSizeInBytes();
 	}
 
 	@Override
@@ -76,12 +79,15 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 	@Override
 	public boolean isScalar() {
-		return false;
+		if (isEmpty()) {
+			return false;
+		}
+		return getDimensions().length == 0;
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return false;
+		return data == null;
 	}
 
 	@Override
@@ -96,27 +102,28 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 	@Override
 	public long[] getMaxSize() {
-		return new long[0];
+		return dataSpace.getMaxSizes();
 	}
 
 	@Override
 	public DataLayout getDataLayout() {
-		return null;
+		// ATM we only support contiguous
+		return DataLayout.CONTIGUOUS;
 	}
 
 	@Override
 	public Object getData() {
-		return null;
+		return data;
 	}
 
 	@Override
 	public Object getDataFlat() {
-		return null;
+		return flatten(data);
 	}
 
 	@Override
 	public Object getData(long[] sliceOffset, int[] sliceDimensions) {
-		return null;
+		throw new HdfWritingException("Slicing a writable dataset not supported");
 	}
 
 	@Override
@@ -136,6 +143,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 	@Override
 	public List<PipelineFilterWithData> getFilters() {
+		// ATM no filters support
 		return Collections.emptyList();
 	}
 
@@ -151,22 +159,22 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 	@Override
 	public File getFile() {
-		return null;
+		return getParent().getFile();
 	}
 
 	@Override
 	public Path getFileAsPath() {
-		return null;
+		return getParent().getFileAsPath();
 	}
 
 	@Override
 	public HdfFile getHdfFile() {
-		return null;
+		return getParent().getHdfFile();
 	}
 
 	@Override
 	public long getAddress() {
-		return 0;
+		throw new HdfWritingException("Address not known until written");
 	}
 
 	@Override

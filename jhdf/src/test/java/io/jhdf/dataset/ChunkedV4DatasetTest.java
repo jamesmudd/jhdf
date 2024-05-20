@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static io.jhdf.TestUtils.flatten;
+import static io.jhdf.Utils.flatten;
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.CoreMatchers.equalTo;
