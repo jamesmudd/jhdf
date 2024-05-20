@@ -24,7 +24,7 @@ import org.junit.jupiter.api.function.Executable;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static io.jhdf.TestUtils.flatten;
+import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.getDimensions;
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static java.nio.charset.StandardCharsets.UTF_8;
