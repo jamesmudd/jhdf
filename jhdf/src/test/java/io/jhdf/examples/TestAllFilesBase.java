@@ -38,7 +38,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.jhdf.TestUtils.flatten;
+import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.getDimensions;
 import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
