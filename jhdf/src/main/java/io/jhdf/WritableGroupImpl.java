@@ -10,6 +10,7 @@
 
 package io.jhdf;
 
+import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
@@ -18,6 +19,7 @@ import io.jhdf.api.WritableGroup;
 import io.jhdf.api.WritableNode;
 import io.jhdf.api.WritiableDataset;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.GroupInfoMessage;
 import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
@@ -129,6 +131,12 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 		for (Map.Entry<String, WritableNode> child : children.entrySet()) {
 			LinkMessage linkMessage = LinkMessage.create(child.getKey(), 0L);
 			messages.add(linkMessage);
+		}
+
+		for (Map.Entry<String, Attribute> attribute : getAttributes().entrySet()) {
+			logger.info("Writing attribute [{}]", attribute.getKey());
+			AttributeMessage attributeMessage = AttributeMessage.create(attribute.getKey(), attribute.getValue());
+			messages.add(attributeMessage);
 		}
 
 		ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);

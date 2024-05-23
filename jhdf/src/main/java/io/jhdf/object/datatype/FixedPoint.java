@@ -9,8 +9,11 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -19,7 +22,9 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
+import java.util.Arrays;
 
+import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.stripLeadingIndex;
 
 public class FixedPoint extends DataType implements OrderedDataType, WritableDataType {
@@ -163,7 +168,20 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 		return data;
 	}
 
-	// Signed Fixed Point
+    @Override
+    public ByteBuffer encodeData(Object data) {
+		Class<?> type = Utils.getArrayType(data);
+		// TODO multi dimensional and scalar and empty
+		if(type == int.class) {
+			Object[] flattened = flatten(data);
+			ByteBuffer buffer = ByteBuffer.allocate(flattened.length * 4);
+			buffer.asIntBuffer().put((int[]) data);
+			return buffer;
+		}
+		throw new UnsupportedHdfException("Cant write type");
+	}
+
+    // Signed Fixed Point
 
 	private static void fillData(Object data, int[] dims, ByteBuffer buffer) {
 		if (dims.length > 1) {

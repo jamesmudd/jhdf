@@ -76,7 +76,16 @@ public class WritableAttributeImpl implements Attribute {
 
 	@Override
 	public ByteBuffer getBuffer() {
-		// TODO
-		return null;
+		return dataType.encodeData(data);
+	}
+
+	@Override
+	public DataSpace getDataSpace() {
+		return dataSpace;
+	}
+
+	@Override
+	public DataType getDataType() {
+		return dataType;
 	}
 }

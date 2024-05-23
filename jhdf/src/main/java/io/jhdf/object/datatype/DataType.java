@@ -145,6 +145,11 @@ public abstract class DataType {
 	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage);
 
 	// TODO could be abstract when there are more impls
+	public ByteBuffer encodeData(Object data){
+		throw new UnsupportedHdfException("Data type [" + getClass().getSimpleName() + "] does not support writing");
+	}
+
+	// TODO could be abstract when there are more impls
 	public ByteBuffer toBuffer() {
 		throw new UnsupportedHdfException("Data type [" + getClass().getSimpleName() + "] does not support writing");
 	}

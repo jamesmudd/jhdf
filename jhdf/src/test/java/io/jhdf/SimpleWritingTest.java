@@ -10,6 +10,7 @@
 
 package io.jhdf;
 
+import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
 import io.jhdf.api.WritableGroup;
@@ -143,6 +144,27 @@ class SimpleWritingTest {
 		try(HdfFile hdfFile = new HdfFile(tempFile)) {
 			// Compare
 			H5Dump.assetXmlAndHdfFileMatch(hdf5FileXml, hdfFile);
+		}
+	}
+
+	@Test
+	@Order(5)
+	void writeAttributes() throws Exception {
+		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
+
+		WritableGroup intGroup = writableHdfFile.putGroup("intGroup");
+		int[] intData1 = new int[]{-5, -4, -3, -2, -1, 0, 1,2,3,4,5 };
+		intGroup.putDataset("intData1", intData1);
+
+		writableHdfFile.putAttribute("rootAttribute", new int[] {1,2,3});
+
+		// Actually flush and write everything
+		writableHdfFile.close();
+
+		// Now read it back
+		try(HdfFile hdfFile = new HdfFile(tempFile)) {
+			Map<String, Attribute> attributes = hdfFile.getAttributes();
+			assertThat(attributes).containsKeys("rootAttribute");
 		}
 	}
 }
