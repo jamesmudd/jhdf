@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.BitSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,6 +34,12 @@ class AttributeMessageTest {
 		assertThat(roundtripMessage).usingRecursiveComparison()
 			.withStrictTypeChecking()
 			.isEqualTo(attributeMessage);
+
+		IntBuffer readBackData = roundtripMessage.getDataBuffer().asIntBuffer();
+		assertThat(readBackData.get()).isEqualTo(1);
+		assertThat(readBackData.get()).isEqualTo(2);
+		assertThat(readBackData.get()).isEqualTo(3);
+		assertThat(readBackData.limit()).isEqualTo(3);
 	}
 
 }

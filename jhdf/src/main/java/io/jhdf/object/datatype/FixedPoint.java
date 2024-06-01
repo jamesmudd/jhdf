@@ -175,6 +175,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 		if(type == int.class) {
 			Object[] flattened = flatten(data);
 			ByteBuffer buffer = ByteBuffer.allocate(flattened.length * 4);
+			buffer.order(ByteOrder.nativeOrder());
 			buffer.asIntBuffer().put((int[]) data);
 			return buffer;
 		}
