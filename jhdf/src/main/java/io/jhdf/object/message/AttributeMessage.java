@@ -187,7 +187,7 @@ public class AttributeMessage extends Message {
 
 		return new BufferBuilder()
 			.writeByte(3) // version
-			.writeByte(0) // flags
+			.writeBitSet(BitSet.valueOf(new byte[1]), 1)
 			.writeShort(nameBytes.length)
 			.writeShort(dataTypeBytes.capacity())
 			.writeShort(dataSpaceBytes.capacity())
