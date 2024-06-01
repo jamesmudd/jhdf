@@ -165,6 +165,11 @@ class SimpleWritingTest {
 		try(HdfFile hdfFile = new HdfFile(tempFile)) {
 			Map<String, Attribute> attributes = hdfFile.getAttributes();
 			assertThat(attributes).containsKeys("rootAttribute");
+			Attribute attribute = attributes.get("rootAttribute");
+			assertThat(attribute.getData()).isEqualTo(new int[] {1,2,3});
+			assertThat(attribute.getDimensions()).isEqualTo(new int[] {3});
+			assertThat(attribute.getJavaType()).isEqualTo(int.class);
 		}
+
 	}
 }
