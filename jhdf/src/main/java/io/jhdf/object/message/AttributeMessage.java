@@ -10,6 +10,7 @@
 package io.jhdf.object.message;
 
 import io.jhdf.BufferBuilder;
+import io.jhdf.Constants;
 import io.jhdf.ObjectHeader;
 import io.jhdf.Utils;
 import io.jhdf.api.Attribute;
@@ -187,12 +188,13 @@ public class AttributeMessage extends Message {
 
 		return new BufferBuilder()
 			.writeByte(3) // version
-			.writeBitSet(BitSet.valueOf(new byte[1]), 1)
-			.writeShort(nameBytes.length)
+			.writeByte(0) // flags
+			.writeShort(nameBytes.length + 1) // +1 for null terminated
 			.writeShort(dataTypeBytes.capacity())
 			.writeShort(dataSpaceBytes.capacity())
-			.writeByte(1) // name charset
+			.writeByte(1) // name charset UTF8
 			.writeBytes(nameBytes)
+			.writeByte(Constants.NULL) // Null terminated string
 			.writeBuffer(dataTypeBytes)
 			.writeBuffer(dataSpaceBytes)
 			.writeBuffer(data)

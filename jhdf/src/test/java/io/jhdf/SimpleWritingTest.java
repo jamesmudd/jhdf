@@ -14,6 +14,7 @@ import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
 import io.jhdf.api.WritableGroup;
+import io.jhdf.api.WritiableDataset;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
 import io.jhdf.h5dump.HDF5FileXml;
@@ -154,9 +155,11 @@ class SimpleWritingTest {
 
 		WritableGroup intGroup = writableHdfFile.putGroup("intGroup");
 		int[] intData1 = new int[]{-5, -4, -3, -2, -1, 0, 1,2,3,4,5 };
-		intGroup.putDataset("intData1", intData1);
+		WritiableDataset intDataset = intGroup.putDataset("intData1", intData1);
 
 		writableHdfFile.putAttribute("rootAttribute", new int[] {1,2,3});
+		intGroup.putAttribute("groupAttribute", new int[] {1,2,3});
+		intDataset.putAttribute("datasetAttribute", new int[] {1,2,3});
 
 		// Actually flush and write everything
 		writableHdfFile.close();

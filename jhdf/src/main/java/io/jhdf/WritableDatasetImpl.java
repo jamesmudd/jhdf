@@ -10,6 +10,7 @@
 
 package io.jhdf;
 
+import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.WritiableDataset;
@@ -17,6 +18,7 @@ import io.jhdf.exceptions.HdfWritingException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
+import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataLayout;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
 import io.jhdf.object.message.DataSpace;
@@ -36,6 +38,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.stripLeadingIndex;
@@ -197,6 +200,12 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 		// TODO will have know fixed size so don't really need these objects but for now...
 		ContiguousDataLayoutMessage placeholder = ContiguousDataLayoutMessage.create(Constants.UNDEFINED_ADDRESS, Constants.UNDEFINED_ADDRESS);
 		messages.add(placeholder);
+
+		for (Map.Entry<String, Attribute> attribute : getAttributes().entrySet()) {
+			logger.info("Writing attribute [{}]", attribute.getKey());
+			AttributeMessage attributeMessage = AttributeMessage.create(attribute.getKey(), attribute.getValue());
+			messages.add(attributeMessage);
+		}
 
 		ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
 		int ohSize = objectHeader.toBuffer().limit();
