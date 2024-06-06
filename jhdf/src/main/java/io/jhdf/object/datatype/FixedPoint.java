@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -22,7 +22,13 @@ import java.nio.ShortBuffer;
 
 import static io.jhdf.Utils.stripLeadingIndex;
 
-public class FixedPoint extends DataType implements OrderedDataType {
+public class FixedPoint extends DataType implements OrderedDataType, WritableDataType {
+
+	public static final int CLASS_ID = 0;
+	private static final int ORDER_BIT = 0;
+	private static final int LOW_PADDING_BIT = 1;
+	private static final int HIGH_PADDING_BIT = 2;
+	private static final int SIGNED_BIT = 3;
 	private final ByteOrder order;
 	private final boolean lowPadding;
 	private final boolean highPadding;
@@ -33,18 +39,29 @@ public class FixedPoint extends DataType implements OrderedDataType {
 	public FixedPoint(ByteBuffer bb) {
 		super(bb);
 
-		if (classBits.get(0)) {
+		if (classBits.get(ORDER_BIT)) {
 			order = ByteOrder.BIG_ENDIAN;
 		} else {
 			order = ByteOrder.LITTLE_ENDIAN;
 		}
 
-		lowPadding = classBits.get(1);
-		highPadding = classBits.get(2);
-		signed = classBits.get(3);
+		lowPadding = classBits.get(LOW_PADDING_BIT);
+		highPadding = classBits.get(HIGH_PADDING_BIT);
+		signed = classBits.get(SIGNED_BIT);
 
 		bitOffset = bb.getShort();
 		bitPrecision = bb.getShort();
+	}
+
+	public FixedPoint(int bytePrecision) {
+		// TODO arg validation
+		super(CLASS_ID, bytePrecision);
+		this.order = ByteOrder.nativeOrder();
+		this.bitPrecision = (short) (bytePrecision * 8);
+		this.lowPadding = false;
+		this.highPadding = false;
+		this.signed = true;
+		this.bitOffset = 0; // TODO ok?
 	}
 
 	@Override
@@ -97,7 +114,7 @@ public class FixedPoint extends DataType implements OrderedDataType {
 				case 64:
 					return BigInteger.class;
 				default:
-					throw new HdfTypeException("Unsupported signed fixed point data type");
+					throw new HdfTypeException("Unsupported unsigned fixed point data type");
 			}
 		}
 	}
@@ -261,5 +278,18 @@ public class FixedPoint extends DataType implements OrderedDataType {
 				bigIntData[i] = new BigInteger(1, tempByteBuffer.array());
 			}
 		}
+	}
+
+	@Override
+	public ByteBuffer toBuffer() {
+		classBits.set(ORDER_BIT, order.equals(ByteOrder.BIG_ENDIAN));
+		classBits.set(LOW_PADDING_BIT, lowPadding);
+		classBits.set(HIGH_PADDING_BIT, highPadding);
+		classBits.set(SIGNED_BIT, signed);
+
+		return  super.toBufferBuilder()
+			.writeShort(bitOffset)
+			.writeShort(bitPrecision)
+			.build();
 	}
 }

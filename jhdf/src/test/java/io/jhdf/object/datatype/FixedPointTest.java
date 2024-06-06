@@ -3,15 +3,18 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.Utils;
+import io.jhdf.object.message.DataTypeMessage;
 import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.storage.HdfBackingStorage;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -21,6 +24,7 @@ import org.mockito.Mockito;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.BitSet;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -152,6 +156,17 @@ class FixedPointTest {
 		HdfBackingStorage hdfBackingStorage = mock(HdfBackingStorage.class);
 		assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(longBuffer, dims, hdfBackingStorage));
 		verifyNoInteractions(hdfBackingStorage);
+	}
+
+	@Test
+	void testWritingFixedPoint() {
+		FixedPoint fixedPoint = new FixedPoint(4);
+		ByteBuffer buffer = fixedPoint.toBuffer();
+		FixedPoint readBack = new FixedPoint(buffer);
+
+		Assertions.assertThat(readBack).usingRecursiveComparison()
+			.withStrictTypeChecking()
+			.isEqualTo(fixedPoint);
 	}
 
 }

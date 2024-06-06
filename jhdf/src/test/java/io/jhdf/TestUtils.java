@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -11,11 +11,8 @@ package io.jhdf;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 public final class TestUtils {
 
@@ -31,33 +28,8 @@ public final class TestUtils {
 		return new HdfFile(Paths.get(url.toURI()));
 	}
 
-	public static Object[] flatten(Object data) {
-		List<Object> flat = new ArrayList<>();
-		flattenInternal(data, flat);
-		return flat.toArray();
+	public static String[] toStringArray(Object data) {
+		return ArrayUtils.toStringArray(Utils.flatten(data));
 	}
 
-	private static void flattenInternal(Object data, List<Object> flat) {
-		int length = Array.getLength(data);
-		for (int i = 0; i < length; i++) {
-			Object element = Array.get(data, i);
-			if (element.getClass().isArray()) {
-				flattenInternal(element, flat);
-			} else {
-				flat.add(element);
-			}
-		}
-	}
-
-	public static int[] getDimensions(Object data) {
-		List<Integer> dims = new ArrayList<>();
-		int dimLength = Array.getLength(data);
-		dims.add(dimLength);
-
-		while (dimLength > 0 && Array.get(data, 0).getClass().isArray()) {
-			data = Array.get(data, 0);
-			dims.add(Array.getLength(data));
-		}
-		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
-	}
 }

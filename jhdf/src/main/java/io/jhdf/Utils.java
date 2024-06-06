@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -11,13 +11,16 @@ package io.jhdf;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.List;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
@@ -42,7 +45,7 @@ public final class Utils {
 	}
 
 	/**
-	 * Reads ASCII string from the buffer until a null character is reached. This
+	 * Reads UTF8 string from the buffer until a null character is reached. This
 	 * will read from the buffers current position. After the method the buffer
 	 * position will be after the null character.
 	 *
@@ -52,13 +55,19 @@ public final class Utils {
 	 *                                  and null terminator
 	 */
 	public static String readUntilNull(ByteBuffer buffer) {
-		StringBuilder sb = new StringBuilder(buffer.remaining());
+		buffer.mark();
+		int length = 0;
+		// Step through the buffer while NULL is not found
 		while (buffer.hasRemaining()) {
 			byte b = buffer.get();
 			if (b == Constants.NULL) {
-				return sb.toString();
+				buffer.reset();
+				byte[] bytes = new byte[length];
+				buffer.get(bytes);
+				buffer.get(); // Step over the NULL again to position the buffer
+				return new String(bytes, StandardCharsets.UTF_8);
 			}
-			sb.append((char) b);
+			length++;
 		}
 		throw new IllegalArgumentException("End of buffer reached before NULL");
 	}
@@ -89,6 +98,13 @@ public final class Utils {
 			return; // Already on a 8 byte multiple
 		}
 		bb.position(pos + (8 - (pos % 8)));
+	}
+
+	public static long nextMultipleOfEight(long value) {
+		if (value % 8 == 0) {
+			return value; // Already on a 8 byte multiple
+		}
+		return value + (8 - (value % 8));
 	}
 
 	/**
@@ -373,5 +389,57 @@ public final class Utils {
 		final int byteIndex = bit / 8;
 		final int bitInByte = bit % 8;
 		return ((bytes[byteIndex]  >> bitInByte) & 1) == 1;
+	}
+
+	public static int[] getDimensions(Object data) {
+		List<Integer> dims = new ArrayList<>();
+		int dimLength = Array.getLength(data);
+		dims.add(dimLength);
+
+		while (dimLength > 0 && Array.get(data, 0).getClass().isArray()) {
+			data = Array.get(data, 0);
+			dims.add(Array.getLength(data));
+		}
+		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
+	}
+
+	public static Class<?> getArrayType(Object array) {
+		Object element = Array.get(array, 0);
+		if (element.getClass().isArray()) {
+			return getArrayType(element);
+		} else {
+			return array.getClass().getComponentType();
+		}
+	}
+
+	public static void writeIntToBits(int value, BitSet bits, int start, int length) {
+		if(value < 0) {
+			throw new IllegalArgumentException("Value cannot be negative");
+		}
+		BigInteger bi = BigInteger.valueOf(value);
+		if(bi.bitLength() > length) {
+			throw new IllegalArgumentException("Value [" + value + "] to high to convert to bits");
+		}
+		for (int i = 0; i < length; i++) {
+			bits.set(start + i, bi.testBit(i));
+		}
+	}
+
+    public static Object[] flatten(Object data) {
+        List<Object> flat = new ArrayList<>();
+        flattenInternal(data, flat);
+        return flat.toArray();
+    }
+
+	private static void flattenInternal(Object data, List<Object> flat) {
+		int length = Array.getLength(data);
+		for (int i = 0; i < length; i++) {
+			Object element = Array.get(data, i);
+			if (element.getClass().isArray()) {
+				flattenInternal(element, flat);
+			} else {
+				flat.add(element);
+			}
+		}
 	}
 }

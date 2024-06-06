@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -16,6 +16,7 @@ import java.util.BitSet;
 
 public class ObjectReferenceCountMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 22;
 	private final int referenceCount;
 
 	public ObjectReferenceCountMessage(ByteBuffer bb, BitSet flags) {
@@ -32,5 +33,11 @@ public class ObjectReferenceCountMessage extends Message {
 	public int getReferenceCount() {
 		return referenceCount;
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
 
 }

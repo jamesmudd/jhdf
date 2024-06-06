@@ -3,14 +3,14 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
-import io.jhdf.TestUtils;
+import io.jhdf.Utils;
 import io.jhdf.api.Dataset;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -122,7 +122,7 @@ class VariableLengthDatasetTest {
 			assertThat(Array.getLength(data[2]), is(3));
 
 			// Now check the values
-			Object[] flatData = TestUtils.flatten(data);
+			Object[] flatData = Utils.flatten(data);
 			for (int i = 0; i < flatData.length; i++) {
 				// Do element comparison as there are all different primitive numeric types
 				// convert to double

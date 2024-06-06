@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -30,6 +30,8 @@ import java.util.BitSet;
  * @author James Mudd
  */
 public class AttributeInfoMessage extends Message {
+
+	public static final int MESSAGE_TYPE = 21;
 
 	private static final int MAXIMUM_CREATION_INDEX_PRESENT = 0;
 	private static final int ATTRIBUTE_CREATION_ORDER_PRESENT = 1;
@@ -81,5 +83,11 @@ public class AttributeInfoMessage extends Message {
 	public long getAttributeCreationOrderBTreeAddress() {
 		return attributeCreationOrderBTreeAddress;
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
 
 }

@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -24,6 +24,12 @@ import java.nio.ShortBuffer;
 import static io.jhdf.Utils.stripLeadingIndex;
 
 public class FloatingPoint extends DataType implements OrderedDataType {
+
+	public static final int CLASS_ID = 1;
+	private static final int ORDER_BIT = 0;
+	private static final int LOW_PADDING_BIT = 1;
+	private static final int HIGH_PADDING_BIT = 2;
+	private static final int INTERNAL_PADDING_BIT = 3;
 
 	private final ByteOrder order;
 	private final boolean lowPadding;
@@ -47,19 +53,17 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		if (classBits.get(6)) {
 			throw new UnsupportedHdfException("VAX endian is not supported");
 		}
-		if (classBits.get(0)) {
+		if (classBits.get(ORDER_BIT)) {
 			order = ByteOrder.BIG_ENDIAN;
 		} else {
 			order = ByteOrder.LITTLE_ENDIAN;
 		}
 
-		lowPadding = classBits.get(1);
-		highPadding = classBits.get(2);
-		internalPadding = classBits.get(3);
+		lowPadding = classBits.get(LOW_PADDING_BIT);
+		highPadding = classBits.get(HIGH_PADDING_BIT);
+		internalPadding = classBits.get(INTERNAL_PADDING_BIT);
 
-		// Mask the 4+5 bits and shift to the end
 		mantissaNormalization = Utils.bitsToInt(classBits, 4, 2);
-
 		signLocation = Utils.bitsToInt(classBits, 8, 8);
 
 		// Properties
@@ -70,6 +74,39 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		mantissaLocation = bb.get();
 		mantissaSize = bb.get();
 		exponentBias = bb.getInt();
+	}
+
+	private FloatingPoint(int size,
+						  int mantissaNormalization,
+						  int signLocation,
+						  short bitOffset,
+						  short bitPrecision,
+						  byte exponentLocation,
+						  byte exponentSize,
+						  byte mantissaLocation,
+						  byte mantissaSize,
+						  int exponentBias) {
+		super(CLASS_ID, size);
+		this.order = ByteOrder.nativeOrder();
+		this.lowPadding = false;
+		this.highPadding = false;
+		this.internalPadding = false;
+		this.mantissaNormalization = mantissaNormalization;
+		this.signLocation = signLocation;
+		this.bitOffset = bitOffset;
+		this.bitPrecision = bitPrecision;
+		this.exponentLocation = exponentLocation;
+		this.exponentSize = exponentSize;
+		this.mantissaLocation = mantissaLocation;
+		this.mantissaSize = mantissaSize;
+		this.exponentBias = exponentBias;
+
+		classBits.set(ORDER_BIT, order.equals(ByteOrder.BIG_ENDIAN));
+		classBits.set(LOW_PADDING_BIT, false);
+		classBits.set(HIGH_PADDING_BIT, false);
+		classBits.set(INTERNAL_PADDING_BIT, false);
+		Utils.writeIntToBits(mantissaNormalization, classBits, 4, 2);
+		Utils.writeIntToBits(signLocation, classBits, 8, 8);
 	}
 
 	@Override
@@ -226,5 +263,42 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 			buffer.get((double[]) data);
 		}
 	}
+
+	@Override
+	public ByteBuffer toBuffer() {
+		return  super.toBufferBuilder()
+			.writeShort(bitOffset)
+			.writeShort(bitPrecision)
+			.writeByte(exponentLocation)
+			.writeByte(exponentSize)
+			.writeByte(mantissaLocation)
+			.writeByte(mantissaSize)
+			.writeInt(exponentBias)
+			.build();
+	}
+
+	public static final FloatingPoint FLOAT = new FloatingPoint(
+		4,
+		2,
+		31,
+		(short) 0,
+		(short) 32,
+		(byte) 23,
+		(byte) 8,
+		(byte) 0,
+		(byte) 23,
+		127);
+
+	public static final FloatingPoint DOUBLE = new FloatingPoint(
+		8, // size
+		2,      // mantissa normalisation
+		63,     // Sign location
+		(short) 0,   // bit offset
+		(short) 64,   // bit precision
+		(byte) 52,  // exponent location
+		(byte) 11,    // exponent size
+		(byte) 0,      // mantissa location
+		(byte) 52,     // mantissa size
+		1023);   // exponent bias
 
 }

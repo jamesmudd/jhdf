@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -23,6 +23,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 
 public class AttributeMessage extends Message {
+	public static final int MESSAGE_TYPE = 12;
+
 	private static final Logger logger = LoggerFactory.getLogger(AttributeMessage.class);
 
 	private static final int DATA_TYPE_SHARED = 0;
@@ -155,6 +157,11 @@ public class AttributeMessage extends Message {
 	@Override
 	public String toString() {
 		return "AttributeMessage [name=" + name + ", dataType=" + dataType + ", dataSpace=" + dataSpace + "]";
+	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
 	}
 
 }

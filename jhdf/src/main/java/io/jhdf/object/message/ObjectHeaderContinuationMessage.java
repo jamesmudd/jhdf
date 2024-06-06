@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -30,6 +30,8 @@ import java.util.BitSet;
  */
 public class ObjectHeaderContinuationMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 16;
+
 	private final long offset;
 	private final int length;
 
@@ -47,4 +49,11 @@ public class ObjectHeaderContinuationMessage extends Message {
 	public int getLength() {
 		return length;
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
+
 }

@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -59,9 +59,8 @@ public class HdfFile implements Group, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(HdfFile.class);
 
 	static {
-		final String versionStr = HdfFile.class.getPackage().getImplementationVersion();
-		if (versionStr != null) {
-			logger.info("jHDF version: {}", HdfFile.class.getPackage().getImplementationVersion());
+		if (JhdfInfo.VERSION != null) {
+			logger.info("jHDF version: {}", JhdfInfo.VERSION);
 		} else {
 			logger.warn("Using development version of jHDF");
 		}
@@ -235,6 +234,10 @@ public class HdfFile implements Group, AutoCloseable {
 			return 512L;
 		}
 		return offset * 2;
+	}
+
+	public static WritableHdfFile write(Path path) {
+		return new WritableHdfFile(path);
 	}
 
 	/**

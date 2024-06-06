@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.function.Executable;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static io.jhdf.TestUtils.flatten;
+import static io.jhdf.Utils.flatten;
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

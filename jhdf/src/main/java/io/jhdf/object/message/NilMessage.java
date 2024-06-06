@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -27,10 +27,33 @@ import java.util.BitSet;
  */
 public class NilMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 0;
+
+	private final int size;
+
 	/* package */ NilMessage(ByteBuffer bb, BitSet flags) {
 		super(flags);
+		this.size = bb.capacity();
 		// Move buffer to the end
 		bb.position(bb.limit());
 	}
 
+	public static NilMessage create() {
+		return new NilMessage(16);
+	}
+
+	private NilMessage(int size) {
+		super(new BitSet(1));
+		this.size = size;
+	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
+	@Override
+	public ByteBuffer toBuffer() {
+		return ByteBuffer.allocate(size);
+	}
 }

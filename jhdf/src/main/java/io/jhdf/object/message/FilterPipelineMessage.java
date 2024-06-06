@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -33,6 +33,8 @@ import java.util.List;
  * @author James Mudd
  */
 public class FilterPipelineMessage extends Message {
+
+	public static final int MESSAGE_TYPE = 11;
 
 	private static final int OPTIONAL = 0;
 
@@ -137,4 +139,11 @@ public class FilterPipelineMessage extends Message {
 				+ "]";
 		}
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
+
 }

@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -29,6 +29,8 @@ import java.util.BitSet;
  */
 public class FillValueOldMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 4;
+
 	private final ByteBuffer fillValue;
 
 	/* package */ FillValueOldMessage(ByteBuffer bb, BitSet flags) {
@@ -47,5 +49,11 @@ public class FillValueOldMessage extends Message {
 	public ByteBuffer getFillValue() {
 		return fillValue.asReadOnlyBuffer();
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
 
 }

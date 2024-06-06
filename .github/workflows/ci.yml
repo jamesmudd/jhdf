@@ -15,28 +15,60 @@ jobs:
             fail-fast: false
             matrix:
                 os: [ 'macos-latest', 'ubuntu-latest', 'windows-latest', ['self-hosted', 'ARM64'] ]
-                java: [ '8', '11', '17' ]
+                java: [ '8', '11', '17', '21' ]
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Set up JDK (x64)
-              uses: actions/setup-java@v3
-              if: runner.arch != 'ARM64'
+              uses: actions/setup-java@v4
+              if: runner.arch != 'ARM64' && runner.os != 'Linux'
               with:
                   java-version: ${{ matrix.java }}
-                  architecture: 'x64'
+                  architecture: ${{ runner.arch }}
                   distribution: 'temurin'
                   cache: 'gradle'
 
             - name: Set up JDK (arm64)
-              uses: actions/setup-java@v3
-              if: runner.arch == 'ARM64'
+              uses: actions/setup-java@v4
+              if: runner.arch == 'ARM64' && runner.os == 'Linux'
               with:
                   java-version: ${{ matrix.java }}
                   architecture: 'aarch64'
-                  distribution: 'temurin'
+                  distribution: 'zulu'
                   cache: 'gradle'
+
+            - name: Install HDF5 (Linux)
+              if: runner.arch != 'ARM64' && runner.os == 'Linux'
+              run: >
+                wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.2/hdf5-1.14.4-2-ubuntu-2204_gcc.tar.gz
+                  tar -xzf hdf5-1.14.4-2-ubuntu-2204_gcc.tar.gz
+                  tar -xzf hdf5/HDF5-1.14.4.2-Linux.tar.gz
+                  echo "$GITHUB_WORKSPACE/HDF5-1.14.4.2-Linux/HDF_Group/HDF5/1.14.4.2/bin/" >> $GITHUB_PATH
+                  echo $GITHUB_PATH
+
+            - name: Install HDF5 (Mac)
+              if: runner.os == 'macOS'
+              run: >
+                wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.2/hdf5-1.14.4-2-osx12.tar.gz
+                  tar -xzf hdf5-1.14.4-2-osx12.tar.gz
+                  tar -xzf hdf5/HDF5-1.14.4.2-Darwin.tar.gz
+                  echo "$GITHUB_WORKSPACE/HDF5-1.14.4.2-Darwin/HDF_Group/HDF5/1.14.4.2/bin/" >> $GITHUB_PATH
+                  echo $GITHUB_PATH
+
+            - name: Install HDF5 (Windows)
+              if: runner.os == 'Windows'
+              shell: bash
+              run: >
+                  curl.exe --location --remote-name https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.2/hdf5-1.14.4-2-win-vs2022_cl.zip
+                    unzip hdf5-1.14.4-2-win-vs2022_cl.zip
+                    unzip hdf5/HDF5-1.14.4-win64.zip
+                    echo "$GITHUB_WORKSPACE/HDF5-1.14.4-win64/bin/" >> $GITHUB_PATH
+                    echo $GITHUB_PATH
+
+            - name: h5dump version
+              continue-on-error: true
+              run: h5dump --version
 
             - name: Gradle Build
               working-directory: jhdf
@@ -49,3 +81,11 @@ jobs:
             - name: Gradle Stop Daemon
               working-directory: jhdf
               run: ./gradlew --stop
+
+            - name: Archive junit results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                name: junit-report-${{ matrix.os }}-${{ matrix.java }}
+                path: jhdf/build/reports/tests/test
+                if-no-files-found: error

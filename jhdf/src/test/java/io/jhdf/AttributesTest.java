@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -491,7 +490,7 @@ class AttributesTest {
 				assertThat(attribute.getSize(), is(0L));
 				assertThat(attribute.getSizeInBytes(), is(0L));
 			} else if (expectedData.getClass().isArray()) { // Array
-				assertThat(attribute.getJavaType(), is(equalTo(getArrayType(expectedData))));
+				assertThat(attribute.getJavaType(), is(equalTo(Utils.getArrayType(expectedData))));
 				assertThat(attribute.isEmpty(), is(false));
 				assertThat(attribute.isScalar(), is(false));
 			} else { // Scalar
@@ -505,15 +504,6 @@ class AttributesTest {
 				assertThat(attribute.getNode(), is(sameInstance(node)));
 			}
 		};
-	}
-
-	Class<?> getArrayType(Object array) {
-		Object element = Array.get(array, 0);
-		if (element.getClass().isArray()) {
-			return getArrayType(element);
-		} else {
-			return array.getClass().getComponentType();
-		}
 	}
 
 	@Test

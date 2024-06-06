@@ -3,39 +3,60 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.object.message;
 
+import io.jhdf.BufferBuilder;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class LinkMessage extends Message {
 
-	public enum LinkType {
-		HARD, SOFT, EXTERNAL;
+	public static final int MESSAGE_TYPE = 6;
 
-		private static LinkType fromInt(int typeInt) {
-			switch (typeInt) {
-				case 0:
-					return HARD;
-				case 1:
-					return SOFT;
-				case 64:
-					return EXTERNAL;
-				default:
-					throw new HdfException("Unrecognized link type: " + typeInt);
+	public enum LinkType {
+		HARD(0),
+		SOFT(1),
+		EXTERNAL(64);
+
+		private final int value;
+
+		LinkType(int value) {
+			this.value = value;
+		}
+
+		public int getValue() {
+			return value;
+		}
+
+		private static final Map<Integer, LinkType> LOOKUP_MAP;
+		static {
+			LOOKUP_MAP = Arrays.stream(values())
+				.collect(Collectors.toMap(LinkType::getValue, Function.identity()));
+		}
+
+		private static LinkType fromValue(int value) {
+			LinkType linkType = LOOKUP_MAP.get(value);
+			if (linkType == null) {
+				throw new HdfException("Unrecognized link type: " + value);
 			}
+			return linkType;
 		}
 	}
 
@@ -44,9 +65,12 @@ public class LinkMessage extends Message {
 	private static final int LINK_CHARACTER_SET_PRESENT = 4;
 
 	private final byte version;
+	private final BitSet flags;
 	private final LinkType linkType;
 	private final long creationOrder;
+	private final Charset linkNameCharset;
 	private final String linkName;
+
 	private long hardLinkAddress;
 	private String softLink;
 	private String externalFile;
@@ -66,30 +90,13 @@ public class LinkMessage extends Message {
 		}
 
 		// Flags
-		final BitSet flags = BitSet.valueOf(new byte[]{bb.get()});
+		flags = BitSet.valueOf(new byte[]{bb.get()});
 
 		// Size of length of link name
-		final int sizeOfLengthOfLinkNameIndex = Utils.bitsToInt(flags, 0, 2);
-		final int sizeOfLengthOfLinkName;
-		switch (sizeOfLengthOfLinkNameIndex) {
-			case 0:
-				sizeOfLengthOfLinkName = 1;
-				break;
-			case 1:
-				sizeOfLengthOfLinkName = 2;
-				break;
-			case 2:
-				sizeOfLengthOfLinkName = 4;
-				break;
-			case 3:
-				sizeOfLengthOfLinkName = 8;
-				break;
-			default:
-				throw new HdfException("Unrecognized size of link name");
-		}
+		final int sizeOfLengthOfLinkName = getSizeOfLengthOfLinkName();
 
 		if (flags.get(LINK_TYPE_PRESENT)) {
-			linkType = LinkType.fromInt(Utils.readBytesAsUnsignedInt(bb, 1));
+			linkType = LinkType.fromValue(Utils.readBytesAsUnsignedInt(bb, 1));
 		} else {
 			linkType = LinkType.HARD; // No link type specified so is hard link
 		}
@@ -100,7 +107,7 @@ public class LinkMessage extends Message {
 			creationOrder = -1;
 		}
 
-		final Charset linkNameCharset;
+
 		if (flags.get(LINK_CHARACTER_SET_PRESENT)) {
 			int charsetValue = Utils.readBytesAsUnsignedInt(bb, 1);
 			switch (charsetValue) {
@@ -144,6 +151,39 @@ public class LinkMessage extends Message {
 			default:
 				throw new HdfException("Unrecognized link type = " + linkType);
 		}
+	}
+
+	private LinkMessage(BitSet messageFlags, byte version, BitSet flags, LinkType linkType, long creationOrder, Charset linkNameCharset, String linkName, long hardLinkAddress) {
+		super(messageFlags);
+		this.version = version;
+		this.flags = flags;
+		this.linkType = linkType;
+		this.creationOrder = creationOrder;
+		this.linkNameCharset = linkNameCharset;
+		this.linkName = linkName;
+		this.hardLinkAddress = hardLinkAddress;
+	}
+
+	private int getSizeOfLengthOfLinkName() {
+		final int sizeOfLengthOfLinkNameIndex = Utils.bitsToInt(flags, 0, 2);
+		final int sizeOfLengthOfLinkName;
+		switch (sizeOfLengthOfLinkNameIndex) {
+			case 0:
+				sizeOfLengthOfLinkName = 1;
+				break;
+			case 1:
+				sizeOfLengthOfLinkName = 2;
+				break;
+			case 2:
+				sizeOfLengthOfLinkName = 4;
+				break;
+			case 3:
+				sizeOfLengthOfLinkName = 8;
+				break;
+			default:
+				throw new HdfException("Unrecognized size of link name");
+		}
+		return sizeOfLengthOfLinkName;
 	}
 
 	public byte getVersion() {
@@ -192,5 +232,60 @@ public class LinkMessage extends Message {
 		} else {
 			throw new HdfException("This link message is not a external link. Link type is: " + linkType);
 		}
+	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
+	@Override
+	public ByteBuffer toBuffer() {
+		BufferBuilder bufferBuilder = new BufferBuilder();
+		bufferBuilder.writeByte(version);
+		bufferBuilder.writeBitSet(flags, 1);
+		if (flags.get(LINK_TYPE_PRESENT)){
+			bufferBuilder.writeByte(linkType.getValue());
+		}
+		if (flags.get(CREATION_ORDER_PRESENT)) {
+			bufferBuilder.writeLong(creationOrder);
+		}
+		if (flags.get(LINK_CHARACTER_SET_PRESENT) && (linkNameCharset.equals(UTF_8)))
+				{bufferBuilder.writeByte(1);
+		}
+		byte[] encodedLinkName = linkName.getBytes(linkNameCharset);
+		bufferBuilder.writeShortestRepresentation(encodedLinkName.length);
+		bufferBuilder.writeBytes(encodedLinkName);
+
+		// Link Information
+		switch (linkType) {
+			case HARD:
+				bufferBuilder.writeLong(hardLinkAddress);
+				break;
+			case SOFT:
+				byte[] softLinkBytes = softLink.getBytes(US_ASCII);
+				bufferBuilder.writeShort(softLinkBytes.length);
+				bufferBuilder.writeBytes(softLinkBytes);
+				break;
+			case EXTERNAL:
+				throw new UnsupportedHdfException("Writing External link not supported");
+		}
+
+		return bufferBuilder.build();
+	}
+
+	public static LinkMessage create(String name, long address) {
+		BitSet flags = new BitSet(1);
+		flags.set(LINK_CHARACTER_SET_PRESENT);
+		return new LinkMessage(
+			new BitSet(1),
+			(byte) 1,
+			flags,
+			LinkType.HARD,
+			-1,
+			UTF_8,
+			name,
+			address
+		);
 	}
 }

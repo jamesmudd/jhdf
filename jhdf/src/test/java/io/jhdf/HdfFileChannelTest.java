@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -13,6 +13,9 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.storage.HdfFileChannel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -82,6 +85,7 @@ class HdfFileChannelTest {
 	}
 
 	@Test
+	@DisabledForJreRange(min = JRE.JAVA_17)
 	void testMap() throws IOException {
 		MappedByteBuffer mockMappedByteBuffer = mock(MappedByteBuffer.class);
 		when(fc.map(any(MapMode.class), anyLong(), anyLong())).thenReturn(mockMappedByteBuffer);

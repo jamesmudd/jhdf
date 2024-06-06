@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -17,9 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.BitSet;
 
-public class Message {
+public abstract class Message {
 	private static final Logger logger = LoggerFactory.getLogger(Message.class);
 
 	// Message flags
@@ -31,10 +32,15 @@ public class Message {
 	private static final int OBJECT_MODIFIED_WITHOUT_UNDERSTANDING_MESSAGE = 5;
 	private static final int MESSAGE_CAN_BE_SHARED = 6;
 	private static final int ALWAYS_FAIL_ON_UNKNOWN_MESSAGE_TYPE = 7;
+	public static final BitSet BASIC_FLAGS = new BitSet(1);
 
 	private final BitSet flags;
 
-	public Message(BitSet flags) {
+	Message() {
+		this.flags = BASIC_FLAGS;
+	}
+
+	Message(BitSet flags) {
 		this.flags = flags;
 	}
 
@@ -85,57 +91,59 @@ public class Message {
 
 	private static Message readMessage(ByteBuffer bb, HdfBackingStorage hdfBackingStorage, int messageType, BitSet flags) {
 		switch (messageType) {
-			case 0: // 0x0000
+			case NilMessage.MESSAGE_TYPE: // 0x0000
 				return new NilMessage(bb, flags);
-			case 1: // 0x0001
+			case DataSpaceMessage.MESSAGE_TYPE: // 0x0001
 				return new DataSpaceMessage(bb, hdfBackingStorage.getSuperblock(), flags);
-			case 2: // 0x0002
+			case LinkInfoMessage.MESSAGE_TYPE: // 0x0002
 				return new LinkInfoMessage(bb, hdfBackingStorage.getSuperblock(), flags);
-			case 3: // 0x0003
+			case DataTypeMessage.MESSAGE_TYPE: // 0x0003
 				return new DataTypeMessage(bb, flags);
-			case 4: // 0x0004
+			case FillValueOldMessage.MESSAGE_TYPE: // 0x0004
 				return new FillValueOldMessage(bb, flags);
-			case 5: // 0x0005
+			case FillValueMessage.MESSAGE_TYPE: // 0x0005
 				return new FillValueMessage(bb, flags);
-			case 6: // 0x0006
+			case LinkMessage.MESSAGE_TYPE: // 0x0006
 				return new LinkMessage(bb, hdfBackingStorage.getSuperblock(), flags);
 			case 7: // 0x0007
 				throw new UnsupportedHdfException("Encountered External Data Files Message, this is not supported by jHDF");
-			case 8: // 0x0008
+			case DataLayoutMessage.MESSAGE_TYPE: // 0x0008
 				return DataLayoutMessage.createDataLayoutMessage(bb, hdfBackingStorage.getSuperblock(), flags);
 			case 9: // 0x0009
 				throw new HdfException("Encountered Bogus message. Is this a valid HDF5 file?");
-			case 10: // 0x000A
+			case GroupInfoMessage.MESSAGE_TYPE: // 0x000A
 				return new GroupInfoMessage(bb, flags);
-			case 11: // 0x000B
+			case FilterPipelineMessage.MESSAGE_TYPE: // 0x000B
 				return new FilterPipelineMessage(bb, flags);
-			case 12: // 0x000C
+			case AttributeMessage.MESSAGE_TYPE: // 0x000C
 				return new AttributeMessage(bb, hdfBackingStorage, flags);
-			case 13: // 0x000D
+			case ObjectCommentMessage.MESSAGE_TYPE: // 0x000D
 				return new ObjectCommentMessage(bb, flags);
-			case 14: // 0x000E
+			case OldObjectModificationTimeMessage.MESSAGE_TYPE: // 0x000E
 				return new OldObjectModificationTimeMessage(bb, flags);
 			case 15: // 0x000F
 				throw new UnsupportedHdfException("Encountered Shared Message Table Message, this is not supported by jHDF");
-			case 16: // 0x0010
+			case ObjectHeaderContinuationMessage.MESSAGE_TYPE: // 0x0010
 				return new ObjectHeaderContinuationMessage(bb, hdfBackingStorage.getSuperblock(), flags);
-			case 17: // 0x0011
+			case SymbolTableMessage.MESSAGE_TYPE: // 0x0011
 				return new SymbolTableMessage(bb, hdfBackingStorage.getSuperblock(), flags);
-			case 18: // 0x0012
+			case ObjectModificationTimeMessage.MESSAGE_TYPE: // 0x0012
 				return new ObjectModificationTimeMessage(bb, flags);
-			case 19: // 0x0013
+			case BTreeKValuesMessage.MESSAGE_TYPE: // 0x0013
 				return new BTreeKValuesMessage(bb, flags);
 			case 20: // 0x0014
 				throw new UnsupportedHdfException("Encountered Driver Info Message, this is not supported by jHDF");
-			case 21: // 0x0015
+			case AttributeInfoMessage.MESSAGE_TYPE: // 0x0015
 				return new AttributeInfoMessage(bb, hdfBackingStorage.getSuperblock(), flags);
-			case 22: // 0x0016
+			case ObjectReferenceCountMessage.MESSAGE_TYPE: // 0x0016
 				return new ObjectReferenceCountMessage(bb, flags);
 
 			default:
 				throw new HdfException("Unrecognized message type = " + messageType);
 		}
 	}
+
+	public abstract int getMessageType();
 
 	public boolean isMessageDataConstant() {
 		return flags.get(MESSAGE_DATA_CONSTANT);
@@ -167,6 +175,15 @@ public class Message {
 
 	public boolean isAlwaysFailOnUnknownType() {
 		return flags.get(ALWAYS_FAIL_ON_UNKNOWN_MESSAGE_TYPE);
+	}
+
+	public byte[] flagsToBytes() {
+		// TODO Flags object
+		return Arrays.copyOf(flags.toByteArray(), 1);
+	}
+
+	public ByteBuffer toBuffer() {
+		throw new UnsupportedHdfException("Writing of message [" + getClass().getSimpleName() + "] is not supported");
 	}
 
 }

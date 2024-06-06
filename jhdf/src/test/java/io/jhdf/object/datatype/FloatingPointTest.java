@@ -3,7 +3,7 @@
  *
  * http://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2024 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -12,6 +12,7 @@ package io.jhdf.object.datatype;
 import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.storage.HdfBackingStorage;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -129,5 +130,45 @@ public class FloatingPointTest {
 	@MethodSource
 	void testHalfPrecisionFloats(short input, float expected) {
 		assertThat(FloatingPoint.toFloat(input), is(expected));
+	}
+
+	@Test
+	void testRoundTripFloat() {
+		ByteBuffer buffer = FloatingPoint.FLOAT.toBuffer();
+		DataType readBack = FloatingPoint.readDataType(buffer);
+		Assertions.assertThat(readBack).usingRecursiveComparison()
+			.withStrictTypeChecking()
+			.isEqualTo(FloatingPoint.FLOAT);
+	}
+	@Test
+	void testRoundTripDouble() {
+		ByteBuffer buffer = FloatingPoint.DOUBLE.toBuffer();
+		DataType readBack = FloatingPoint.readDataType(buffer);
+		Assertions.assertThat(readBack).usingRecursiveComparison()
+			.withStrictTypeChecking()
+			.isEqualTo(FloatingPoint.DOUBLE);
+	}
+
+	@Test
+	void testDoubleIsEqualToH5T_IEEE_F64LE() {
+		ByteBuffer buffer = ByteBuffer.wrap(
+			new byte[]{17, 32, 63, 0, 8, 0, 0, 0, 0, 0, 64, 0, 52, 11, 0, 52, -1, 3, 0, 0})
+			.order(ByteOrder.LITTLE_ENDIAN);
+
+		DataType readBack = FloatingPoint.readDataType(buffer);
+		Assertions.assertThat(readBack).usingRecursiveComparison()
+			.withStrictTypeChecking()
+			.isEqualTo(FloatingPoint.DOUBLE);
+	}
+	@Test
+	void testDoubleIsEqualToH5T_IEEE_F32LE() {
+		ByteBuffer buffer = ByteBuffer.wrap(
+			new byte[] {17, 32, 31, 0, 4, 0, 0, 0, 0, 0, 32, 0, 23, 8, 0, 23, 127, 0, 0, 0})
+			.order(ByteOrder.LITTLE_ENDIAN);
+
+		DataType readBack = FloatingPoint.readDataType(buffer);
+		Assertions.assertThat(readBack).usingRecursiveComparison()
+			.withStrictTypeChecking()
+			.isEqualTo(FloatingPoint.FLOAT);
 	}
 }
