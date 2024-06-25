@@ -19,6 +19,7 @@ import io.jhdf.api.WritableGroup;
 import io.jhdf.api.WritableNode;
 import io.jhdf.api.WritiableDataset;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.object.message.AttributeInfoMessage;
 import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.GroupInfoMessage;
 import io.jhdf.object.message.LinkInfoMessage;
@@ -133,10 +134,15 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 			messages.add(linkMessage);
 		}
 
-		for (Map.Entry<String, Attribute> attribute : getAttributes().entrySet()) {
-			logger.info("Writing attribute [{}]", attribute.getKey());
-			AttributeMessage attributeMessage = AttributeMessage.create(attribute.getKey(), attribute.getValue());
-			messages.add(attributeMessage);
+		if(!getAttributes().isEmpty()) {
+			// Need an attribute info message to allow HDFView to see the attributes
+			AttributeInfoMessage attributeInfoMessage = AttributeInfoMessage.create();
+			messages.add(attributeInfoMessage);
+			for (Map.Entry<String, Attribute> attribute : getAttributes().entrySet()) {
+				logger.info("Writing attribute [{}]", attribute.getKey());
+				AttributeMessage attributeMessage = AttributeMessage.create(attribute.getKey(), attribute.getValue());
+				messages.add(attributeMessage);
+			}
 		}
 
 		ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
@@ -150,10 +156,14 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 		messages.add(groupInfoMessage);
 		messages.add(linkInfoMessage);
 
-		for (Map.Entry<String, Attribute> attribute : getAttributes().entrySet()) {
-			logger.info("Writing attribute [{}]", attribute.getKey());
-			AttributeMessage attributeMessage = AttributeMessage.create(attribute.getKey(), attribute.getValue());
-			messages.add(attributeMessage);
+		if(!getAttributes().isEmpty()) {
+			AttributeInfoMessage attributeInfoMessage = AttributeInfoMessage.create();
+			messages.add(attributeInfoMessage);
+			for (Map.Entry<String, Attribute> attribute : getAttributes().entrySet()) {
+				logger.info("Writing attribute [{}]", attribute.getKey());
+				AttributeMessage attributeMessage = AttributeMessage.create(attribute.getKey(), attribute.getValue());
+				messages.add(attributeMessage);
+			}
 		}
 
 		long nextChildAddress = position + objectHeaderSize;
