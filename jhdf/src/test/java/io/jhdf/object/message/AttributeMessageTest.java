@@ -1,17 +1,24 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright (c) 2024 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
 package io.jhdf.object.message;
 
 import io.jhdf.Superblock;
 import io.jhdf.api.WritableAttributeImpl;
 import io.jhdf.storage.HdfBackingStorage;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.BitSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

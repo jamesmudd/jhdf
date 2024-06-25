@@ -173,6 +173,19 @@ class SimpleWritingTest {
 			assertThat(attribute.getDimensions()).isEqualTo(new int[] {3});
 			assertThat(attribute.getJavaType()).isEqualTo(int.class);
 		}
+	}
 
+	@Test
+	@Order(6)
+	@EnabledIfH5DumpAvailable
+	void readAttributesWithH5Dump() throws Exception {
+		// Read with h5dump
+		HDF5FileXml hdf5FileXml = H5Dump.dumpAndParse(tempFile);
+
+		// Read with jhdf
+		try(HdfFile hdfFile = new HdfFile(tempFile)) {
+			// Compare
+			H5Dump.assetXmlAndHdfFileMatch(hdf5FileXml, hdfFile);
+		}
 	}
 }
