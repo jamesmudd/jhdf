@@ -10,7 +10,6 @@
 package io.jhdf.h5dump;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import org.apache.commons.lang3.StringUtils;
 
 public class DatasetXml extends NodeXml {
 
@@ -29,13 +28,11 @@ public class DatasetXml extends NodeXml {
 	DataTypeXml dataType;
 
 	public String[] getData() {
-		return StringUtils.split(data.dataString);
+		return data.getData();
 	}
 
 	public int[] getDimensions() {
-		return dataspace.simpleDataspace.dimensions.stream()
-			.mapToInt(dim -> dim.size)
-			.toArray();
+		return dataspace.getDimensions();
 	}
 
 }
