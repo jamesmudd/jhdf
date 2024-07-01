@@ -98,8 +98,12 @@ public abstract class DataType {
 			Class<?> type = Utils.getArrayType(data);
 			if(type.equals(byte.class)) {
 				return new FixedPoint(1);
+			} else if (type.equals(short.class)) {
+				return new FixedPoint(2);
 			} else if (type.equals(int.class)) {
 				return new FixedPoint(4);
+			} else if (type.equals(long.class)) {
+				return new FixedPoint(8);
 			} else if (type.equals(double.class)) {
 				return FloatingPoint.DOUBLE;
 			}
@@ -143,6 +147,11 @@ public abstract class DataType {
 	 * @return the read data
 	 */
 	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage);
+
+	// TODO could be abstract when there are more impls
+	public ByteBuffer encodeData(Object data){
+		throw new UnsupportedHdfException("Data type [" + getClass().getSimpleName() + "] does not support writing");
+	}
 
 	// TODO could be abstract when there are more impls
 	public ByteBuffer toBuffer() {

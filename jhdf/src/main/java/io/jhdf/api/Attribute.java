@@ -18,6 +18,9 @@
  */
 package io.jhdf.api;
 
+import io.jhdf.object.datatype.DataType;
+import io.jhdf.object.message.DataSpace;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -109,4 +112,7 @@ public interface Attribute {
 	ByteBuffer getBuffer();
 
 
+	DataSpace getDataSpace();
+
+	DataType getDataType();
 }

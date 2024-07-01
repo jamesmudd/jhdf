@@ -12,16 +12,19 @@ package io.jhdf;
 
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
+import io.jhdf.api.WritableAttributeImpl;
 import io.jhdf.api.WritableNode;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AbstractWritableNode implements WritableNode {
 	private final Group parent;
 	private final String name;
+
+	private final Map<String, Attribute> attributes = new HashMap<>();
 
 	AbstractWritableNode(Group parent, String name) {
 		this.parent = parent;
@@ -49,12 +52,12 @@ public abstract class AbstractWritableNode implements WritableNode {
 
 	@Override
 	public Map<String, Attribute> getAttributes() {
-		return Collections.emptyMap();
+		return attributes;
 	}
 
 	@Override
 	public Attribute getAttribute(String name) {
-		return null;
+		return attributes.get(name);
 	}
 
 	@Override
@@ -70,5 +73,16 @@ public abstract class AbstractWritableNode implements WritableNode {
 	@Override
 	public HdfFile getHdfFile() {
 		return parent.getHdfFile();
+	}
+
+	@Override
+	public Attribute putAttribute(String name, Object data) {
+		WritableAttributeImpl attribute = new WritableAttributeImpl(name, this, data);
+		return attributes.put(name, attribute);
+	}
+
+	@Override
+	public Attribute removeAttribute(String name) {
+		return attributes.remove(name);
 	}
 }
