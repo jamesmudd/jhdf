@@ -28,11 +28,6 @@ public class DatasetXml extends NodeXml {
 	@JacksonXmlProperty(localName = "DataType")
 	DataTypeXml dataType;
 
-	public static class DataXml {
-		@JacksonXmlProperty(localName = "DataFromFile")
-		String dataString;
-	}
-
 	public String[] getData() {
 		return StringUtils.split(data.dataString);
 	}
@@ -43,26 +38,4 @@ public class DatasetXml extends NodeXml {
 			.toArray();
 	}
 
-	public static class DataTypeXml {
-		@JacksonXmlProperty(localName = "AtomicType")
-			AtomicTypeXml atomicType;
-
-		private static class AtomicTypeXml {
-
-			@JacksonXmlProperty(localName = "IntegerType")
-			IntegerTypeXml type;
-
-		}
-
-		private static class IntegerTypeXml {
-			@JacksonXmlProperty(localName = "ByteOrder")
-			String byteOrder;
-
-			@JacksonXmlProperty(localName = "Sign")
-			boolean sign;
-
-			@JacksonXmlProperty(localName = "Size")
-			int size;
-		}
-	}
 }

@@ -24,6 +24,9 @@ public class GroupXml extends NodeXml {
 	@JacksonXmlProperty(localName = "Dataset")
 	@JacksonXmlElementWrapper(useWrapping = false)
 	List<DatasetXml> datasets = Collections.emptyList();
+	@JacksonXmlProperty(localName = "Attribute")
+	@JacksonXmlElementWrapper(useWrapping = false)
+	List<AttributeXml> attributes = Collections.emptyList();
 
 	public int children() {
 		return groups.size() + datasets.size();
