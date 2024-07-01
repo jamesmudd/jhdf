@@ -172,14 +172,21 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
     public ByteBuffer encodeData(Object data) {
 		Class<?> type = Utils.getArrayType(data);
 		// TODO multi dimensional and scalar and empty
-		if(type == int.class) {
-			Object[] flattened = flatten(data);
-			ByteBuffer buffer = ByteBuffer.allocate(flattened.length * 4);
-			buffer.order(ByteOrder.nativeOrder());
+		Object[] flattened = flatten(data);
+		ByteBuffer buffer = ByteBuffer.allocate(flattened.length * getSize());
+		buffer.order(ByteOrder.nativeOrder());
+		if(type == byte.class) {
+			buffer.put((byte[]) data);
+		} else if (type == short.class) {
+			buffer.asShortBuffer().put((short[]) data);
+		} else if(type == int.class) {
 			buffer.asIntBuffer().put((int[]) data);
-			return buffer;
+		} else if (type == long.class) {
+			buffer.asLongBuffer().put((long[]) data);
+		} else {
+			throw new UnsupportedHdfException("Cant write type: " + type);
 		}
-		throw new UnsupportedHdfException("Cant write type");
+		return buffer;
 	}
 
     // Signed Fixed Point

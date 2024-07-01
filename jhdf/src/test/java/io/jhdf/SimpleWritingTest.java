@@ -15,6 +15,7 @@ import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
 import io.jhdf.api.WritableGroup;
 import io.jhdf.api.WritiableDataset;
+import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
 import io.jhdf.h5dump.HDF5FileXml;
@@ -61,6 +62,10 @@ class SimpleWritingTest {
 		try(HdfFile hdfFile = new HdfFile(tempFile)) {
 			Map<String, Node> children = hdfFile.getChildren();
 			assertThat(children).containsKeys("testGroup", "testGroup2", "testGroup3");
+
+			// Just check thw whole file is readable
+			TestAllFilesBase.verifyAttributes(hdfFile);
+			TestAllFilesBase.recurseGroup(hdfFile);
 		}
 	}
 
@@ -131,6 +136,10 @@ class SimpleWritingTest {
 			Dataset doubleData1Dataset = hdfFile.getDatasetByPath("doubleGroup/doubleData1");
 			Object doubleData1ReadBack = doubleData1Dataset.getData();
 			assertThat(doubleData1ReadBack).isEqualTo(doubleData1);
+
+			// Just check thw whole file is readable
+			TestAllFilesBase.verifyAttributes(hdfFile);
+			TestAllFilesBase.recurseGroup(hdfFile);
 		}
 	}
 
@@ -158,8 +167,16 @@ class SimpleWritingTest {
 		WritiableDataset intDataset = intGroup.putDataset("intData1", intData1);
 
 		writableHdfFile.putAttribute("rootAttribute", new int[] {1,2,3});
-		intGroup.putAttribute("groupAttribute", new int[] {1,2,3});
+
+		intGroup.putAttribute("groupByteAttribute", new byte[] {1,2,3});
+		intGroup.putAttribute("groupShortAttribute", new short[] {1,2,3});
+		intGroup.putAttribute("groupIntAttribute", new int[] {1,2,3});
+		intGroup.putAttribute("groupLongAttribute", new long[] {1,2,3});
+
 		intDataset.putAttribute("datasetAttribute", new int[] {1,2,3});
+
+		// TODO floating point attributes
+//		intGroup.putAttribute("groupDoubleAttribute", new double[]{1234.5678, 2345.6789});
 
 		// Actually flush and write everything
 		writableHdfFile.close();
@@ -172,6 +189,10 @@ class SimpleWritingTest {
 			assertThat(attribute.getData()).isEqualTo(new int[] {1,2,3});
 			assertThat(attribute.getDimensions()).isEqualTo(new int[] {3});
 			assertThat(attribute.getJavaType()).isEqualTo(int.class);
+
+			// Just check thw whole file is readable
+			TestAllFilesBase.verifyAttributes(hdfFile);
+			TestAllFilesBase.recurseGroup(hdfFile);
 		}
 	}
 
