@@ -104,10 +104,12 @@ public abstract class DataType {
 				return new FixedPoint(4);
 			} else if (type.equals(long.class)) {
 				return new FixedPoint(8);
+			} else if (type.equals(float.class)) {
+				return FloatingPoint.FLOAT;
 			} else if (type.equals(double.class)) {
 				return FloatingPoint.DOUBLE;
 			}
-			throw new HdfException("Error");
+			throw new HdfException("Could not create DataType for: " + type);
 
 		} else {
 			throw new UnsupportedHdfException("Only arrays can be written at the moment");
