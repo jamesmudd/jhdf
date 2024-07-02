@@ -171,12 +171,14 @@ class SimpleWritingTest {
 		intGroup.putAttribute("groupByteAttribute", new byte[] {1,2,3});
 		intGroup.putAttribute("groupShortAttribute", new short[] {1,2,3});
 		intGroup.putAttribute("groupIntAttribute", new int[] {1,2,3});
-		intGroup.putAttribute("groupLongAttribute", new long[] {1,2,3});
+		intGroup.putAttribute("groupLongAttribute", new long[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15});
 
-		intDataset.putAttribute("datasetAttribute", new int[] {1,2,3});
+		intDataset.putAttribute("datasetByteAttribute", new byte[] {1,2,3});
+		intDataset.putAttribute("datasetShortAttribute", new short[] {1,2,3});
+		intDataset.putAttribute("datasetIntAttribute", new int[] {1,2,3});
+		intDataset.putAttribute("datasetLongAttribute", new long[] {1,2,3});
 
 		// TODO floating point attributes
-//		intGroup.putAttribute("groupDoubleAttribute", new double[]{1234.5678, 2345.6789});
 
 		// Actually flush and write everything
 		writableHdfFile.close();

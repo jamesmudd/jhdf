@@ -311,6 +311,7 @@ public abstract class ObjectHeader {
 			maximumNumberOfDenseAttributes = -1;
 
 			flags = new BitSet(8); // TODO make consistent with values
+			flags.set(1); // Make sizeOfChunk0 4 bytes.
 		}
 
 		public ByteBuffer toBuffer() {
@@ -328,12 +329,12 @@ public abstract class ObjectHeader {
 
 			if(flags.get(NUMBER_OF_ATTRIBUTES_PRESENT)) {
 				// TODO min/max attributes
-				throw new UnsupportedHdfException("Writting number of attributes");
+				throw new UnsupportedHdfException("Writing number of attributes");
 			}
 
 			// Start messages
 			ByteBuffer messagesBuffer = messagesToBuffer();
-			bufferBuilder.writeByte(messagesBuffer.capacity()) // Size of chunk 0 TODO support variable sizes
+			bufferBuilder.writeInt(messagesBuffer.capacity())
 					.writeBuffer(messagesBuffer);
 
 			return bufferBuilder.appendChecksum().build();
