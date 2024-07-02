@@ -13,11 +13,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import io.jhdf.HdfFile;
 import io.jhdf.TestUtils;
+import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
-import io.jhdf.dataset.DatasetBase;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.MatcherAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.blankString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -74,6 +72,15 @@ public class H5Dump {
 		for (DatasetXml dataset : groupXml.datasets) {
 			compareDatasets(dataset, (Dataset) group.getChild(dataset.name));
 		}
+		for (AttributeXml attribute : groupXml.attributes) {
+			compareAttributes(attribute, group.getAttribute(attribute.name));
+		}
+	}
+
+	private static void compareAttributes(AttributeXml attributeXml, Attribute attribute) {
+		assertThat(attributeXml.name, is(equalTo(attribute.getName())));
+		assertThat(attributeXml.getDimensions(), is(equalTo(attribute.getDimensions())));
+		assertThat(attributeXml.getData(), is(equalTo(TestUtils.toStringArray(attribute.getData()))));
 	}
 
 	private static void compareDatasets(DatasetXml datasetXml, Dataset dataset) {

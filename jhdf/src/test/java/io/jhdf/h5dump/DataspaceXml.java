@@ -17,7 +17,7 @@ import java.util.List;
 public class DataspaceXml {
 
 	@JacksonXmlProperty(localName = "SimpleDataspace")
-		SimpleDataspace simpleDataspace;
+	SimpleDataspace simpleDataspace;
 
 	public static class SimpleDataspace {
 		@JacksonXmlProperty(localName = "Dimension")
@@ -30,5 +30,11 @@ public class DataspaceXml {
 		int size;
 		  @JacksonXmlProperty(localName = "MaxDimSize")
 		int maxSize;
+	}
+
+	public int[] getDimensions() {
+		return simpleDataspace.dimensions.stream()
+			.mapToInt(dim -> dim.size)
+			.toArray();
 	}
 }

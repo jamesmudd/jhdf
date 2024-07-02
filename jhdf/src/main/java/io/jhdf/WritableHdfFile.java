@@ -150,6 +150,16 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	}
 
 	@Override
+	public Attribute putAttribute(String name, Object data) {
+		return rootGroup.putAttribute(name, data);
+	}
+
+	@Override
+	public Attribute removeAttribute(String name) {
+		return rootGroup.removeAttribute(name);
+	}
+
+	@Override
 	public NodeType getType() {
 		return rootGroup.getType();
 	}

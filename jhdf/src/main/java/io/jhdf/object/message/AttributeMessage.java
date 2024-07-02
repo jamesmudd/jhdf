@@ -9,8 +9,11 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.BufferBuilder;
+import io.jhdf.Constants;
 import io.jhdf.ObjectHeader;
 import io.jhdf.Utils;
+import io.jhdf.api.Attribute;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.storage.HdfBackingStorage;
@@ -164,4 +167,37 @@ public class AttributeMessage extends Message {
 		return MESSAGE_TYPE;
 	}
 
+	public static AttributeMessage create(String name, Attribute attribute) {
+		return new AttributeMessage(name, attribute.getDataSpace(), attribute.getDataType(), attribute.getData());
+	}
+
+	private AttributeMessage(String name, DataSpace dataSpace, DataType dataType, Object data) {
+		this.name = name;
+		this.version = 3;
+		this.dataSpace = dataSpace;
+		this.dataType = dataType;
+		this.data = dataType.encodeData(data);
+	}
+
+	@Override
+	public ByteBuffer toBuffer() {
+
+		byte[] nameBytes = name.getBytes(StandardCharsets.UTF_8);
+		ByteBuffer dataTypeBytes = dataType.toBuffer();
+		ByteBuffer dataSpaceBytes = dataSpace.toBuffer();
+
+		return new BufferBuilder()
+			.writeByte(3) // version
+			.writeByte(0) // flags
+			.writeShort(nameBytes.length + 1) // +1 for null terminated
+			.writeShort(dataTypeBytes.capacity())
+			.writeShort(dataSpaceBytes.capacity())
+			.writeByte(1) // name charset UTF8
+			.writeBytes(nameBytes)
+			.writeByte(Constants.NULL) // Null terminated string
+			.writeBuffer(dataTypeBytes)
+			.writeBuffer(dataSpaceBytes)
+			.writeBuffer(data)
+			.build();
+	}
 }

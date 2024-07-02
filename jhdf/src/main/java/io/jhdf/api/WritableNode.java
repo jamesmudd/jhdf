@@ -15,4 +15,7 @@ import io.jhdf.storage.HdfFileChannel;
 public interface WritableNode extends Node {
 
 	long write(HdfFileChannel hdfFileChannel, long position);
+
+	Attribute putAttribute(String name, Object data);
+	Attribute removeAttribute(String name);
 }

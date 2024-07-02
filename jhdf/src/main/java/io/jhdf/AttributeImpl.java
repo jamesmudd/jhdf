@@ -14,6 +14,7 @@ import io.jhdf.api.Node;
 import io.jhdf.dataset.DatasetReader;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.AttributeMessage;
+import io.jhdf.object.message.DataSpace;
 import io.jhdf.storage.HdfBackingStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,4 +102,14 @@ public class AttributeImpl implements Attribute {
 	public ByteBuffer getBuffer() {
 		return message.getDataBuffer();
 	}
+
+	@Override
+	public DataSpace getDataSpace() {
+		return message.getDataSpace();
+	}
+
+	@Override
+    public DataType getDataType() {
+        return message.getDataType();
+    }
 }
