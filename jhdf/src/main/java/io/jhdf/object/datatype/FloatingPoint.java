@@ -21,6 +21,7 @@ import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.stripLeadingIndex;
 
 public class FloatingPoint extends DataType implements OrderedDataType {
@@ -301,4 +302,21 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		(byte) 52,     // mantissa size
 		1023);   // exponent bias
 
+
+	@Override
+	public ByteBuffer encodeData(Object data) {
+		Class<?> type = Utils.getArrayType(data);
+		// TODO multi dimensional and scalar and empty
+		Object[] flattened = flatten(data);
+		ByteBuffer buffer = ByteBuffer.allocate(flattened.length * getSize());
+		buffer.order(ByteOrder.nativeOrder());
+		if(type == float.class) {
+			buffer.asFloatBuffer().put((float[]) data);
+		} else if (type == double.class) {
+			buffer.asDoubleBuffer().put((double[]) data);
+		} else {
+			throw new UnsupportedHdfException("Cant write type: " + type);
+		}
+		return buffer;
+	}
 }

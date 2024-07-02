@@ -172,6 +172,8 @@ class SimpleWritingTest {
 		intGroup.putAttribute("groupShortAttribute", new short[] {1,2,3});
 		intGroup.putAttribute("groupIntAttribute", new int[] {1,2,3});
 		intGroup.putAttribute("groupLongAttribute", new long[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15});
+		intGroup.putAttribute("groupFloatAttribute", new float[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15});
+		intGroup.putAttribute("groupDoubleAttribute", new double[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15});
 
 		intDataset.putAttribute("datasetByteAttribute", new byte[] {1,2,3});
 		intDataset.putAttribute("datasetShortAttribute", new short[] {1,2,3});
