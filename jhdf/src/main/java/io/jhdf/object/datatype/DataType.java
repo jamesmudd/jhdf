@@ -94,25 +94,22 @@ public abstract class DataType {
 	}
 
 	public static DataType fromObject(Object data) {
-		if (data.getClass().isArray()) {
-			Class<?> type = Utils.getArrayType(data);
-			if(type.equals(byte.class)) {
-				return new FixedPoint(1);
-			} else if (type.equals(short.class)) {
-				return new FixedPoint(2);
-			} else if (type.equals(int.class)) {
-				return new FixedPoint(4);
-			} else if (type.equals(long.class)) {
-				return new FixedPoint(8);
-			} else if (type.equals(float.class)) {
-				return FloatingPoint.FLOAT;
-			} else if (type.equals(double.class)) {
-				return FloatingPoint.DOUBLE;
-			}
-			throw new HdfException("Could not create DataType for: " + type);
+		final Class<?> type = Utils.getType(data);
 
+		if (type == byte.class) {
+			return new FixedPoint(1);
+		} else if (type == short.class) {
+			return new FixedPoint(2);
+		} else if (type == int.class) {
+			return new FixedPoint(4);
+		} else if (type == long.class) {
+			return new FixedPoint(8);
+		} else if (type == float.class) {
+			return FloatingPoint.FLOAT;
+		} else if (type == double.class) {
+			return FloatingPoint.DOUBLE;
 		} else {
-			throw new UnsupportedHdfException("Only arrays can be written at the moment");
+			throw new HdfException("Could not create DataType for: " + type);
 		}
 	}
 

@@ -10,6 +10,7 @@
 package io.jhdf;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -401,6 +402,21 @@ public final class Utils {
 			dims.add(Array.getLength(data));
 		}
 		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
+	}
+
+	public static Class<?> getType(Object obj) {
+		final Class<?> type;
+		if(obj.getClass().isArray()) {
+			type = getArrayType(obj);
+		} else {
+			type = obj.getClass();
+		}
+
+		if(ClassUtils.isPrimitiveWrapper(type)) {
+			return ClassUtils.wrapperToPrimitive(type);
+		} else {
+			return type;
+		}
 	}
 
 	public static Class<?> getArrayType(Object array) {

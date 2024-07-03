@@ -13,6 +13,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -305,10 +306,17 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 
 	@Override
 	public ByteBuffer encodeData(Object data) {
-		Class<?> type = Utils.getArrayType(data);
+		final Class<?> type = Utils.getType(data);
+		final int totalElements;
+		if (data.getClass().isArray()) {
+			totalElements = flatten(data).length;
+		} else {
+			totalElements = 1;
+			data = ArrayUtils.toArray(data);
+		}
 		// TODO multi dimensional and scalar and empty
-		Object[] flattened = flatten(data);
-		ByteBuffer buffer = ByteBuffer.allocate(flattened.length * getSize());
+
+		ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize());
 		buffer.order(ByteOrder.nativeOrder());
 		if(type == float.class) {
 			buffer.asFloatBuffer().put((float[]) data);
