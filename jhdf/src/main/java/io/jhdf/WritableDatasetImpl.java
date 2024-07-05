@@ -240,6 +240,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 		ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * dataType.getSize()).order(ByteOrder.nativeOrder());
 		hdfFileChannel.position(dataAddress);
 
+		dataType.writeData(data, dimensions, hdfFileChannel);
 		// TODO move out into data types?
 		if(arrayType.equals(byte.class)) {
 			writeByteData(data, dimensions, buffer, hdfFileChannel);
@@ -253,31 +254,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 		return totalBytes;
 	}
 
-	private static void writeByteData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
-		if (dims.length > 1) {
-			for (int i = 0; i < dims[0]; i++) {
-				Object newArray = Array.get(data, i);
-				writeByteData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
-			}
-		} else {
-			buffer.put((byte[]) data);
-			buffer.rewind();
-			hdfFileChannel.write(buffer);
-			buffer.clear();
-		}
-	}
-	private static void writeIntData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
-		if (dims.length > 1) {
-			for (int i = 0; i < dims[0]; i++) {
-				Object newArray = Array.get(data, i);
-				writeIntData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
-			}
-		} else {
-			buffer.asIntBuffer().put((int[]) data);
-			hdfFileChannel.write(buffer);
-			buffer.clear();
-		}
-	}
+
 	private static void writeDoubleData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {

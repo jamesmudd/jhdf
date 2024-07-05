@@ -13,6 +13,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
@@ -327,4 +328,13 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		}
 		return buffer;
 	}
+
+	@Override
+	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
+		int fastDimSize = dimensions[dimensions.length - 1];
+		// This buffer is reused
+		ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize()).order(ByteOrder.nativeOrder());
+	}
+
+
 }

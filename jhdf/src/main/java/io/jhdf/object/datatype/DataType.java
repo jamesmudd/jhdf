@@ -14,6 +14,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
@@ -166,5 +167,9 @@ public abstract class DataType {
 			.writeBitSet(classAndVersion,1)
 			.writeBitSet(classBits, 3)
 			.writeInt(getSize());
+	}
+
+	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
+		throw new UnsupportedHdfException("Data type [" + getClass().getSimpleName() + "] does not support writing");
 	}
 }

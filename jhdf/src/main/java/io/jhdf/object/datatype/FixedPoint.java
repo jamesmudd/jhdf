@@ -13,6 +13,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
@@ -317,5 +318,39 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 			.writeShort(bitOffset)
 			.writeShort(bitPrecision)
 			.build();
+	}
+
+	@Override
+	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
+		int fastDimSize = dimensions[dimensions.length - 1];
+		ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize()).order(ByteOrder.nativeOrder());
+
+
+	}
+
+	private static void writeByteData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeByteData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
+			}
+		} else {
+			buffer.put((byte[]) data);
+			buffer.rewind();
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
+	}
+	private static void writeIntData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeIntData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
+			}
+		} else {
+			buffer.asIntBuffer().put((int[]) data);
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
 	}
 }
