@@ -90,14 +90,15 @@ public class DataSpace {
 				false,
 				dimensions1,
 				Arrays.stream(dimensions1).asLongStream().toArray(),
-				(byte) 1
+				(byte) 1 // Simple
 			);
 		} else {
+			// Scalar
 			return new DataSpace((byte) 2,
 				false,
-				new int[] {0},
-				new long[] {0},
-				(byte) 0);
+				new int[] {},
+				new long[] {},
+				(byte) 0); // Scalar
 		}
 		// TODO null/empty datasets
 	}
