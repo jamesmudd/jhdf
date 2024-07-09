@@ -97,17 +97,17 @@ public abstract class DataType {
 	public static DataType fromObject(Object data) {
 		final Class<?> type = Utils.getType(data);
 
-		if (type == byte.class) {
+		if (type == byte.class || type == Byte.class) {
 			return new FixedPoint(1);
-		} else if (type == short.class) {
+		} else if (type == short.class || type == Short.class) {
 			return new FixedPoint(2);
-		} else if (type == int.class) {
+		} else if (type == int.class || type == Integer.class) {
 			return new FixedPoint(4);
-		} else if (type == long.class) {
+		} else if (type == long.class || type == Long.class) {
 			return new FixedPoint(8);
-		} else if (type == float.class) {
+		} else if (type == float.class || type == Float.class) {
 			return FloatingPoint.FLOAT;
-		} else if (type == double.class) {
+		} else if (type == double.class || type == Double.class) {
 			return FloatingPoint.DOUBLE;
 		} else {
 			throw new HdfException("Could not create DataType for: " + type);

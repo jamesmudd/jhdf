@@ -232,26 +232,12 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 	private long writeData(HdfFileChannel hdfFileChannel, long dataAddress) {
 		logger.info("Writing data for dataset [{}] at position [{}]", getPath(), dataAddress);
-		Class<?> arrayType = Utils.getArrayType(this.data);
-		long totalBytes = dataSpace.getTotalLength() * dataType.getSize();
 
-		int[] dimensions = dataSpace.getDimensions();
-		int fastDimSize = dimensions[dimensions.length - 1];
-		ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * dataType.getSize()).order(ByteOrder.nativeOrder());
 		hdfFileChannel.position(dataAddress);
 
-		dataType.writeData(data, dimensions, hdfFileChannel);
-		// TODO move out into data types?
-		if(arrayType.equals(byte.class)) {
-			writeByteData(data, dimensions, buffer, hdfFileChannel);
-		} else if(arrayType.equals(int.class)) {
-			writeIntData(data, dimensions, buffer, hdfFileChannel);
-		} else if (arrayType.equals(double.class)) {
-			writeDoubleData(data, dimensions, buffer, hdfFileChannel);
-		} else {
-			throw new UnsupportedHdfException("Writing [" + arrayType.getSimpleName() + "] is not supported");
-		}
-		return totalBytes;
+		dataType.writeData(data, getDimensions(), hdfFileChannel);
+
+		return  dataSpace.getTotalLength() * dataType.getSize();
 	}
 
 

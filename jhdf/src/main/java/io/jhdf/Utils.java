@@ -411,12 +411,7 @@ public final class Utils {
 		} else {
 			type = obj.getClass();
 		}
-
-		if(ClassUtils.isPrimitiveWrapper(type)) {
-			return ClassUtils.wrapperToPrimitive(type);
-		} else {
-			return type;
-		}
+		return type;
 	}
 
 	public static Class<?> getArrayType(Object array) {

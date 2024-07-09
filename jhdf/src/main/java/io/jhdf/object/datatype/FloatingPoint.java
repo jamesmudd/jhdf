@@ -308,25 +308,44 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 	@Override
 	public ByteBuffer encodeData(Object data) {
 		final Class<?> type = Utils.getType(data);
-		final int totalElements;
 		if (data.getClass().isArray()) {
-			totalElements = flatten(data).length;
-		} else {
-			totalElements = 1;
-			data = ArrayUtils.toArray(data);
-		}
-		// TODO multi dimensional and scalar and empty
+			final int totalElements = flatten(data).length;
+			final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize())
+				.order(order);
 
-		final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize())
-			.order(ByteOrder.nativeOrder());
-		if(type == float.class) {
-			buffer.asFloatBuffer().put((float[]) data);
-		} else if (type == double.class) {
-			buffer.asDoubleBuffer().put((double[]) data);
+			if(type == float.class) {
+				buffer.asFloatBuffer().put((float[]) data);
+			} else if (type == Float.class) {
+				buffer.asFloatBuffer().put(ArrayUtils.toPrimitive((Float[]) data));
+			}  else if (type == double.class) {
+				buffer.asDoubleBuffer().put((double[]) data);
+			} else if (type == Double.class) {
+				buffer.asDoubleBuffer().put(ArrayUtils.toPrimitive((Double[]) data));
+			} else {
+				throw new UnsupportedHdfException("Cant write type: " + type);
+			}
+
+			return buffer;
+		} else if (data == null) {
+			throw new UnsupportedHdfException("Encoding empty data not supported");
 		} else {
-			throw new UnsupportedHdfException("Cant write type: " + type);
+			// Scalar dataset
+			final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);
+
+			if(type == float.class) {
+				buffer.asFloatBuffer().put((float) data);
+			} else if (type == Float.class) {
+				buffer.asFloatBuffer().put((Float) data);
+			}  else if (type == double.class) {
+				buffer.asDoubleBuffer().put((double) data);
+			} else if (type == Double.class) {
+				buffer.asDoubleBuffer().put((Double) data);
+			} else {
+				throw new UnsupportedHdfException("Cant write scalar type: " + type);
+			}
+
+			return buffer;
 		}
-		return buffer;
 	}
 
 	@Override
