@@ -172,27 +172,27 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
     @Override
     public ByteBuffer encodeData(Object data) {
 		final Class<?> type = Utils.getType(data);
-		// TODO multi dimensional and scalar and empty
 		if(data.getClass().isArray()) {
-			final Object[] flattened = flatten(data);
-			final ByteBuffer buffer = ByteBuffer.allocate(flattened.length * getSize())
+			final int[] dimensions = Utils.getDimensions(data);
+			final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
+			final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize())
 				.order(order);
 			if(type == byte.class) {
-				buffer.put((byte[]) data);
+				encodeByteData(data, dimensions, buffer, true);
 			} else if (type == Byte.class) {
-				buffer.put(ArrayUtils.toPrimitive((Byte[]) data));
+				encodeByteData(data, dimensions, buffer, false);
 			} else if (type == short.class) {
-				buffer.asShortBuffer().put((short[]) data);
+				encodeShortData(data, dimensions, buffer.asShortBuffer(), true);
 			} else if (type == Short.class) {
-				buffer.asShortBuffer().put(ArrayUtils.toPrimitive((Short[]) data));
+				encodeShortData(data, dimensions, buffer.asShortBuffer(), false);
 			} else if(type == int.class) {
-				buffer.asIntBuffer().put((int[]) data);
+				encodeIntData(data, dimensions, buffer.asIntBuffer(), true);
 			}  else if(type == Integer.class) {
-				buffer.asIntBuffer().put(ArrayUtils.toPrimitive((Integer[]) data));
+				encodeIntData(data,dimensions,buffer.asIntBuffer(),false);
 			} else if (type == long.class) {
-				buffer.asLongBuffer().put((long[]) data);
+				encodeLongData(data,dimensions,buffer.asLongBuffer(),true);
 			}  else if (type == Long.class) {
-				buffer.asLongBuffer().put(ArrayUtils.toPrimitive((Long[]) data));
+				encodeLongData(data,dimensions,buffer.asLongBuffer(),false);
 			} else {
 				throw new UnsupportedHdfException("Cant write type: " + type);
 			}
@@ -433,6 +433,65 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 			buffer.asLongBuffer().put((long[]) data);
 			hdfFileChannel.write(buffer);
 			buffer.clear();
+		}
+	}
+
+	private static void encodeByteData(Object data, int[] dims, ByteBuffer buffer, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeByteData(newArray, stripLeadingIndex(dims), buffer, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put((byte[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Byte[]) data));
+			}
+		}
+	}
+	private static void encodeShortData(Object data, int[] dims, ShortBuffer buffer, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeShortData(newArray, stripLeadingIndex(dims), buffer, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put((short[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Short[]) data));
+			}
+		}
+	}
+
+	private static void encodeIntData(Object data, int[] dims, IntBuffer buffer, boolean primative) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeIntData(newArray, stripLeadingIndex(dims), buffer, primative);
+			}
+		} else {
+			if(primative) {
+				buffer.put((int[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Integer[]) data));
+			}
+		}
+	}
+
+	private static void encodeLongData(Object data, int[] dims, LongBuffer buffer, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeLongData(newArray, stripLeadingIndex(dims), buffer, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put((long[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Long[]) data));
+			}
 		}
 	}
 }

@@ -22,6 +22,7 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.Arrays;
 
 import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.stripLeadingIndex;
@@ -309,18 +310,18 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 	public ByteBuffer encodeData(Object data) {
 		final Class<?> type = Utils.getType(data);
 		if (data.getClass().isArray()) {
-			final int totalElements = flatten(data).length;
+			final int[] dimensions = Utils.getDimensions(data);
+			final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
 			final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize())
 				.order(order);
-
 			if(type == float.class) {
-				buffer.asFloatBuffer().put((float[]) data);
+				encodeFloatData(data, dimensions, buffer.asFloatBuffer(), true);
 			} else if (type == Float.class) {
-				buffer.asFloatBuffer().put(ArrayUtils.toPrimitive((Float[]) data));
+				encodeFloatData(data, dimensions, buffer.asFloatBuffer(), false);
 			}  else if (type == double.class) {
-				buffer.asDoubleBuffer().put((double[]) data);
+				encodeDoubleData(data, dimensions, buffer.asDoubleBuffer(), true);
 			} else if (type == Double.class) {
-				buffer.asDoubleBuffer().put(ArrayUtils.toPrimitive((Double[]) data));
+				encodeDoubleData(data, dimensions, buffer.asDoubleBuffer(), false);
 			} else {
 				throw new UnsupportedHdfException("Cant write type: " + type);
 			}
@@ -391,6 +392,36 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 			buffer.asFloatBuffer().put((float[]) data);
 			hdfFileChannel.write(buffer);
 			buffer.clear();
+		}
+	}
+
+	private static void encodeFloatData(Object data, int[] dims, FloatBuffer buffer, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeFloatData(newArray, stripLeadingIndex(dims), buffer, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put((float[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Float[]) data));
+			}
+		}
+	}
+
+	private static void encodeDoubleData(Object data, int[] dims, DoubleBuffer buffer, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeDoubleData(newArray, stripLeadingIndex(dims), buffer, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put((double[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Double[]) data));
+			}
 		}
 	}
 

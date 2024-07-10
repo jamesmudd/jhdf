@@ -139,7 +139,7 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 			AttributeInfoMessage attributeInfoMessage = AttributeInfoMessage.create();
 			messages.add(attributeInfoMessage);
 			for (Map.Entry<String, Attribute> attribute : getAttributes().entrySet()) {
-				logger.info("Writing attribute [{}]", attribute.getKey());
+				logger.info("Writing attribute [{}] in group [{}]", attribute.getKey(), getName());
 				AttributeMessage attributeMessage = AttributeMessage.create(attribute.getKey(), attribute.getValue());
 				messages.add(attributeMessage);
 			}
