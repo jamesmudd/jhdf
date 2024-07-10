@@ -274,50 +274,50 @@ public class WritingAttributesTest {
 
 		WritiableDataset intDataset = writableHdfFile.putDataset("intData",  new int[] {1,2,3});
 
-		intDataset.putAttribute("group3DByteAttribute", new byte[][][]{
+		intDataset.putAttribute("dataset3DByteAttribute", new byte[][][]{
 				{{10,20,30},{10,20,30},{10,20,30}},
 				{{100,-123,33},{35,11,-35},{-43,22,99}}});
-		intDataset.putAttribute("group2DByteObjAttribute", new Byte[][]{
+		intDataset.putAttribute("dataset2DByteObjAttribute", new Byte[][]{
 				{1,2,3,4,5},
 				{6,7,8,9,10}});
-		intDataset.putAttribute("group3DShortAttribute", new short[][][]{
+		intDataset.putAttribute("dataset3DShortAttribute", new short[][][]{
 				{{133, 222, 444}, {133, 222, 444}, {133, 222, 444}},
 				{{-343, 22, -2444}, {1000, -2, 421}, {3, -52, 94}}});
-		intDataset.putAttribute("group3DShortObjAttribute", new Short[][][]{
+		intDataset.putAttribute("dataset3DShortObjAttribute", new Short[][][]{
 				{{133, 222, 444}, {133, 222, 444}, {133, 222, 444}},
 				{{-343, 22, -2444}, {1000, -2, 421}, {3, -52, 94}}});
-		intDataset.putAttribute("group3DIntAttribute", new int[][][]{
+		intDataset.putAttribute("dataset3DIntAttribute", new int[][][]{
 				{{-32455,121,244},{-32455,121,244}},
 				{{452345,-91221,42244},{-355,121321,244099}},
 				{{5341,-43121,-210044},{-200455,121112,224244}}});
-		intDataset.putAttribute("group3DIntObjAttribute", new Integer[][][]{
+		intDataset.putAttribute("dataset3DIntObjAttribute", new Integer[][][]{
 				{{-32455,121,244},{-32455,121,244}},
 				{{452345,-91221,42244},{-355,121321,244099}},
 				{{5341,-43121,-210044},{-200455,121112,224244}}});
-		intDataset.putAttribute("group3DLongAttribute", new long[][][]{
+		intDataset.putAttribute("dataset3DLongAttribute", new long[][][]{
 				{{837726444324L, 11843589389219L}, {1836444324L, 9843589389219L}, {11837726444324L, 5843589389219L}},
 				{{26444324L, -9219L}, {-6444324L, 349843589389219L}, {726444324L, -843589389219L}},
 				{{834L, -1119L}, {14324L, -989389219L}, {7726444324L, -5389211L}}});
-		intDataset.putAttribute("group3DLongObjAttribute", new Long[][][]{
+		intDataset.putAttribute("dataset3DLongObjAttribute", new Long[][][]{
 				{{837726444324L, 11843589389219L}, {1836444324L, 9843589389219L}, {11837726444324L, 5843589389219L}},
 				{{26444324L, -9219L}, {-6444324L, 349843589389219L}, {726444324L, -843589389219L}},
 				{{834L, -1119L}, {14324L, -989389219L}, {7726444324L, -5389211L}}});
-		intDataset.putAttribute("group3DFloatAttribute", new float[][][]{
+		intDataset.putAttribute("dataset3DFloatAttribute", new float[][][]{
 				{{-2847372.324242f, -442453.213424f}, {847372.324242f, -2453.213424f}},
 				{{-372.42f, 53.13424f}, {-117372.324242f, -992453.213424f}},
 				{{7372.324242f, -2453.213424f}, {237372.324242f, -2453.21333424f}},
 				{{555847372.324242f, 82453.213424f}, {-28847372.324242f, -2453.213435324f}}});
-		intDataset.putAttribute("group3DFloatObjAttribute", new Float[][][]{
+		intDataset.putAttribute("dataset3DFloatObjAttribute", new Float[][][]{
 				{{-2847372.324242f, -442453.213424f}, {847372.324242f, -2453.213424f}},
 				{{-372.42f, 53.13424f}, {-117372.324242f, -992453.213424f}},
 				{{7372.324242f, -2453.213424f}, {237372.324242f, -2453.21333424f}},
 				{{555847372.324242f, 82453.213424f}, {-28847372.324242f, -2453.213435324f}}});
-		intDataset.putAttribute("group3DDoubleAttribute", new double[][][]{
+		intDataset.putAttribute("dataset3DDoubleAttribute", new double[][][]{
 				{{-2847372.324242, -442453.213424}, {847372.324242, -2453.213424}},
 				{{-372.42, 53.13424}, {-117372.324242, -992453.213424}},
 				{{7372.324242, -2453.213424}, {237372.324242, -2453.21333424}},
 				{{555847372.324242, 82453.213424}, {-28847372.324242, -2453.213435324}}});
-		intDataset.putAttribute("group3DDoubleObjAttribute", new Double[][][]{
+		intDataset.putAttribute("dataset3DDoubleObjAttribute", new Double[][][]{
 				{{-2847372.324242, -442453.213424}, {847372.324242, -2453.213424}},
 				{{-372.42, 53.13424}, {-117372.324242, -992453.213424}},
 				{{7372.324242, -2453.213424}, {237372.324242, -2453.21333424}},
@@ -330,10 +330,6 @@ public class WritingAttributesTest {
 		try(HdfFile hdfFile = new HdfFile(tempFile)) {
 			Map<String, Attribute> attributes = hdfFile.getAttributes();
 			assertThat(attributes).hasSize(12);
-//			Attribute attribute = attributes.get("rootAttribute");
-//			assertThat(attribute.getData()).isEqualTo(new int[] {1,2,3});
-//			assertThat(attribute.getDimensions()).isEqualTo(new int[] {3});
-//			assertThat(attribute.getJavaType()).isEqualTo(int.class);
 
 			// Just check thw whole file is readable
 			TestAllFilesBase.verifyAttributes(hdfFile);
