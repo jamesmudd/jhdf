@@ -14,11 +14,13 @@ import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
 import io.jhdf.api.WritableAttributeImpl;
 import io.jhdf.api.WritableNode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class AbstractWritableNode implements WritableNode {
 	private final Group parent;
@@ -77,6 +79,10 @@ public abstract class AbstractWritableNode implements WritableNode {
 
 	@Override
 	public Attribute putAttribute(String name, Object data) {
+		if(StringUtils.isBlank(name)) {
+			throw new IllegalArgumentException("name cannot be null or blank");
+		}
+		Objects.requireNonNull(data, "Cannot write null attributes");
 		WritableAttributeImpl attribute = new WritableAttributeImpl(name, this, data);
 		return attributes.put(name, attribute);
 	}
