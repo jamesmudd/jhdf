@@ -10,12 +10,17 @@
 package io.jhdf;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.net.URL;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Arrays;
 
 public final class TestUtils {
 
+	private static final DecimalFormat format = new DecimalFormat("0.#####");
 	private TestUtils() {
 		throw new AssertionError("No instances of TestUtils");
 	}
@@ -29,7 +34,15 @@ public final class TestUtils {
 	}
 
 	public static String[] toStringArray(Object data) {
-		return ArrayUtils.toStringArray(Utils.flatten(data));
+		return Arrays.stream(Utils.flatten(data))
+			.map(format::format)
+			.toArray(String[]::new);
+	}
+
+	public static double[] toDoubleArray(Object data) {
+		return Arrays.stream(Utils.flatten(data))
+			.mapToDouble(el -> Double.parseDouble(el.toString()))
+			.toArray();
 	}
 
 }

@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
+import static io.jhdf.TestUtils.toDoubleArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.equalTo;
@@ -44,7 +45,7 @@ public class H5Dump {
 
 	public static HDF5FileXml dumpAndParse(Path path) throws IOException, InterruptedException {
 		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.command("h5dump", "--format=%.5lf", "--xml", path.toAbsolutePath().toString());
+		processBuilder.command("h5dump", "--format=%.10lf", "--xml", path.toAbsolutePath().toString());
 		processBuilder.redirectErrorStream(true); // get stderr as well
 		Process process = processBuilder.start();
   String xmlString = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
@@ -80,13 +81,13 @@ public class H5Dump {
 	private static void compareAttributes(AttributeXml attributeXml, Attribute attribute) {
 		assertThat(attributeXml.name, is(equalTo(attribute.getName())));
 		assertThat(attributeXml.getDimensions(), is(equalTo(attribute.getDimensions())));
-		assertThat(attributeXml.getData(), is(equalTo(TestUtils.toStringArray(attribute.getData()))));
+		assertThat(toDoubleArray(attributeXml.getData()), is(equalTo(toDoubleArray(attribute.getData()))));
 	}
 
 	private static void compareDatasets(DatasetXml datasetXml, Dataset dataset) {
 		assertThat(datasetXml.getObjectId(), is(equalTo(dataset.getAddress())));
 		assertThat(datasetXml.getDimensions(), is(equalTo(dataset.getDimensions())));
-		assertThat(datasetXml.getData(), is(equalTo(TestUtils.toStringArray(dataset.getData()))));
+		assertThat(toDoubleArray(datasetXml.getData()), is(equalTo(toDoubleArray(dataset.getData()))));
 	}
 
 }

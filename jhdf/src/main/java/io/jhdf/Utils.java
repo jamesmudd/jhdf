@@ -443,14 +443,18 @@ public final class Utils {
     }
 
 	private static void flattenInternal(Object data, List<Object> flat) {
-		int length = Array.getLength(data);
-		for (int i = 0; i < length; i++) {
-			Object element = Array.get(data, i);
-			if (element.getClass().isArray()) {
-				flattenInternal(element, flat);
-			} else {
-				flat.add(element);
+		if (data.getClass().isArray()) {
+			int length = Array.getLength(data);
+			for (int i = 0; i < length; i++) {
+				Object element = Array.get(data, i);
+				if (element.getClass().isArray()) {
+					flattenInternal(element, flat);
+				} else {
+					flat.add(element);
+				}
 			}
+		} else {
+			flat.add(data);
 		}
 	}
 }
