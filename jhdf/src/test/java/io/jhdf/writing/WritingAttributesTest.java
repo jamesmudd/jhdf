@@ -1,3 +1,13 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * http://jhdf.io
+ *
+ * Copyright (c) 2024 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
+
 package io.jhdf.writing;
 
 import io.jhdf.HdfFile;
@@ -9,7 +19,11 @@ import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
 import io.jhdf.h5dump.HDF5FileXml;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.io.IOException;
 import java.nio.file.Files;
