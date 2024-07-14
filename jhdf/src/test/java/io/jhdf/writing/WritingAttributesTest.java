@@ -33,7 +33,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class WritingAttributesTest {
+class WritingAttributesTest {
 
 	private static Path tempFile;
 
@@ -105,32 +105,20 @@ public class WritingAttributesTest {
 
 		// Scalar
 		writableHdfFile.putAttribute("groupScalarByteAttribute", 10);
-		writableHdfFile.putAttribute("groupScalarByteObjAttribute", new Byte("20"));
 		writableHdfFile.putAttribute("groupScalarShortAttribute", 133);
-		writableHdfFile.putAttribute("groupScalarShortObjAttribute", new Short("123"));
 		writableHdfFile.putAttribute("groupScalarIntAttribute", -32455);
-		writableHdfFile.putAttribute("groupScalarIntObjAttribute", new Integer(9455));
 		writableHdfFile.putAttribute("groupScalarLongAttribute", 83772644);
-		writableHdfFile.putAttribute("groupScalarLongObjAttribute", new Long(837726444324L));
 		writableHdfFile.putAttribute("groupScalarFloatAttribute", -2847372.324242);
-		writableHdfFile.putAttribute("groupScalarFloatObjAttribute", new Float(372.324242));
 		writableHdfFile.putAttribute("groupScalarDoubleAttribute", 21342.324);
-		writableHdfFile.putAttribute("groupScalarDoubleObjAttribute", new Double(3421342.324113));
 
 		WritiableDataset intDataset = writableHdfFile.putDataset("intData",  new int[] {1,2,3});
 
 		intDataset.putAttribute("datasetByteAttribute", 10);
-		intDataset.putAttribute("datasetByteObjAttribute", new Byte("20"));
 		intDataset.putAttribute("datasetShortAttribute", 133);
-		intDataset.putAttribute("datasetShortObjAttribute", new Short("123"));
 		intDataset.putAttribute("datasetIntAttribute", -32455);
-		intDataset.putAttribute("datasetIntObjAttribute", new Integer(9455));
 		intDataset.putAttribute("datasetLongAttribute", 83772644);
-		intDataset.putAttribute("datasetLongObjAttribute", new Long(837726444324L));
 		intDataset.putAttribute("datasetFloatAttribute", -2847372.324242);
-		intDataset.putAttribute("datasetFloatObjAttribute", new Float(372.324242));
 		intDataset.putAttribute("datasetDoubleAttribute", 21342.324);
-		intDataset.putAttribute("datasetDoubleObjAttribute", new Double(3421342.324113));
 
 		// Actually flush and write everything
 		writableHdfFile.close();

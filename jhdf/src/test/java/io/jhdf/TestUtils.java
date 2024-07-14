@@ -15,8 +15,6 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 
 public final class TestUtils {
-
-	private static final DecimalFormat format = new DecimalFormat("0.#####");
 	private TestUtils() {
 		throw new AssertionError("No instances of TestUtils");
 	}
