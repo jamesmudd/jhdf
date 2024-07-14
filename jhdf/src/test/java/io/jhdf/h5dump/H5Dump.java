@@ -44,13 +44,15 @@ public class H5Dump {
 	}
 
 	public static HDF5FileXml dumpAndParse(Path path) throws IOException, InterruptedException {
+		logger.info("Reading [{}] with h5dump", path.toAbsolutePath());
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.command("h5dump", "--format=%.10lf", "--xml", path.toAbsolutePath().toString());
 		processBuilder.redirectErrorStream(true); // get stderr as well
+		logger.info("Starting h5dump process [{}]", processBuilder.command());
 		Process process = processBuilder.start();
-  String xmlString = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+  		String xmlString = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
 		process.waitFor(30, TimeUnit.SECONDS);
-		logger.info("h5dump return [{}] output [{}]", process.exitValue(), xmlString);
+		logger.info("h5dump returned [{}] output [{}]", process.exitValue(), xmlString);
 		// Validate
 		assertThat(process.exitValue(), is(equalTo(0)));
 		assertThat(xmlString, is(not(blankOrNullString())));
@@ -79,16 +81,16 @@ public class H5Dump {
 	}
 
 	private static void compareAttributes(AttributeXml attributeXml, Attribute attribute) {
+		logger.info("Comparing attribute [{}] on node [{}]", attribute.getName(), attribute.getNode().getPath());
 		assertThat(attributeXml.name, is(equalTo(attribute.getName())));
 		assertThat(attributeXml.getDimensions(), is(equalTo(attribute.getDimensions())));
-//		assertThat(toDoubleArray(attributeXml.getData()), is(equalTo(toDoubleArray(attribute.getData()))));
 		assertArrayEquals(toDoubleArray(attributeXml.getData()), toDoubleArray(attribute.getData()), 0.00005);
 	}
 
 	private static void compareDatasets(DatasetXml datasetXml, Dataset dataset) {
+		logger.info("Comparing dataset [{}] on node [{}]", dataset.getName(), dataset.getPath());
 		assertThat(datasetXml.getObjectId(), is(equalTo(dataset.getAddress())));
 		assertThat(datasetXml.getDimensions(), is(equalTo(dataset.getDimensions())));
-//		assertThat(toDoubleArray(datasetXml.getData()), is(equalTo(toDoubleArray(dataset.getData()), 0.005)));
 		assertArrayEquals(toDoubleArray(datasetXml.getData()), toDoubleArray(dataset.getData()), 0.00005);
 	}
 

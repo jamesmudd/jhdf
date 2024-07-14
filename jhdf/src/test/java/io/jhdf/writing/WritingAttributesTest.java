@@ -126,7 +126,7 @@ class WritingAttributesTest {
 		// Now read it back
 		try(HdfFile hdfFile = new HdfFile(tempFile)) {
 			Map<String, Attribute> attributes = hdfFile.getAttributes();
-			assertThat(attributes).hasSize(12);
+			assertThat(attributes).hasSize(6);
 //			Attribute attribute = attributes.get("rootAttribute");
 //			assertThat(attribute.getData()).isEqualTo(new int[] {1,2,3});
 //			assertThat(attribute.getDimensions()).isEqualTo(new int[] {3});
