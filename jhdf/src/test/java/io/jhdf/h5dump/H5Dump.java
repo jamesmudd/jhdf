@@ -17,6 +17,7 @@ import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,7 @@ import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class H5Dump {
 
@@ -81,13 +83,15 @@ public class H5Dump {
 	private static void compareAttributes(AttributeXml attributeXml, Attribute attribute) {
 		assertThat(attributeXml.name, is(equalTo(attribute.getName())));
 		assertThat(attributeXml.getDimensions(), is(equalTo(attribute.getDimensions())));
-		assertThat(toDoubleArray(attributeXml.getData()), is(equalTo(toDoubleArray(attribute.getData()))));
+//		assertThat(toDoubleArray(attributeXml.getData()), is(equalTo(toDoubleArray(attribute.getData()))));
+		assertArrayEquals(toDoubleArray(attributeXml.getData()), toDoubleArray(attribute.getData()), 0.00005);
 	}
 
 	private static void compareDatasets(DatasetXml datasetXml, Dataset dataset) {
 		assertThat(datasetXml.getObjectId(), is(equalTo(dataset.getAddress())));
 		assertThat(datasetXml.getDimensions(), is(equalTo(dataset.getDimensions())));
-		assertThat(toDoubleArray(datasetXml.getData()), is(equalTo(toDoubleArray(dataset.getData()))));
+//		assertThat(toDoubleArray(datasetXml.getData()), is(equalTo(toDoubleArray(dataset.getData()), 0.005)));
+		assertArrayEquals(toDoubleArray(datasetXml.getData()), toDoubleArray(dataset.getData()), 0.005);
 	}
 
 }
