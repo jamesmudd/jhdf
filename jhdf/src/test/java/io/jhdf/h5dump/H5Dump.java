@@ -12,12 +12,10 @@ package io.jhdf.h5dump;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import io.jhdf.HdfFile;
-import io.jhdf.TestUtils;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +89,7 @@ public class H5Dump {
 		assertThat(datasetXml.getObjectId(), is(equalTo(dataset.getAddress())));
 		assertThat(datasetXml.getDimensions(), is(equalTo(dataset.getDimensions())));
 //		assertThat(toDoubleArray(datasetXml.getData()), is(equalTo(toDoubleArray(dataset.getData()), 0.005)));
-		assertArrayEquals(toDoubleArray(datasetXml.getData()), toDoubleArray(dataset.getData()), 0.005);
+		assertArrayEquals(toDoubleArray(datasetXml.getData()), toDoubleArray(dataset.getData()), 0.00005);
 	}
 
 }

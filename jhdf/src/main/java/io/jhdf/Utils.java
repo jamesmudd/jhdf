@@ -10,7 +10,6 @@
 package io.jhdf;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -380,9 +379,9 @@ public final class Utils {
 		final int byteIndex = bit / 8;
 		final int bitInByte = bit % 8;
 		if(value) {
-			bytes[byteIndex] |= 1 << bitInByte;
+			bytes[byteIndex] |= (byte) (1 << bitInByte);
 		} else {
-			bytes[byteIndex] &= ~(1 << bitInByte);
+			bytes[byteIndex] &= (byte) ~(1 << bitInByte);
 		}
 	}
 

@@ -9,13 +9,9 @@
  */
 package io.jhdf;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.net.URL;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Arrays;
 
 public final class TestUtils {
@@ -31,12 +27,6 @@ public final class TestUtils {
 			throw new RuntimeException("Could not find test file named: " + fileName);
 		}
 		return new HdfFile(Paths.get(url.toURI()));
-	}
-
-	public static String[] toStringArray(Object data) {
-		return Arrays.stream(Utils.flatten(data))
-			.map(format::format)
-			.toArray(String[]::new);
 	}
 
 	public static double[] toDoubleArray(Object data) {
