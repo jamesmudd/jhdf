@@ -12,9 +12,11 @@ package io.jhdf.h5dump;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import io.jhdf.HdfFile;
+import io.jhdf.WritableHdfFile;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
+import io.jhdf.api.Node;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static io.jhdf.TestUtils.toDoubleArray;
@@ -80,6 +83,11 @@ public class H5Dump {
 		}
 	}
 
+	public static void assetHdfFilesMatch(WritableHdfFile hdfFile1, HdfFile hdfFile2) {
+		// First validate the root group size
+		compareGroups(hdfFile1, hdfFile2);
+	}
+
 	private static void compareAttributes(AttributeXml attributeXml, Attribute attribute) {
 		logger.info("Comparing attribute [{}] on node [{}]", attribute.getName(), attribute.getNode().getPath());
 		assertThat(attributeXml.name, is(equalTo(attribute.getName())));
@@ -92,6 +100,38 @@ public class H5Dump {
 		assertThat(datasetXml.getObjectId(), is(equalTo(dataset.getAddress())));
 		assertThat(datasetXml.getDimensions(), is(equalTo(dataset.getDimensions())));
 		assertArrayEquals(toDoubleArray(datasetXml.getData()), toDoubleArray(dataset.getData()), 0.002);
+	}
+
+
+	public static void compareGroups(Group group1, Group group2) {
+		// First validate the group size
+		assertThat(group1.getChildren().size(), is(equalTo(group2.getChildren().size())));
+
+		for (Map.Entry<String, Node> entry : group1.getChildren().entrySet()) {
+			for (Map.Entry<String, Attribute> attributeEntry : entry.getValue().getAttributes().entrySet()) {
+				Node group2Child = group2.getChild(entry.getValue().getName());
+				compareAttributes(attributeEntry.getValue(), group2Child.getAttribute(attributeEntry.getKey()));
+			}
+
+			if(entry.getValue().isGroup()) {
+					compareGroups((Group) entry.getValue(), (Group) group2.getChild(entry.getKey()));
+				} else if (entry.getValue() instanceof Dataset) {
+					compareDatasets((Dataset) entry.getValue(), (Dataset) group2.getChild(entry.getKey()));
+				}
+			}
+	}
+
+	private static void compareAttributes(Attribute attribute1, Attribute attribute2) {
+		logger.info("Comparing attribute [{}] on node [{}]", attribute1.getName(), attribute1.getNode().getPath());
+		assertThat(attribute1.getName(), is(equalTo(attribute2.getName())));
+		assertThat(attribute1.getDimensions(), is(equalTo(attribute2.getDimensions())));
+		assertArrayEquals(toDoubleArray(attribute1.getData()), toDoubleArray(attribute2.getData()), 0.002);
+	}
+
+	private static void compareDatasets(Dataset dataset1, Dataset dataset2) {
+		logger.info("Comparing dataset2 [{}] on node [{}]", dataset1.getName(), dataset1.getPath());
+		assertThat(dataset1.getDimensions(), is(equalTo(dataset2.getDimensions())));
+		assertArrayEquals(toDoubleArray(dataset1.getData()), toDoubleArray(dataset2.getData()), 0.002);
 	}
 
 }

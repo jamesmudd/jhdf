@@ -11,6 +11,7 @@
 package io.jhdf.writing;
 
 import io.jhdf.HdfFile;
+import io.jhdf.TestUtils;
 import io.jhdf.WritableHdfFile;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.WritableGroup;
@@ -81,6 +82,8 @@ class WritingAttributesTest {
 				// Just check thw whole file is readable
 				TestAllFilesBase.verifyAttributes(hdfFile);
 				TestAllFilesBase.recurseGroup(hdfFile);
+
+				H5Dump.assetHdfFilesMatch(writableHdfFile, hdfFile);
 			}
 		}
 
@@ -217,6 +220,8 @@ class WritingAttributesTest {
 				// Just check thw whole file is readable
 				TestAllFilesBase.verifyAttributes(hdfFile);
 				TestAllFilesBase.recurseGroup(hdfFile);
+
+				H5Dump.assetHdfFilesMatch(writableHdfFile, hdfFile);
 			}
 		}
 
@@ -360,6 +365,8 @@ class WritingAttributesTest {
 				// Just check thw whole file is readable
 				TestAllFilesBase.verifyAttributes(hdfFile);
 				TestAllFilesBase.recurseGroup(hdfFile);
+
+				H5Dump.assetHdfFilesMatch(writableHdfFile, hdfFile);
 			}
 		}
 
