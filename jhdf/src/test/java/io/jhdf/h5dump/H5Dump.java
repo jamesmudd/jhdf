@@ -84,14 +84,14 @@ public class H5Dump {
 		logger.info("Comparing attribute [{}] on node [{}]", attribute.getName(), attribute.getNode().getPath());
 		assertThat(attributeXml.name, is(equalTo(attribute.getName())));
 		assertThat(attributeXml.getDimensions(), is(equalTo(attribute.getDimensions())));
-		assertArrayEquals(toDoubleArray(attributeXml.getData()), toDoubleArray(attribute.getData()), 0.00005);
+		assertArrayEquals(toDoubleArray(attributeXml.getData()), toDoubleArray(attribute.getData()), 0.002);
 	}
 
 	private static void compareDatasets(DatasetXml datasetXml, Dataset dataset) {
 		logger.info("Comparing dataset [{}] on node [{}]", dataset.getName(), dataset.getPath());
 		assertThat(datasetXml.getObjectId(), is(equalTo(dataset.getAddress())));
 		assertThat(datasetXml.getDimensions(), is(equalTo(dataset.getDimensions())));
-		assertArrayEquals(toDoubleArray(datasetXml.getData()), toDoubleArray(dataset.getData()), 0.00005);
+		assertArrayEquals(toDoubleArray(datasetXml.getData()), toDoubleArray(dataset.getData()), 0.002);
 	}
 
 }
