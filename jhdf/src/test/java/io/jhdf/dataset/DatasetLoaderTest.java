@@ -23,7 +23,6 @@ import java.util.BitSet;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.powermock.reflect.Whitebox.invokeConstructor;
 
 class DatasetLoaderTest {
 

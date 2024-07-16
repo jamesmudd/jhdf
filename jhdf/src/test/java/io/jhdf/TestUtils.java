@@ -11,7 +11,6 @@ package io.jhdf;
 
 import java.net.URL;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
 import java.util.Arrays;
 
 public final class TestUtils {

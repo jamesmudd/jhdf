@@ -40,7 +40,6 @@ import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Link;
 import io.jhdf.api.Node;
-import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.datatype.DataType;
 
 /**

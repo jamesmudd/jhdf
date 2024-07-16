@@ -10,7 +10,6 @@
 package io.jhdf.object.message;
 
 import io.jhdf.BufferBuilder;
-import io.jhdf.Constants;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 

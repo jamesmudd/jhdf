@@ -15,7 +15,6 @@ import net.jpountz.lz4.LZ4Factory;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.xerial.snappy.BitShuffle;
 import org.xerial.snappy.BitShuffleType;
 

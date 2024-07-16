@@ -24,8 +24,8 @@ import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
+import java.util.Objects;
 
-import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.stripLeadingIndex;
 
 public class FixedPoint extends DataType implements OrderedDataType, WritableDataType {
@@ -171,6 +171,8 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 
     @Override
     public ByteBuffer encodeData(Object data) {
+		Objects.requireNonNull(data, "Cannot encode null");
+
 		final Class<?> type = Utils.getType(data);
 		if(data.getClass().isArray()) {
 			final int[] dimensions = Utils.getDimensions(data);
@@ -197,8 +199,6 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 				throw new UnsupportedHdfException("Cant write type: " + type);
 			}
 			return buffer;
-		} else if (data == null) {
-			throw new UnsupportedHdfException("Encoding empty data not supported");
 		} else {
 			// Scalar
 			final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);

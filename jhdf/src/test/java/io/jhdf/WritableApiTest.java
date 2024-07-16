@@ -17,13 +17,12 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class WritableApiTest {
 
 	@Test
-	void testBuildingFile() throws Exception {
+	void testBuildingFile() {
 		Path path = Paths.get("writing.hdf5");
 		try (WritableHdfFile file = HdfFile.write(path)) {
 

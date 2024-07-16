@@ -23,8 +23,8 @@ import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
+import java.util.Objects;
 
-import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.stripLeadingIndex;
 
 public class FloatingPoint extends DataType implements OrderedDataType {
@@ -308,6 +308,8 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 
 	@Override
 	public ByteBuffer encodeData(Object data) {
+		Objects.requireNonNull(data, "Cannot encode null");
+
 		final Class<?> type = Utils.getType(data);
 		if (data.getClass().isArray()) {
 			final int[] dimensions = Utils.getDimensions(data);
@@ -327,8 +329,6 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 			}
 
 			return buffer;
-		} else if (data == null) {
-			throw new UnsupportedHdfException("Encoding empty data not supported");
 		} else {
 			// Scalar dataset
 			final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);

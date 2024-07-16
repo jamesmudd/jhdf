@@ -12,11 +12,9 @@ package io.jhdf.writing;
 
 import io.jhdf.HdfFile;
 import io.jhdf.WritableHdfFile;
-import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
 import io.jhdf.api.WritableGroup;
-import io.jhdf.api.WritiableDataset;
 import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
