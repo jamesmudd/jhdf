@@ -11,6 +11,7 @@
 package io.jhdf.writing;
 
 import io.jhdf.HdfFile;
+import io.jhdf.TestUtils;
 import io.jhdf.WritableHdfFile;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.WritableGroup;
@@ -32,7 +33,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WritingAttributesTest {
+class AttributesWritingTest {
 
 	@Nested
 	@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -79,7 +80,7 @@ class WritingAttributesTest {
 				TestAllFilesBase.verifyAttributes(hdfFile);
 				TestAllFilesBase.recurseGroup(hdfFile);
 
-				H5Dump.assetHdfFilesMatch(writableHdfFile, hdfFile);
+				TestUtils.compareGroups(writableHdfFile, hdfFile);
 			}
 		}
 
@@ -209,7 +210,7 @@ class WritingAttributesTest {
 				TestAllFilesBase.verifyAttributes(hdfFile);
 				TestAllFilesBase.recurseGroup(hdfFile);
 
-				H5Dump.assetHdfFilesMatch(writableHdfFile, hdfFile);
+				TestUtils.compareGroups(writableHdfFile, hdfFile);
 			}
 		}
 
@@ -354,7 +355,7 @@ class WritingAttributesTest {
 				TestAllFilesBase.verifyAttributes(hdfFile);
 				TestAllFilesBase.recurseGroup(hdfFile);
 
-				H5Dump.assetHdfFilesMatch(writableHdfFile, hdfFile);
+				TestUtils.compareGroups(writableHdfFile, hdfFile);
 			}
 		}
 

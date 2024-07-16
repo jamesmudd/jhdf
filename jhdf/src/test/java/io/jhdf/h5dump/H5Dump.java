@@ -82,11 +82,6 @@ public class H5Dump {
 		}
 	}
 
-	public static void assetHdfFilesMatch(WritableHdfFile hdfFile1, HdfFile hdfFile2) {
-		// First validate the root group size
-		TestUtils.compareGroups(hdfFile1, hdfFile2);
-	}
-
 	private static void compareAttributes(AttributeXml attributeXml, Attribute attribute) {
 		logger.info("Comparing attribute [{}] on node [{}]", attribute.getName(), attribute.getNode().getPath());
 		assertThat(attributeXml.name, is(equalTo(attribute.getName())));

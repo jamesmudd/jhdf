@@ -76,7 +76,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 	@Override
 	public int[] getDimensions() {
-		return Utils.getDimensions(data);
+		return dataSpace.getDimensions();
 	}
 
 	@Override
