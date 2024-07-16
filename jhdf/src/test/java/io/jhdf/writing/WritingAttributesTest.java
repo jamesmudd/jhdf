@@ -134,10 +134,6 @@ class WritingAttributesTest {
 			try (HdfFile hdfFile = new HdfFile(tempFile)) {
 				Map<String, Attribute> attributes = hdfFile.getAttributes();
 				assertThat(attributes).hasSize(6);
-//			Attribute attribute = attributes.get("rootAttribute");
-//			assertThat(attribute.getData()).isEqualTo(new int[] {1,2,3});
-//			assertThat(attribute.getDimensions()).isEqualTo(new int[] {3});
-//			assertThat(attribute.getJavaType()).isEqualTo(int.class);
 
 				// Just check thw whole file is readable
 				TestAllFilesBase.verifyAttributes(hdfFile);
@@ -207,11 +203,7 @@ class WritingAttributesTest {
 			// Now read it back
 			try (HdfFile hdfFile = new HdfFile(tempFile)) {
 				Map<String, Attribute> attributes = hdfFile.getAttributes();
-//				assertThat(attributes).hasSize(12);
-//			Attribute attribute = attributes.get("rootAttribute");
-//			assertThat(attribute.getData()).isEqualTo(new int[] {1,2,3});
-//			assertThat(attribute.getDimensions()).isEqualTo(new int[] {3});
-//			assertThat(attribute.getJavaType()).isEqualTo(int.class);
+				assertThat(attributes).hasSize(12);
 
 				// Just check thw whole file is readable
 				TestAllFilesBase.verifyAttributes(hdfFile);
