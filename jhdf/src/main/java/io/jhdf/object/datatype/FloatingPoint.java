@@ -333,12 +333,8 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 			// Scalar dataset
 			final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);
 
-			if(type == float.class) {
-				buffer.asFloatBuffer().put((float) data);
-			} else if (type == Float.class) {
+			if (type == Float.class) {
 				buffer.asFloatBuffer().put((Float) data);
-			}  else if (type == double.class) {
-				buffer.asDoubleBuffer().put((double) data);
 			} else if (type == Double.class) {
 				buffer.asDoubleBuffer().put((Double) data);
 			} else {

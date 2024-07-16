@@ -202,20 +202,12 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 		} else {
 			// Scalar
 			final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);
-			if(type == byte.class) {
-				buffer.put((byte) data);
-			} else if (type == Byte.class) {
+			if (type == Byte.class) {
 				buffer.put((Byte) data);
-			} else if (type == short.class) {
-				buffer.asShortBuffer().put((short) data);
 			}  else if (type == Short.class) {
 				buffer.asShortBuffer().put((Short) data);
-			} else if(type == int.class) {
-				buffer.asIntBuffer().put((int) data);
 			}  else if(type == Integer.class) {
 				buffer.asIntBuffer().put((Integer) data);
-			} else if (type == long.class) {
-				buffer.asLongBuffer().put((long) data);
 			} else if (type == Long.class) {
 				buffer.asLongBuffer().put((Long) data);
 			} else {
