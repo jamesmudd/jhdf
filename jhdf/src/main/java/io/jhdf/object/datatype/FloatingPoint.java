@@ -347,10 +347,9 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 
 	@Override
 	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
-		final int fastDimSize = dimensions[dimensions.length - 1];
-
 		final Class<?> type = Utils.getType(data);
 		if (data.getClass().isArray()) {
+			final int fastDimSize = dimensions[dimensions.length - 1];
 			// This buffer is reused
 			final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize())
 				.order(order);
