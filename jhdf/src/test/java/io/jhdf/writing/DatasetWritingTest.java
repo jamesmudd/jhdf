@@ -51,11 +51,11 @@ class DatasetWritingTest {
 			WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 
             // Scalar
-            writableHdfFile.putDataset("ScalarByteDataset", 10);
-            writableHdfFile.putDataset("ScalarShortDataset", 133);
+            writableHdfFile.putDataset("ScalarByteDataset", (byte) 10);
+            writableHdfFile.putDataset("ScalarShortDataset",  (short) 133);
             writableHdfFile.putDataset("ScalarIntDataset", -32455);
-            writableHdfFile.putDataset("ScalarLongDataset", 83772644);
-            writableHdfFile.putDataset("ScalarFloatDataset", -78472.324);
+            writableHdfFile.putDataset("ScalarLongDataset", 83772644L);
+            writableHdfFile.putDataset("ScalarFloatDataset", -78472.324F);
             writableHdfFile.putDataset("ScalarDoubleDataset", 2134922.321114);
 
             // Actually flush and write everything

@@ -389,6 +389,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 			} else {
 				throw new UnsupportedHdfException("Cant write type: " + type);
 			}
+			buffer.rewind();
 			hdfFileChannel.write(buffer);
 		}
 
@@ -406,6 +407,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 			} else {
 				buffer.put(ArrayUtils.toPrimitive((Byte[]) data));
 			}
+			buffer.rewind(); // Need to rewind as there is not a view
 			hdfFileChannel.write(buffer);
 			buffer.clear();
 		}

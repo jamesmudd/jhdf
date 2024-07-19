@@ -112,20 +112,20 @@ class AttributesWritingTest {
 			WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 
 			// Scalar
-			writableHdfFile.putAttribute("groupScalarByteAttribute", 10);
-			writableHdfFile.putAttribute("groupScalarShortAttribute", 133);
+			writableHdfFile.putAttribute("groupScalarByteAttribute", (byte) 10);
+			writableHdfFile.putAttribute("groupScalarShortAttribute", (short) 133);
 			writableHdfFile.putAttribute("groupScalarIntAttribute", -32455);
-			writableHdfFile.putAttribute("groupScalarLongAttribute", 83772644);
-			writableHdfFile.putAttribute("groupScalarFloatAttribute", -78472.324);
+			writableHdfFile.putAttribute("groupScalarLongAttribute", 83772644L);
+			writableHdfFile.putAttribute("groupScalarFloatAttribute", -78472.324F);
 			writableHdfFile.putAttribute("groupScalarDoubleAttribute", 21342.324);
 
 			WritiableDataset intDataset = writableHdfFile.putDataset("intData", new int[]{1, 2, 3});
 
-			intDataset.putAttribute("datasetByteAttribute", 10);
-			intDataset.putAttribute("datasetShortAttribute", 133);
+			intDataset.putAttribute("datasetByteAttribute", (byte) 10);
+			intDataset.putAttribute("datasetShortAttribute", (short) 133);
 			intDataset.putAttribute("datasetIntAttribute", -32455);
-			intDataset.putAttribute("datasetLongAttribute", 83772644);
-			intDataset.putAttribute("datasetFloatAttribute", -78472.324);
+			intDataset.putAttribute("datasetLongAttribute", 83772644L);
+			intDataset.putAttribute("datasetFloatAttribute", -78472.324F);
 			intDataset.putAttribute("datasetDoubleAttribute", 21342.324);
 
 			// Actually flush and write everything
