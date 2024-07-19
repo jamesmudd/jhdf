@@ -348,44 +348,68 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 	@Override
 	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
 		final int fastDimSize = dimensions[dimensions.length - 1];
-		// This buffer is reused
-		final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize())
-			.order(ByteOrder.nativeOrder());
 
-		switch (bitPrecision) {
-			case 32:
-				writeFloatData(data,dimensions,buffer,hdfFileChannel);
-				break;
-			case 64:
-				writeDoubleData(data, dimensions, buffer, hdfFileChannel);
-				break;
-			default:
-				throw new UnsupportedHdfException("Cant write FP precission: " + bitPrecision);
+		final Class<?> type = Utils.getType(data);
+		if (data.getClass().isArray()) {
+			// This buffer is reused
+			final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize())
+				.order(order);
+
+			if(type == float.class) {
+				writeFloatData(data, dimensions, buffer, hdfFileChannel, true);
+			} else if (type == Float.class) {
+				writeFloatData(data, dimensions, buffer, hdfFileChannel, false);
+			}  else if (type == double.class) {
+				writeDoubleData(data, dimensions, buffer, hdfFileChannel, true);
+			} else if (type == Double.class) {
+				writeDoubleData(data, dimensions, buffer, hdfFileChannel, false);
+			} else {
+				throw new UnsupportedHdfException("Cant write type: " + type);
+			}
+		} else {
+			// Scalar
+			final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);
+			if (type == Float.class) {
+				buffer.asFloatBuffer().put((Float) data);
+			} else if (type == Double.class) {
+				buffer.asDoubleBuffer().put((Double) data);
+			} else {
+				throw new UnsupportedHdfException("Cant write scalar type: " + type);
+			}
+			hdfFileChannel.write(buffer);
 		}
 
 	}
 
-	private static void writeDoubleData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
+	private static void writeDoubleData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel, boolean primitive) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				writeDoubleData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
+				writeDoubleData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel, primitive);
 			}
 		} else {
-			buffer.asDoubleBuffer().put((double[]) data);
+			if(primitive) {
+				buffer.asDoubleBuffer().put((double[]) data);
+			} else {
+				buffer.asDoubleBuffer().put(ArrayUtils.toPrimitive((Double[]) data));
+			}
 			hdfFileChannel.write(buffer);
 			buffer.clear();
 		}
 	}
 
-	private static void writeFloatData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
+	private static void writeFloatData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel, boolean primitive) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				writeFloatData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
+				writeFloatData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel, primitive);
 			}
 		} else {
-			buffer.asFloatBuffer().put((float[]) data);
+			if(primitive) {
+				buffer.asFloatBuffer().put((float[]) data);
+			} else {
+				buffer.asFloatBuffer().put(ArrayUtils.toPrimitive((Float[]) data));
+			}
 			hdfFileChannel.write(buffer);
 			buffer.clear();
 		}
