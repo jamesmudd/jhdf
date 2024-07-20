@@ -26,6 +26,7 @@ import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.Message;
 import io.jhdf.storage.HdfFileChannel;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,6 +101,9 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 
 	@Override
 	public WritiableDataset putDataset(String name, Object data) {
+		if(StringUtils.isBlank(name)) {
+			throw new IllegalArgumentException("name cannot be null or blank");
+		}
 		WritableDatasetImpl writableDataset = new WritableDatasetImpl(data, name, this);
 		children.put(name, writableDataset);
 		logger.info("Added dataset [{}] to group [{}]", name, getPath());
@@ -108,6 +112,9 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 
 	@Override
 	public WritableGroup putGroup(String name) {
+		if(StringUtils.isBlank(name)) {
+			throw new IllegalArgumentException("name cannot be null or blank");
+		}
 		WritableGroupImpl newGroup = new WritableGroupImpl(this, name);
 		children.put(name, newGroup);
 		logger.info("Added group [{}] to group [{}]", name, getPath());

@@ -27,11 +27,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DatasetWritingTest {
 
@@ -234,5 +236,26 @@ class DatasetWritingTest {
                 H5Dump.assetXmlAndHdfFileMatch(hdf5FileXml, hdfFile);
             }
         }
+	}
+
+	@Test
+	void testNoDatasetNameFails() throws IOException {
+		Path tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
+		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
+
+		assertThrows(IllegalArgumentException.class,
+			() -> writableHdfFile.putDataset(null, 111));
+
+		assertThrows(IllegalArgumentException.class,
+			() -> writableHdfFile.putDataset("", 111));
+	}
+
+	@Test
+	void testNullDatasFails() throws IOException {
+		Path tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
+		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
+
+		assertThrows(NullPointerException.class,
+			() -> writableHdfFile.putDataset("test", null));
 	}
 }
