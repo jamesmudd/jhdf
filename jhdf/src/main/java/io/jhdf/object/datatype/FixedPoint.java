@@ -13,6 +13,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
@@ -23,8 +24,8 @@ import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
+import java.util.Objects;
 
-import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.stripLeadingIndex;
 
 public class FixedPoint extends DataType implements OrderedDataType, WritableDataType {
@@ -170,26 +171,62 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 
     @Override
     public ByteBuffer encodeData(Object data) {
-		Class<?> type = Utils.getArrayType(data);
-		// TODO multi dimensional and scalar and empty
-		Object[] flattened = flatten(data);
-		ByteBuffer buffer = ByteBuffer.allocate(flattened.length * getSize());
-		buffer.order(ByteOrder.nativeOrder());
-		if(type == byte.class) {
-			buffer.put((byte[]) data);
-		} else if (type == short.class) {
-			buffer.asShortBuffer().put((short[]) data);
-		} else if(type == int.class) {
-			buffer.asIntBuffer().put((int[]) data);
-		} else if (type == long.class) {
-			buffer.asLongBuffer().put((long[]) data);
+		Objects.requireNonNull(data, "Cannot encode null");
+
+
+		if(data.getClass().isArray()) {
+			return encodeArrayData(data);
+		} else {
+			return encodeScalarData(data);
+		}
+	}
+
+	private ByteBuffer encodeScalarData(Object data) {
+		final Class<?> type = Utils.getType(data);
+		final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);
+		if (type == Byte.class) {
+			buffer.put((Byte) data);
+		}  else if (type == Short.class) {
+			buffer.asShortBuffer().put((Short) data);
+		}  else if(type == Integer.class) {
+			buffer.asIntBuffer().put((Integer) data);
+		} else if (type == Long.class) {
+			buffer.asLongBuffer().put((Long) data);
 		} else {
 			throw new UnsupportedHdfException("Cant write type: " + type);
 		}
 		return buffer;
 	}
 
-    // Signed Fixed Point
+	private ByteBuffer encodeArrayData(Object data) {
+		final Class<?> type = Utils.getType(data);
+		final int[] dimensions = Utils.getDimensions(data);
+		final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
+		final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize())
+			.order(order);
+		if(type == byte.class) {
+			encodeByteData(data, dimensions, buffer, true);
+		} else if (type == Byte.class) {
+			encodeByteData(data, dimensions, buffer, false);
+		} else if (type == short.class) {
+			encodeShortData(data, dimensions, buffer.asShortBuffer(), true);
+		} else if (type == Short.class) {
+			encodeShortData(data, dimensions, buffer.asShortBuffer(), false);
+		} else if(type == int.class) {
+			encodeIntData(data, dimensions, buffer.asIntBuffer(), true);
+		}  else if(type == Integer.class) {
+			encodeIntData(data,dimensions,buffer.asIntBuffer(),false);
+		} else if (type == long.class) {
+			encodeLongData(data,dimensions,buffer.asLongBuffer(),true);
+		}  else if (type == Long.class) {
+			encodeLongData(data,dimensions,buffer.asLongBuffer(),false);
+		} else {
+			throw new UnsupportedHdfException("Cant write type: " + type);
+		}
+		return buffer;
+	}
+
+	// Signed Fixed Point
 
 	private static void fillData(Object data, int[] dims, ByteBuffer buffer) {
 		if (dims.length > 1) {
@@ -317,5 +354,177 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 			.writeShort(bitOffset)
 			.writeShort(bitPrecision)
 			.build();
+	}
+
+	@Override
+	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
+
+		if (data.getClass().isArray()) {
+			writeArrayData(data, dimensions, hdfFileChannel);
+		} else {
+			writeScalarData(data, hdfFileChannel);
+		}
+
+	}
+
+	private void writeScalarData(Object data, HdfFileChannel hdfFileChannel) {
+		ByteBuffer buffer = encodeScalarData(data);
+		buffer.rewind();
+		hdfFileChannel.write(buffer);
+	}
+
+	private void writeArrayData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
+		final Class<?> type = Utils.getType(data);
+		final int fastDimSize = dimensions[dimensions.length - 1];
+		// This buffer is reused
+		final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize())
+			.order(order);
+		if(type == byte.class) {
+			writeByteData(data, dimensions, buffer, hdfFileChannel, true);
+		} else if (type == Byte.class) {
+			writeByteData(data, dimensions, buffer, hdfFileChannel, false);
+		} else if (type == short.class) {
+			writeShortData(data, dimensions, buffer, hdfFileChannel, true);
+		} else if (type == Short.class) {
+			writeShortData(data, dimensions, buffer, hdfFileChannel, false);
+		} else if(type == int.class) {
+			writeIntData(data, dimensions, buffer, hdfFileChannel, true);
+		}  else if(type == Integer.class) {
+			writeIntData(data, dimensions, buffer, hdfFileChannel, false);
+		} else if (type == long.class) {
+			writeLongData(data, dimensions, buffer, hdfFileChannel, true);
+		}  else if (type == Long.class) {
+			writeLongData(data, dimensions, buffer, hdfFileChannel, false);
+		} else {
+			throw new UnsupportedHdfException("Cant write type: " + type);
+		}
+	}
+
+	private static void writeByteData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeByteData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put((byte[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Byte[]) data));
+			}
+			buffer.rewind(); // Need to rewind as there is not a view
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
+	}
+
+	private static void writeShortData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeShortData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.asShortBuffer().put((short[]) data);
+			} else {
+				buffer.asShortBuffer().put(ArrayUtils.toPrimitive((Short[]) data));
+			}
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
+	}
+
+	private static void writeIntData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeIntData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.asIntBuffer().put((int[]) data);
+			} else {
+				buffer.asIntBuffer().put(ArrayUtils.toPrimitive((Integer[]) data));
+			}
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
+	}
+
+	private static void writeLongData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeLongData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.asLongBuffer().put((long[]) data);
+			} else {
+				buffer.asLongBuffer().put(ArrayUtils.toPrimitive((Long[]) data));
+			}
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
+	}
+
+	private static void encodeByteData(Object data, int[] dims, ByteBuffer buffer, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeByteData(newArray, stripLeadingIndex(dims), buffer, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put((byte[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Byte[]) data));
+			}
+		}
+	}
+	private static void encodeShortData(Object data, int[] dims, ShortBuffer buffer, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeShortData(newArray, stripLeadingIndex(dims), buffer, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put((short[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Short[]) data));
+			}
+		}
+	}
+
+	private static void encodeIntData(Object data, int[] dims, IntBuffer buffer, boolean primative) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeIntData(newArray, stripLeadingIndex(dims), buffer, primative);
+			}
+		} else {
+			if(primative) {
+				buffer.put((int[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Integer[]) data));
+			}
+		}
+	}
+
+	private static void encodeLongData(Object data, int[] dims, LongBuffer buffer, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeLongData(newArray, stripLeadingIndex(dims), buffer, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put((long[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Long[]) data));
+			}
+		}
 	}
 }

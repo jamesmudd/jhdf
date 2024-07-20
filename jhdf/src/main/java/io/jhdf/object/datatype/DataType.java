@@ -14,6 +14,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
@@ -94,25 +95,22 @@ public abstract class DataType {
 	}
 
 	public static DataType fromObject(Object data) {
-		if (data.getClass().isArray()) {
-			Class<?> type = Utils.getArrayType(data);
-			if(type.equals(byte.class)) {
-				return new FixedPoint(1);
-			} else if (type.equals(short.class)) {
-				return new FixedPoint(2);
-			} else if (type.equals(int.class)) {
-				return new FixedPoint(4);
-			} else if (type.equals(long.class)) {
-				return new FixedPoint(8);
-			} else if (type.equals(float.class)) {
-				return FloatingPoint.FLOAT;
-			} else if (type.equals(double.class)) {
-				return FloatingPoint.DOUBLE;
-			}
-			throw new HdfException("Could not create DataType for: " + type);
+		final Class<?> type = Utils.getType(data);
 
+		if (type == byte.class || type == Byte.class) {
+			return new FixedPoint(1);
+		} else if (type == short.class || type == Short.class) {
+			return new FixedPoint(2);
+		} else if (type == int.class || type == Integer.class) {
+			return new FixedPoint(4);
+		} else if (type == long.class || type == Long.class) {
+			return new FixedPoint(8);
+		} else if (type == float.class || type == Float.class) {
+			return FloatingPoint.FLOAT;
+		} else if (type == double.class || type == Double.class) {
+			return FloatingPoint.DOUBLE;
 		} else {
-			throw new UnsupportedHdfException("Only arrays can be written at the moment");
+			throw new HdfException("Could not create DataType for: " + type);
 		}
 	}
 
@@ -169,5 +167,9 @@ public abstract class DataType {
 			.writeBitSet(classAndVersion,1)
 			.writeBitSet(classBits, 3)
 			.writeInt(getSize());
+	}
+
+	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
+		throw new UnsupportedHdfException("Data type [" + getClass().getSimpleName() + "] does not support writing");
 	}
 }

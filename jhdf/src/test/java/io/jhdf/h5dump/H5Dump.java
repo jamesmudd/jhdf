@@ -12,7 +12,6 @@ package io.jhdf.h5dump;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import io.jhdf.HdfFile;
-import io.jhdf.TestUtils;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -25,11 +24,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
+import static io.jhdf.TestUtils.toDoubleArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class H5Dump {
 
@@ -43,13 +44,15 @@ public class H5Dump {
 	}
 
 	public static HDF5FileXml dumpAndParse(Path path) throws IOException, InterruptedException {
+		logger.info("Reading [{}] with h5dump", path.toAbsolutePath());
 		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.command("h5dump", "--format=%.1lf", "--xml", path.toAbsolutePath().toString());
+		processBuilder.command("h5dump", "--format=%.10lf", "--xml", path.toAbsolutePath().toString());
 		processBuilder.redirectErrorStream(true); // get stderr as well
+		logger.info("Starting h5dump process [{}]", processBuilder.command());
 		Process process = processBuilder.start();
-  String xmlString = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+  		String xmlString = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
 		process.waitFor(30, TimeUnit.SECONDS);
-		logger.info("h5dump return [{}] output [{}]", process.exitValue(), xmlString);
+		logger.info("h5dump returned [{}] output [{}]", process.exitValue(), xmlString);
 		// Validate
 		assertThat(process.exitValue(), is(equalTo(0)));
 		assertThat(xmlString, is(not(blankOrNullString())));
@@ -78,15 +81,18 @@ public class H5Dump {
 	}
 
 	private static void compareAttributes(AttributeXml attributeXml, Attribute attribute) {
+		logger.info("Comparing attribute [{}] on node [{}]", attribute.getName(), attribute.getNode().getPath());
 		assertThat(attributeXml.name, is(equalTo(attribute.getName())));
 		assertThat(attributeXml.getDimensions(), is(equalTo(attribute.getDimensions())));
-		assertThat(attributeXml.getData(), is(equalTo(TestUtils.toStringArray(attribute.getData()))));
+		assertArrayEquals(toDoubleArray(attributeXml.getData()), toDoubleArray(attribute.getData()), 0.002);
 	}
 
 	private static void compareDatasets(DatasetXml datasetXml, Dataset dataset) {
+		logger.info("Comparing dataset [{}] on node [{}]", dataset.getName(), dataset.getPath());
 		assertThat(datasetXml.getObjectId(), is(equalTo(dataset.getAddress())));
 		assertThat(datasetXml.getDimensions(), is(equalTo(dataset.getDimensions())));
-		assertThat(datasetXml.getData(), is(equalTo(TestUtils.toStringArray(dataset.getData()))));
+		assertArrayEquals(toDoubleArray(datasetXml.getData()), toDoubleArray(dataset.getData()), 0.002);
 	}
+
 
 }

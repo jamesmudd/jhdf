@@ -13,6 +13,8 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -20,8 +22,9 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.Arrays;
+import java.util.Objects;
 
-import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.stripLeadingIndex;
 
 public class FloatingPoint extends DataType implements OrderedDataType {
@@ -305,18 +308,141 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 
 	@Override
 	public ByteBuffer encodeData(Object data) {
-		Class<?> type = Utils.getArrayType(data);
-		// TODO multi dimensional and scalar and empty
-		Object[] flattened = flatten(data);
-		ByteBuffer buffer = ByteBuffer.allocate(flattened.length * getSize());
-		buffer.order(ByteOrder.nativeOrder());
-		if(type == float.class) {
-			buffer.asFloatBuffer().put((float[]) data);
-		} else if (type == double.class) {
-			buffer.asDoubleBuffer().put((double[]) data);
+		Objects.requireNonNull(data, "Cannot encode null");
+
+		final Class<?> type = Utils.getType(data);
+		if (data.getClass().isArray()) {
+			final int[] dimensions = Utils.getDimensions(data);
+			final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
+			final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize())
+				.order(order);
+			if(type == float.class) {
+				encodeFloatData(data, dimensions, buffer.asFloatBuffer(), true);
+			} else if (type == Float.class) {
+				encodeFloatData(data, dimensions, buffer.asFloatBuffer(), false);
+			}  else if (type == double.class) {
+				encodeDoubleData(data, dimensions, buffer.asDoubleBuffer(), true);
+			} else if (type == Double.class) {
+				encodeDoubleData(data, dimensions, buffer.asDoubleBuffer(), false);
+			} else {
+				throw new UnsupportedHdfException("Cant write type: " + type);
+			}
+
+			return buffer;
 		} else {
-			throw new UnsupportedHdfException("Cant write type: " + type);
+			// Scalar dataset
+			final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);
+
+			if (type == Float.class) {
+				buffer.asFloatBuffer().put((Float) data);
+			} else if (type == Double.class) {
+				buffer.asDoubleBuffer().put((Double) data);
+			} else {
+				throw new UnsupportedHdfException("Cant write scalar type: " + type);
+			}
+
+			return buffer;
 		}
-		return buffer;
 	}
+
+	@Override
+	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
+		final Class<?> type = Utils.getType(data);
+		if (data.getClass().isArray()) {
+			final int fastDimSize = dimensions[dimensions.length - 1];
+			// This buffer is reused
+			final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize())
+				.order(order);
+
+			if(type == float.class) {
+				writeFloatData(data, dimensions, buffer, hdfFileChannel, true);
+			} else if (type == Float.class) {
+				writeFloatData(data, dimensions, buffer, hdfFileChannel, false);
+			}  else if (type == double.class) {
+				writeDoubleData(data, dimensions, buffer, hdfFileChannel, true);
+			} else if (type == Double.class) {
+				writeDoubleData(data, dimensions, buffer, hdfFileChannel, false);
+			} else {
+				throw new UnsupportedHdfException("Cant write type: " + type);
+			}
+		} else {
+			// Scalar
+			final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);
+			if (type == Float.class) {
+				buffer.asFloatBuffer().put((Float) data);
+			} else if (type == Double.class) {
+				buffer.asDoubleBuffer().put((Double) data);
+			} else {
+				throw new UnsupportedHdfException("Cant write scalar type: " + type);
+			}
+			hdfFileChannel.write(buffer);
+		}
+
+	}
+
+	private static void writeDoubleData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeDoubleData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.asDoubleBuffer().put((double[]) data);
+			} else {
+				buffer.asDoubleBuffer().put(ArrayUtils.toPrimitive((Double[]) data));
+			}
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
+	}
+
+	private static void writeFloatData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeFloatData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.asFloatBuffer().put((float[]) data);
+			} else {
+				buffer.asFloatBuffer().put(ArrayUtils.toPrimitive((Float[]) data));
+			}
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
+	}
+
+	private static void encodeFloatData(Object data, int[] dims, FloatBuffer buffer, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeFloatData(newArray, stripLeadingIndex(dims), buffer, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put((float[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Float[]) data));
+			}
+		}
+	}
+
+	private static void encodeDoubleData(Object data, int[] dims, DoubleBuffer buffer, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeDoubleData(newArray, stripLeadingIndex(dims), buffer, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put((double[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Double[]) data));
+			}
+		}
+	}
+
+
 }

@@ -84,13 +84,23 @@ public class DataSpace {
 	}
 
 	public static DataSpace fromObject(Object data) {
-		int[] dimensions1 = Utils.getDimensions(data);
-		return new DataSpace((byte) 2,
-			false,
-			dimensions1,
-			Arrays.stream(dimensions1).asLongStream().toArray(),
-			(byte) 1
-		);
+		if(data.getClass().isArray()) {
+			int[] dimensions1 = Utils.getDimensions(data);
+			return new DataSpace((byte) 2,
+				false,
+				dimensions1,
+				Arrays.stream(dimensions1).asLongStream().toArray(),
+				(byte) 1 // Simple
+			);
+		} else {
+			// Scalar
+			return new DataSpace((byte) 2,
+				false,
+				new int[] {},
+				new long[] {},
+				(byte) 0); // Scalar
+		}
+		// TODO null/empty datasets
 	}
 
 	/**

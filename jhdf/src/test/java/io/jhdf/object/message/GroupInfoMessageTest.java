@@ -10,7 +10,6 @@
 
 package io.jhdf.object.message;
 
-import io.jhdf.Superblock;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;

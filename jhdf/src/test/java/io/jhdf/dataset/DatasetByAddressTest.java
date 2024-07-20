@@ -23,9 +23,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import static io.jhdf.TestUtils.loadTestHdfFile;
 import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.getDimensions;
-import static io.jhdf.TestUtils.loadTestHdfFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;

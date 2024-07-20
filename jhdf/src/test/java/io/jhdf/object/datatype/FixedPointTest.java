@@ -9,22 +9,18 @@
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.Utils;
-import io.jhdf.object.message.DataTypeMessage;
-import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
-import org.mockito.Mockito;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.BitSet;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;

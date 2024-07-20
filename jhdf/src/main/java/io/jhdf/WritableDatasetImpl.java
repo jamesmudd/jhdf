@@ -15,7 +15,6 @@ import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.WritiableDataset;
 import io.jhdf.exceptions.HdfWritingException;
-import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.AttributeInfoMessage;
@@ -34,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -78,7 +76,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 	@Override
 	public int[] getDimensions() {
-		return Utils.getDimensions(data);
+		return dataSpace.getDimensions();
 	}
 
 	@Override
@@ -232,52 +230,15 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 	private long writeData(HdfFileChannel hdfFileChannel, long dataAddress) {
 		logger.info("Writing data for dataset [{}] at position [{}]", getPath(), dataAddress);
-		Class<?> arrayType = Utils.getArrayType(this.data);
-		long totalBytes = dataSpace.getTotalLength() * dataType.getSize();
 
-		int[] dimensions = dataSpace.getDimensions();
-		int fastDimSize = dimensions[dimensions.length - 1];
-		ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * dataType.getSize()).order(ByteOrder.nativeOrder());
 		hdfFileChannel.position(dataAddress);
 
-		// TODO move out into data types?
-		if(arrayType.equals(byte.class)) {
-			writeByteData(data, dimensions, buffer, hdfFileChannel);
-		} else if(arrayType.equals(int.class)) {
-			writeIntData(data, dimensions, buffer, hdfFileChannel);
-		} else if (arrayType.equals(double.class)) {
-			writeDoubleData(data, dimensions, buffer, hdfFileChannel);
-		} else {
-			throw new UnsupportedHdfException("Writing [" + arrayType.getSimpleName() + "] is not supported");
-		}
-		return totalBytes;
+		dataType.writeData(data, getDimensions(), hdfFileChannel);
+
+		return  dataSpace.getTotalLength() * dataType.getSize();
 	}
 
-	private static void writeByteData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
-		if (dims.length > 1) {
-			for (int i = 0; i < dims[0]; i++) {
-				Object newArray = Array.get(data, i);
-				writeByteData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
-			}
-		} else {
-			buffer.put((byte[]) data);
-			buffer.rewind();
-			hdfFileChannel.write(buffer);
-			buffer.clear();
-		}
-	}
-	private static void writeIntData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
-		if (dims.length > 1) {
-			for (int i = 0; i < dims[0]; i++) {
-				Object newArray = Array.get(data, i);
-				writeIntData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
-			}
-		} else {
-			buffer.asIntBuffer().put((int[]) data);
-			hdfFileChannel.write(buffer);
-			buffer.clear();
-		}
-	}
+
 	private static void writeDoubleData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {

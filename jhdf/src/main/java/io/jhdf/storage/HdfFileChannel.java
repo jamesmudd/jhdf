@@ -82,7 +82,6 @@ public class HdfFileChannel implements HdfBackingStorage {
 					memoryMappingFailed = true;
 				}
 			}
-			assert memoryMappingFailed;
 			// read channel into buffer instead of mapping it to memory
 			return readBufferNoOffset(address, Math.toIntExact(length));
 		} catch (IOException e) {

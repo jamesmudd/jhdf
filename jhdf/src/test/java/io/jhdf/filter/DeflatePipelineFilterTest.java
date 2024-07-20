@@ -11,8 +11,6 @@ package io.jhdf.filter;
 
 import io.jhdf.exceptions.HdfFilterException;
 import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;

@@ -14,7 +14,6 @@ import io.jhdf.storage.HdfFileChannel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledForJreRange;
-import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
 import org.mockito.Mock;
 import org.mockito.Mockito;

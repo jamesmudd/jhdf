@@ -9,13 +9,13 @@
  */
 package io.jhdf.dataset;
 
-import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayout;
 import io.jhdf.object.message.DataLayoutMessage;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.junit.jupiter.api.Test;
 
 import java.util.BitSet;
@@ -23,7 +23,6 @@ import java.util.BitSet;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.powermock.reflect.Whitebox.invokeConstructor;
 
 class DatasetLoaderTest {
 
