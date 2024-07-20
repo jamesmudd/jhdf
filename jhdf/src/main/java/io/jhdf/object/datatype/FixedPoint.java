@@ -173,51 +173,60 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
     public ByteBuffer encodeData(Object data) {
 		Objects.requireNonNull(data, "Cannot encode null");
 
-		final Class<?> type = Utils.getType(data);
+
 		if(data.getClass().isArray()) {
-			final int[] dimensions = Utils.getDimensions(data);
-			final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
-			final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize())
-				.order(order);
-			if(type == byte.class) {
-				encodeByteData(data, dimensions, buffer, true);
-			} else if (type == Byte.class) {
-				encodeByteData(data, dimensions, buffer, false);
-			} else if (type == short.class) {
-				encodeShortData(data, dimensions, buffer.asShortBuffer(), true);
-			} else if (type == Short.class) {
-				encodeShortData(data, dimensions, buffer.asShortBuffer(), false);
-			} else if(type == int.class) {
-				encodeIntData(data, dimensions, buffer.asIntBuffer(), true);
-			}  else if(type == Integer.class) {
-				encodeIntData(data,dimensions,buffer.asIntBuffer(),false);
-			} else if (type == long.class) {
-				encodeLongData(data,dimensions,buffer.asLongBuffer(),true);
-			}  else if (type == Long.class) {
-				encodeLongData(data,dimensions,buffer.asLongBuffer(),false);
-			} else {
-				throw new UnsupportedHdfException("Cant write type: " + type);
-			}
-			return buffer;
+			return encodeArrayData(data);
 		} else {
-			// Scalar
-			final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);
-			if (type == Byte.class) {
-				buffer.put((Byte) data);
-			}  else if (type == Short.class) {
-				buffer.asShortBuffer().put((Short) data);
-			}  else if(type == Integer.class) {
-				buffer.asIntBuffer().put((Integer) data);
-			} else if (type == Long.class) {
-				buffer.asLongBuffer().put((Long) data);
-			} else {
-				throw new UnsupportedHdfException("Cant write type: " + type);
-			}
-			return buffer;
+			return encodeScalarData(data);
 		}
 	}
 
-    // Signed Fixed Point
+	private ByteBuffer encodeScalarData(Object data) {
+		final Class<?> type = Utils.getType(data);
+		final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);
+		if (type == Byte.class) {
+			buffer.put((Byte) data);
+		}  else if (type == Short.class) {
+			buffer.asShortBuffer().put((Short) data);
+		}  else if(type == Integer.class) {
+			buffer.asIntBuffer().put((Integer) data);
+		} else if (type == Long.class) {
+			buffer.asLongBuffer().put((Long) data);
+		} else {
+			throw new UnsupportedHdfException("Cant write type: " + type);
+		}
+		return buffer;
+	}
+
+	private ByteBuffer encodeArrayData(Object data) {
+		final Class<?> type = Utils.getType(data);
+		final int[] dimensions = Utils.getDimensions(data);
+		final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
+		final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize())
+			.order(order);
+		if(type == byte.class) {
+			encodeByteData(data, dimensions, buffer, true);
+		} else if (type == Byte.class) {
+			encodeByteData(data, dimensions, buffer, false);
+		} else if (type == short.class) {
+			encodeShortData(data, dimensions, buffer.asShortBuffer(), true);
+		} else if (type == Short.class) {
+			encodeShortData(data, dimensions, buffer.asShortBuffer(), false);
+		} else if(type == int.class) {
+			encodeIntData(data, dimensions, buffer.asIntBuffer(), true);
+		}  else if(type == Integer.class) {
+			encodeIntData(data,dimensions,buffer.asIntBuffer(),false);
+		} else if (type == long.class) {
+			encodeLongData(data,dimensions,buffer.asLongBuffer(),true);
+		}  else if (type == Long.class) {
+			encodeLongData(data,dimensions,buffer.asLongBuffer(),false);
+		} else {
+			throw new UnsupportedHdfException("Cant write type: " + type);
+		}
+		return buffer;
+	}
+
+	// Signed Fixed Point
 
 	private static void fillData(Object data, int[] dims, ByteBuffer buffer) {
 		if (dims.length > 1) {
@@ -350,49 +359,45 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 	@Override
 	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
 
-		final Class<?> type = Utils.getType(data);
 		if (data.getClass().isArray()) {
-			final int fastDimSize = dimensions[dimensions.length - 1];
-			// This buffer is reused
-			final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize())
-				.order(order);
-			if(type == byte.class) {
-				writeByteData(data, dimensions, buffer, hdfFileChannel, true);
-			} else if (type == Byte.class) {
-				writeByteData(data, dimensions, buffer, hdfFileChannel, false);
-			} else if (type == short.class) {
-				writeShortData(data, dimensions, buffer, hdfFileChannel, true);
-			} else if (type == Short.class) {
-				writeShortData(data, dimensions, buffer, hdfFileChannel, false);
-			} else if(type == int.class) {
-				writeIntData(data, dimensions, buffer, hdfFileChannel, true);
-			}  else if(type == Integer.class) {
-				writeIntData(data, dimensions, buffer, hdfFileChannel, false);
-			} else if (type == long.class) {
-				writeLongData(data, dimensions, buffer, hdfFileChannel, true);
-			}  else if (type == Long.class) {
-				writeLongData(data, dimensions, buffer, hdfFileChannel, false);
-			} else {
-				throw new UnsupportedHdfException("Cant write type: " + type);
-			}
+			writeArrayData(data, dimensions, hdfFileChannel);
 		} else {
-			// Scalar
-			final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);
-			if (type == Byte.class) {
-				buffer.put((Byte) data);
-			}  else if (type == Short.class) {
-				buffer.asShortBuffer().put((Short) data);
-			}  else if(type == Integer.class) {
-				buffer.asIntBuffer().put((Integer) data);
-			} else if (type == Long.class) {
-				buffer.asLongBuffer().put((Long) data);
-			} else {
-				throw new UnsupportedHdfException("Cant write type: " + type);
-			}
-			buffer.rewind();
-			hdfFileChannel.write(buffer);
+			writeScalarData(data, hdfFileChannel);
 		}
 
+	}
+
+	private void writeScalarData(Object data, HdfFileChannel hdfFileChannel) {
+		ByteBuffer buffer = encodeScalarData(data);
+		buffer.rewind();
+		hdfFileChannel.write(buffer);
+	}
+
+	private void writeArrayData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
+		final Class<?> type = Utils.getType(data);
+		final int fastDimSize = dimensions[dimensions.length - 1];
+		// This buffer is reused
+		final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize())
+			.order(order);
+		if(type == byte.class) {
+			writeByteData(data, dimensions, buffer, hdfFileChannel, true);
+		} else if (type == Byte.class) {
+			writeByteData(data, dimensions, buffer, hdfFileChannel, false);
+		} else if (type == short.class) {
+			writeShortData(data, dimensions, buffer, hdfFileChannel, true);
+		} else if (type == Short.class) {
+			writeShortData(data, dimensions, buffer, hdfFileChannel, false);
+		} else if(type == int.class) {
+			writeIntData(data, dimensions, buffer, hdfFileChannel, true);
+		}  else if(type == Integer.class) {
+			writeIntData(data, dimensions, buffer, hdfFileChannel, false);
+		} else if (type == long.class) {
+			writeLongData(data, dimensions, buffer, hdfFileChannel, true);
+		}  else if (type == Long.class) {
+			writeLongData(data, dimensions, buffer, hdfFileChannel, false);
+		} else {
+			throw new UnsupportedHdfException("Cant write type: " + type);
+		}
 	}
 
 	private static void writeByteData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel, boolean primitive) {
