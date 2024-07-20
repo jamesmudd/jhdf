@@ -9,12 +9,14 @@
  */
 package io.jhdf.object.datatype;
 
-import static io.jhdf.Utils.readBytesAsUnsignedInt;
 import io.jhdf.dataset.DatasetReader;
 import io.jhdf.storage.HdfBackingStorage;
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import org.apache.commons.lang3.ArrayUtils;
+
+import static io.jhdf.Utils.readBytesAsUnsignedInt;
 
 /**
  * Class for reading array data type messages.

@@ -9,9 +9,9 @@
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;

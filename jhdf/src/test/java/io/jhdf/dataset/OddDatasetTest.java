@@ -20,8 +20,8 @@ import org.junit.jupiter.api.function.Executable;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static io.jhdf.Utils.flatten;
 import static io.jhdf.TestUtils.loadTestHdfFile;
+import static io.jhdf.Utils.flatten;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;

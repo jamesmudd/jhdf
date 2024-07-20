@@ -12,8 +12,6 @@ package io.jhdf.h5dump;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import io.jhdf.HdfFile;
-import io.jhdf.TestUtils;
-import io.jhdf.WritableHdfFile;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
