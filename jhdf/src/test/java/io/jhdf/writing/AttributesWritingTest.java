@@ -20,6 +20,8 @@ import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
 import io.jhdf.h5dump.HDF5FileXml;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
@@ -27,11 +29,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.anEmptyMap;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AttributesWritingTest {
 
@@ -372,5 +383,34 @@ class AttributesWritingTest {
 				H5Dump.assetXmlAndHdfFileMatch(hdf5FileXml, hdfFile);
 			}
 		}
+	}
+
+	@Test
+	void testNoAttributeNameFails() throws IOException {
+		Path tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
+		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
+
+		assertThrows(IllegalArgumentException.class,
+			() -> writableHdfFile.putAttribute(null, 111));
+
+		assertThrows(IllegalArgumentException.class,
+			() -> writableHdfFile.putAttribute("", 111));
+	}
+
+	@Test
+	void testRemovingAttribute() throws IOException {
+		Path tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
+		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
+
+		// Should return null as no attr
+		MatcherAssert.assertThat(writableHdfFile.removeAttribute("missing"), is(Matchers.nullValue()));
+
+		// Add attribute then remove it
+		writableHdfFile.putAttribute("testAttr", 111);
+		Attribute attr = writableHdfFile.removeAttribute("testAttr");
+
+		MatcherAssert.assertThat(attr, is(not(nullValue())));
+		MatcherAssert.assertThat(attr.getData(), is(equalTo(111)));
+		MatcherAssert.assertThat(writableHdfFile.getAttributes(), is(anEmptyMap()));
 	}
 }
