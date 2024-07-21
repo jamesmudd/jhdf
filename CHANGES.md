@@ -1,5 +1,15 @@
 # jHDF Change Log
 
+## v0.8.0 - July 2024
+- Major writing support improvements
+  - Attributes can now be written https://github.com/jamesmudd/jhdf/issues/552
+  - Full support for `byte`, `short`, `int`, `long`, `float`, `double` and wrapper classes as datasets and attributes https://github.com/jamesmudd/jhdf/discussions/587
+  - Support for scalar datasets and attributes
+  - Much more complete API on writable objects, allowing introspection of data type and data layout and data space etc.
+- Many test improvements for writing support
+- Build and dependency updates
+- Note: This may be the last release supporting Java 8
+
 ## v0.7.0 - May 2024
 - Release adding HDF5 writing support! https://github.com/jamesmudd/jhdf/issues/354. Special thanks to [@thadguidry](https://github.com/thadguidry) for sponsoring this work. See [WriteHdf5.java](jhdf/src/main/java/io/jhdf/examples/WriteHdf5.java) for example usage. Supports
   - Groups
