@@ -11,7 +11,6 @@ package io.jhdf.examples;
 
 import io.jhdf.HdfFile;
 import io.jhdf.WritableHdfFile;
-import io.jhdf.api.WritableGroup;
 import io.jhdf.api.WritiableDataset;
 
 import java.nio.file.Paths;
