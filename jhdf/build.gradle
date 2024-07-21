@@ -142,7 +142,7 @@ publishing {
             pom {
                 name = 'jhdf'
                 description = 'A pure Java HDF5 library'
-                url = 'http://jhdf.io/'
+                url = 'https://jhdf.io/'
                 licenses {
                     license {
                         name = 'MIT License'
