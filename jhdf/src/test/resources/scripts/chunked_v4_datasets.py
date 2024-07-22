@@ -1,7 +1,7 @@
 # -------------------------------------------------------------------------------
 # This file is part of jHDF. A pure Java library for accessing HDF5 files.
 #
-# http://jhdf.io
+# https://jhdf.io
 #
 # Copyright (c) 2024 James Mudd
 #
