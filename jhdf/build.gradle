@@ -27,7 +27,7 @@ plugins {
 
 // Variables
 group = 'io.jhdf'
-version = '0.7.0'
+version = '0.8.0'
 
 compileJava {
     sourceCompatibility = "1.8"
@@ -142,7 +142,7 @@ publishing {
             pom {
                 name = 'jhdf'
                 description = 'A pure Java HDF5 library'
-                url = 'http://jhdf.io/'
+                url = 'https://jhdf.io/'
                 licenses {
                     license {
                         name = 'MIT License'
