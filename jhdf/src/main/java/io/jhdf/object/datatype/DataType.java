@@ -57,7 +57,7 @@ public abstract class DataType {
 				return new FloatingPoint(bb);
 			case 2: // Time
 				throw new UnsupportedHdfException("Time data type is not yet supported");
-			case 3: // String
+			case StringData.CLASS_ID: // String
 				return new StringData(bb);
 			case 4: // Bit field
 				return new BitField(bb);
@@ -109,6 +109,8 @@ public abstract class DataType {
 			return FloatingPoint.FLOAT;
 		} else if (type == double.class || type == Double.class) {
 			return FloatingPoint.DOUBLE;
+		} else if (type == String.class) {
+			return StringData.create(20); // TODO
 		} else {
 			throw new HdfException("Could not create DataType for: " + type);
 		}

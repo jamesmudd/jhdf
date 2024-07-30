@@ -9,18 +9,24 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.BufferBuilder;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.BitSet;
 
 import static io.jhdf.Constants.NULL;
 import static io.jhdf.Constants.SPACE;
 import static io.jhdf.Utils.stripLeadingIndex;
+import static java.nio.charset.StandardCharsets.US_ASCII;
 
 /**
  * Data type representing strings.
@@ -29,6 +35,7 @@ import static io.jhdf.Utils.stripLeadingIndex;
  */
 public class StringData extends DataType {
 
+	public static final int CLASS_ID = 3;
 	private final PaddingType paddingType;
 
 	private final Charset charset;
@@ -56,14 +63,16 @@ public class StringData extends DataType {
 	}
 
 	public enum PaddingType {
-		NULL_TERMINATED(new NullTerminated()),
-		NULL_PADDED(new NullPadded()),
-		SPACE_PADDED(new SpacePadded());
+		NULL_TERMINATED(new NullTerminated(), 0),
+		NULL_PADDED(new NullPadded(), 1),
+		SPACE_PADDED(new SpacePadded(), 2);
 
 		private final StringPaddingHandler stringPaddingHandler;
+		private final int id;
 
-		PaddingType(StringPaddingHandler stringPaddingHandler) {
+		PaddingType(StringPaddingHandler stringPaddingHandler, int id) {
 			this.stringPaddingHandler = stringPaddingHandler;
+			this.id = id;
 		}
 	}
 
@@ -88,7 +97,7 @@ public class StringData extends DataType {
 		final int charsetIndex = Utils.bitsToInt(classBits, 4, 4);
 		switch (charsetIndex) {
 			case 0:
-				charset = StandardCharsets.US_ASCII;
+				charset = US_ASCII;
 				break;
 			case 1:
 				charset = StandardCharsets.UTF_8;
@@ -154,6 +163,45 @@ public class StringData extends DataType {
 			// Set the limit to terminate before the spaces
 			byteBuffer.limit(i + 1);
 		}
+	}
+
+	public static StringData create(int maxlength) {
+		return new StringData(PaddingType.NULL_TERMINATED, StandardCharsets.UTF_8, maxlength);
+	}
+
+	private StringData(PaddingType paddingType, Charset charset, int maxLength) {
+        super(CLASS_ID, maxLength); // +1 for padding
+        this.paddingType = paddingType;
+		this.charset = charset;
+	};
+
+	@Override
+	public ByteBuffer toBuffer() {
+		Utils.writeIntToBits(paddingType.id, classBits, 0, 4);
+		Utils.writeIntToBits(1, classBits, 4, 4); // Always UTF8
+		return  super.toBufferBuilder().build();
+	}
+
+	@Override
+	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
+		if (data.getClass().isArray()) {
+//			writeArrayData(data, dimensions, hdfFileChannel);
+		} else {
+			writeScalarData(data, hdfFileChannel);
+		}
+	}
+
+	private void writeScalarData(Object data, HdfFileChannel hdfFileChannel) {
+		ByteBuffer buffer = encodeScalarData(data);
+		buffer.rewind();
+		hdfFileChannel.write(buffer);
+	}
+
+	private ByteBuffer encodeScalarData(Object data) {
+		return new BufferBuilder()
+			.writeBuffer(charset.encode((String) data))
+			.writeByte(NULL)
+			.build();
 	}
 
 	@Override
