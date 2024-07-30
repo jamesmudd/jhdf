@@ -14,6 +14,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -170,7 +171,7 @@ public class StringData extends DataType {
 	}
 
 	private StringData(PaddingType paddingType, Charset charset, int maxLength) {
-        super(CLASS_ID, maxLength); // +1 for padding
+        super(CLASS_ID, maxLength + 1); // +1 for padding
         this.paddingType = paddingType;
 		this.charset = charset;
 	};
@@ -185,7 +186,9 @@ public class StringData extends DataType {
 	@Override
 	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
 		if (data.getClass().isArray()) {
-//			writeArrayData(data, dimensions, hdfFileChannel);
+			final int fastDimSize = dimensions[dimensions.length - 1];
+			final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize());
+			writeArrayData(data, dimensions, buffer, hdfFileChannel);
 		} else {
 			writeScalarData(data, hdfFileChannel);
 		}
@@ -196,6 +199,23 @@ public class StringData extends DataType {
 		buffer.rewind();
 		hdfFileChannel.write(buffer);
 	}
+
+	private void writeArrayData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeArrayData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
+			}
+		} else {
+			for (String str : (String[]) data) {
+				buffer.put(charset.encode(str)).put(NULL);
+			}
+			buffer.rewind();
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
+	}
+
 
 	private ByteBuffer encodeScalarData(Object data) {
 		return new BufferBuilder()
