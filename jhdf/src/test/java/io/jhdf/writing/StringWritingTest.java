@@ -5,6 +5,7 @@ import io.jhdf.TestUtils;
 import io.jhdf.WritableHdfFile;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
+import io.jhdf.api.WritiableDataset;
 import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
@@ -32,14 +33,22 @@ public class StringWritingTest {
 		tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 
-		writableHdfFile.putDataset("scalarString", "scalarString");
-		writableHdfFile.putDataset("1DString", new String[]
+		WritiableDataset scalarStringDataset = writableHdfFile.putDataset("scalarString", "scalarString");
+		scalarStringDataset.putAttribute("scalarStringAttribute", "scalarString");
+
+		WritiableDataset oneDStringDataset = writableHdfFile.putDataset("1DString", new String[]
 			{"element 1", "element 2", "element 3", "element 4", "element 5"});
-		writableHdfFile.putDataset("2DString", new String[][]{
+		oneDStringDataset.putAttribute("1DStringAttr", new String[]
+			{"element 1", "element 2", "element 3", "element 4", "element 5"});
+
+		WritiableDataset twoDStringDataset = writableHdfFile.putDataset("2DString", new String[][]{
 			{"element 1,1", "element 1,2", "element 1,3", "element 1,4", "element 1,5"},
 			{"element 2,1", "element 2,2", "element 2,3", "element 2,4", "element 2,5"}
 		});
-
+		twoDStringDataset.putAttribute("2DStringAttr", new String[][]{
+			{"element 1,1", "element 1,2", "element 1,3", "element 1,4", "element 1,5"},
+			{"element 2,1", "element 2,2", "element 2,3", "element 2,4", "element 2,5"}
+		});
 
 		// Actually flush and write everything
 		writableHdfFile.close();
