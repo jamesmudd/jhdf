@@ -20,10 +20,12 @@ import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
+import java.nio.DoubleBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
@@ -224,7 +226,6 @@ public class StringData extends DataType {
 		}
 	}
 
-
 	private ByteBuffer encodeScalarData(Object data) {
 		return new BufferBuilder()
 			.writeBuffer(charset.encode((String) data))
@@ -232,6 +233,33 @@ public class StringData extends DataType {
 			.build();
 	}
 
+	@Override
+	public ByteBuffer encodeData(Object data) {
+		Objects.requireNonNull(data, "Cannot encode null");
+
+		if (data.getClass().isArray()) {
+			final int[] dimensions = Utils.getDimensions(data);
+			final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
+			final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize());
+			encodeDataInternal(data, dimensions, buffer);
+			return buffer;
+		} else {
+			return encodeScalarData(data);
+		}
+	}
+
+private void encodeDataInternal(Object data, int[] dims, ByteBuffer buffer) {
+	if (dims.length > 1) {
+		for (int i = 0; i < dims[0]; i++) {
+			Object newArray = Array.get(data, i);
+			encodeDataInternal(newArray, stripLeadingIndex(dims), buffer);
+		}
+	} else {
+		for (String str : (String[]) data) {
+			buffer.put(this.charset.encode(str)).put(NULL);
+		}
+	}
+}
 	@Override
 	public String toString() {
 		return "StringData{" +

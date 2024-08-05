@@ -54,7 +54,7 @@ public class WritableAttributeImpl implements Attribute {
 
 	@Override
 	public int[] getDimensions() {
-		return Utils.getDimensions(data);
+		return dataSpace.getDimensions();
 	}
 
 	@Override
