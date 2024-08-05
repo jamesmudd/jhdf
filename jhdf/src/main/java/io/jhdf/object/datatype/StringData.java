@@ -22,7 +22,10 @@ import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.OptionalInt;
+import java.util.stream.Collectors;
 
 import static io.jhdf.Constants.NULL;
 import static io.jhdf.Constants.SPACE;
@@ -166,8 +169,13 @@ public class StringData extends DataType {
 		}
 	}
 
-	public static StringData create(int maxlength) {
-		return new StringData(PaddingType.NULL_TERMINATED, StandardCharsets.UTF_8, maxlength);
+	public static StringData create(Object data) {
+		int maxLength = Arrays.stream(Utils.flatten(data))
+			.map(String.class::cast)
+			.mapToInt(String::length)
+			.max().getAsInt();
+
+		return new StringData(PaddingType.NULL_TERMINATED, StandardCharsets.UTF_8, maxLength);
 	}
 
 	private StringData(PaddingType paddingType, Charset charset, int maxLength) {

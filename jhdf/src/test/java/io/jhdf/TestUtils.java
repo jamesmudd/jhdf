@@ -48,6 +48,12 @@ public final class TestUtils {
 			.toArray();
 	}
 
+	public static String[] toStringArray(Object data) {
+		return Arrays.stream(Utils.flatten(data))
+			.map(el -> el.toString())
+			.toArray(String[]::new);
+	}
+
 	public static void compareGroups(Group group1, Group group2) {
 		logger.info("Comparing groups [{}]", group1.getPath());
 
@@ -72,12 +78,23 @@ public final class TestUtils {
 		logger.info("Comparing attribute [{}] on node [{}]", attribute1.getName(), attribute1.getNode().getPath());
 		assertThat(attribute1.getName(), is(equalTo(attribute2.getName())));
 		assertThat(attribute1.getDimensions(), is(equalTo(attribute2.getDimensions())));
-		assertArrayEquals(toDoubleArray(attribute1.getData()), toDoubleArray(attribute2.getData()), 0.002);
+		assertThat(attribute1.getJavaType(), is(equalTo(attribute2.getJavaType())));
+		if(attribute1.getJavaType() == String.class) {
+			assertArrayEquals(toStringArray(attribute1.getData()), toStringArray(attribute2.getData()));
+		} else {
+			assertArrayEquals(toDoubleArray(attribute1.getData()), toDoubleArray(attribute2.getData()), 0.002);
+		}
 	}
 
 	private static void compareDatasets(Dataset dataset1, Dataset dataset2) {
 		logger.info("Comparing dataset2 [{}] on node [{}]", dataset1.getName(), dataset1.getPath());
+		assertThat(dataset1.getName(), is(equalTo(dataset2.getName())));
 		assertThat(dataset1.getDimensions(), is(equalTo(dataset2.getDimensions())));
-		assertArrayEquals(toDoubleArray(dataset1.getData()), toDoubleArray(dataset2.getData()), 0.002);
+		assertThat(dataset1.getJavaType(), is(equalTo(dataset2.getJavaType())));
+		if(dataset1.getJavaType() == String.class) {
+			assertArrayEquals(toStringArray(dataset1.getData()), toStringArray(dataset2.getData()));
+		} else {
+			assertArrayEquals(toDoubleArray(dataset1.getData()), toDoubleArray(dataset2.getData()), 0.002);
+		}
 	}
 }

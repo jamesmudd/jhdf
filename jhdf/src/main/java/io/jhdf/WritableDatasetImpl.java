@@ -130,7 +130,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 	@Override
 	public Class<?> getJavaType() {
-		return Utils.getArrayType(data);
+		return dataType.getJavaType();
 	}
 
 	@Override
