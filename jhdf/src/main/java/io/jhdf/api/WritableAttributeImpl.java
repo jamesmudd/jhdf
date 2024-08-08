@@ -9,7 +9,6 @@
  */
 package io.jhdf.api;
 
-import io.jhdf.Utils;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataSpace;
 

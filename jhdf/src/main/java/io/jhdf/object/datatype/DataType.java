@@ -110,7 +110,7 @@ public abstract class DataType {
 		} else if (type == double.class || type == Double.class) {
 			return FloatingPoint.DOUBLE;
 		} else if (type == String.class) {
-			return StringData.create(data); // TODO
+			return StringData.create(data);
 		} else {
 			throw new HdfException("Could not create DataType for: " + type);
 		}

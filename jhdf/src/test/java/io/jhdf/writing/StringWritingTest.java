@@ -106,6 +106,10 @@ class StringWritingTest {
 			Map<String, Node> datasets = hdfFile.getChildren();
 			assertThat(datasets).hasSize(4);
 
+			String[] proseReadBackArray = (String[]) hdfFile.getDatasetByPath("prose").getData();
+			String proseReadback = StringUtils.joinWith(" ", proseReadBackArray);
+			assertThat(proseReadback).isEqualTo(prose);
+
 			// Just check thw whole file is readable
 			TestAllFilesBase.verifyAttributes(hdfFile);
 			TestAllFilesBase.recurseGroup(hdfFile);
