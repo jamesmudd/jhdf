@@ -14,20 +14,13 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.CharBuffer;
-import java.nio.DoubleBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Objects;
-import java.util.OptionalInt;
-import java.util.stream.Collectors;
 
 import static io.jhdf.Constants.NULL;
 import static io.jhdf.Constants.SPACE;
@@ -184,7 +177,7 @@ public class StringData extends DataType {
         super(CLASS_ID, maxLength + 1); // +1 for padding
         this.paddingType = paddingType;
 		this.charset = charset;
-	};
+	}
 
 	@Override
 	public ByteBuffer toBuffer() {
@@ -217,9 +210,13 @@ public class StringData extends DataType {
 				writeArrayData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
 			}
 		} else {
-			for (String str : (String[]) data) {
-				buffer.put(charset.encode(str)).put(NULL);
-			}
+            String[] strings = (String[]) data;
+            for (int i = 0; i < strings.length; i++) {
+                String str = strings[i];
+                buffer.put(charset.encode(str))
+					.put(NULL)
+					.position((i+1)*getSize());
+            }
 			buffer.rewind();
 			hdfFileChannel.write(buffer);
 			buffer.clear();

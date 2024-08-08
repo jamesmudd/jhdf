@@ -19,6 +19,7 @@ import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
 import io.jhdf.h5dump.HDF5FileXml;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -33,9 +34,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class StringWritingTest {
+class StringWritingTest {
 
 	private Path tempFile;
+
+	private String prose = "Lorem ipsum odor amet, consectetuer adipiscing elit. Phasellus tempus turpis; proin sed est ornare odio. Tempor suspendisse dapibus quis pharetra adipiscing turpis; urna hendrerit. Nam lobortis inceptos ad ante dignissim sociosqu nec consectetur platea. Magnis per velit; posuere nunc id placerat. Dis curabitur sagittis penatibus inceptos molestie massa odio vehicula. Himenaeos inceptos egestas et platea ut condimentum. Senectus facilisi fusce semper elit commodo. Tellus primis ultrices sed risus quis.";
 
 	@Test
 	@Order(1)
@@ -60,13 +63,15 @@ public class StringWritingTest {
 			{"element 2,1", "element 2,2", "element 2,3", "element 2,4", "element 2,5"}
 		});
 
+		writableHdfFile.putDataset("prose", StringUtils.split(prose));
+
 		// Actually flush and write everything
 		writableHdfFile.close();
 
 		// Now read it back
 		try (HdfFile hdfFile = new HdfFile(tempFile)) {
 			Map<String, Node> datasets = hdfFile.getChildren();
-			assertThat(datasets).hasSize(3);
+			assertThat(datasets).hasSize(4);
 			// Verify scalar
 //			for (Node node : datasets.values()) {
 //				Dataset dataset = (Dataset) node;
