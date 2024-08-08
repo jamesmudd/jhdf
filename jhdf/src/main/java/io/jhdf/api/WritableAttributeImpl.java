@@ -9,7 +9,6 @@
  */
 package io.jhdf.api;
 
-import io.jhdf.Utils;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataSpace;
 
@@ -54,7 +53,7 @@ public class WritableAttributeImpl implements Attribute {
 
 	@Override
 	public int[] getDimensions() {
-		return Utils.getDimensions(data);
+		return dataSpace.getDimensions();
 	}
 
 	@Override

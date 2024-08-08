@@ -41,6 +41,7 @@ import java.util.Map;
 
 import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.stripLeadingIndex;
+import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 
 public class WritableDatasetImpl extends AbstractWritableNode implements WritiableDataset {
 
@@ -130,7 +131,13 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writiab
 
 	@Override
 	public Class<?> getJavaType() {
-		return Utils.getArrayType(data);
+		final Class<?> type = dataType.getJavaType();
+		// For scalar datasets the returned type will be the wrapper class because
+		// getData returns Object
+		if (isScalar() && type.isPrimitive()) {
+			return primitiveToWrapper(type);
+		}
+		return type;
 	}
 
 	@Override

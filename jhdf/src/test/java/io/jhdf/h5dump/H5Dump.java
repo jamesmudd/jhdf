@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
 import static io.jhdf.TestUtils.toDoubleArray;
+import static io.jhdf.TestUtils.toStringArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.equalTo;
@@ -84,14 +85,21 @@ public class H5Dump {
 		logger.info("Comparing attribute [{}] on node [{}]", attribute.getName(), attribute.getNode().getPath());
 		assertThat(attributeXml.name, is(equalTo(attribute.getName())));
 		assertThat(attributeXml.getDimensions(), is(equalTo(attribute.getDimensions())));
-		assertArrayEquals(toDoubleArray(attributeXml.getData()), toDoubleArray(attribute.getData()), 0.002);
-	}
+		if(attribute.getJavaType() == String.class) {
+			assertArrayEquals(toStringArray(attributeXml.getData()), toStringArray(attribute.getData()));
+		} else {
+			assertArrayEquals(toDoubleArray(attributeXml.getData()), toDoubleArray(attribute.getData()), 0.002);
+		}	}
 
 	private static void compareDatasets(DatasetXml datasetXml, Dataset dataset) {
 		logger.info("Comparing dataset [{}] on node [{}]", dataset.getName(), dataset.getPath());
 		assertThat(datasetXml.getObjectId(), is(equalTo(dataset.getAddress())));
 		assertThat(datasetXml.getDimensions(), is(equalTo(dataset.getDimensions())));
-		assertArrayEquals(toDoubleArray(datasetXml.getData()), toDoubleArray(dataset.getData()), 0.002);
+		if(dataset.getJavaType() == String.class) {
+			assertArrayEquals(toStringArray(datasetXml.getData()), toStringArray(dataset.getData()));
+		} else {
+			assertArrayEquals(toDoubleArray(datasetXml.getData()), toDoubleArray(dataset.getData()), 0.002);
+		}
 	}
 
 
