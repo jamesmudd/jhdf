@@ -3,17 +3,16 @@ package io.jhdf.writing;
 import io.jhdf.HdfFile;
 import io.jhdf.TestUtils;
 import io.jhdf.WritableHdfFile;
-import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
 import io.jhdf.api.WritiableDataset;
 import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
 import io.jhdf.h5dump.HDF5FileXml;
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import java.nio.file.Files;
@@ -23,6 +22,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class StringWritingTest {
 
 	private Path tempFile;
