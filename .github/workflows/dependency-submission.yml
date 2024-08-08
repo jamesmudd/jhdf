@@ -12,6 +12,6 @@ jobs:
             - name: Checkout sources
               uses: actions/checkout@v4
             - name: Generate and submit dependency graph
-              uses: gradle/actions/dependency-submission@v3
+              uses: gradle/actions/dependency-submission@v4
               with:
                 build-root-directory: jhdf
