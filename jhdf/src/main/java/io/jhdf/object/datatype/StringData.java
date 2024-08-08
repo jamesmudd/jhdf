@@ -174,8 +174,8 @@ public class StringData extends DataType {
 	}
 
 	private StringData(PaddingType paddingType, Charset charset, int maxLength) {
-        super(CLASS_ID, maxLength + 1); // +1 for padding
-        this.paddingType = paddingType;
+		super(CLASS_ID, maxLength + 1); // +1 for padding
+		this.paddingType = paddingType;
 		this.charset = charset;
 	}
 
@@ -183,7 +183,7 @@ public class StringData extends DataType {
 	public ByteBuffer toBuffer() {
 		Utils.writeIntToBits(paddingType.id, classBits, 0, 4);
 		Utils.writeIntToBits(1, classBits, 4, 4); // Always UTF8
-		return  super.toBufferBuilder().build();
+		return super.toBufferBuilder().build();
 	}
 
 	@Override
@@ -210,13 +210,13 @@ public class StringData extends DataType {
 				writeArrayData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel);
 			}
 		} else {
-            String[] strings = (String[]) data;
-            for (int i = 0; i < strings.length; i++) {
-                String str = strings[i];
-                buffer.put(charset.encode(str))
+			String[] strings = (String[]) data;
+			for (int i = 0; i < strings.length; i++) {
+				String str = strings[i];
+				buffer.put(charset.encode(str))
 					.put(NULL)
-					.position((i+1)*getSize());
-            }
+					.position((i + 1) * getSize());
+			}
 			buffer.rewind();
 			hdfFileChannel.write(buffer);
 			buffer.clear();
@@ -245,18 +245,19 @@ public class StringData extends DataType {
 		}
 	}
 
-private void encodeDataInternal(Object data, int[] dims, ByteBuffer buffer) {
-	if (dims.length > 1) {
-		for (int i = 0; i < dims[0]; i++) {
-			Object newArray = Array.get(data, i);
-			encodeDataInternal(newArray, stripLeadingIndex(dims), buffer);
-		}
-	} else {
-		for (String str : (String[]) data) {
-			buffer.put(this.charset.encode(str)).put(NULL);
+	private void encodeDataInternal(Object data, int[] dims, ByteBuffer buffer) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeDataInternal(newArray, stripLeadingIndex(dims), buffer);
+			}
+		} else {
+			for (String str : (String[]) data) {
+				buffer.put(this.charset.encode(str)).put(NULL);
+			}
 		}
 	}
-}
+
 	@Override
 	public String toString() {
 		return "StringData{" +
