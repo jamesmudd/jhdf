@@ -1,5 +1,10 @@
 # jHDF Change Log
 
+## v0.8.1 - August 2024
+- Add support fo writing `String` datasets and attributes
+- Add `_jHDF` default attribute to root group
+- Build and dependency updates
+
 ## v0.8.0 - July 2024
 - Major writing support improvements
   - Attributes can now be written https://github.com/jamesmudd/jhdf/issues/552
