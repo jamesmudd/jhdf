@@ -145,7 +145,7 @@ class AttributesWritingTest {
 			// Now read it back
 			try (HdfFile hdfFile = new HdfFile(tempFile)) {
 				Map<String, Attribute> attributes = hdfFile.getAttributes();
-				assertThat(attributes).hasSize(6);
+				assertThat(attributes).hasSize(7);
 
 				// Just check thw whole file is readable
 				TestAllFilesBase.verifyAttributes(hdfFile);
@@ -215,7 +215,7 @@ class AttributesWritingTest {
 			// Now read it back
 			try (HdfFile hdfFile = new HdfFile(tempFile)) {
 				Map<String, Attribute> attributes = hdfFile.getAttributes();
-				assertThat(attributes).hasSize(12);
+				assertThat(attributes).hasSize(13);
 
 				// Just check thw whole file is readable
 				TestAllFilesBase.verifyAttributes(hdfFile);
@@ -360,7 +360,7 @@ class AttributesWritingTest {
 			// Now read it back
 			try (HdfFile hdfFile = new HdfFile(tempFile)) {
 				Map<String, Attribute> attributes = hdfFile.getAttributes();
-				assertThat(attributes).hasSize(12);
+				assertThat(attributes).hasSize(13);
 
 				// Just check thw whole file is readable
 				TestAllFilesBase.verifyAttributes(hdfFile);
@@ -408,6 +408,8 @@ class AttributesWritingTest {
 		// Add attribute then remove it
 		writableHdfFile.putAttribute("testAttr", 111);
 		Attribute attr = writableHdfFile.removeAttribute("testAttr");
+		// Remove the default attribute
+		Attribute jHdfAttr = writableHdfFile.removeAttribute("_jHDF");
 
 		MatcherAssert.assertThat(attr, is(not(nullValue())));
 		MatcherAssert.assertThat(attr.getData(), is(equalTo(111)));
