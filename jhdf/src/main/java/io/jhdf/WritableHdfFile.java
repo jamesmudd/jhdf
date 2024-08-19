@@ -59,6 +59,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		this.hdfFileChannel = new HdfFileChannel(this.fileChannel, this.superblock);
 
 		this.rootGroup = new WritableGroupImpl(null, "/");
+		this.rootGroup.putAttribute("_jHDF", getJHdfInfo());
 	}
 
 	@Override
@@ -75,7 +76,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		logger.info("Flushing to disk [{}]...", path.toAbsolutePath());
 		try {
 			rootGroup.write(hdfFileChannel, ROOT_GROUP_ADDRESS);
-			hdfFileChannel.write(getJHdfInfo());
+			hdfFileChannel.write(getJHdfInfoBuffer());
 			long endOfFile = hdfFileChannel.getFileChannel().size();
 			hdfFileChannel.write(superblock.toBuffer(endOfFile), 0L);
 			logger.info("Flushed to disk [{}] file is [{}] bytes", path.toAbsolutePath(), endOfFile);
@@ -84,9 +85,13 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		}
 	}
 
-	private ByteBuffer getJHdfInfo() {
-		final String info = "jHDF - " + JhdfInfo.VERSION + " - " + JhdfInfo.OS + " - " + JhdfInfo.ARCH + " - " + JhdfInfo.BYTE_ORDER;
+	private ByteBuffer getJHdfInfoBuffer() {
+		final String info = getJHdfInfo();
 		return ByteBuffer.wrap(info.getBytes(StandardCharsets.UTF_8));
+	}
+
+	private static String getJHdfInfo() {
+		return "jHDF - " + JhdfInfo.VERSION + " - " + JhdfInfo.OS + " - " + JhdfInfo.ARCH + " - " + JhdfInfo.BYTE_ORDER;
 	}
 
 	@Override
