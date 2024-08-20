@@ -80,7 +80,7 @@ public class BitField extends DataType implements OrderedDataType {
 				fillBitfieldData(newArray, stripLeadingIndex(dims), buffer);
 			}
 		} else {
-			for (int i = 0; i < Array.getLength(data); i++) {
+			for (int i = 0; i < dims[0]; i++) {
 				Array.set(data, i, buffer.get() == 1);
 			}
 		}
