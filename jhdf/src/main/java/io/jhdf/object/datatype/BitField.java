@@ -14,6 +14,9 @@ import io.jhdf.storage.HdfBackingStorage;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.BitSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.LongAdder;
 
 import static io.jhdf.Utils.stripLeadingIndex;
 
@@ -69,19 +72,19 @@ public class BitField extends DataType implements OrderedDataType {
 	@Override
 	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
 		final Object data = Array.newInstance(getJavaType(), dimensions);
-		fillBitfieldData(data, dimensions, buffer.order(getByteOrder()));
+		fillBitfieldData(data, dimensions, BitSet.valueOf(buffer.order(getByteOrder())), new AtomicInteger());
 		return data;
 	}
 
-	private static void fillBitfieldData(Object data, int[] dims, ByteBuffer buffer) {
+	private void fillBitfieldData(Object data, int[] dims, BitSet bitset, AtomicInteger position) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillBitfieldData(newArray, stripLeadingIndex(dims), buffer);
+				fillBitfieldData(newArray, stripLeadingIndex(dims), bitset, position);
 			}
 		} else {
 			for (int i = 0; i < dims[0]; i++) {
-				Array.set(data, i, buffer.get() == 1);
+				Array.set(data, i, bitset.get(position.getAndAdd(getBitPrecision())));
 			}
 		}
 	}
