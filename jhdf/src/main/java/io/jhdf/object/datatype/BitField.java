@@ -9,12 +9,18 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.Utils;
+import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -118,4 +124,81 @@ public class BitField extends DataType implements OrderedDataType {
 			.build();
 	}
 
+	@Override
+	public ByteBuffer encodeData(Object data) {
+		Objects.requireNonNull(data, "Cannot encode null");
+
+
+		if(data.getClass().isArray()) {
+			return encodeArrayData(data);
+		} else {
+			return encodeScalarData(data);
+		}
+	}
+
+
+	private ByteBuffer encodeScalarData(Object data) {
+		final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);
+		buffer.put(booleanToByte((Boolean) data));
+		return buffer;
+	}
+
+	private ByteBuffer encodeArrayData(Object data) {
+		final Class<?> type = Utils.getType(data);
+		final int[] dimensions = Utils.getDimensions(data);
+		final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
+		final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize())
+			.order(order);
+		if(type == boolean.class) {
+			encodeBooleanData(data, dimensions, buffer, true);
+		} else if (type == Boolean.class) {
+			encodeBooleanData(data, dimensions, buffer, false);
+		} else {
+			throw new UnsupportedHdfException("Cant write type: " + type);
+		}
+		return buffer;
+	}
+
+	private static void encodeBooleanData(Object data, int[] dims, ByteBuffer buffer, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeBooleanData(newArray, stripLeadingIndex(dims), buffer, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put(asByteArray((boolean[]) data));
+			} else {
+				buffer.put(asByteArray(ArrayUtils.toPrimitive((Boolean[]) data)));
+			}
+		}
+	}
+
+	private static byte[] asByteArray(boolean[] data) {
+		byte[] bytes = new byte[data.length];
+		for (int i = 0; i < data.length; i++) {
+            bytes[i] = booleanToByte(data[i]);
+        }
+		return bytes;
+	}
+
+	private static byte booleanToByte(boolean b) {
+		return b ? (byte) 1 : 0;
+	}
+
+	@Override
+	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
+		if (data.getClass().isArray()) {
+//			writeArrayData(data, dimensions, hdfFileChannel); // TODO
+		} else {
+			writeScalarData(data, hdfFileChannel);
+		}
+
+	}
+
+	private void writeScalarData(Object data, HdfFileChannel hdfFileChannel) {
+		ByteBuffer buffer = encodeScalarData(data);
+		buffer.rewind();
+		hdfFileChannel.write(buffer);
+	}
 }
