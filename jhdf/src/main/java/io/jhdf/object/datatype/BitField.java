@@ -21,6 +21,13 @@ import java.util.concurrent.atomic.LongAdder;
 import static io.jhdf.Utils.stripLeadingIndex;
 
 public class BitField extends DataType implements OrderedDataType {
+	public static final int CLASS_ID = 4;
+	private static final int ORDER_BIT = 0;
+	private static final int LOW_PADDING_BIT = 1;
+	private static final int HIGH_PADDING_BIT = 2;
+
+	public static final BitField INSTANCE = new BitField();
+
 	private final ByteOrder order;
 	private final boolean lowPadding;
 	private final boolean highPadding;
@@ -30,17 +37,27 @@ public class BitField extends DataType implements OrderedDataType {
 	public BitField(ByteBuffer bb) {
 		super(bb);
 
-		if (classBits.get(0)) {
+		if (classBits.get(ORDER_BIT)) {
 			order = ByteOrder.BIG_ENDIAN;
 		} else {
 			order = ByteOrder.LITTLE_ENDIAN;
 		}
 
-		lowPadding = classBits.get(1);
-		highPadding = classBits.get(2);
+		lowPadding = classBits.get(LOW_PADDING_BIT);
+		highPadding = classBits.get(HIGH_PADDING_BIT);
 
 		bitOffset = bb.getShort();
 		bitPrecision = bb.getShort();
+	}
+
+	private BitField() {
+		super(CLASS_ID, 1);
+
+		this.order = ByteOrder.nativeOrder();
+		this.bitPrecision = 8;
+		this.bitOffset = 0;
+		this.lowPadding = false;
+		this.highPadding = false;
 	}
 
 	@Override
@@ -89,5 +106,16 @@ public class BitField extends DataType implements OrderedDataType {
 		}
 	}
 
+	@Override
+	public ByteBuffer toBuffer() {
+		classBits.set(ORDER_BIT, order.equals(ByteOrder.BIG_ENDIAN));
+		classBits.set(LOW_PADDING_BIT, lowPadding);
+		classBits.set(HIGH_PADDING_BIT, highPadding);
+
+		return  super.toBufferBuilder()
+			.writeShort(bitOffset)
+			.writeShort(bitPrecision)
+			.build();
+	}
 
 }

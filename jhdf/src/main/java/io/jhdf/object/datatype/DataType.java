@@ -59,7 +59,7 @@ public abstract class DataType {
 				throw new UnsupportedHdfException("Time data type is not yet supported");
 			case StringData.CLASS_ID: // String
 				return new StringData(bb);
-			case 4: // Bit field
+			case BitField.CLASS_ID: // Bit field
 				return new BitField(bb);
 			case 5: // Opaque
 				return new OpaqueDataType(bb);
@@ -111,6 +111,8 @@ public abstract class DataType {
 			return FloatingPoint.DOUBLE;
 		} else if (type == String.class) {
 			return StringData.create(data);
+		} else if (type == boolean.class || type == Boolean.class) {
+			return BitField.INSTANCE;
 		} else {
 			throw new HdfException("Could not create DataType for: " + type);
 		}
