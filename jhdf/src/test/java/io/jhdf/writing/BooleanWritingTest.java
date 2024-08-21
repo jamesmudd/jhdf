@@ -72,7 +72,7 @@ class BooleanWritingTest {
 		// Now read it back
 		try (HdfFile hdfFile = new HdfFile(tempFile)) {
 			Map<String, Node> datasets = hdfFile.getChildren();
-			assertThat(datasets).hasSize(4);
+			assertThat(datasets).hasSize(5);
 
 			// Just check thw whole file is readable
 			TestAllFilesBase.verifyAttributes(hdfFile);

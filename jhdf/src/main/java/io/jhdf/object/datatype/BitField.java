@@ -189,7 +189,7 @@ public class BitField extends DataType implements OrderedDataType {
 	@Override
 	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
 		if (data.getClass().isArray()) {
-//			writeArrayData(data, dimensions, hdfFileChannel); // TODO
+			writeArrayData(data, dimensions, hdfFileChannel); // TODO
 		} else {
 			writeScalarData(data, hdfFileChannel);
 		}
@@ -201,4 +201,39 @@ public class BitField extends DataType implements OrderedDataType {
 		buffer.rewind();
 		hdfFileChannel.write(buffer);
 	}
+
+	private void writeArrayData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
+		final Class<?> type = Utils.getType(data);
+		final int fastDimSize = dimensions[dimensions.length - 1];
+		// This buffer is reused
+		final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize())
+			.order(order);
+		if (type == boolean.class) {
+			writeBooleanData(data, dimensions, buffer, hdfFileChannel, true);
+		} else if (type == Boolean.class) {
+			writeBooleanData(data, dimensions, buffer, hdfFileChannel, false);
+		} else {
+			throw new UnsupportedHdfException("Cant write type: " + type);
+		}
+	}
+
+
+	private static void writeBooleanData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeBooleanData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put(asByteArray((boolean[]) data));
+			} else {
+				buffer.put(asByteArray(ArrayUtils.toPrimitive((Boolean[]) data)));
+			}
+			buffer.rewind(); // Need to rewind as there is not a view
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
+	}
+
 }
