@@ -13,6 +13,8 @@ import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,10 +56,19 @@ public final class TestUtils {
 			.toArray(String[]::new);
 	}
 
-	private static Boolean[] toBooleanArray(Object data) {
+	public static Boolean[] toBooleanArray(Object data) {
 		return Arrays.stream(Utils.flatten(data))
-			.map(el -> Boolean.parseBoolean(el.toString()))
+			.map(el -> parseBoolean(el.toString()))
 			.toArray(Boolean[]::new);
+	}
+
+	private static Boolean parseBoolean(String str) {
+		Boolean aBoolean = BooleanUtils.toBooleanObject(str);
+		if(aBoolean != null) {
+			return aBoolean;
+		}
+		// Used for parsing h5dump output
+		return BooleanUtils.toBooleanObject(str, "0x01", "0x00", "null");
 	}
 
 	public static void compareGroups(Group group1, Group group2) {

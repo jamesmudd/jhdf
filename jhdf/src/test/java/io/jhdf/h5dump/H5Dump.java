@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
+import static io.jhdf.TestUtils.toBooleanArray;
 import static io.jhdf.TestUtils.toDoubleArray;
 import static io.jhdf.TestUtils.toStringArray;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -87,6 +88,9 @@ public class H5Dump {
 		assertThat(attributeXml.getDimensions(), is(equalTo(attribute.getDimensions())));
 		if(attribute.getJavaType() == String.class) {
 			assertArrayEquals(toStringArray(attributeXml.getData()), toStringArray(attribute.getData()));
+		} else if (attribute.getJavaType() == boolean.class ||
+			attribute.getJavaType() == Boolean.class) {
+			assertArrayEquals(toBooleanArray(attributeXml.getData()), toBooleanArray(attribute.getData()));
 		} else {
 			assertArrayEquals(toDoubleArray(attributeXml.getData()), toDoubleArray(attribute.getData()), 0.002);
 		}	}
@@ -97,6 +101,9 @@ public class H5Dump {
 		assertThat(datasetXml.getDimensions(), is(equalTo(dataset.getDimensions())));
 		if(dataset.getJavaType() == String.class) {
 			assertArrayEquals(toStringArray(datasetXml.getData()), toStringArray(dataset.getData()));
+		} else if (dataset.getJavaType() == boolean.class ||
+				dataset.getJavaType() == Boolean.class) {
+			assertArrayEquals(toBooleanArray(datasetXml.getData()), toBooleanArray(dataset.getData()));
 		} else {
 			assertArrayEquals(toDoubleArray(datasetXml.getData()), toDoubleArray(dataset.getData()), 0.002);
 		}
