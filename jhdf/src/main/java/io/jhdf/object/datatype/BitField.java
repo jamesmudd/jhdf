@@ -95,19 +95,19 @@ public class BitField extends DataType implements OrderedDataType {
 	@Override
 	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
 		final Object data = Array.newInstance(getJavaType(), dimensions);
-		fillBitfieldData(data, dimensions, BitSet.valueOf(buffer.order(getByteOrder())), new AtomicInteger());
+		fillBitfieldData(data, dimensions, buffer.order(getByteOrder()));
 		return data;
 	}
 
-	private void fillBitfieldData(Object data, int[] dims, BitSet bitset, AtomicInteger position) {
+	private static void fillBitfieldData(Object data, int[] dims, ByteBuffer buffer) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
 				Object newArray = Array.get(data, i);
-				fillBitfieldData(newArray, stripLeadingIndex(dims), bitset, position);
+				fillBitfieldData(newArray, stripLeadingIndex(dims), buffer);
 			}
 		} else {
 			for (int i = 0; i < dims[0]; i++) {
-				Array.set(data, i, bitset.get(position.getAndAdd(getBitPrecision())));
+				Array.set(data, i, buffer.get() == 1);
 			}
 		}
 	}
