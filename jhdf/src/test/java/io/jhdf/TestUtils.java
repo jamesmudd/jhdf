@@ -13,6 +13,8 @@ import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +56,21 @@ public final class TestUtils {
 			.toArray(String[]::new);
 	}
 
+	public static Boolean[] toBooleanArray(Object data) {
+		return Arrays.stream(Utils.flatten(data))
+			.map(el -> parseBoolean(el.toString()))
+			.toArray(Boolean[]::new);
+	}
+
+	private static Boolean parseBoolean(String str) {
+		Boolean aBoolean = BooleanUtils.toBooleanObject(str);
+		if(aBoolean != null) {
+			return aBoolean;
+		}
+		// Used for parsing h5dump output
+		return BooleanUtils.toBooleanObject(str, "0x01", "0x00", "null");
+	}
+
 	public static void compareGroups(Group group1, Group group2) {
 		logger.info("Comparing groups [{}]", group1.getPath());
 
@@ -79,8 +96,15 @@ public final class TestUtils {
 		assertThat(attribute1.getName(), is(equalTo(attribute2.getName())));
 		assertThat(attribute1.getDimensions(), is(equalTo(attribute2.getDimensions())));
 		assertThat(attribute1.getJavaType(), is(equalTo(attribute2.getJavaType())));
+		assertThat(attribute1.isScalar(), is(equalTo(attribute2.isScalar())));
+		assertThat(attribute1.isEmpty(), is(equalTo(attribute2.isEmpty())));
+
+
 		if(attribute1.getJavaType() == String.class) {
 			assertArrayEquals(toStringArray(attribute1.getData()), toStringArray(attribute2.getData()));
+		} else if (attribute1.getJavaType() == boolean.class ||
+					attribute1.getJavaType() == Boolean.class) {
+			assertArrayEquals(toBooleanArray(attribute1.getData()), toBooleanArray(attribute2.getData()));
 		} else {
 			assertArrayEquals(toDoubleArray(attribute1.getData()), toDoubleArray(attribute2.getData()), 0.002);
 		}
@@ -93,6 +117,9 @@ public final class TestUtils {
 		assertThat(dataset1.getJavaType(), is(equalTo(dataset2.getJavaType())));
 		if(dataset1.getJavaType() == String.class) {
 			assertArrayEquals(toStringArray(dataset1.getData()), toStringArray(dataset2.getData()));
+		} else if (dataset1.getJavaType() == boolean.class ||
+			dataset1.getJavaType() == Boolean.class) {
+			assertArrayEquals(toBooleanArray(dataset1.getData()), toBooleanArray(dataset2.getData()));
 		} else {
 			assertArrayEquals(toDoubleArray(dataset1.getData()), toDoubleArray(dataset2.getData()), 0.002);
 		}
