@@ -1,5 +1,8 @@
 # jHDF Change Log
 
+## v0.8.2 - August 2024
+- Add support for writing `boolean` datasets and attributes as Bitfield
+
 ## v0.8.1 - August 2024
 - Add support fo writing `String` datasets and attributes
 - Add `_jHDF` default attribute to root group
