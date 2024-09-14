@@ -16,6 +16,7 @@ import io.jhdf.dataset.chunked.DatasetInfo;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.storage.HdfBackingStorage;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -40,7 +41,8 @@ public class FixedArrayIndex implements ChunkIndex {
 	private final int pageBits;
 	private final int maxNumberOfEntries;
 	private final long dataBlockAddress;
-
+	private final boolean paged;
+	private final int pages;
 	private final List<Chunk> chunks;
 
 	public FixedArrayIndex(HdfBackingStorage hdfBackingStorage, long address, DatasetInfo datasetInfo) {
@@ -71,6 +73,10 @@ public class FixedArrayIndex implements ChunkIndex {
 		pageBits = bb.get();
 
 		maxNumberOfEntries = Utils.readBytesAsUnsignedInt(bb, hdfBackingStorage.getSizeOfLengths());
+		final int pageSize = BigInteger.valueOf(2).pow(pageBits).intValue();
+		paged = maxNumberOfEntries > pageSize;
+		pages = (int) Math.ceil((double) maxNumberOfEntries / pageSize);
+
 		dataBlockAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
 
 		chunks = new ArrayList<>(maxNumberOfEntries);
@@ -79,11 +85,11 @@ public class FixedArrayIndex implements ChunkIndex {
 		bb.rewind();
 		ChecksumUtils.validateChecksum(bb);
 
-		// Building the object fills the chunks. Probably shoudld be changed
+		// Building the object fills the chunks. Probably should be changed
 		new FixedArrayDataBlock(this, hdfBackingStorage, dataBlockAddress);
 	}
 
-	private static class FixedArrayDataBlock {
+	private class FixedArrayDataBlock {
 
 		private FixedArrayDataBlock(FixedArrayIndex fixedArrayIndex, HdfBackingStorage hdfBackingStorage, long address) {
 
@@ -115,6 +121,14 @@ public class FixedArrayIndex implements ChunkIndex {
 				throw new HdfException("Fixed array data block header address missmatch");
 			}
 
+			if(paged) {
+//				throw new HdfException("Paged");
+//				pageBits
+				int pageBitmapBytes = (int) Math.ceil((double) pages / 8);
+//				byte[] pageBitmap = new byte[pageBitmapBytes];
+//				bb.get(pageBitmapBytes);
+				bb.position(bb.position() + pageBitmapBytes + 1);
+			}
 			// TODO ignoring paging here might need to revisit
 
 			if (clientId == 0) { // Not filtered
