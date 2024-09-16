@@ -41,7 +41,6 @@ public class FixedArrayIndex implements ChunkIndex {
 	private final int pageBits;
 	private final int maxNumberOfEntries;
 	private final long dataBlockAddress;
-	private final boolean paged;
 	private final int pages;
 	private final List<Chunk> chunks;
 
@@ -73,9 +72,8 @@ public class FixedArrayIndex implements ChunkIndex {
 		pageBits = bb.get();
 
 		maxNumberOfEntries = Utils.readBytesAsUnsignedInt(bb, hdfBackingStorage.getSizeOfLengths());
-		final int pageSize = BigInteger.valueOf(2).pow(pageBits).intValue();
-		paged = maxNumberOfEntries > pageSize;
-		pages = (int) Math.ceil((double) maxNumberOfEntries / pageSize);
+		final int pageSize = 1 << pageBits;
+		pages = (maxNumberOfEntries + pageSize -1) / pageSize;
 
 		dataBlockAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
 
@@ -121,15 +119,15 @@ public class FixedArrayIndex implements ChunkIndex {
 				throw new HdfException("Fixed array data block header address missmatch");
 			}
 
-			if(paged) {
+			if(pages > 1) {
 //				throw new HdfException("Paged");
 //				pageBits
-				int pageBitmapBytes = (int) Math.ceil((double) pages / 8);
+				int pageBitmapBytes = (pages + 7) / 8;
+//				pageBitmapSize = (pageCount + 7) / 8;
 //				byte[] pageBitmap = new byte[pageBitmapBytes];
 //				bb.get(pageBitmapBytes);
-				bb.position(bb.position() + pageBitmapBytes + 1);
+				bb.position(bb.position() + pageBitmapBytes );
 			}
-			// TODO ignoring paging here might need to revisit
 
 			if (clientId == 0) { // Not filtered
 				for (int i = 0; i < fixedArrayIndex.maxNumberOfEntries; i++) {
