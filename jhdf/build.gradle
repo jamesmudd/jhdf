@@ -104,7 +104,7 @@ jar {
             'Bundle-Name': project.name,
             'Bundle-Vendor': 'James Mudd',
             'Bundle-Version': project.version,
-            'Export-Package': 'io.jhdf,io.jhdf.*',
+            'Export-Package': 'io.jhdf,io.jhdf.*,io.jhdf.api,io.jhdf.api.*',
             // Build data
             'Build-JDK': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
             'Build-OS': System.getProperty('os.name') + ' ' + System.getProperty('os.version'),
