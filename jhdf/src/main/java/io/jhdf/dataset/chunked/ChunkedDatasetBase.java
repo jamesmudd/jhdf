@@ -291,6 +291,16 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		return getDataBuffer(chunk);
 	}
 
+	@Override
+	public byte[] getDecompressedChunk(int[] chunkOffset) {
+		final Chunk chunk = getChunk(new ChunkOffset(chunkOffset));
+		if (chunk == null) {
+			throw new HdfException("No chunk with offset " + Arrays.toString(chunkOffset) +
+				" in dataset: " + getPath());
+		}
+		return decompressChunk(chunk);
+	}
+
 	private Collection<Chunk> getAllChunks() {
 		return getChunkLookup().values();
 	}
