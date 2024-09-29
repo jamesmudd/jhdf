@@ -118,4 +118,17 @@ class ChunkedV4DatasetTest {
 		intBuffer.get(chunkData);
 		assertThat(toObject(chunkData), is(arrayContaining(0, 1, 2, 3, 4, 5)));
 	}
+	@Test
+	void testGettingDecompressedChunkWithoutFiltersIsTheSameAsRaw() {
+		Dataset dataset = hdfFile.getDatasetByPath("/fixed_array/int32");
+		assertThat(dataset, isA(ChunkedDataset.class));
+		ChunkedDataset chunkedDataset = (ChunkedDataset) dataset;
+		assertThat(toObject(chunkedDataset.getChunkDimensions()), is(arrayContaining(2, 3)));
+
+		ByteBuffer rawChunkBuffer = chunkedDataset.getRawChunkBuffer(new int[]{0, 0});
+		byte[] decompressedChunkBytes = chunkedDataset.getDecompressedChunk(new int[]{0, 0});
+		byte[] rawChunkBytes = new byte[rawChunkBuffer.capacity()];
+		rawChunkBuffer.get(rawChunkBytes);
+		assertThat(rawChunkBytes, is(decompressedChunkBytes));
+	}
 }
