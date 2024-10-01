@@ -21,7 +21,7 @@ plugins {
 
     // Community plugins (need versions)
     id 'org.sonarqube' version '4.0.0.2929' // Code quality
-    id "com.github.spotbugs" version "6.0.22" // Static analysis
+    id "com.github.spotbugs" version "6.0.23" // Static analysis
     id "me.champeau.jmh" version "0.7.2" // JMH support
 }
 
@@ -55,7 +55,7 @@ dependencies {
     implementation group: 'org.lz4', name: 'lz4-java', version: '1.8.0'
 
     // Use JUnit 5 test framework
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.11.0'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.11.1'
     testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 
     // Mocking
@@ -67,8 +67,8 @@ dependencies {
     // Alternative bitshuffle impl to check results against
     testImplementation 'org.xerial.snappy:snappy-java:1.1.10.7'
     // For parsing h5dump XML output
-    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.17.2'
-    testImplementation 'commons-io:commons-io:2.16.1'
+    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.0'
+    testImplementation 'commons-io:commons-io:2.17.0'
 }
 
 test {
@@ -104,7 +104,8 @@ jar {
             'Bundle-Name': project.name,
             'Bundle-Vendor': 'James Mudd',
             'Bundle-Version': project.version,
-            'Export-Package': 'io.jhdf,io.jhdf.*',
+            'Export-Package': 'io.jhdf,io.jhdf.*,io.jhdf.api,io.jhdf.api.*',
+            'Require-Bundle': 'slf4j.api;bundle-version="1.7.36",org.apache.commons.lang3;bundle-version="3.17.0",com.ning.compress-lzf;bundle-version="1.1.2",lz4-java;bundle-version="1.8.0"',
             // Build data
             'Build-JDK': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
             'Build-OS': System.getProperty('os.name') + ' ' + System.getProperty('os.version'),
