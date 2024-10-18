@@ -48,7 +48,9 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HdfFileTest {
 
@@ -314,6 +316,17 @@ class HdfFileTest {
 			Mockito.when(inputStream.read(Mockito.any())).thenThrow(new IOException("Broken test stream"));
 			assertThrows(HdfException.class, () -> HdfFile.fromInputStream(inputStream));
 		}
+	}
+
+	@Test
+	void testReadingFromStreamDeletesTempFileOnClose() throws IOException {
+		File tempFile;
+		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_PATH).openStream();
+			 HdfFile hdfFile = HdfFile.fromInputStream(inputStream)) {
+			tempFile = hdfFile.getFile();
+			assertTrue(tempFile.exists());
+		}
+		assertFalse(tempFile.exists());
 	}
 
 	@Test
