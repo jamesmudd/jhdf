@@ -20,6 +20,7 @@ import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
 import io.jhdf.h5dump.HDF5FileXml;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -134,7 +135,7 @@ class StringWritingTest {
 		}
 	}
 
-	@Test()
+	@Test
 	@Order(3)
 	// https://github.com/jamesmudd/jhdf/issues/641
 	void writeVarStringAttributes() throws Exception {
@@ -159,6 +160,34 @@ class StringWritingTest {
 			// Expected :["", "1", "mm2"]
 			// Actual   :["", "m2", ""]
 			assertThat(dataset.getAttribute("units").getData()).isEqualTo(new String[] {"", "1", "mm2"});
+		} finally {
+			tempFile.toFile().delete();
+		}
+	}
+
+	@Test()
+	@Order(4)
+	void writeReallyLongStrings() throws Exception {
+		Path tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
+		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
+
+		// Write a dataset with string attributes
+		String[] randomLongStringData = {
+			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
+			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
+			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
+			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
+			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
+		};
+		WritiableDataset writiableDataset = writableHdfFile.putDataset("dataset", randomLongStringData);
+		writiableDataset.putAttribute("attr", randomLongStringData);
+		writableHdfFile.close();
+
+		// Now read it back
+		try (HdfFile hdfFile = new HdfFile(tempFile)) {
+			Dataset dataset = hdfFile.getDatasetByPath("dataset");
+			assertThat(dataset.getData()).isEqualTo(randomLongStringData);
+			assertThat(dataset.getAttribute("attr").getData()).isEqualTo(randomLongStringData);
 		} finally {
 			tempFile.toFile().delete();
 		}
