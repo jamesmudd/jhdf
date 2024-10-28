@@ -97,7 +97,8 @@ class StringWritingTest {
 			{"element 2,1", "element 2,2", "element 2,3", "element 2,4", "element 2,5"}
 		});
 
-		writableHdfFile.putDataset("prose", StringUtils.split(prose));
+		WritiableDataset proseDataset = writableHdfFile.putDataset("prose", StringUtils.split(prose));
+		proseDataset.putAttribute("prose_attr", StringUtils.split(prose));
 
 		// Actually flush and write everything
 		writableHdfFile.close();
