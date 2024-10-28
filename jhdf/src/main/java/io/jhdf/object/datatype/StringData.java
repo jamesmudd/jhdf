@@ -252,12 +252,13 @@ public class StringData extends DataType {
 				encodeDataInternal(newArray, stripLeadingIndex(dims), buffer);
 			}
 		} else {
+			final int offset = buffer.position();
             String[] strings = (String[]) data;
             for (int i = 0; i < strings.length; i++) {
                 String str = strings[i];
                 buffer.put(this.charset.encode(str))
                         .put(NULL)
-                        .position((i + 1) * getSize());
+                        .position(offset + (i + 1) * getSize());
             }
 		}
 	}
