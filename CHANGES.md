@@ -1,5 +1,9 @@
 # jHDF Change Log
 
+## v0.8.4 - October 2024
+- Fix incorrectly written string attributes. https://github.com/jamesmudd/jhdf/issues/641
+- Dependency updates
+
 ## v0.8.3 - October 2024
 - Add support for accessing decompressed chunks individually. Thanks to [@marcobitplane](https://github.com/marcobitplane) https://github.com/jamesmudd/jhdf/pull/626
 - Fix OSGi headers, and autogenerate them during the build. Thanks to [@mailaender](https://github.com/Mailaender) https://github.com/jamesmudd/jhdf/pull/625 https://github.com/jamesmudd/jhdf/pull/632
