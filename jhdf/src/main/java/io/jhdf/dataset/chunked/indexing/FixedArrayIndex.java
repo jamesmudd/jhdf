@@ -43,6 +43,7 @@ public class FixedArrayIndex implements ChunkIndex {
 	private final long dataBlockAddress;
 	private final int pages;
 	private final List<Chunk> chunks;
+	private final int pageSize;
 
 	public FixedArrayIndex(HdfBackingStorage hdfBackingStorage, long address, DatasetInfo datasetInfo) {
 		this.address = address;
@@ -72,7 +73,7 @@ public class FixedArrayIndex implements ChunkIndex {
 		pageBits = bb.get();
 
 		maxNumberOfEntries = Utils.readBytesAsUnsignedInt(bb, hdfBackingStorage.getSizeOfLengths());
-		final int pageSize = 1 << pageBits;
+		pageSize = 1 << pageBits;
 		pages = (maxNumberOfEntries + pageSize -1) / pageSize;
 
 		dataBlockAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
@@ -92,7 +93,11 @@ public class FixedArrayIndex implements ChunkIndex {
 		private FixedArrayDataBlock(FixedArrayIndex fixedArrayIndex, HdfBackingStorage hdfBackingStorage, long address) {
 
 			// TODO header size ignoring paging
-			final int headerSize = 6 + hdfBackingStorage.getSizeOfOffsets() + fixedArrayIndex.entrySize * fixedArrayIndex.maxNumberOfEntries + 4;
+			int pageBitmapBytes = (pages + 7) / 8;
+			int headerSize = 6 + hdfBackingStorage.getSizeOfOffsets() + fixedArrayIndex.entrySize * fixedArrayIndex.maxNumberOfEntries + 4;
+			if(pages > 1) {
+				headerSize += pageBitmapBytes + (4 * pages);
+			}
 			final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
 			byte[] formatSignatureBytes = new byte[4];
@@ -122,34 +127,70 @@ public class FixedArrayIndex implements ChunkIndex {
 			if(pages > 1) {
 //				throw new HdfException("Paged");
 //				pageBits
-				int pageBitmapBytes = (pages + 7) / 8;
 //				pageBitmapSize = (pageCount + 7) / 8;
-//				byte[] pageBitmap = new byte[pageBitmapBytes];
-//				bb.get(pageBitmapBytes);
-				bb.position(bb.position() + pageBitmapBytes );
-			}
+				byte[] pageBitmap = new byte[pageBitmapBytes];
+				bb.get(pageBitmap);
+				// TODO skip check sum
+				bb.position(bb.position() + 4);
+//				bb.position(bb.position() + pageBitmapBytes );
 
-			if (clientId == 0) { // Not filtered
-				for (int i = 0; i < fixedArrayIndex.maxNumberOfEntries; i++) {
-					final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
-					final int[] chunkOffset = Utils.chunkIndexToChunkOffset(i, fixedArrayIndex.chunkDimensions, fixedArrayIndex.datasetDimensions);
-					fixedArrayIndex.chunks.add(new ChunkImpl(chunkAddress, fixedArrayIndex.unfilteredChunkSize, chunkOffset));
-				}
-			} else if (clientId == 1) { // Filtered
-				for (int i = 0; i < fixedArrayIndex.maxNumberOfEntries; i++) {
-					final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
-					final int chunkSizeInBytes = Utils.readBytesAsUnsignedInt(bb, fixedArrayIndex.entrySize - hdfBackingStorage.getSizeOfOffsets() - 4);
-					final BitSet filterMask = BitSet.valueOf(new byte[]{bb.get(), bb.get(), bb.get(), bb.get()});
-					final int[] chunkOffset = Utils.chunkIndexToChunkOffset(i, fixedArrayIndex.chunkDimensions, fixedArrayIndex.datasetDimensions);
+				int chunkIndex = 0;
+				for(int page = 0; page < pages; page++) {
+					final int pageSize;
+					if(page == pages -1) {
+						// last page so not a full page
+						pageSize = fixedArrayIndex.maxNumberOfEntries % fixedArrayIndex.pageSize;
+					} else {
+						pageSize = fixedArrayIndex.pageSize;
+					}
 
-					fixedArrayIndex.chunks.add(new ChunkImpl(chunkAddress, chunkSizeInBytes, chunkOffset, filterMask));
+					if (clientId == 0) { // Not filtered
+						for (int i = 0; i < pageSize; i++) {
+							readUnfiltered(fixedArrayIndex, hdfBackingStorage.getSizeOfOffsets(), bb, chunkIndex++);
+						}
+					} else if (clientId == 1) { // Filtered
+						for (int i = 0; i < pageSize; i++) {
+							readFiltered(fixedArrayIndex, hdfBackingStorage, bb, i);
+						}
+					} else {
+						throw new HdfException("Unrecognized client ID  = " + clientId);
+					}
+
+					// TODO skip check sum
+					bb.position(bb.position() + 4);
 				}
 			} else {
-				throw new HdfException("Unrecognized client ID  = " + clientId);
-			}
+				// Unpaged
+				if (clientId == 0) { // Not filtered
+					for (int i = 0; i < fixedArrayIndex.maxNumberOfEntries; i++) {
+						readUnfiltered(fixedArrayIndex, hdfBackingStorage.getSizeOfOffsets(), bb, i);
+					}
+				} else if (clientId == 1) { // Filtered
+					for (int i = 0; i < fixedArrayIndex.maxNumberOfEntries; i++) {
+						readFiltered(fixedArrayIndex, hdfBackingStorage, bb, i);
+					}
+				} else {
+					throw new HdfException("Unrecognized client ID  = " + clientId);
+				}
 
-			bb.rewind();
-			ChecksumUtils.validateChecksum(bb);
+				bb.rewind();
+				ChecksumUtils.validateChecksum(bb);
+			}
+		}
+
+		private void readFiltered(FixedArrayIndex fixedArrayIndex, HdfBackingStorage hdfBackingStorage, ByteBuffer bb, int i) {
+			final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
+			final int chunkSizeInBytes = Utils.readBytesAsUnsignedInt(bb, fixedArrayIndex.entrySize - hdfBackingStorage.getSizeOfOffsets() - 4);
+			final BitSet filterMask = BitSet.valueOf(new byte[]{bb.get(), bb.get(), bb.get(), bb.get()});
+			final int[] chunkOffset = Utils.chunkIndexToChunkOffset(i, fixedArrayIndex.chunkDimensions, fixedArrayIndex.datasetDimensions);
+
+			fixedArrayIndex.chunks.add(new ChunkImpl(chunkAddress, chunkSizeInBytes, chunkOffset, filterMask));
+		}
+
+		private void readUnfiltered(FixedArrayIndex fixedArrayIndex, int sizeOfOffsets, ByteBuffer bb, int chunkIndex) {
+			final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, sizeOfOffsets);
+			final int[] chunkOffset = Utils.chunkIndexToChunkOffset(chunkIndex, fixedArrayIndex.chunkDimensions, fixedArrayIndex.datasetDimensions);
+			fixedArrayIndex.chunks.add(new ChunkImpl(chunkAddress, fixedArrayIndex.unfilteredChunkSize, chunkOffset));
 		}
 	}
 
