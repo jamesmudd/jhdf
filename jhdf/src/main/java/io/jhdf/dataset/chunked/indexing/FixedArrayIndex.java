@@ -150,7 +150,7 @@ public class FixedArrayIndex implements ChunkIndex {
 						}
 					} else if (clientId == 1) { // Filtered
 						for (int i = 0; i < pageSize; i++) {
-							readFiltered(fixedArrayIndex, hdfBackingStorage, bb, i);
+							readFiltered(fixedArrayIndex, hdfBackingStorage, bb, chunkIndex++);
 						}
 					} else {
 						throw new HdfException("Unrecognized client ID  = " + clientId);
