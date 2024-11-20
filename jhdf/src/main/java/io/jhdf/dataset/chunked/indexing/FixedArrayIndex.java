@@ -15,8 +15,11 @@ import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.DatasetInfo;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -30,6 +33,8 @@ public class FixedArrayIndex implements ChunkIndex {
 	private static final byte[] FIXED_ARRAY_HEADER_SIGNATURE = "FAHD".getBytes(StandardCharsets.US_ASCII);
 	private static final byte[] FIXED_ARRAY_DATA_BLOCK_SIGNATURE = "FADB".getBytes(StandardCharsets.US_ASCII);
 
+	private static final Logger logger = LoggerFactory.getLogger(FixedArrayIndex.class);
+
 	private final long address;
 	private final int unfilteredChunkSize;
 
@@ -42,8 +47,9 @@ public class FixedArrayIndex implements ChunkIndex {
 	private final int maxNumberOfEntries;
 	private final long dataBlockAddress;
 	private final int pages;
-	private final List<Chunk> chunks;
 	private final int pageSize;
+
+	private final FixedArrayDataBlockInitializer dataBlockInitializer;
 
 	public FixedArrayIndex(HdfBackingStorage hdfBackingStorage, long address, DatasetInfo datasetInfo) {
 		this.address = address;
@@ -78,17 +84,36 @@ public class FixedArrayIndex implements ChunkIndex {
 
 		dataBlockAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
 
-		chunks = new ArrayList<>(maxNumberOfEntries);
-
 		// Checksum
 		bb.rewind();
 		ChecksumUtils.validateChecksum(bb);
 
+		logger.info("Read fixed array index header. pages=[{}], maxEntries=[{}]", pages, maxNumberOfEntries);
+
 		// Building the object fills the chunks. Probably should be changed
-		new FixedArrayDataBlock(this, hdfBackingStorage, dataBlockAddress);
+//		new FixedArrayDataBlock(this, hdfBackingStorage, dataBlockAddress);
+		dataBlockInitializer = new FixedArrayDataBlockInitializer(hdfBackingStorage);
+	}
+
+	private class FixedArrayDataBlockInitializer extends LazyInitializer<FixedArrayDataBlock> {
+
+		private final HdfBackingStorage hdfBackingStorage;
+
+		public FixedArrayDataBlockInitializer(HdfBackingStorage hdfBackingStorage) {
+			this.hdfBackingStorage = hdfBackingStorage;
+		}
+
+		@Override
+		protected FixedArrayDataBlock initialize() {
+			logger.info("Initializing data block");
+			return new FixedArrayDataBlock(FixedArrayIndex.this, hdfBackingStorage, FixedArrayIndex.this.dataBlockAddress);
+		}
+
 	}
 
 	private class FixedArrayDataBlock {
+
+		private final List<Chunk> chunks = new ArrayList<>(maxNumberOfEntries);
 
 		private FixedArrayDataBlock(FixedArrayIndex fixedArrayIndex, HdfBackingStorage hdfBackingStorage, long address) {
 
@@ -184,18 +209,22 @@ public class FixedArrayIndex implements ChunkIndex {
 			final BitSet filterMask = BitSet.valueOf(new byte[]{bb.get(), bb.get(), bb.get(), bb.get()});
 			final int[] chunkOffset = Utils.chunkIndexToChunkOffset(i, fixedArrayIndex.chunkDimensions, fixedArrayIndex.datasetDimensions);
 
-			fixedArrayIndex.chunks.add(new ChunkImpl(chunkAddress, chunkSizeInBytes, chunkOffset, filterMask));
+			chunks.add(new ChunkImpl(chunkAddress, chunkSizeInBytes, chunkOffset, filterMask));
 		}
 
 		private void readUnfiltered(FixedArrayIndex fixedArrayIndex, int sizeOfOffsets, ByteBuffer bb, int chunkIndex) {
 			final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, sizeOfOffsets);
 			final int[] chunkOffset = Utils.chunkIndexToChunkOffset(chunkIndex, fixedArrayIndex.chunkDimensions, fixedArrayIndex.datasetDimensions);
-			fixedArrayIndex.chunks.add(new ChunkImpl(chunkAddress, fixedArrayIndex.unfilteredChunkSize, chunkOffset));
+			chunks.add(new ChunkImpl(chunkAddress, fixedArrayIndex.unfilteredChunkSize, chunkOffset));
 		}
 	}
 
 	@Override
 	public Collection<Chunk> getAllChunks() {
-		return chunks;
+		try {
+			return this.dataBlockInitializer.get().chunks;
+		} catch (ConcurrentException e) {
+			throw new HdfException("Error initializing data block", e);
+		}
 	}
 }
