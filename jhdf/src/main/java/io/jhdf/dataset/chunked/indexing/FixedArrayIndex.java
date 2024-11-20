@@ -59,6 +59,7 @@ public class FixedArrayIndex implements ChunkIndex {
 
 		final int headerSize = 12 + hdfBackingStorage.getSizeOfOffsets() + hdfBackingStorage.getSizeOfLengths();
 		final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
+		bb.mark();
 
 		byte[] formatSignatureBytes = new byte[4];
 		bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -85,14 +86,10 @@ public class FixedArrayIndex implements ChunkIndex {
 		dataBlockAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
 
 		// Checksum
-		bb.rewind();
-		ChecksumUtils.validateChecksum(bb);
+		ChecksumUtils.validateChecksumFromMark(bb);
 
-		logger.info("Read fixed array index header. pages=[{}], maxEntries=[{}]", pages, maxNumberOfEntries);
-
-		// Building the object fills the chunks. Probably should be changed
-//		new FixedArrayDataBlock(this, hdfBackingStorage, dataBlockAddress);
 		dataBlockInitializer = new FixedArrayDataBlockInitializer(hdfBackingStorage);
+		logger.info("Read fixed array index header. pages=[{}], maxEntries=[{}]", pages, maxNumberOfEntries);
 	}
 
 	private class FixedArrayDataBlockInitializer extends LazyInitializer<FixedArrayDataBlock> {
@@ -117,13 +114,13 @@ public class FixedArrayIndex implements ChunkIndex {
 
 		private FixedArrayDataBlock(FixedArrayIndex fixedArrayIndex, HdfBackingStorage hdfBackingStorage, long address) {
 
-			// TODO header size ignoring paging
 			int pageBitmapBytes = (pages + 7) / 8;
 			int headerSize = 6 + hdfBackingStorage.getSizeOfOffsets() + fixedArrayIndex.entrySize * fixedArrayIndex.maxNumberOfEntries + 4;
 			if(pages > 1) {
 				headerSize += pageBitmapBytes + (4 * pages);
 			}
 			final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
+			bb.mark();
 
 			byte[] formatSignatureBytes = new byte[4];
 			bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -139,8 +136,8 @@ public class FixedArrayIndex implements ChunkIndex {
 				throw new HdfException("Unsupported fixed array data block version detected. Version: " + version);
 			}
 
-			final int clientId = bb.get();
-			if (clientId != fixedArrayIndex.clientId) {
+			final int dataBlockclientId = bb.get();
+			if (dataBlockclientId != fixedArrayIndex.clientId) {
 				throw new HdfException("Fixed array client ID mismatch. Possible file corruption detected");
 			}
 
@@ -150,56 +147,51 @@ public class FixedArrayIndex implements ChunkIndex {
 			}
 
 			if(pages > 1) {
-//				throw new HdfException("Paged");
-//				pageBits
-//				pageBitmapSize = (pageCount + 7) / 8;
+				logger.info("Reading paged");
 				byte[] pageBitmap = new byte[pageBitmapBytes];
 				bb.get(pageBitmap);
-				// TODO skip check sum
-				bb.position(bb.position() + 4);
-//				bb.position(bb.position() + pageBitmapBytes );
+
+				ChecksumUtils.validateChecksumFromMark(bb);
 
 				int chunkIndex = 0;
 				for(int page = 0; page < pages; page++) {
-					final int pageSize;
+					final int currentPageSize;
 					if(page == pages -1) {
 						// last page so not a full page
-						pageSize = fixedArrayIndex.maxNumberOfEntries % fixedArrayIndex.pageSize;
+						currentPageSize = fixedArrayIndex.maxNumberOfEntries % fixedArrayIndex.pageSize;
 					} else {
-						pageSize = fixedArrayIndex.pageSize;
+						currentPageSize = fixedArrayIndex.pageSize;
 					}
 
-					if (clientId == 0) { // Not filtered
-						for (int i = 0; i < pageSize; i++) {
+					if (dataBlockclientId == 0) { // Not filtered
+						for (int i = 0; i < currentPageSize; i++) {
 							readUnfiltered(fixedArrayIndex, hdfBackingStorage.getSizeOfOffsets(), bb, chunkIndex++);
 						}
-					} else if (clientId == 1) { // Filtered
-						for (int i = 0; i < pageSize; i++) {
+					} else if (dataBlockclientId == 1) { // Filtered
+						for (int i = 0; i < currentPageSize; i++) {
 							readFiltered(fixedArrayIndex, hdfBackingStorage, bb, chunkIndex++);
 						}
 					} else {
-						throw new HdfException("Unrecognized client ID  = " + clientId);
+						throw new HdfException("Unrecognized client ID  = " + dataBlockclientId);
 					}
-
-					// TODO skip check sum
-					bb.position(bb.position() + 4);
+					ChecksumUtils.validateChecksumFromMark(bb);
 				}
 			} else {
 				// Unpaged
-				if (clientId == 0) { // Not filtered
+				logger.info("Reading unpaged");
+				if (dataBlockclientId == 0) { // Not filtered
 					for (int i = 0; i < fixedArrayIndex.maxNumberOfEntries; i++) {
 						readUnfiltered(fixedArrayIndex, hdfBackingStorage.getSizeOfOffsets(), bb, i);
 					}
-				} else if (clientId == 1) { // Filtered
+				} else if (dataBlockclientId == 1) { // Filtered
 					for (int i = 0; i < fixedArrayIndex.maxNumberOfEntries; i++) {
 						readFiltered(fixedArrayIndex, hdfBackingStorage, bb, i);
 					}
 				} else {
-					throw new HdfException("Unrecognized client ID  = " + clientId);
+					throw new HdfException("Unrecognized client ID  = " + dataBlockclientId);
 				}
 
-				bb.rewind();
-				ChecksumUtils.validateChecksum(bb);
+				ChecksumUtils.validateChecksumFromMark(bb);
 			}
 		}
 
