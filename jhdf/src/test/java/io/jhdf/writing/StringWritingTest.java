@@ -13,12 +13,14 @@ package io.jhdf.writing;
 import io.jhdf.HdfFile;
 import io.jhdf.TestUtils;
 import io.jhdf.WritableHdfFile;
+import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
 import io.jhdf.api.WritiableDataset;
 import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
 import io.jhdf.h5dump.HDF5FileXml;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -96,7 +98,8 @@ class StringWritingTest {
 			{"element 2,1", "element 2,2", "element 2,3", "element 2,4", "element 2,5"}
 		});
 
-		writableHdfFile.putDataset("prose", StringUtils.split(prose));
+		WritiableDataset proseDataset = writableHdfFile.putDataset("prose", StringUtils.split(prose));
+		proseDataset.putAttribute("prose_attr", StringUtils.split(prose));
 
 		// Actually flush and write everything
 		writableHdfFile.close();
@@ -129,6 +132,64 @@ class StringWritingTest {
 		try (HdfFile hdfFile = new HdfFile(tempFile)) {
 			// Compare
 			H5Dump.assetXmlAndHdfFileMatch(hdf5FileXml, hdfFile);
+		}
+	}
+
+	@Test
+	@Order(3)
+	// https://github.com/jamesmudd/jhdf/issues/641
+	void writeVarStringAttributes() throws Exception {
+		Path tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
+		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
+
+		// Write a dataset with string attributes
+		WritiableDataset writiableDataset = writableHdfFile.putDataset("dataset", new String[] {"vv", "xx", "abcdef"});
+		writiableDataset.putAttribute("labels", new String[] {"vv", "xx", "abcdef"});
+		writiableDataset.putAttribute("units", new String[] {"", "1", "mm2"});
+		writableHdfFile.close();
+
+		// Now read it back
+		try (HdfFile hdfFile = new HdfFile(tempFile)) {
+			Dataset dataset = hdfFile.getDatasetByPath("dataset");
+			assertThat(dataset.getData()).isEqualTo(new String[] {"vv", "xx", "abcdef"});
+
+			// Expected :["vv", "xx", "abcdef"]
+			// Actual   :["vv", "cdedf", ""]
+			assertThat(dataset.getAttribute("labels").getData()).isEqualTo(new String[] {"vv", "xx", "abcdef"});
+
+			// Expected :["", "1", "mm2"]
+			// Actual   :["", "m2", ""]
+			assertThat(dataset.getAttribute("units").getData()).isEqualTo(new String[] {"", "1", "mm2"});
+		} finally {
+			tempFile.toFile().delete();
+		}
+	}
+
+	@Test()
+	@Order(4)
+	void writeReallyLongStrings() throws Exception {
+		Path tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
+		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
+
+		// Write a dataset with string attributes
+		String[] randomLongStringData = {
+			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
+			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
+			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
+			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
+			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
+		};
+		WritiableDataset writiableDataset = writableHdfFile.putDataset("dataset", randomLongStringData);
+		writiableDataset.putAttribute("attr", randomLongStringData);
+		writableHdfFile.close();
+
+		// Now read it back
+		try (HdfFile hdfFile = new HdfFile(tempFile)) {
+			Dataset dataset = hdfFile.getDatasetByPath("dataset");
+			assertThat(dataset.getData()).isEqualTo(randomLongStringData);
+			assertThat(dataset.getAttribute("attr").getData()).isEqualTo(randomLongStringData);
+		} finally {
+			tempFile.toFile().delete();
 		}
 	}
 }
