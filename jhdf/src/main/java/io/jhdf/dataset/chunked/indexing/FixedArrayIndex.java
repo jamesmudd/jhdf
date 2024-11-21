@@ -176,13 +176,7 @@ public class FixedArrayIndex implements ChunkIndex {
 
 			int chunkIndex = 0;
 			for(int page = 0; page < pages; page++) {
-				final int currentPageSize;
-				if(page == pages -1) {
-					// last page so not a full page
-					currentPageSize = FixedArrayIndex.this.maxNumberOfEntries % FixedArrayIndex.this.pageSize;
-				} else {
-					currentPageSize = FixedArrayIndex.this.pageSize;
-				}
+				final int currentPageSize = getCurrentPageSize(page);
 
 				if (dataBlockclientId == 0) { // Not filtered
 					for (int i = 0; i < currentPageSize; i++) {
@@ -197,6 +191,22 @@ public class FixedArrayIndex implements ChunkIndex {
 				}
 				ChecksumUtils.validateChecksumFromMark(bb);
 			}
+		}
+
+		private int getCurrentPageSize(int page) {
+			final int currentPageSize;
+			if(page == pages -1) {
+				// last page so maybe not a full page
+				int lastPageSize = FixedArrayIndex.this.maxNumberOfEntries % FixedArrayIndex.this.pageSize;
+				if(lastPageSize == 0) {
+					currentPageSize = FixedArrayIndex.this.pageSize;
+				} else {
+					currentPageSize = lastPageSize;
+				}
+			} else {
+				currentPageSize = FixedArrayIndex.this.pageSize;
+			}
+			return currentPageSize;
 		}
 
 		private void readFiltered(HdfBackingStorage hdfBackingStorage, ByteBuffer bb, int i) {
