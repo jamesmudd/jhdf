@@ -15,8 +15,8 @@ import numpy as np
 def write_chunked_datasets(f):
     # Less than 1025 element should be unpaged
     data = np.arange(1000).reshape(10, 100)
-    # >1024 elements paged
-    two_page_data = np.arange(2000).reshape(200, 10)
+    # 1024 elements per page
+    two_page_data = np.arange(2048).reshape(128, 16)
     five_page_data = np.arange(5000).reshape(200, 25)
 
     # Fixed Array Index - Fixed maximum dimension sizes. Index type 3
