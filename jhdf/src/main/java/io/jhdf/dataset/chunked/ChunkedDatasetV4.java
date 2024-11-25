@@ -17,6 +17,7 @@ import io.jhdf.dataset.chunked.indexing.ChunkIndex;
 import io.jhdf.dataset.chunked.indexing.EmptyChunkIndex;
 import io.jhdf.dataset.chunked.indexing.ExtensibleArrayIndex;
 import io.jhdf.dataset.chunked.indexing.FixedArrayIndex;
+import io.jhdf.dataset.chunked.indexing.ImplicitChunkIndex;
 import io.jhdf.dataset.chunked.indexing.SingleChunkIndex;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
@@ -85,7 +86,9 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
 						chunkIndex = new SingleChunkIndex(layoutMessage, datasetInfo);
 						break;
 					case 2: // Implicit
-						throw new UnsupportedHdfException("Implicit indexing is currently not supported");
+						logger.debug("Reading implicit indexed dataset");
+						chunkIndex = new ImplicitChunkIndex(layoutMessage.getAddress(), datasetInfo);
+						break;
 					case 3: // Fixed array
 						logger.debug("Reading fixed array indexed dataset");
 						chunkIndex = new FixedArrayIndex(hdfBackingStorage, layoutMessage.getAddress(), datasetInfo);
