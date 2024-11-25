@@ -201,7 +201,7 @@ public final class Utils {
 			case 8:
 				long value = buffer.getLong();
 				if (value < 0 && value != Constants.UNDEFINED_ADDRESS) {
-					throw new ArithmeticException("Could not convert to unsigned");
+					throw new ArithmeticException("Could not convert to unsigned value: " + value);
 				}
 				return value;
 			default:

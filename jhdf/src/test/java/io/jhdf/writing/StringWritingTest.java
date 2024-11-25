@@ -110,7 +110,7 @@ class StringWritingTest {
 			assertThat(datasets).hasSize(4);
 
 			String[] proseReadBackArray = (String[]) hdfFile.getDatasetByPath("prose").getData();
-			String proseReadback = StringUtils.joinWith(" ", proseReadBackArray);
+			String proseReadback = StringUtils.joinWith(" ", (Object[]) proseReadBackArray);
 			assertThat(proseReadback).isEqualTo(prose);
 
 			// Just check thw whole file is readable
