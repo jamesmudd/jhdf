@@ -165,7 +165,7 @@ class StringWritingTest {
 		}
 	}
 
-	@Test()
+	@Test
 	@Order(4)
 	void writeReallyLongStrings() throws Exception {
 		Path tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
@@ -191,5 +191,22 @@ class StringWritingTest {
 		} finally {
 			tempFile.toFile().delete();
 		}
+	}
+
+	@Test
+	void writingNonAsciiStrings() throws Exception {
+		Path tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
+		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
+
+		WritiableDataset dataset1 = writableHdfFile.putDataset("dataset1", "你好");
+		dataset1.putAttribute("attr", "你好");
+
+		WritiableDataset dataset2 = writableHdfFile.putDataset("dataset2", new String[] {"你好"});
+		dataset2.putAttribute("attr", new String[] {"你好"});
+
+		WritiableDataset dataset3 = writableHdfFile.putDataset("dataset3", new String[][] {{"你好"}, {"世界"}});
+		dataset3.putAttribute("attr", new String[][] {{"你好"}, {"世界"}});
+
+		writableHdfFile.close();
 	}
 }
