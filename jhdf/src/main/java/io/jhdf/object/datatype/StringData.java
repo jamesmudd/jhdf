@@ -167,7 +167,7 @@ public class StringData extends DataType {
 	public static StringData create(Object data) {
 		int maxLength = Arrays.stream(Utils.flatten(data))
 			.map(String.class::cast)
-			.mapToInt(String::length)
+			.mapToInt(s -> StandardCharsets.UTF_8.encode(s).limit())
 			.max().getAsInt();
 
 		return new StringData(PaddingType.NULL_TERMINATED, StandardCharsets.UTF_8, maxLength);
