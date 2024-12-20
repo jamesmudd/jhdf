@@ -1,5 +1,11 @@
 # jHDF Change Log
 
+## v0.8.5 - December 2024
+- Fix issue writing string datasets containing non-ASCII characters https://github.com/jamesmudd/jhdf/issues/656
+- Add support for reading chunked datasets using fixed-array paging. https://github.com/jamesmudd/jhdf/pull/622
+- Allow maven publish tasks to complete without signing, if no signing keys are available. Makes local builds easier and allows building on jitpack.io https://jitpack.io/#jamesmudd/jhdf making a rolling jar release available.
+- Dependency updates
+
 ## v0.8.4 - October 2024
 - Fix incorrectly written string attributes. https://github.com/jamesmudd/jhdf/issues/641
 - Dependency updates
