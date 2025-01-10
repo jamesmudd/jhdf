@@ -26,7 +26,6 @@ public class ImplicitChunkIndex implements ChunkIndex {
 	private final long baseAddress;
 
 	public ImplicitChunkIndex(long baseAddress, DatasetInfo datasetInfo) {
-
 		this.baseAddress = baseAddress;
 		this.chunkSize = datasetInfo.getChunkSizeInBytes();
 		this.datasetDimensions = datasetInfo.getDatasetDimensions();
