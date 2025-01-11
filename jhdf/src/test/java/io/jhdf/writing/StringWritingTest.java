@@ -165,7 +165,7 @@ class StringWritingTest {
 		}
 	}
 
-	@Test()
+	@Test
 	@Order(4)
 	void writeReallyLongStrings() throws Exception {
 		Path tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
@@ -190,6 +190,57 @@ class StringWritingTest {
 			assertThat(dataset.getAttribute("attr").getData()).isEqualTo(randomLongStringData);
 		} finally {
 			tempFile.toFile().delete();
+		}
+	}
+
+	// https://github.com/jamesmudd/jhdf/issues/656
+	@Test
+	@Order(5)
+	void writingNonAsciiStrings() throws Exception {
+		tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
+		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
+
+		WritiableDataset dataset1 = writableHdfFile.putDataset("dataset1", "你好");
+		dataset1.putAttribute("attr", "你好");
+
+		WritiableDataset dataset2 = writableHdfFile.putDataset("dataset2", new String[] {"你好"});
+		dataset2.putAttribute("attr", new String[] {"你好"});
+
+		WritiableDataset dataset3 = writableHdfFile.putDataset("dataset3", new String[][] {{"你好"}, {"世界"}});
+		dataset3.putAttribute("attr", new String[][] {{"你好"}, {"世界"}});
+
+		writableHdfFile.close();
+
+		// Now read it back
+		try (HdfFile hdfFile = new HdfFile(tempFile)) {
+			Dataset dataset1Readback = hdfFile.getDatasetByPath("dataset1");
+			assertThat(dataset1Readback.getData()).isEqualTo("你好");
+			assertThat(dataset1Readback.getAttribute("attr").getData())
+				.isEqualTo("你好");
+
+			Dataset dataset2Readback = hdfFile.getDatasetByPath("dataset2");
+			assertThat(dataset2Readback.getData()).isEqualTo(new String[] {"你好"});
+			assertThat(dataset2Readback.getAttribute("attr").getData())
+				.isEqualTo(new String[] {"你好"});
+
+			Dataset dataset3Readback = hdfFile.getDatasetByPath("dataset3");
+			assertThat(dataset3Readback.getData()).isEqualTo(new String[][] {{"你好"}, {"世界"}});
+			assertThat(dataset3Readback.getAttribute("attr").getData())
+				.isEqualTo(new String[][] {{"你好"}, {"世界"}});
+		}
+	}
+
+	@Test
+	@Order(6)
+	@EnabledIfH5DumpAvailable
+	void readNonAsciiStringDatasetsWithH5Dump() throws Exception {
+		// Read with h5dump
+		HDF5FileXml hdf5FileXml = H5Dump.dumpAndParse(tempFile);
+
+		// Read with jhdf
+		try (HdfFile hdfFile = new HdfFile(tempFile)) {
+			// Compare
+			H5Dump.assetXmlAndHdfFileMatch(hdf5FileXml, hdfFile);
 		}
 	}
 }

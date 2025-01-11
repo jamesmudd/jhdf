@@ -21,13 +21,13 @@ plugins {
 
     // Community plugins (need versions)
     id 'org.sonarqube' version '4.0.0.2929' // Code quality
-    id "com.github.spotbugs" version "6.0.26" // Static analysis
+    id "com.github.spotbugs" version "6.0.28" // Static analysis
     id "me.champeau.jmh" version "0.7.2" // JMH support
 }
 
 // Variables
 group = 'io.jhdf'
-version = '0.8.4'
+version = '0.8.5'
 
 compileJava {
     sourceCompatibility = "1.8"
@@ -55,7 +55,7 @@ dependencies {
     implementation group: 'org.lz4', name: 'lz4-java', version: '1.8.0'
 
     // Use JUnit 5 test framework
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.11.3'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.11.4'
     testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 
     // Mocking
@@ -63,11 +63,11 @@ dependencies {
     testImplementation group: 'org.powermock', name: 'powermock-core', version: '2.0.9'
     // Matchers
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '3.0'
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.26.3'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.27.2'
     // Alternative bitshuffle impl to check results against
     testImplementation 'org.xerial.snappy:snappy-java:1.1.10.7'
     // For parsing h5dump XML output
-    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.1'
+    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.2'
     testImplementation 'commons-io:commons-io:2.18.0'
 }
 
