@@ -21,14 +21,14 @@ def write_chunked_datasets(f):
 
     # Fixed Array Index - Fixed maximum dimension sizes. Index type 3
     fixed_array_group = f.create_group("fixed_array")
-    fixed_array_group.create_dataset("int8_unpaged", data=data, dtype='i1', chunks=(2, 3))
-    fixed_array_group.create_dataset("int8_two_page", data=two_page_data, dtype='i1', chunks=(1, 1))
-    fixed_array_group.create_dataset("int8_five_page", data=five_page_data, dtype='i1', chunks=(1, 1))
+    fixed_array_group.create_dataset("int16_unpaged", data=data, dtype='i2', chunks=(2, 3))
+    fixed_array_group.create_dataset("int16_two_page", data=two_page_data, dtype='i2', chunks=(1, 1))
+    fixed_array_group.create_dataset("int16_five_page", data=five_page_data, dtype='i2', chunks=(1, 1))
 
     filtered_fixed_array_group = f.create_group("filtered_fixed_array")
-    filtered_fixed_array_group.create_dataset("int8_unpaged", data=data, dtype='i1', chunks=(2, 3), compression="gzip")
-    filtered_fixed_array_group.create_dataset("int8_two_page", data=two_page_data, dtype='i1', chunks=(1, 1), compression="gzip")
-    filtered_fixed_array_group.create_dataset("int8_five_page", data=five_page_data, dtype='i1', chunks=(1, 1), compression="gzip")
+    filtered_fixed_array_group.create_dataset("int16_unpaged", data=data, dtype='i2', chunks=(2, 3), compression="gzip")
+    filtered_fixed_array_group.create_dataset("int16_two_page", data=two_page_data, dtype='i2', chunks=(1, 1), compression="gzip")
+    filtered_fixed_array_group.create_dataset("int16_five_page", data=five_page_data, dtype='i2', chunks=(1, 1), compression="gzip")
 
     f.flush()
     f.close()
