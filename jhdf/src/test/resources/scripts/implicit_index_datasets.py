@@ -1,6 +1,14 @@
+# -------------------------------------------------------------------------------
+# This file is part of jHDF. A pure Java library for accessing HDF5 files.
+#
+# https://jhdf.io
+#
+# Copyright (c) 2024 James Mudd
+#
+# MIT License see 'LICENSE' file
+# -------------------------------------------------------------------------------
 import h5py
 import numpy
-
 
 f = h5py.File("implicit_index_datasets.hdf5", "w",  libver='latest')
 
