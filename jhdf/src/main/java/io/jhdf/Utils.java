@@ -456,4 +456,15 @@ public final class Utils {
 			flat.add(data);
 		}
 	}
+
+	public static int totalChunks(int[] datasetDimensions, int[] chunkDimensions) {
+		int chunks = 1;
+		for (int i = 0; i < datasetDimensions.length; i++) {
+			int chunksInDim = datasetDimensions[i] / chunkDimensions[i];
+			// If there is a partial chunk then we need to add one chunk in this dim
+			if(datasetDimensions[i] % chunkDimensions[i] != 0 ) chunksInDim++;
+			chunks *=  chunksInDim;
+		}
+		return chunks;
+	}
 }
