@@ -20,7 +20,6 @@ import io.jhdf.dataset.chunked.indexing.FixedArrayIndex;
 import io.jhdf.dataset.chunked.indexing.ImplicitChunkIndex;
 import io.jhdf.dataset.chunked.indexing.SingleChunkIndex;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV4;
 import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.ArrayUtils;
