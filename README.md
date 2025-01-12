@@ -39,6 +39,7 @@ For more examples see package [io.jhdf.examples](jhdf/src/main/java/io/jhdf/exam
 - Integration with Java logging via SLF4J
 - Performance? Maybe, the library uses Java NIO `MappedByteBuffer`s which should provide fast file access. In addition, when accessing chunked datasets the library is parallelized to take advantage of modern CPUs. `jHDF` will also allow parallel reading of multiple datasets or multiple files. I have seen cases where `jHDF` is significantly faster than the C libraries, but as with all performance issues, it is case specific, so you will need to do your own tests on the cases you care about. If you do run tests please post the results so everyone can benefit, here are some results I am aware of:
     - [Peter Kirkham - Parallel IO Improvements](http://pkirkham.github.io/pyrus/parallel-io-improvements/)
+    - [Apollo3zehn - hdf5-benchmark](https://github.com/Apollo3zehn/hdf5-benchmark)
 - Security - jHDF is pure Java and therefore benefits from the memory safety provided by the JVM. The HDF5 Group library is written using non-memory safe languages, therefore susceptible to [memory related security bugs](https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=hdf5).
 
 ## Why should I not use jHDF?
