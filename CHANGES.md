@@ -1,5 +1,10 @@
 # jHDF Change Log
 
+## v0.8.6 - January 2025
+- Add support for reading implicit index chunked datasets https://github.com/jamesmudd/jhdf/issues/651 https://github.com/jamesmudd/jhdf/pull/655
+- Test fixes for fixed-array index datasets
+- Dependency updates
+
 ## v0.8.5 - December 2024
 - Fix issue writing string datasets containing non-ASCII characters https://github.com/jamesmudd/jhdf/issues/656
 - Add support for reading chunked datasets using fixed-array paging. https://github.com/jamesmudd/jhdf/pull/622
