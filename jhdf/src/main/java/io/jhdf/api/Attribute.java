@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2024 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -12,7 +12,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2024 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see LICENSE file
  */
