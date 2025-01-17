@@ -16,7 +16,7 @@ jobs:
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
-                os: [ 'macos-latest', 'ubuntu-latest', 'windows-latest', ['self-hosted', 'ARM64'] ]
+                os: [ 'macos-latest', 'ubuntu-latest', 'windows-latest', 'ubuntu-24.04-arm']
                 java: [ '8', '11', '17', '21' ]
 
         steps:
