@@ -9,8 +9,14 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.BufferBuilder;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import io.jhdf.filter.FilterPipeline;
+import io.jhdf.object.datatype.DataType;
+import io.jhdf.filter.FilterManager;
+import io.jhdf.filter.Filter;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
@@ -98,6 +104,17 @@ public class FilterPipelineMessage extends Message {
 
 	}
 
+	private FilterPipelineMessage() {	
+		boolean optional=false;
+		int[] data = new int[1];
+		filters = new ArrayList<>(1);
+		filters.add(new FilterInfo(1,"deflate",optional,data));
+	}
+
+	public static FilterPipelineMessage create() {
+		return new FilterPipelineMessage();
+	}
+	
 	public List<FilterInfo> getFilters() {
 		return filters;
 	}
@@ -143,6 +160,23 @@ public class FilterPipelineMessage extends Message {
 	@Override
 	public int getMessageType() {
 		return MESSAGE_TYPE;
+	}
+
+	@Override
+	public ByteBuffer toBuffer() {
+		return new BufferBuilder()
+					.writeByte(1) // Version
+					.writeByte(1) // number of filters
+					.writeShort(0) // padding
+					.writeInt(0)   // padding
+					.writeShort(1) // filter ID
+					.writeShort(8) // length of name
+					.writeShort(1) // flags
+					.writeShort(1) // number of client data
+					.writeBytes("deflate".getBytes())
+					.writeByte(0) // zero terminate string
+					.writeInt(9)
+ 					.build();
 	}
 
 

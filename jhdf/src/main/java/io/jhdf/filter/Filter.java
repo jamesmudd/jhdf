@@ -10,6 +10,7 @@
 package io.jhdf.filter;
 
 import io.jhdf.exceptions.HdfFilterException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 
 /**
  * Interface to be implemented to be a HDF5 filter.
@@ -44,5 +45,9 @@ public interface Filter {
 	 * @throws HdfFilterException if the decode operation fails
 	 */
 	byte[] decode(byte[] encodedData, int[] filterData);
+	
+	default byte[] encode(byte[] data, int[] filterData) {
+		throw new UnsupportedHdfException(String.format("[%s (%d)] does not support encoding", getName(), getId()));
+	}
 
 }

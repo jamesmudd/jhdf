@@ -91,6 +91,25 @@ public abstract class ObjectHeader {
 		 */
 		private final int referenceCount;
 
+		public ObjectHeaderV1(long address, List<Message> messages) {
+			super(address);
+			this.messages.addAll(messages);
+
+			version = 1;
+			referenceCount = 0;
+
+			// accessTime = -1;
+			// modificationTime = -1;
+			// changeTime = -1;
+			// birthTime = -1;
+
+			// maximumNumberOfCompactAttributes = -1;
+			// maximumNumberOfDenseAttributes = -1;
+
+			// flags = new BitSet(8); // TODO make consistent with values
+			// flags.set(1); // Make sizeOfChunk0 4 bytes.
+		}
+
 		private ObjectHeaderV1(HdfBackingStorage hdfBackingStorage, long address) {
 			super(address);
 
@@ -136,7 +155,8 @@ public abstract class ObjectHeader {
 				if (m instanceof ObjectHeaderContinuationMessage) {
 					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
 
-					ByteBuffer continuationBuffer = hdfBackingStorage.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
+					ByteBuffer continuationBuffer = hdfBackingStorage.readBufferFromAddress(ohcm.getOffset(),
+							ohcm.getLength());
 
 					readMessages(hdfBackingStorage, continuationBuffer, numberOfMessages);
 				}
@@ -160,6 +180,46 @@ public abstract class ObjectHeader {
 		@Override
 		public boolean isAttributeCreationOrderIndexed() {
 			return false; // Not supported in v1 headers
+		}
+
+		public ByteBuffer toBuffer() {
+
+			// Start messages
+			ByteBuffer messagesBuffer = messagesToBuffer();
+
+			// finish buffer
+			BufferBuilder bufferBuilder = new BufferBuilder()
+					.writeByte(version)
+					.writeByte(0) // reserved
+					.writeShort(messages.size())
+					.writeInt(1) // obj. reference count
+					.writeInt(messagesBuffer.capacity())
+					.writeInt(0) // reseved
+					.writeBuffer(messagesBuffer);
+
+			return bufferBuilder.build();
+		}
+
+		private ByteBuffer messagesToBuffer() {
+			BufferBuilder bufferBuilder = new BufferBuilder();
+			for (Message message : messages) {
+				final ByteBuffer messageBuffer = message.toBuffer();
+				int length = messageBuffer.capacity();
+				if (message.getMessageType() != 1) {
+					length = length + (8 - (length % 8)); // extend to next 8 byte boundary
+				}
+				bufferBuilder.writeShort(message.getMessageType())
+						.writeShort(length)
+						.writeBytes(message.flagsToBytes())
+						.writeByte(0) // padding
+						.writeByte(0) // padding
+						.writeByte(0) // padding
+						.writeBuffer(messageBuffer);
+			    for (int i=messageBuffer.capacity(); i<length; i++) { // extend to next 8 byte boundary
+					bufferBuilder.writeByte(0); // padding
+				}
+			}
+			return bufferBuilder.build();
 		}
 
 	}
@@ -316,9 +376,9 @@ public abstract class ObjectHeader {
 
 		public ByteBuffer toBuffer() {
 			BufferBuilder bufferBuilder = new BufferBuilder()
-				.writeBytes(OBJECT_HEADER_V2_SIGNATURE)
-				.writeByte(version)
-				.writeBitSet(flags, 1);
+					.writeBytes(OBJECT_HEADER_V2_SIGNATURE)
+					.writeByte(version)
+					.writeBitSet(flags, 1);
 
 			if (flags.get(TIMESTAMPS_PRESENT)) {
 				bufferBuilder.writeInt((int) accessTime);
@@ -327,7 +387,7 @@ public abstract class ObjectHeader {
 				bufferBuilder.writeInt((int) birthTime);
 			}
 
-			if(flags.get(NUMBER_OF_ATTRIBUTES_PRESENT)) {
+			if (flags.get(NUMBER_OF_ATTRIBUTES_PRESENT)) {
 				// TODO min/max attributes
 				throw new UnsupportedHdfException("Writing number of attributes");
 			}
@@ -345,9 +405,9 @@ public abstract class ObjectHeader {
 			for (Message message : messages) {
 				final ByteBuffer messageBuffer = message.toBuffer();
 				bufferBuilder.writeByte(message.getMessageType())
-					.writeShort(messageBuffer.capacity())
-					.writeBytes(message.flagsToBytes())
-					.writeBuffer(messageBuffer);
+						.writeShort(messageBuffer.capacity())
+						.writeBytes(message.flagsToBytes())
+						.writeBuffer(messageBuffer);
 			}
 			return bufferBuilder.build();
 		}

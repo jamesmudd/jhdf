@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 
 public class DeflatePipelineFilter implements Filter {
@@ -67,5 +69,29 @@ public class DeflatePipelineFilter implements Filter {
 			// Close the inflater
 			inflater.end();
 		}
+	}
+
+	public byte[] encode(byte[] data, int[] filterData) {
+
+		try (final ByteArrayOutputStream baos = new ByteArrayOutputStream(data.length)) {
+			// Setup the deflater
+			DeflaterOutputStream daos = new DeflaterOutputStream(baos,new Deflater(filterData[0]));
+		
+			// Do the compression
+			daos.write(data);
+			daos.close();
+
+			byte[] output = baos.toByteArray();
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Decompressed chunk. Decompressed size = {} bytes, Compressed size = {}",
+					data.length, output.length);
+			}
+
+			return output;
+
+		} catch (IOException e) {
+			throw new HdfFilterException("Inflating failed", e);
+		} 
 	}
 }

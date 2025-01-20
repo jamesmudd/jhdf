@@ -79,6 +79,13 @@ public class BufferBuilder {
 			throw new BufferBuilderException(e);
 		}
 	}
+	
+	public BufferBuilder writeInts(int[] ints) {
+		for (int i=0; i < ints.length; i++) {
+			writeInt(ints[i]);
+		}
+		return this;
+	}
 
 	public BufferBuilder writeLong(long l) {
 		try {
@@ -90,6 +97,13 @@ public class BufferBuilder {
 		} catch (IOException e) {
 			throw new BufferBuilderException(e);
 		}
+	}
+	
+	public BufferBuilder writeLongs(long[] longs) {
+		for (int i=0; i < longs.length; i++) {
+			writeLong(longs[i]);
+		}
+		return this;
 	}
 
 	public ByteBuffer build() {

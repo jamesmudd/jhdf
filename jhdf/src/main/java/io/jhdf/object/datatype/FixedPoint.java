@@ -364,7 +364,6 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 		} else {
 			writeScalarData(data, hdfFileChannel);
 		}
-
 	}
 
 	private void writeScalarData(Object data, HdfFileChannel hdfFileChannel) {

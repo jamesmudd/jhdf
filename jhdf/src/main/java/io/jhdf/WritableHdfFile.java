@@ -43,6 +43,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	private final Path path;
 	private final FileChannel fileChannel;
 	private final Superblock.SuperblockV2V3 superblock;
+	//private final Superblock.SuperblockV0V1 superblock;
 	private final HdfFileChannel hdfFileChannel;
 	private final WritableGroup rootGroup;
 
@@ -56,6 +57,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 			throw new HdfWritingException("Failed to open file: " + path.toAbsolutePath(), e);
 		}
 		this.superblock = new Superblock.SuperblockV2V3();
+		//this.superblock = new Superblock.SuperblockV0V1();
 		this.hdfFileChannel = new HdfFileChannel(this.fileChannel, this.superblock);
 
 		this.rootGroup = new WritableGroupImpl(null, "/");
@@ -75,9 +77,13 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	private void flush() {
 		logger.info("Flushing to disk [{}]...", path.toAbsolutePath());
 		try {
-			rootGroup.write(hdfFileChannel, ROOT_GROUP_ADDRESS);
-			hdfFileChannel.write(getJHdfInfoBuffer());
+			rootGroup.write(hdfFileChannel, ROOT_GROUP_ADDRESS); //V2 header
+			//rootGroup.write(hdfFileChannel, superblock.getRootGroupSymbolTableAddress());  //V0 header
+
+			//hdfFileChannel.write(getJHdfInfoBuffer());
 			long endOfFile = hdfFileChannel.getFileChannel().size();
+
+
 			hdfFileChannel.write(superblock.toBuffer(endOfFile), 0L);
 			logger.info("Flushed to disk [{}] file is [{}] bytes", path.toAbsolutePath(), endOfFile);
 		} catch (IOException e) {
@@ -97,6 +103,11 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	@Override
 	public WritiableDataset putDataset(String name, Object data) {
 		return rootGroup.putDataset(name, data);
+	}
+
+	// @Override
+	public WritiableDataset putDataset(WritiableDataset dataset) {
+		return rootGroup.putDataset(dataset);
 	}
 
 	@Override
