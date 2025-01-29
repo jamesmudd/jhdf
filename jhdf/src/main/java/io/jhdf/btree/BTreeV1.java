@@ -9,8 +9,12 @@
  */
 package io.jhdf.btree;
 
+import io.jhdf.dataset.chunked.Chunk;
+// import io.jhdf.BufferBuilder;
+// import io.jhdf.Constants;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.object.datatype.DataType;
 import io.jhdf.storage.HdfBackingStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,7 +39,7 @@ import java.util.List;
 public abstract class BTreeV1 {
 	private static final Logger logger = LoggerFactory.getLogger(BTreeV1.class);
 
-	private static final byte[] BTREE_NODE_V1_SIGNATURE = "TREE".getBytes(StandardCharsets.US_ASCII);
+	protected static final byte[] BTREE_NODE_V1_SIGNATURE = "TREE".getBytes(StandardCharsets.US_ASCII);
 	private static final int HEADER_BYTES = 6;
 
 	/**
@@ -80,6 +85,10 @@ public abstract class BTreeV1 {
 		}
 	}
 
+	public static BTreeV1Data createDataBTree(long leftSibling, long rightSibling, DataType dataType, ArrayList<Chunk> chunks) {
+		return new BTreeV1Data.BTreeV1DataLeafNode(leftSibling, rightSibling, dataType, chunks);
+	}
+
 	public static ByteBuffer readHeaderAndValidateSignature(HdfBackingStorage fc, long address) {
 		ByteBuffer header = fc.readBufferFromAddress(address, HEADER_BYTES);
 
@@ -109,6 +118,19 @@ public abstract class BTreeV1 {
 
 	}
 
+	BTreeV1(long leftSibling, long rightSibling, DataType dataType, ArrayList<Chunk> chunks) {
+		this.address = 0;
+
+		entriesUsed = chunks.size()-1; // BTree has one extra chunk (node) at the end of the list
+		logger.trace("Entries = {}", entriesUsed);
+
+		leftSiblingAddress = leftSibling;
+		logger.trace("left address = {}", leftSiblingAddress);
+
+		rightSiblingAddress = rightSibling;
+		logger.trace("right address = {}", rightSiblingAddress);
+	}
+
 	public int getEntriesUsed() {
 		return entriesUsed;
 	}
@@ -126,5 +148,9 @@ public abstract class BTreeV1 {
 	}
 
 	public abstract List<Long> getChildAddresses();
+
+	public ByteBuffer toBuffer() {
+		return ByteBuffer.allocate(0);
+	};
 
 }

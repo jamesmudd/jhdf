@@ -83,6 +83,26 @@ public class DataSpace {
 		return new DataSpace(bb, sb);
 	}
 
+	public static DataSpace fromObjectV1(Object data) {
+		if(data.getClass().isArray()) {
+			int[] dimensions1 = Utils.getDimensions(data);
+			return new DataSpace((byte) 1,
+			false,
+			dimensions1,
+			Arrays.stream(dimensions1).asLongStream().toArray(),
+			(byte) 1 // Simple
+		    );
+		} else {
+			// Scalar
+			return new DataSpace((byte) 2,
+				false,
+				new int[] {},
+				new long[] {},
+				(byte) 0); // Scalar
+		}
+		// TODO null/empty datasets
+	}
+
 	public static DataSpace fromObject(Object data) {
 		if(data.getClass().isArray()) {
 			int[] dimensions1 = Utils.getDimensions(data);
@@ -141,19 +161,40 @@ public class DataSpace {
 	}
 
 	public ByteBuffer toBuffer() {
-		BitSet flags = new BitSet(8);
-		flags.set(MAX_SIZES_PRESENT_BIT, maxSizesPresent);
-		BufferBuilder bufferBuilder = new BufferBuilder()
-			.writeByte(version) // Version
-			.writeByte(dimensions.length) // no dims
-			.writeBitSet(flags, 1)
-			.writeByte(type);
+		if (version == 1) {
+			BitSet flags = new BitSet(8);
+			flags.set(MAX_SIZES_PRESENT_BIT, maxSizesPresent);
+			BufferBuilder bufferBuilder = new BufferBuilder()
+				.writeByte(version) // Version
+				.writeByte(dimensions.length) // number of dims
+				.writeBitSet(flags, 1)
+				.writeByte(0) //reserved
+				.writeInt(0); //reserved
+	
+			for (int dimension : dimensions) {
+				bufferBuilder.writeLong(dimension);
+			}
+			if (maxSizesPresent) {
+				bufferBuilder.writeLongs(maxSizes);
+			}
+			return bufferBuilder.build();
+		} else { //version == 2
+			BitSet flags = new BitSet(8);
+			flags.set(MAX_SIZES_PRESENT_BIT, maxSizesPresent);
+			BufferBuilder bufferBuilder = new BufferBuilder()
+				.writeByte(version) // Version
+				.writeByte(dimensions.length) // no dims
+				.writeBitSet(flags, 1)
+				.writeByte(type);
+	
+			for (int dimension : dimensions) {
+				// TODO should be size of length
+				bufferBuilder.writeLong(dimension);
+			}
+			return bufferBuilder.build();
+		}
+		
 
-        for (int dimension : dimensions) {
-			// TODO should be size of length
-            bufferBuilder.writeLong(dimension);
-        }
-
-		return bufferBuilder.build();
+		
 	}
 }

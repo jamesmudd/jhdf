@@ -160,7 +160,28 @@ public abstract class Superblock {
 		private final long addressOfGlobalFreeSpaceIndex;
 		private final long endOfFileAddress;
 		private final long driverInformationBlockAddress;
+		private final long rootLinkNameAddress = 0L;
 		private final long rootGroupSymbolTableAddress;
+		public static final long ROOT_GROUP_ADDRESS = 0x60;
+
+
+		public SuperblockV0V1() {
+			versionOfSuperblock = 0;
+			versionNumberOfTheFileFreeSpaceInformation = 0;
+		    versionOfRootGroupSymbolTableEntry = 0;
+		    versionOfSharedHeaderMessageFormat = 0;
+			sizeOfOffsets = 8;
+			sizeOfLengths = 8;
+			groupLeafNodeK = 4;
+			groupInternalNodeK = 16;
+			baseAddressByte = 0L;
+			addressOfGlobalFreeSpaceIndex = Constants.UNDEFINED_ADDRESS;
+			endOfFileAddress = Constants.UNDEFINED_ADDRESS; 
+			driverInformationBlockAddress = Constants.UNDEFINED_ADDRESS;
+
+			rootGroupSymbolTableAddress = ROOT_GROUP_ADDRESS; 
+		}
+
 
 		private SuperblockV0V1(FileChannel fc, long address) {
 			try {
@@ -426,6 +447,35 @@ public abstract class Superblock {
 		public long getRootGroupSymbolTableAddress() {
 			return rootGroupSymbolTableAddress;
 		}
+
+		public ByteBuffer toBuffer(long endOfFileAddress) {
+
+			BufferBuilder bufferBuilder = new BufferBuilder()
+					.writeBytes(HDF5_FILE_SIGNATURE)
+					.writeByte(versionOfSuperblock)
+					.writeByte(versionNumberOfTheFileFreeSpaceInformation)
+					.writeByte(versionOfRootGroupSymbolTableEntry)
+					.writeByte(0) //Reserved
+					.writeByte(versionOfSharedHeaderMessageFormat)
+					.writeByte(sizeOfOffsets)
+					.writeByte(sizeOfLengths)
+					.writeByte(0) //Reserved
+					.writeShort(groupLeafNodeK)
+					.writeShort(groupInternalNodeK)
+					.writeInt(0) //Flags
+					.writeLong(baseAddressByte)
+					.writeLong(addressOfGlobalFreeSpaceIndex)
+					.writeLong(endOfFileAddress)
+					.writeLong(driverInformationBlockAddress)
+					.writeLong(rootLinkNameAddress)
+					.writeLong(rootGroupSymbolTableAddress)
+					.writeInt(0) //Cache type
+					.writeInt(0) //Reserved
+					.writeLong(0L) //Scratch
+					.writeLong(0L); //Scratch		
+
+			return bufferBuilder.build();
+		}
 	}
 
 	public static class SuperblockV2V3 extends Superblock {
@@ -446,7 +496,7 @@ public abstract class Superblock {
 			sizeOfLengths = 8;
 			baseAddressByte = 0;
 			superblockExtensionAddress = Constants.UNDEFINED_ADDRESS;
-			endOfFileAddress = 500; // TODO
+			endOfFileAddress = 1000; // TODO
 			rootGroupObjectHeaderAddress = WritableHdfFile.ROOT_GROUP_ADDRESS;
 		}
 

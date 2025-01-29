@@ -69,6 +69,20 @@ public enum FilterManager {
 	}
 
 	/**
+	 * Retrieves a filter. 
+	 *
+	 * @param filterId the ID of the filter to retrieve 
+	 * @throws HdfFilterException if the filterId is not valid
+	 */
+	public static Filter getFilter(int filterId) {
+
+		Filter filter = ID_TO_FILTER.get(filterId);
+		logger.info("Retrieved HDF5 filter '{}' with ID '{}'", filter.getName(), filter.getId());
+
+		return filter;		
+	}
+
+	/**
 	 * Builds a new pipeline for decoding chunks from a
 	 * {@link FilterPipelineMessage}.
 	 *

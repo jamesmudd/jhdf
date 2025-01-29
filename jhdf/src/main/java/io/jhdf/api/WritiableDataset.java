@@ -12,4 +12,8 @@ package io.jhdf.api;
 
 public interface WritiableDataset extends Dataset, WritableNode {
 
+    public void setChunked(boolean chunked);
+
+    public void setCompression(int compression);
+
 }

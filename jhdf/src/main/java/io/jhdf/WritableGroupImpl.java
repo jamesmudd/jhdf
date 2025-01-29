@@ -111,6 +111,13 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 	}
 
 	@Override
+	public WritiableDataset putDataset(WritiableDataset dataset) {
+		children.put(dataset.getName(), dataset);
+		logger.info("Added dataset [{}] to group [{}]", dataset.getName(), getPath());
+		return dataset;
+	}
+	
+	@Override
 	public WritableGroup putGroup(String name) {
 		if(StringUtils.isBlank(name)) {
 			throw new IllegalArgumentException("name cannot be null or blank");
@@ -152,7 +159,8 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 			}
 		}
 
-		ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
+		//ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
+		ObjectHeader.ObjectHeaderV1 objectHeader = new ObjectHeader.ObjectHeaderV1(position, messages);
 
 		ByteBuffer tempBuffer = objectHeader.toBuffer();
 		int objectHeaderSize = tempBuffer.limit();
@@ -162,6 +170,7 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 		messages = new ArrayList<>();
 		messages.add(groupInfoMessage);
 		messages.add(linkInfoMessage);
+		
 
 		if(!getAttributes().isEmpty()) {
 			AttributeInfoMessage attributeInfoMessage = AttributeInfoMessage.create();
@@ -174,18 +183,23 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 		}
 
 		long nextChildAddress = position + objectHeaderSize;
+		nextChildAddress = nextChildAddress + (16 - (nextChildAddress % 16));
+
 
 		for (Map.Entry<String, WritableNode> child : children.entrySet()) {
 			LinkMessage linkMessage = LinkMessage.create(child.getKey(), nextChildAddress);
 			messages.add(linkMessage);
 			long endPosition = child.getValue().write(hdfFileChannel, nextChildAddress);
 			nextChildAddress = endPosition;
+			nextChildAddress = nextChildAddress + (16 - (nextChildAddress % 16));
 		}
 
-		objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
+		//objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
+		objectHeader = new ObjectHeader.ObjectHeaderV1(position, messages);
 		hdfFileChannel.write(objectHeader.toBuffer(), position);
 
 		logger.info("Finished writing group [{}]", getPath());
 		return nextChildAddress;
 	}
+
 }

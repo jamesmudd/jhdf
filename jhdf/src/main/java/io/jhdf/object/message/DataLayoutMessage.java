@@ -41,7 +41,8 @@ public abstract class DataLayoutMessage extends Message {
 			case 4:
 				return readV3V4Message(bb, sb, flags, version);
 			default:
-				throw new UnsupportedHdfException("Unsupported data layout message version detected. Detected version = " + version);
+				throw new UnsupportedHdfException(
+						"Unsupported data layout message version detected. Detected version = " + version);
 		}
 	}
 
@@ -175,11 +176,11 @@ public abstract class DataLayoutMessage extends Message {
 		@Override
 		public ByteBuffer toBuffer() {
 			return new BufferBuilder()
-				.writeByte(3) // Version
-				.writeByte(1) // Contiguous Storage
-				.writeLong(address)
-				.writeLong(size)
-				.build();
+					.writeByte(3) // Version
+					.writeByte(1) // Contiguous Storage
+					.writeLong(address)
+					.writeLong(size)
+					.build();
 		}
 	}
 
@@ -207,6 +208,10 @@ public abstract class DataLayoutMessage extends Message {
 			size = Utils.readBytesAsUnsignedInt(bb, 4);
 		}
 
+		public static ChunkedDataLayoutMessage create(long bTreeAddress, int size, int[] chunkDimensions) {
+			return new ChunkedDataLayoutMessage(Message.BASIC_FLAGS, bTreeAddress, size, chunkDimensions);
+		}
+
 		@Override
 		public DataLayout getDataLayout() {
 			return DataLayout.CHUNKED;
@@ -226,7 +231,16 @@ public abstract class DataLayoutMessage extends Message {
 
 		@Override
 		public ByteBuffer toBuffer() {
-			return null;
+			return new BufferBuilder()
+					.writeByte(3) // Version
+					.writeByte(2) // Chunked Storage
+					.writeByte(chunkDimensions.length + 1)
+					.writeLong(bTreeAddress) //
+					.writeInts(chunkDimensions)
+					.writeInt(size)
+					.writeInt(0) // padding
+//					.writeByte(0) // padding
+					.build();
 		}
 	}
 
@@ -256,7 +270,7 @@ public abstract class DataLayoutMessage extends Message {
 		private ChunkedDataLayoutMessageV4(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
 
-			final BitSet chunkedFlags = BitSet.valueOf(new byte[]{bb.get()});
+			final BitSet chunkedFlags = BitSet.valueOf(new byte[] { bb.get() });
 			final int chunkDimensionality = bb.get();
 			final int dimSizeBytes = bb.get();
 
@@ -272,7 +286,8 @@ public abstract class DataLayoutMessage extends Message {
 					if (chunkedFlags.get(SINGLE_INDEX_WITH_FILTER)) {
 						isFilteredSingleChunk = true;
 						sizeOfFilteredSingleChunk = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
-						filterMaskFilteredSingleChunk = BitSet.valueOf(new byte[]{bb.get(), bb.get(), bb.get(), bb.get()});
+						filterMaskFilteredSingleChunk = BitSet
+								.valueOf(new byte[] { bb.get(), bb.get(), bb.get(), bb.get() });
 					}
 					break;
 
@@ -381,6 +396,5 @@ public abstract class DataLayoutMessage extends Message {
 	public int getMessageType() {
 		return MESSAGE_TYPE;
 	}
-
 
 }
