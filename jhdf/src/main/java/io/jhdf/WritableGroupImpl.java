@@ -17,7 +17,7 @@ import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.WritableGroup;
 import io.jhdf.api.WritableNode;
-import io.jhdf.api.WritiableDataset;
+import io.jhdf.api.WritableDataset;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.message.AttributeInfoMessage;
 import io.jhdf.object.message.AttributeMessage;
@@ -100,7 +100,7 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 	}
 
 	@Override
-	public WritiableDataset putDataset(String name, Object data) {
+	public WritableDataset putDataset(String name, Object data) {
 		if(StringUtils.isBlank(name)) {
 			throw new IllegalArgumentException("name cannot be null or blank");
 		}

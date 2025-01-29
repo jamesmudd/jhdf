@@ -16,7 +16,7 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.WritableGroup;
-import io.jhdf.api.WritiableDataset;
+import io.jhdf.api.WritableDataset;
 import io.jhdf.exceptions.HdfWritingException;
 import io.jhdf.storage.HdfFileChannel;
 import org.slf4j.Logger;
@@ -95,7 +95,7 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	}
 
 	@Override
-	public WritiableDataset putDataset(String name, Object data) {
+	public WritableDataset putDataset(String name, Object data) {
 		return rootGroup.putDataset(name, data);
 	}
 

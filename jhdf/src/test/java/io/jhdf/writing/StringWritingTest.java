@@ -15,7 +15,7 @@ import io.jhdf.TestUtils;
 import io.jhdf.WritableHdfFile;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Node;
-import io.jhdf.api.WritiableDataset;
+import io.jhdf.api.WritableDataset;
 import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
@@ -81,15 +81,15 @@ class StringWritingTest {
 		tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 
-		WritiableDataset scalarStringDataset = writableHdfFile.putDataset("scalarString", "scalarString");
+		WritableDataset scalarStringDataset = writableHdfFile.putDataset("scalarString", "scalarString");
 		scalarStringDataset.putAttribute("scalarStringAttribute", "scalarString");
 
-		WritiableDataset oneDStringDataset = writableHdfFile.putDataset("1DString", new String[]
+		WritableDataset oneDStringDataset = writableHdfFile.putDataset("1DString", new String[]
 			{"element 1", "element 2", "element 3", "element 4", "element 5"});
 		oneDStringDataset.putAttribute("1DStringAttr", new String[]
 			{"element 1", "element 2", "element 3", "element 4", "element 5"});
 
-		WritiableDataset twoDStringDataset = writableHdfFile.putDataset("2DString", new String[][]{
+		WritableDataset twoDStringDataset = writableHdfFile.putDataset("2DString", new String[][]{
 			{"element 1,1", "element 1,2", "element 1,3", "element 1,4", "element 1,5"},
 			{"element 2,1", "element 2,2", "element 2,3", "element 2,4", "element 2,5"}
 		});
@@ -98,7 +98,7 @@ class StringWritingTest {
 			{"element 2,1", "element 2,2", "element 2,3", "element 2,4", "element 2,5"}
 		});
 
-		WritiableDataset proseDataset = writableHdfFile.putDataset("prose", StringUtils.split(prose));
+		WritableDataset proseDataset = writableHdfFile.putDataset("prose", StringUtils.split(prose));
 		proseDataset.putAttribute("prose_attr", StringUtils.split(prose));
 
 		// Actually flush and write everything
@@ -143,9 +143,10 @@ class StringWritingTest {
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 
 		// Write a dataset with string attributes
-		WritiableDataset writiableDataset = writableHdfFile.putDataset("dataset", new String[] {"vv", "xx", "abcdef"});
-		writiableDataset.putAttribute("labels", new String[] {"vv", "xx", "abcdef"});
-		writiableDataset.putAttribute("units", new String[] {"", "1", "mm2"});
+		WritableDataset
+        writableDataset = writableHdfFile.putDataset("dataset", new String[] {"vv", "xx", "abcdef"});
+		writableDataset.putAttribute("labels", new String[] {"vv", "xx", "abcdef"});
+		writableDataset.putAttribute("units", new String[] {"", "1", "mm2"});
 		writableHdfFile.close();
 
 		// Now read it back
@@ -179,8 +180,8 @@ class StringWritingTest {
 			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
 			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
 		};
-		WritiableDataset writiableDataset = writableHdfFile.putDataset("dataset", randomLongStringData);
-		writiableDataset.putAttribute("attr", randomLongStringData);
+		WritableDataset writableDataset = writableHdfFile.putDataset("dataset", randomLongStringData);
+		writableDataset.putAttribute("attr", randomLongStringData);
 		writableHdfFile.close();
 
 		// Now read it back
@@ -200,13 +201,14 @@ class StringWritingTest {
 		tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 
-		WritiableDataset dataset1 = writableHdfFile.putDataset("dataset1", "你好");
+		WritableDataset dataset1 = writableHdfFile.putDataset("dataset1", "你好");
 		dataset1.putAttribute("attr", "你好");
 
-		WritiableDataset dataset2 = writableHdfFile.putDataset("dataset2", new String[] {"你好"});
+		WritableDataset dataset2 = writableHdfFile.putDataset("dataset2", new String[] {"你好"});
 		dataset2.putAttribute("attr", new String[] {"你好"});
 
-		WritiableDataset dataset3 = writableHdfFile.putDataset("dataset3", new String[][] {{"你好"}, {"世界"}});
+		WritableDataset
+        dataset3 = writableHdfFile.putDataset("dataset3", new String[][] {{"你好"}, {"世界"}});
 		dataset3.putAttribute("attr", new String[][] {{"你好"}, {"世界"}});
 
 		writableHdfFile.close();

@@ -15,7 +15,7 @@ import io.jhdf.TestUtils;
 import io.jhdf.WritableHdfFile;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.WritableGroup;
-import io.jhdf.api.WritiableDataset;
+import io.jhdf.api.WritableDataset;
 import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,7 +36,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -59,7 +57,7 @@ class AttributesWritingTest {
 
 			WritableGroup intGroup = writableHdfFile.putGroup("intGroup");
 			int[] intData1 = new int[]{-5, -4, -3, -2, -1, 0, 1,2,3,4,5 };
-			WritiableDataset intDataset = intGroup.putDataset("intData1", intData1);
+			WritableDataset intDataset = intGroup.putDataset("intData1", intData1);
 
 			writableHdfFile.putAttribute("rootAttribute", new int[] {1,2,3});
 
@@ -130,7 +128,7 @@ class AttributesWritingTest {
 			writableHdfFile.putAttribute("groupScalarFloatAttribute", -78472.324F);
 			writableHdfFile.putAttribute("groupScalarDoubleAttribute", 21342.324);
 
-			WritiableDataset intDataset = writableHdfFile.putDataset("intData", new int[]{1, 2, 3});
+			WritableDataset intDataset = writableHdfFile.putDataset("intData", new int[]{1, 2, 3});
 
 			intDataset.putAttribute("datasetByteAttribute", (byte) 10);
 			intDataset.putAttribute("datasetShortAttribute", (short) 133);
@@ -194,7 +192,7 @@ class AttributesWritingTest {
 			writableHdfFile.putAttribute("group1DDoubleAttribute", new double[]{21342.324, -232342.434});
 			writableHdfFile.putAttribute("group1DDoubleObjAttribute", new Double[]{3421342.324113, 54366.324223});
 
-			WritiableDataset intDataset = writableHdfFile.putDataset("intData", new int[]{1, 2, 3});
+			WritableDataset intDataset = writableHdfFile.putDataset("intData", new int[]{1, 2, 3});
 
 			intDataset.putAttribute("dataset1DByteAttribute", new byte[]{10, 20, 30});
 			intDataset.putAttribute("dataset1DByteObjAttribute", new Byte[]{10, 20, 30});
@@ -303,7 +301,7 @@ class AttributesWritingTest {
 					{{555847372.324242, 82453.213424}, {-28847372.324242, -2453.213435324}}});
 
 
-			WritiableDataset intDataset = writableHdfFile.putDataset("intData", new int[]{1, 2, 3});
+			WritableDataset intDataset = writableHdfFile.putDataset("intData", new int[]{1, 2, 3});
 
 			intDataset.putAttribute("dataset3DByteAttribute", new byte[][][]{
 					{{10, 20, 30}, {10, 20, 30}, {10, 20, 30}},
