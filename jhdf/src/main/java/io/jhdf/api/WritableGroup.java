@@ -12,7 +12,7 @@ package io.jhdf.api;
 
 public interface WritableGroup extends Group, WritableNode {
 
-	WritiableDataset putDataset(String name, Object data);
+	WritableDataset putDataset(String name, Object data);
 
 	WritableGroup putGroup(String name);
 }

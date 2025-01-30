@@ -11,7 +11,7 @@
 package io.jhdf;
 
 import io.jhdf.api.WritableGroup;
-import io.jhdf.api.WritiableDataset;
+import io.jhdf.api.WritableDataset;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -30,9 +30,9 @@ class WritableApiTest {
 			assertThat(file.getFile()).hasName("writing.hdf5");
 
 			WritableGroup group1 = file.putGroup("group1");
-			WritiableDataset datasetInGroup1 = group1.putDataset("datasetInGroup1", new int[]{1, 2, 3, 4, 5});
+			WritableDataset datasetInGroup1 = group1.putDataset("datasetInGroup1", new int[]{1, 2, 3, 4, 5});
 
-			WritiableDataset datasetInRoot = file.putDataset("datasetInRoot", new double[]{1, 2, 3, 4, 5});
+			WritableDataset datasetInRoot = file.putDataset("datasetInRoot", new double[]{1, 2, 3, 4, 5});
 
 			assertThat(file.getChildren()).hasSize(2);
 			assertThat(file.getChildren()).containsEntry("group1", group1);

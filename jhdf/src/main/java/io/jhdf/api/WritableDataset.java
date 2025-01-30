@@ -10,6 +10,6 @@
 
 package io.jhdf.api;
 
-public interface WritiableDataset extends Dataset, WritableNode {
+public interface WritableDataset extends Dataset, WritableNode {
 
 }

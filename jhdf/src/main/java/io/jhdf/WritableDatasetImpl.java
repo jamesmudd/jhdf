@@ -13,7 +13,7 @@ package io.jhdf;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
-import io.jhdf.api.WritiableDataset;
+import io.jhdf.api.WritableDataset;
 import io.jhdf.exceptions.HdfWritingException;
 import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
@@ -43,7 +43,7 @@ import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.stripLeadingIndex;
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 
-public class WritableDatasetImpl extends AbstractWritableNode implements WritiableDataset {
+public class WritableDatasetImpl extends AbstractWritableNode implements WritableDataset {
 
 	private static final Logger logger = LoggerFactory.getLogger(WritableDatasetImpl.class);
 

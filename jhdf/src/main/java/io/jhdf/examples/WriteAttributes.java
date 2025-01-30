@@ -11,7 +11,7 @@ package io.jhdf.examples;
 
 import io.jhdf.HdfFile;
 import io.jhdf.WritableHdfFile;
-import io.jhdf.api.WritiableDataset;
+import io.jhdf.api.WritableDataset;
 
 import java.nio.file.Paths;
 
@@ -27,7 +27,7 @@ public class WriteAttributes {
 			hdfFile.putAttribute("example_group_attribute", 55.543);
 
 			// Write a dataset
-			WritiableDataset dataset = hdfFile.putDataset("ints", new int[]{1, 2, 3, 4});
+			WritableDataset dataset = hdfFile.putDataset("ints", new int[]{1, 2, 3, 4});
 			dataset.putAttribute("example_ints_attribute", new int[] {1, 2, 3, 4});
 		}
 	}

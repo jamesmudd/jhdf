@@ -14,7 +14,7 @@ import io.jhdf.HdfFile;
 import io.jhdf.TestUtils;
 import io.jhdf.WritableHdfFile;
 import io.jhdf.api.Node;
-import io.jhdf.api.WritiableDataset;
+import io.jhdf.api.WritableDataset;
 import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
@@ -43,22 +43,22 @@ class BooleanWritingTest {
 		tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 
-		WritiableDataset scalarTrueDataset = writableHdfFile.putDataset("scalarTrueBoolean", true);
-		WritiableDataset scalarFalseDataset = writableHdfFile.putDataset("scalarFalseBoolean", false);
+		WritableDataset scalarTrueDataset = writableHdfFile.putDataset("scalarTrueBoolean", true);
+		WritableDataset scalarFalseDataset = writableHdfFile.putDataset("scalarFalseBoolean", false);
 		scalarTrueDataset.putAttribute("scalarTrueAttribute", true);
 		scalarFalseDataset.putAttribute("scalarFalseAttribute", false);
 
-		WritiableDataset oneDBoolean = writableHdfFile.putDataset("1DBoolean", new boolean[]
+		WritableDataset oneDBoolean = writableHdfFile.putDataset("1DBoolean", new boolean[]
 			{true, false, true, false, true, false});
 		oneDBoolean.putAttribute("1DBooleanAttr", new boolean[]
 			{true, false, true, false, true, false});
 
-		WritiableDataset oneDObjBoolean = writableHdfFile.putDataset("1DObjBoolean", new Boolean[]
+		WritableDataset oneDObjBoolean = writableHdfFile.putDataset("1DObjBoolean", new Boolean[]
 			{true, false, true, false, true, false});
 		oneDObjBoolean.putAttribute("1DObjBooleanAttr", new Boolean[]
 			{true, false, true, false, true, false});
 
-		WritiableDataset twoDBooleanDataset = writableHdfFile.putDataset("2DBoolean", new boolean[][]{
+		WritableDataset twoDBooleanDataset = writableHdfFile.putDataset("2DBoolean", new boolean[][]{
 			{true, false, true, false, true, false},
 			{false, true, false, true, false, true}});
 
