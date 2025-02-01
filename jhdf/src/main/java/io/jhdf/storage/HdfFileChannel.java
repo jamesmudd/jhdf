@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -12,6 +12,7 @@ package io.jhdf.storage;
 import io.jhdf.HdfFile;
 import io.jhdf.Superblock;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.HdfWritingException;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -68,16 +69,19 @@ public class HdfFileChannel implements HdfBackingStorage {
 
 	@Override
 	public ByteBuffer mapNoOffset(long address, long length) {
+		return mapNoOffset(address, length, MapMode.READ_ONLY);
+	}
+
+	public ByteBuffer mapNoOffset(long address, long length, MapMode mode) {
 		try {
 			if (!memoryMappingFailed) {
 				try {
-					return fc.map(MapMode.READ_ONLY, address, length);
+					return fc.map(mode, address, length);
 				} catch (UnsupportedOperationException e) {
 					// many file systems do not support memory mapping
 					memoryMappingFailed = true;
 				}
 			}
-			assert memoryMappingFailed;
 			// read channel into buffer instead of mapping it to memory
 			return readBufferNoOffset(address, Math.toIntExact(length));
 		} catch (IOException e) {
@@ -147,5 +151,30 @@ public class HdfFileChannel implements HdfBackingStorage {
 	@Override
 	public boolean inMemory() {
 		return false;
+	}
+
+	public int write(ByteBuffer buffer, long position) {
+		// TODO check if writable
+		try {
+			return fc.write(buffer, position);
+		} catch (IOException e) {
+			throw new HdfWritingException("Exception writing at position: " + position, e);
+		}
+	}
+	public int write(ByteBuffer buffer) {
+		// TODO check if writable
+		try {
+			return fc.write(buffer);
+		} catch (IOException e) {
+			throw new HdfWritingException("Exception writing", e);
+		}
+	}
+
+	public void position(long dataAddress) {
+		try {
+			fc.position(dataAddress);
+		} catch (IOException e) {
+			throw new HdfWritingException("Exception writing", e);
+		}
 	}
 }

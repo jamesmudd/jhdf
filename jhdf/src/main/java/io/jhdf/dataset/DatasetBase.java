@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -92,11 +91,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 	@Override
 	public long[] getMaxSize() {
-		if (dataSpace.isMaxSizesPresent()) {
-			return dataSpace.getMaxSizes();
-		} else {
-			return Arrays.stream(getDimensions()).asLongStream().toArray();
-		}
+		return  dataSpace.getMaxSizes();
 	}
 
 	@Override

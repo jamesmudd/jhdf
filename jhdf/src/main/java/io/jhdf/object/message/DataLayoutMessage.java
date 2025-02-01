@@ -1,14 +1,15 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.object.message;
 
+import io.jhdf.BufferBuilder;
 import io.jhdf.Constants;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
@@ -20,6 +21,8 @@ import java.nio.ByteBuffer;
 import java.util.BitSet;
 
 public abstract class DataLayoutMessage extends Message {
+
+	public static final int MESSAGE_TYPE = 8;
 
 	public DataLayoutMessage(BitSet flags) {
 		super(flags);
@@ -125,6 +128,11 @@ public abstract class DataLayoutMessage extends Message {
 		public ByteBuffer getDataBuffer() {
 			return dataBuffer.slice();
 		}
+
+		@Override
+		public ByteBuffer toBuffer() {
+			return null;
+		}
 	}
 
 	public static class ContiguousDataLayoutMessage extends DataLayoutMessage {
@@ -144,6 +152,10 @@ public abstract class DataLayoutMessage extends Message {
 			size = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 		}
 
+		public static ContiguousDataLayoutMessage create(long address, long size) {
+			return new ContiguousDataLayoutMessage(Message.BASIC_FLAGS, address, size);
+		}
+
 		@Override
 		public DataLayout getDataLayout() {
 			return DataLayout.CONTIGUOUS;
@@ -158,6 +170,16 @@ public abstract class DataLayoutMessage extends Message {
 		 */
 		public long getSize() {
 			return size;
+		}
+
+		@Override
+		public ByteBuffer toBuffer() {
+			return new BufferBuilder()
+				.writeByte(3) // Version
+				.writeByte(1) // Contiguous Storage
+				.writeLong(address)
+				.writeLong(size)
+				.build();
 		}
 	}
 
@@ -200,6 +222,11 @@ public abstract class DataLayoutMessage extends Message {
 
 		public int[] getChunkDimensions() {
 			return ArrayUtils.clone(chunkDimensions);
+		}
+
+		@Override
+		public ByteBuffer toBuffer() {
+			return null;
 		}
 	}
 
@@ -343,6 +370,17 @@ public abstract class DataLayoutMessage extends Message {
 		public boolean isFilteredSingleChunk() {
 			return isFilteredSingleChunk;
 		}
+
+		@Override
+		public ByteBuffer toBuffer() {
+			return null;
+		}
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
 
 }

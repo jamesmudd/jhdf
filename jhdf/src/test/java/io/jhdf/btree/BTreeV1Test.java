@@ -1,18 +1,18 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.btree;
 
-import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.Superblock;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

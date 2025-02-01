@@ -1,14 +1,16 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf;
 
+import io.jhdf.btree.BTreeV2;
+import io.jhdf.btree.record.HugeFractalHeapObjectUnfilteredRecord;
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
@@ -34,9 +36,6 @@ import static io.jhdf.Utils.createSubBuffer;
 import static io.jhdf.Utils.readBytesAsUnsignedInt;
 import static io.jhdf.Utils.readBytesAsUnsignedLong;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
-
-import io.jhdf.btree.BTreeV2;
-import io.jhdf.btree.record.HugeFractalHeapObjectUnfilteredRecord;
 
 /**
  * Fractal heap implementation. Used for storing data which can be looked up via

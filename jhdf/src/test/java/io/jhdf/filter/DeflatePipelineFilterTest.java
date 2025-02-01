@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -11,8 +11,6 @@ package io.jhdf.filter;
 
 import io.jhdf.exceptions.HdfFilterException;
 import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;

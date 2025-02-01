@@ -1,14 +1,15 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.object.message;
 
+import io.jhdf.BufferBuilder;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 
@@ -30,12 +31,17 @@ import java.util.BitSet;
  */
 public class FillValueMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 5;
+
 	private static final int FILL_VALUE_DEFINED_BIT = 5;
 
 	private final int spaceAllocationTime;
 	private final int fillValueWriteTime;
 	private final boolean fillValueDefined;
 	private final ByteBuffer fillValue;
+
+	public static final FillValueMessage NO_FILL =
+		new FillValueMessage(1, 0, false, null);
 
 	/* package */ FillValueMessage(ByteBuffer bb, BitSet messageFlags) {
 		super(messageFlags);
@@ -76,6 +82,13 @@ public class FillValueMessage extends Message {
 		}
 	}
 
+	private FillValueMessage(int spaceAllocationTime, int fillValueWriteTime, boolean fillValueDefined, ByteBuffer fillValue) {
+		this.spaceAllocationTime = spaceAllocationTime;
+		this.fillValueWriteTime = fillValueWriteTime;
+		this.fillValueDefined = fillValueDefined;
+		this.fillValue = fillValue;
+	}
+
 	public boolean isFillValueDefined() {
 		return fillValueDefined;
 	}
@@ -91,4 +104,24 @@ public class FillValueMessage extends Message {
 	public ByteBuffer getFillValue() {
 		return fillValue.asReadOnlyBuffer();
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
+	@Override
+	public ByteBuffer toBuffer() {
+		BitSet flags = new BitSet(8);
+		Utils.writeIntToBits(spaceAllocationTime, flags, 0, 2);
+		Utils.writeIntToBits(fillValueWriteTime, flags, 2, 2);
+		Utils.writeIntToBits(fillValueDefined ? 0 : 1, flags, 4, 1);
+		Utils.writeIntToBits(fillValueDefined ? 1 : 0, flags, 5, 1);
+		return new BufferBuilder()
+			.writeByte(3) // version
+			.writeBitSet(flags, 1)
+			// TODO Size + fill vale here
+			.build();
+	}
+
 }

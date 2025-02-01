@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -13,6 +13,8 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -20,10 +22,18 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.Arrays;
+import java.util.Objects;
 
 import static io.jhdf.Utils.stripLeadingIndex;
 
 public class FloatingPoint extends DataType implements OrderedDataType {
+
+	public static final int CLASS_ID = 1;
+	private static final int ORDER_BIT = 0;
+	private static final int LOW_PADDING_BIT = 1;
+	private static final int HIGH_PADDING_BIT = 2;
+	private static final int INTERNAL_PADDING_BIT = 3;
 
 	private final ByteOrder order;
 	private final boolean lowPadding;
@@ -47,19 +57,17 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		if (classBits.get(6)) {
 			throw new UnsupportedHdfException("VAX endian is not supported");
 		}
-		if (classBits.get(0)) {
+		if (classBits.get(ORDER_BIT)) {
 			order = ByteOrder.BIG_ENDIAN;
 		} else {
 			order = ByteOrder.LITTLE_ENDIAN;
 		}
 
-		lowPadding = classBits.get(1);
-		highPadding = classBits.get(2);
-		internalPadding = classBits.get(3);
+		lowPadding = classBits.get(LOW_PADDING_BIT);
+		highPadding = classBits.get(HIGH_PADDING_BIT);
+		internalPadding = classBits.get(INTERNAL_PADDING_BIT);
 
-		// Mask the 4+5 bits and shift to the end
 		mantissaNormalization = Utils.bitsToInt(classBits, 4, 2);
-
 		signLocation = Utils.bitsToInt(classBits, 8, 8);
 
 		// Properties
@@ -70,6 +78,39 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		mantissaLocation = bb.get();
 		mantissaSize = bb.get();
 		exponentBias = bb.getInt();
+	}
+
+	private FloatingPoint(int size,
+						  int mantissaNormalization,
+						  int signLocation,
+						  short bitOffset,
+						  short bitPrecision,
+						  byte exponentLocation,
+						  byte exponentSize,
+						  byte mantissaLocation,
+						  byte mantissaSize,
+						  int exponentBias) {
+		super(CLASS_ID, size);
+		this.order = ByteOrder.nativeOrder();
+		this.lowPadding = false;
+		this.highPadding = false;
+		this.internalPadding = false;
+		this.mantissaNormalization = mantissaNormalization;
+		this.signLocation = signLocation;
+		this.bitOffset = bitOffset;
+		this.bitPrecision = bitPrecision;
+		this.exponentLocation = exponentLocation;
+		this.exponentSize = exponentSize;
+		this.mantissaLocation = mantissaLocation;
+		this.mantissaSize = mantissaSize;
+		this.exponentBias = exponentBias;
+
+		classBits.set(ORDER_BIT, order.equals(ByteOrder.BIG_ENDIAN));
+		classBits.set(LOW_PADDING_BIT, false);
+		classBits.set(HIGH_PADDING_BIT, false);
+		classBits.set(INTERNAL_PADDING_BIT, false);
+		Utils.writeIntToBits(mantissaNormalization, classBits, 4, 2);
+		Utils.writeIntToBits(signLocation, classBits, 8, 8);
 	}
 
 	@Override
@@ -226,5 +267,182 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 			buffer.get((double[]) data);
 		}
 	}
+
+	@Override
+	public ByteBuffer toBuffer() {
+		return  super.toBufferBuilder()
+			.writeShort(bitOffset)
+			.writeShort(bitPrecision)
+			.writeByte(exponentLocation)
+			.writeByte(exponentSize)
+			.writeByte(mantissaLocation)
+			.writeByte(mantissaSize)
+			.writeInt(exponentBias)
+			.build();
+	}
+
+	public static final FloatingPoint FLOAT = new FloatingPoint(
+		4,
+		2,
+		31,
+		(short) 0,
+		(short) 32,
+		(byte) 23,
+		(byte) 8,
+		(byte) 0,
+		(byte) 23,
+		127);
+
+	public static final FloatingPoint DOUBLE = new FloatingPoint(
+		8, // size
+		2,      // mantissa normalisation
+		63,     // Sign location
+		(short) 0,   // bit offset
+		(short) 64,   // bit precision
+		(byte) 52,  // exponent location
+		(byte) 11,    // exponent size
+		(byte) 0,      // mantissa location
+		(byte) 52,     // mantissa size
+		1023);   // exponent bias
+
+
+	@Override
+	public ByteBuffer encodeData(Object data) {
+		Objects.requireNonNull(data, "Cannot encode null");
+
+		final Class<?> type = Utils.getType(data);
+		if (data.getClass().isArray()) {
+			final int[] dimensions = Utils.getDimensions(data);
+			final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
+			final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize())
+				.order(order);
+			if(type == float.class) {
+				encodeFloatData(data, dimensions, buffer.asFloatBuffer(), true);
+			} else if (type == Float.class) {
+				encodeFloatData(data, dimensions, buffer.asFloatBuffer(), false);
+			}  else if (type == double.class) {
+				encodeDoubleData(data, dimensions, buffer.asDoubleBuffer(), true);
+			} else if (type == Double.class) {
+				encodeDoubleData(data, dimensions, buffer.asDoubleBuffer(), false);
+			} else {
+				throw new UnsupportedHdfException("Cant write type: " + type);
+			}
+
+			return buffer;
+		} else {
+			// Scalar dataset
+			final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);
+
+			if (type == Float.class) {
+				buffer.asFloatBuffer().put((Float) data);
+			} else if (type == Double.class) {
+				buffer.asDoubleBuffer().put((Double) data);
+			} else {
+				throw new UnsupportedHdfException("Cant write scalar type: " + type);
+			}
+
+			return buffer;
+		}
+	}
+
+	@Override
+	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
+		final Class<?> type = Utils.getType(data);
+		if (data.getClass().isArray()) {
+			final int fastDimSize = dimensions[dimensions.length - 1];
+			// This buffer is reused
+			final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize())
+				.order(order);
+
+			if(type == float.class) {
+				writeFloatData(data, dimensions, buffer, hdfFileChannel, true);
+			} else if (type == Float.class) {
+				writeFloatData(data, dimensions, buffer, hdfFileChannel, false);
+			}  else if (type == double.class) {
+				writeDoubleData(data, dimensions, buffer, hdfFileChannel, true);
+			} else if (type == Double.class) {
+				writeDoubleData(data, dimensions, buffer, hdfFileChannel, false);
+			} else {
+				throw new UnsupportedHdfException("Cant write type: " + type);
+			}
+		} else {
+			// Scalar
+			final ByteBuffer buffer = ByteBuffer.allocate(getSize()).order(order);
+			if (type == Float.class) {
+				buffer.asFloatBuffer().put((Float) data);
+			} else if (type == Double.class) {
+				buffer.asDoubleBuffer().put((Double) data);
+			} else {
+				throw new UnsupportedHdfException("Cant write scalar type: " + type);
+			}
+			hdfFileChannel.write(buffer);
+		}
+
+	}
+
+	private static void writeDoubleData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeDoubleData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.asDoubleBuffer().put((double[]) data);
+			} else {
+				buffer.asDoubleBuffer().put(ArrayUtils.toPrimitive((Double[]) data));
+			}
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
+	}
+
+	private static void writeFloatData(Object data, int[] dims, ByteBuffer buffer, HdfFileChannel hdfFileChannel, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				writeFloatData(newArray, stripLeadingIndex(dims), buffer, hdfFileChannel, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.asFloatBuffer().put((float[]) data);
+			} else {
+				buffer.asFloatBuffer().put(ArrayUtils.toPrimitive((Float[]) data));
+			}
+			hdfFileChannel.write(buffer);
+			buffer.clear();
+		}
+	}
+
+	private static void encodeFloatData(Object data, int[] dims, FloatBuffer buffer, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeFloatData(newArray, stripLeadingIndex(dims), buffer, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put((float[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Float[]) data));
+			}
+		}
+	}
+
+	private static void encodeDoubleData(Object data, int[] dims, DoubleBuffer buffer, boolean primitive) {
+		if (dims.length > 1) {
+			for (int i = 0; i < dims[0]; i++) {
+				Object newArray = Array.get(data, i);
+				encodeDoubleData(newArray, stripLeadingIndex(dims), buffer, primitive);
+			}
+		} else {
+			if(primitive) {
+				buffer.put((double[]) data);
+			} else {
+				buffer.put(ArrayUtils.toPrimitive((Double[]) data));
+			}
+		}
+	}
+
 
 }

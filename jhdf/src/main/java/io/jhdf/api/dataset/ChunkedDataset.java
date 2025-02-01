@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -36,5 +36,14 @@ public interface ChunkedDataset extends Dataset {
 	 * @throws HdfException If the chunk offset is not valid for this dataset
 	 */
 	ByteBuffer getRawChunkBuffer(int[] chunkOffset);
+
+	/**
+	 * Gets the decompressed byte array for the specified chunk.
+	 *
+	 * @param chunkOffset the offset of the required chunk
+	 * @return the decompressed byte array for this chunk
+	 * @throws HdfException If the chunk offset is not valid for this dataset
+	 */
+	byte[] getDecompressedChunk(int[] chunkOffset);
 
 }

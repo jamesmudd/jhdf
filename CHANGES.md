@@ -1,5 +1,57 @@
 # jHDF Change Log
 
+## v0.8.6 - January 2025
+- Add support for reading implicit index chunked datasets https://github.com/jamesmudd/jhdf/issues/651 https://github.com/jamesmudd/jhdf/pull/655
+- Test fixes for fixed-array index datasets
+- Dependency updates
+
+## v0.8.5 - December 2024
+- Fix issue writing string datasets containing non-ASCII characters https://github.com/jamesmudd/jhdf/issues/656
+- Add support for reading chunked datasets using fixed-array paging. https://github.com/jamesmudd/jhdf/pull/622
+- Allow maven publish tasks to complete without signing, if no signing keys are available. Makes local builds easier and allows building on jitpack.io https://jitpack.io/#jamesmudd/jhdf making a rolling jar release available.
+- Dependency updates
+
+## v0.8.4 - October 2024
+- Fix incorrectly written string attributes. https://github.com/jamesmudd/jhdf/issues/641
+- Dependency updates
+
+## v0.8.3 - October 2024
+- Add support for accessing decompressed chunks individually. Thanks to [@marcobitplane](https://github.com/marcobitplane) https://github.com/jamesmudd/jhdf/pull/626
+- Fix OSGi headers, and autogenerate them during the build. Thanks to [@mailaender](https://github.com/Mailaender) https://github.com/jamesmudd/jhdf/pull/625 https://github.com/jamesmudd/jhdf/pull/632
+- Delete temporary file when closing a file read from an input stream. Thanks to [@ivanwick](https://github.com/ivanwick) https://github.com/jamesmudd/jhdf/issues/262 https://github.com/jamesmudd/jhdf/pull/636
+- Build and dependency updates
+
+## v0.8.2 - August 2024
+- Add support for writing `boolean` datasets and attributes as Bitfield
+
+## v0.8.1 - August 2024
+- Add support fo writing `String` datasets and attributes
+- Add `_jHDF` default attribute to root group
+- Build and dependency updates
+
+## v0.8.0 - July 2024
+- Major writing support improvements
+  - Attributes can now be written https://github.com/jamesmudd/jhdf/issues/552
+  - Full support for `byte`, `short`, `int`, `long`, `float`, `double` and wrapper classes as datasets and attributes https://github.com/jamesmudd/jhdf/discussions/587
+  - Support for scalar datasets and attributes
+  - Much more complete API on writable objects, allowing introspection of data type and data layout and data space etc.
+- Many test improvements for writing support
+- Build and dependency updates
+- Note: This may be the last release supporting Java 8
+
+## v0.7.0 - May 2024
+- Release adding HDF5 writing support! https://github.com/jamesmudd/jhdf/issues/354. Special thanks to [@thadguidry](https://github.com/thadguidry) for sponsoring this work. See [WriteHdf5.java](jhdf/src/main/java/io/jhdf/examples/WriteHdf5.java) for example usage. Supports
+  - Groups
+  - n-dimensional `byte`, `int` and `double` datasets
+- Fix UTF-8 groups names https://github.com/jamesmudd/jhdf/issues/539
+- Java 21 now officially supported
+- Adds `h5dump` to CI builds to perform compatability tests.
+- Build and dependency updates
+
+## v0.7.0-alpha
+- Add initial HDF5 writing support! https://github.com/jamesmudd/jhdf/issues/354. Special thanks to [@thadguidry](https://github.com/thadguidry) for sponsoring this work. See [WriteHdf5.java](jhdf/src/main/java/io/jhdf/examples/WriteHdf5.java) for example usage.
+- Build and dependency updates
+
 ##  v0.6.10
 - Add support for files containing superblock extensions https://github.com/jamesmudd/jhdf/issues/462
 - Build and dependency updates

@@ -1,14 +1,15 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.object.message;
 
+import io.jhdf.BufferBuilder;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 
@@ -30,6 +31,8 @@ import java.util.BitSet;
  */
 public class SymbolTableMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 17;
+
 	private final long bTreeAddress;
 	private final long localHeapAddress;
 
@@ -40,6 +43,21 @@ public class SymbolTableMessage extends Message {
 		localHeapAddress = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfOffsets());
 	}
 
+
+	public SymbolTableMessage(BitSet flags, long bTreeAddress, long localHeapAddress) {
+		super(flags);
+		this.bTreeAddress = bTreeAddress;
+		this.localHeapAddress = localHeapAddress;
+	}
+
+	public ByteBuffer toBuffer() {
+		return new BufferBuilder()
+			.writeBytes(super.flagsToBytes())
+			.writeLong(bTreeAddress)
+			.writeLong(localHeapAddress)
+			.build();
+	}
+
 	public long getBTreeAddress() {
 		return bTreeAddress;
 	}
@@ -48,4 +66,8 @@ public class SymbolTableMessage extends Message {
 		return localHeapAddress;
 	}
 
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
 }

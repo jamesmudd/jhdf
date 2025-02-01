@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -35,11 +35,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -59,9 +57,8 @@ public class HdfFile implements Group, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(HdfFile.class);
 
 	static {
-		final String versionStr = HdfFile.class.getPackage().getImplementationVersion();
-		if (versionStr != null) {
-			logger.info("jHDF version: {}", HdfFile.class.getPackage().getImplementationVersion());
+		if (JhdfInfo.VERSION != null) {
+			logger.info("jHDF version: {}", JhdfInfo.VERSION);
 		} else {
 			logger.warn("Using development version of jHDF");
 		}
@@ -157,7 +154,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	/**
 	 * Opens an {@link HdfFile} from an {@link InputStream}. The stream will be read fully into a temporary file. The
-	 * file will be cleaned up at application exit.
+	 * file will be deleted when the HdfFile is closed, or at application exit if it was never closed.
 	 *
 	 * @param inputStream the {@link InputStream} to read
 	 * @return HdfFile instance
@@ -165,16 +162,7 @@ public class HdfFile implements Group, AutoCloseable {
 	 * @see HdfFile#fromByteBuffer(ByteBuffer)
 	 */
 	public static HdfFile fromInputStream(InputStream inputStream) {
-		try {
-			Path tempFile = Files.createTempFile(null, "-stream.hdf5"); // null random file name
-			logger.info("Creating temp file [{}]", tempFile.toAbsolutePath());
-			tempFile.toFile().deleteOnExit(); // Auto cleanup
-			Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
-			logger.debug("Read stream to temp file [{}]", tempFile.toAbsolutePath());
-			return new HdfFile(tempFile);
-		} catch (IOException e) {
-			throw new HdfException("Failed to open input stream", e);
-		}
+		return TempHdfFile.fromInputStream(inputStream);
 	}
 
 	public HdfFile(Path hdfFile) {
@@ -235,6 +223,10 @@ public class HdfFile implements Group, AutoCloseable {
 			return 512L;
 		}
 		return offset * 2;
+	}
+
+	public static WritableHdfFile write(Path path) {
+		return new WritableHdfFile(path);
 	}
 
 	/**

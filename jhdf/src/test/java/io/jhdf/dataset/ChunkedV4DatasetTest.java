@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -29,12 +29,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static io.jhdf.TestUtils.flatten;
 import static io.jhdf.TestUtils.loadTestHdfFile;
+import static io.jhdf.Utils.flatten;
 import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -116,6 +118,41 @@ class ChunkedV4DatasetTest {
 		// read the chunk and verify the data
 		int[] chunkData = new int[6];
 		intBuffer.get(chunkData);
+		assertThat(toObject(chunkData), is(arrayContaining(0, 1, 2, 3, 4, 5)));
+	}
+	@Test
+	void testGettingDecompressedChunkWithoutFiltersIsTheSameAsRaw() {
+		Dataset dataset = hdfFile.getDatasetByPath("/fixed_array/int32");
+		assertThat(dataset, isA(ChunkedDataset.class));
+		ChunkedDataset chunkedDataset = (ChunkedDataset) dataset;
+		assertThat(toObject(chunkedDataset.getChunkDimensions()), is(arrayContaining(2, 3)));
+
+		ByteBuffer rawChunkBuffer = chunkedDataset.getRawChunkBuffer(new int[]{0, 0});
+		byte[] decompressedChunkBytes = chunkedDataset.getDecompressedChunk(new int[]{0, 0});
+		byte[] rawChunkBytes = new byte[rawChunkBuffer.capacity()];
+		rawChunkBuffer.get(rawChunkBytes);
+		assertThat(rawChunkBytes, is(decompressedChunkBytes));
+	}
+
+	@Test
+	void testGettingDecompressedChunkWithFilters() {
+		Dataset dataset = hdfFile.getDatasetByPath("/filtered_fixed_array/int32");
+		assertThat(dataset, isA(ChunkedDataset.class));
+		ChunkedDataset chunkedDataset = (ChunkedDataset) dataset;
+		assertThat(toObject(chunkedDataset.getChunkDimensions()), is(arrayContaining(2, 3)));
+		assertThat(chunkedDataset.getFilters(), hasSize(1));
+
+		// Check the compressed and decompressed chunks are different
+		ByteBuffer rawChunkBuffer = chunkedDataset.getRawChunkBuffer(new int[]{0, 0});
+		byte[] decompressedChunkBytes = chunkedDataset.getDecompressedChunk(new int[]{0, 0});
+		byte[] rawChunkBytes = new byte[rawChunkBuffer.capacity()];
+		rawChunkBuffer.get(rawChunkBytes);
+		assertThat(rawChunkBytes, is(not(decompressedChunkBytes)));
+
+		IntBuffer intBuffer = ByteBuffer.wrap(decompressedChunkBytes).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer();
+		int[] chunkData = new int[intBuffer.capacity()];
+		intBuffer.get(chunkData);
+
 		assertThat(toObject(chunkData), is(arrayContaining(0, 1, 2, 3, 4, 5)));
 	}
 }

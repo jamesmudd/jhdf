@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -21,13 +21,13 @@ plugins {
 
     // Community plugins (need versions)
     id 'org.sonarqube' version '4.0.0.2929' // Code quality
-    id "com.github.spotbugs" version "6.0.4" // Static analysis
-    id "me.champeau.jmh" version "0.7.2" // JMH support
+    id "com.github.spotbugs" version "6.1.3" // Static analysis
+    id "me.champeau.jmh" version "0.7.3" // JMH support
 }
 
 // Variables
 group = 'io.jhdf'
-version = '0.6.10'
+version = '0.8.6'
 
 compileJava {
     sourceCompatibility = "1.8"
@@ -48,23 +48,27 @@ repositories {
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
     // lzf compression support
     implementation group: 'com.ning', name: 'compress-lzf', version: '1.1.2'
     // lz5 support https://mvnrepository.com/artifact/org.lz4/lz4-java
     implementation group: 'org.lz4', name: 'lz4-java', version: '1.8.0'
 
     // Use JUnit 5 test framework
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.10.1'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.11.4'
     testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 
     // Mocking
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.11.0'
     testImplementation group: 'org.powermock', name: 'powermock-core', version: '2.0.9'
     // Matchers
-    testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
+    testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '3.0'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.27.3'
     // Alternative bitshuffle impl to check results against
-    testImplementation 'org.xerial.snappy:snappy-java:1.1.10.5'
+    testImplementation 'org.xerial.snappy:snappy-java:1.1.10.7'
+    // For parsing h5dump XML output
+    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.2'
+    testImplementation 'commons-io:commons-io:2.18.0'
 }
 
 test {
@@ -100,7 +104,8 @@ jar {
             'Bundle-Name': project.name,
             'Bundle-Vendor': 'James Mudd',
             'Bundle-Version': project.version,
-            'Export-Package': 'io.jhdf,io.jhdf.*',
+            'Export-Package': 'io.jhdf,io.jhdf.*,io.jhdf.api,io.jhdf.api.*',
+            'Require-Bundle': buildRequireBundleHeader(),
             // Build data
             'Build-JDK': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
             'Build-OS': System.getProperty('os.name') + ' ' + System.getProperty('os.version'),
@@ -138,7 +143,7 @@ publishing {
             pom {
                 name = 'jhdf'
                 description = 'A pure Java HDF5 library'
-                url = 'http://jhdf.io/'
+                url = 'https://jhdf.io/'
                 licenses {
                     license {
                         name = 'MIT License'
@@ -156,6 +161,10 @@ publishing {
                     connection = 'scm:git:git://github.com/jamesmudd/jhdf.git'
                     developerConnection = 'scm:git:git://github.com/jamesmudd/jhdf.git'
                     url = 'https://github.com/jamesmudd/jhdf.git'
+                }
+                issueManagement {
+                    system = 'github'
+                    url = 'https://github.com/jamesmudd/jhdf/issues'
                 }
             }
         }
@@ -181,6 +190,7 @@ publishing {
 }
 
 signing {
+    required { System.getenv("SIGNING_KEY") != null }
     def signingKey = System.getenv("SIGNING_KEY")
     def signingPassword = System.getenv("SIGNING_PASSWORD")
     useInMemoryPgpKeys(signingKey, signingPassword)
@@ -189,6 +199,9 @@ signing {
 
 import com.github.spotbugs.snom.Confidence
 import com.github.spotbugs.snom.Effort
+
+import java.util.stream.Collectors
+
 spotbugs {
     ignoreFailures = true // Allow build to continue with errors
     effort = Effort.valueOf('MAX')
@@ -212,4 +225,29 @@ sonarqube {
         // Checkstyle
         property "sonar.java.checkstyle.reportPaths", "build/reports/checkstyle/main.xml,build/reports/checkstyle/test.xml"
     }
+}
+
+String buildRequireBundleHeader() {
+    def runtimeDependencies = configurations.runtimeClasspath.getAllDependencies()
+    def bundleToModule = [
+        "slf4j.api": "org.slf4j:slf4j-api",
+        "org.apache.commons.lang3": "org.apache.commons:commons-lang3",
+        "com.ning.compress-lzf": "com.ning:compress-lzf",
+        "lz4-java": "org.lz4:lz4-java"
+    ]
+
+    def moduleToVersion = runtimeDependencies.collectEntries {
+        [it.module.toString(), it.version]
+    }
+
+    //  Check here to catch when dependencies are added/removed
+    if(!bundleToModule.values().containsAll(moduleToVersion.keySet())) {
+        throw new IllegalStateException("Runtime dependencies not mapped for OSGi")
+    }
+
+    def header = bundleToModule.entrySet().stream()
+        .map {"${it.key};bundle-version=\"${moduleToVersion.get(it.value)}\"" }
+        .collect(Collectors.joining(","))
+
+    return header
 }

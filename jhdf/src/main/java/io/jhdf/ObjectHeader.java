@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -11,6 +11,7 @@ package io.jhdf;
 
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.message.Message;
 import io.jhdf.object.message.ObjectHeaderContinuationMessage;
 import io.jhdf.storage.HdfBackingStorage;
@@ -221,20 +222,7 @@ public abstract class ObjectHeader {
 				flags = BitSet.valueOf(new byte[]{bb.get()});
 
 				// Size of chunk 0
-				final byte sizeOfChunk0;
-				if (flags.get(1)) {
-					if (flags.get(0)) {
-						sizeOfChunk0 = 8;
-					} else {
-						sizeOfChunk0 = 4;
-					}
-				} else { // bit 0 = false
-					if (flags.get(0)) {
-						sizeOfChunk0 = 2;
-					} else {
-						sizeOfChunk0 = 1;
-					}
-				}
+				final byte sizeOfChunk0 = getSizeOfChunk0Size();
 
 				// Timestamps
 				if (flags.get(TIMESTAMPS_PRESENT)) {
@@ -289,6 +277,79 @@ public abstract class ObjectHeader {
 			} catch (Exception e) {
 				throw new HdfException("Failed to read object header at address: " + address, e);
 			}
+		}
+
+		private byte getSizeOfChunk0Size() {
+			final byte sizeOfChunk0;
+			if (flags.get(1)) {
+				if (flags.get(0)) {
+					sizeOfChunk0 = 8;
+				} else {
+					sizeOfChunk0 = 4;
+				}
+			} else { // bit 0 = false
+				if (flags.get(0)) {
+					sizeOfChunk0 = 2;
+				} else {
+					sizeOfChunk0 = 1;
+				}
+			}
+			return sizeOfChunk0;
+		}
+
+		public ObjectHeaderV2(long address, List<Message> messages) {
+			super(address);
+			this.messages.addAll(messages);
+			version = 2;
+
+			accessTime = -1;
+			modificationTime = -1;
+			changeTime = -1;
+			birthTime = -1;
+
+			maximumNumberOfCompactAttributes = -1;
+			maximumNumberOfDenseAttributes = -1;
+
+			flags = new BitSet(8); // TODO make consistent with values
+			flags.set(1); // Make sizeOfChunk0 4 bytes.
+		}
+
+		public ByteBuffer toBuffer() {
+			BufferBuilder bufferBuilder = new BufferBuilder()
+				.writeBytes(OBJECT_HEADER_V2_SIGNATURE)
+				.writeByte(version)
+				.writeBitSet(flags, 1);
+
+			if (flags.get(TIMESTAMPS_PRESENT)) {
+				bufferBuilder.writeInt((int) accessTime);
+				bufferBuilder.writeInt((int) modificationTime);
+				bufferBuilder.writeInt((int) changeTime);
+				bufferBuilder.writeInt((int) birthTime);
+			}
+
+			if(flags.get(NUMBER_OF_ATTRIBUTES_PRESENT)) {
+				// TODO min/max attributes
+				throw new UnsupportedHdfException("Writing number of attributes");
+			}
+
+			// Start messages
+			ByteBuffer messagesBuffer = messagesToBuffer();
+			bufferBuilder.writeInt(messagesBuffer.capacity())
+					.writeBuffer(messagesBuffer);
+
+			return bufferBuilder.appendChecksum().build();
+		}
+
+		private ByteBuffer messagesToBuffer() {
+			BufferBuilder bufferBuilder = new BufferBuilder();
+			for (Message message : messages) {
+				final ByteBuffer messageBuffer = message.toBuffer();
+				bufferBuilder.writeByte(message.getMessageType())
+					.writeShort(messageBuffer.capacity())
+					.writeBytes(message.flagsToBytes())
+					.writeBuffer(messageBuffer);
+			}
+			return bufferBuilder.build();
 		}
 
 		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb) {
@@ -380,4 +441,5 @@ public abstract class ObjectHeader {
 
 		};
 	}
+
 }

@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -32,6 +32,8 @@ import static java.nio.charset.StandardCharsets.US_ASCII;
  * @author James Mudd
  */
 public class OldObjectModificationTimeMessage extends Message {
+
+	public static final int MESSAGE_TYPE = 14;
 
 	final LocalDateTime modificationTime;
 
@@ -65,4 +67,11 @@ public class OldObjectModificationTimeMessage extends Message {
 	public LocalDateTime getModifiedTime() {
 		return modificationTime;
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
+
 }

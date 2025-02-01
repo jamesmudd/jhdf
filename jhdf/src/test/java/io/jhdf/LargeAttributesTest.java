@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -50,10 +50,10 @@ class LargeAttributesTest {
 		DoubleBuffer db = bb.asDoubleBuffer();
 		assertThat(db.limit(), is(equalTo(EXPECTED_DATA_LENGTH)));
 
-		double referenceData[] = new double[EXPECTED_DATA_LENGTH];
-		for (int i = 0; i < EXPECTED_DATA_LENGTH; i++) referenceData[i] = (double) i;
+		double[] referenceData = new double[EXPECTED_DATA_LENGTH];
+		for (int i = 0; i < EXPECTED_DATA_LENGTH; i++) referenceData[i] = i;
 
-		double obtainedData[] = new double[EXPECTED_DATA_LENGTH];
+		double[] obtainedData = new double[EXPECTED_DATA_LENGTH];
 		db.get(obtainedData);
 
 		assertThat(obtainedData, is(equalTo(referenceData)));

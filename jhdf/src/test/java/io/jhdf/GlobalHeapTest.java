@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -59,7 +59,7 @@ class GlobalHeapTest {
 		ByteBuffer bb = globalHeap.getObjectData(1);
 
 		assertThat(bb.limit(), is(equalTo(19)));
-		//  Decode the data
+		// Decode the data
 		String data = US_ASCII.decode(bb).toString();
 		assertThat(data, is(equalTo("my string attribute")));
 

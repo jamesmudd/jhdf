@@ -1,16 +1,16 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
-import io.jhdf.TestUtils;
+import io.jhdf.Utils;
 import io.jhdf.api.Dataset;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -75,8 +75,8 @@ class CompressedChunkedDatasetTest {
 		return () -> {
 			Dataset dataset = hdfFile.getDatasetByPath(datasetPath);
 			Object data = dataset.getData();
-			assertThat(TestUtils.getDimensions(data), is(equalTo(new int[]{7, 5})));
-			Object[] flatData = TestUtils.flatten(data);
+			assertThat(Utils.getDimensions(data), is(equalTo(new int[]{7, 5})));
+			Object[] flatData = Utils.flatten(data);
 			for (int i = 0; i < flatData.length; i++) {
 				// Do element comparison as there are all different primitive numeric types
 				// convert to double

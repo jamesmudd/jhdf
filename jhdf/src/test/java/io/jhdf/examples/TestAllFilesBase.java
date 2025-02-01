@@ -1,15 +1,14 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.examples;
 
-import io.jhdf.TestUtils;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -39,8 +38,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.jhdf.TestUtils.flatten;
-import static io.jhdf.TestUtils.getDimensions;
+import static io.jhdf.Utils.flatten;
+import static io.jhdf.Utils.getDimensions;
 import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
@@ -63,7 +62,7 @@ import static org.hamcrest.Matchers.sameInstance;
  *
  * @author James Mudd
  */
-abstract class TestAllFilesBase {
+public abstract class TestAllFilesBase {
 
 	private static final PathMatcher HDF5 = FileSystems.getDefault().getPathMatcher("glob:**.{hdf5,h5}");
 
@@ -87,7 +86,7 @@ abstract class TestAllFilesBase {
 
 	abstract protected DynamicNode createTest(Path path);
 
-	protected void recurseGroup(Group group) {
+	public static void recurseGroup(Group group) {
 		for (Node node : group) {
 			if (node instanceof Group) {
 				Group group2 = (Group) node;
@@ -100,7 +99,7 @@ abstract class TestAllFilesBase {
 		}
 	}
 
-	protected void verifyAttributes(Node node) {
+	public static void verifyAttributes(Node node) {
 		if (node instanceof Link) {
 			if (((Link) node).isBrokenLink()) {
 				return; // Can't verify broken links
@@ -135,7 +134,7 @@ abstract class TestAllFilesBase {
 	 * @param group   its parent group
 	 */
 	@SuppressWarnings("unchecked")
-	private void verifyDataset(Dataset dataset, Group group) {
+	private static void verifyDataset(Dataset dataset, Group group) {
 		assertThat(dataset.getName(), is(notNullValue()));
 		assertThat(dataset.getPath(), is(group.getPath() + dataset.getName()));
 		assertThat(dataset.getParent(), is(sameInstance(group)));
@@ -246,7 +245,7 @@ abstract class TestAllFilesBase {
 		}
 	}
 
-	private Class<?> getType(Object data) {
+	private static Class<?> getType(Object data) {
 		if (Array.get(data, 0).getClass().isArray()) {
 			return getType(Array.get(data, 0));
 		} else {
@@ -259,7 +258,7 @@ abstract class TestAllFilesBase {
 	 *
 	 * @param group to exercise
 	 */
-	private void verifyGroup(Group group) {
+	private static void verifyGroup(Group group) {
 		assertThat(group.getAttributes(), is(notNullValue()));
 		assertThat(group.isGroup(), is(true));
 		assertThat(group.isLink(), is(false));

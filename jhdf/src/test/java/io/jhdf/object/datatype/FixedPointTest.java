@@ -1,22 +1,22 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.object.datatype;
 
-import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.storage.HdfBackingStorage;
+import io.jhdf.storage.HdfFileChannel;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
-import org.mockito.Mockito;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -152,6 +152,17 @@ class FixedPointTest {
 		HdfBackingStorage hdfBackingStorage = mock(HdfBackingStorage.class);
 		assertThrows(HdfTypeException.class, () -> invalidDataType.fillData(longBuffer, dims, hdfBackingStorage));
 		verifyNoInteractions(hdfBackingStorage);
+	}
+
+	@Test
+	void testWritingFixedPoint() {
+		FixedPoint fixedPoint = new FixedPoint(4);
+		ByteBuffer buffer = fixedPoint.toBuffer();
+		FixedPoint readBack = new FixedPoint(buffer);
+
+		Assertions.assertThat(readBack).usingRecursiveComparison()
+			.withStrictTypeChecking()
+			.isEqualTo(fixedPoint);
 	}
 
 }

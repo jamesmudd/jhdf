@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -289,6 +289,16 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 				" in dataset: " + getPath());
 		}
 		return getDataBuffer(chunk);
+	}
+
+	@Override
+	public byte[] getDecompressedChunk(int[] chunkOffset) {
+		final Chunk chunk = getChunk(new ChunkOffset(chunkOffset));
+		if (chunk == null) {
+			throw new HdfException("No chunk with offset " + Arrays.toString(chunkOffset) +
+				" in dataset: " + getPath());
+		}
+		return decompressChunk(chunk);
 	}
 
 	private Collection<Chunk> getAllChunks() {

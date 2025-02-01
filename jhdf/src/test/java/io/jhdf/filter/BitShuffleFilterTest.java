@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -15,7 +15,6 @@ import net.jpountz.lz4.LZ4Factory;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.xerial.snappy.BitShuffle;
 import org.xerial.snappy.BitShuffleType;
 

@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -28,12 +28,9 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.jhdf.TestUtils.loadTestHdfFile;
-import static io.jhdf.filter.BitShuffleFilter.LZ4_COMPRESSION;
-import static io.jhdf.filter.BitShuffleFilter.NO_COMPRESSION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.oneOf;
 
 class Lz4DatasetTest {
 

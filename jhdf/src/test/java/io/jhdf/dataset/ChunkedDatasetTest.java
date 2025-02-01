@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -11,7 +11,6 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
-import io.jhdf.filter.FilterPipeline;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
@@ -21,9 +20,9 @@ import org.junit.jupiter.api.function.Executable;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static io.jhdf.TestUtils.flatten;
-import static io.jhdf.TestUtils.getDimensions;
 import static io.jhdf.TestUtils.loadTestHdfFile;
+import static io.jhdf.Utils.flatten;
+import static io.jhdf.Utils.getDimensions;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;

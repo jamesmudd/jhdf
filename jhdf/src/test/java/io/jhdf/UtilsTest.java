@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -13,9 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Set;
@@ -48,6 +50,18 @@ class UtilsTest {
 		bb.put(b);
 		bb.rewind();
 		assertThat(Utils.readUntilNull(bb), is(equalTo("HDF")));
+		assertThat(bb.position(),is(equalTo(4)));
+	}
+
+	@Test // For https://github.com/jamesmudd/jhdf/issues/539
+	void testReadUntilNullUtf8() {
+		ByteBuffer bb = ByteBuffer.allocate(7);
+		bb.put("数".getBytes(StandardCharsets.UTF_8)); // 3 bytes
+		bb.put("据".getBytes(StandardCharsets.UTF_8)); // 3 bytes
+		bb.put(Constants.NULL); // 1 byte
+		bb.rewind();
+		assertThat(Utils.readUntilNull(bb), is(equalTo("数据")));
+		assertThat(bb.position(),is(equalTo(7)));
 	}
 
 	@Test
@@ -502,5 +516,29 @@ class UtilsTest {
 		// Bit index larger than array length
 		assertThrows(IllegalArgumentException.class,
 			() -> Utils.setBit(bytes, 5*8, true));
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15})
+	void testWritingToBits(int value) {
+		BitSet bits = new BitSet(8);
+		Utils.writeIntToBits(value, bits, 0, 4);
+
+		int readBack = Utils.bitsToInt(bits, 0, 4);
+		assertThat(readBack, is(equalTo(value)));
+
+		bits.clear();
+		Utils.writeIntToBits(value, bits, 4, 4);
+
+		int readBack2 = Utils.bitsToInt(bits, 4, 4);
+		assertThat(readBack2, is(equalTo(value)));
+	}
+	@Test
+	void testWritingToBitsExceptions() {
+		BitSet bits = new BitSet(8);
+
+		assertThrows(IllegalArgumentException.class, () -> Utils.writeIntToBits(-3, bits, 0, 4));
+
+		assertThrows(IllegalArgumentException.class, () -> Utils.writeIntToBits(18, bits, 0, 4));
 	}
 }

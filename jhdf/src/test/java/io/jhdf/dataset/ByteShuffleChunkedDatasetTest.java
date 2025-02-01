@@ -1,16 +1,16 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
-import io.jhdf.TestUtils;
+import io.jhdf.Utils;
 import io.jhdf.api.Dataset;
 import io.jhdf.filter.PipelineFilterWithData;
 import org.apache.commons.lang3.ArrayUtils;
@@ -20,14 +20,12 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static io.jhdf.TestUtils.flatten;
 import static io.jhdf.TestUtils.loadTestHdfFile;
+import static io.jhdf.Utils.flatten;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.equalTo;
@@ -90,7 +88,7 @@ class ByteShuffleChunkedDatasetTest {
 			assertThat(ArrayUtils.toObject(filters.get(1).getFilterData()), is(arrayContaining(compressionLevel)));
 
 			Object data = dataset.getData();
-			assertThat(TestUtils.getDimensions(data), is(equalTo(new int[]{7, 5})));
+			assertThat(Utils.getDimensions(data), is(equalTo(new int[]{7, 5})));
 			Object[] flatData = flatten(data);
 			for (int i = 0; i < flatData.length; i++) {
 				// Do element comparison as there are all different primitive numeric types

@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -28,6 +28,8 @@ import java.util.BitSet;
  * @author James Mudd
  */
 public class BTreeKValuesMessage extends Message {
+
+	public static final int MESSAGE_TYPE = 19;
 
 	private final short indexedStorageInternalNodeK;
 	private final short groupInternalNodeK;
@@ -57,5 +59,11 @@ public class BTreeKValuesMessage extends Message {
 	public short getGroupLeafNodeK() {
 		return groupLeafNodeK;
 	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
 
 }

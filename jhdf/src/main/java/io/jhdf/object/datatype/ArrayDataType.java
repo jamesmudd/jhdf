@@ -1,20 +1,22 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.object.datatype;
 
-import static io.jhdf.Utils.readBytesAsUnsignedInt;
 import io.jhdf.dataset.DatasetReader;
 import io.jhdf.storage.HdfBackingStorage;
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import org.apache.commons.lang3.ArrayUtils;
+
+import static io.jhdf.Utils.readBytesAsUnsignedInt;
 
 /**
  * Class for reading array data type messages.

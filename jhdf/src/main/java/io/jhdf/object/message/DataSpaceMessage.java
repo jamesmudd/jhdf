@@ -1,9 +1,9 @@
 /*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
- * http://jhdf.io
+ * https://jhdf.io
  *
- * Copyright (c) 2023 James Mudd
+ * Copyright (c) 2025 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -29,6 +29,8 @@ import java.util.BitSet;
  */
 public class DataSpaceMessage extends Message {
 
+	public static final int MESSAGE_TYPE = 1;
+
 	private final DataSpace dataSpace;
 
 	/* package */ DataSpaceMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
@@ -37,7 +39,25 @@ public class DataSpaceMessage extends Message {
 		dataSpace = DataSpace.readDataSpace(bb, sb);
 	}
 
+	public DataSpaceMessage(DataSpace dataSpace) {
+		this.dataSpace = dataSpace;
+	}
+
+	public static Message create(DataSpace dataSpace) {
+		return new DataSpaceMessage(dataSpace);
+	}
+
 	public DataSpace getDataSpace() {
 		return dataSpace;
+	}
+
+	@Override
+	public int getMessageType() {
+		return MESSAGE_TYPE;
+	}
+
+	@Override
+	public ByteBuffer toBuffer() {
+		return dataSpace.toBuffer();
 	}
 }
