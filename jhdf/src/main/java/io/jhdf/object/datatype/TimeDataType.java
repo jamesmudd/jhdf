@@ -41,7 +41,7 @@ public class TimeDataType extends DataType implements OrderedDataType {
 	}
 	@Override
 	public Class<?> getJavaType() {
-		return Instant.class;
+		return byte[].class;
 	}
 
 	@Override
@@ -59,9 +59,9 @@ public class TimeDataType extends DataType implements OrderedDataType {
 			}
 		} else {
 			for (int i = 0; i < Array.getLength(data); i++) {
-				long epochMills = Utils.readBytesAsUnsignedLong(buffer, this.getSize());
-				Instant instant = Instant.ofEpochMilli(epochMills);
-				Array.set(data, i, instant);
+				byte[] bytes = new byte[getSize()];
+				buffer.get(bytes);
+				Array.set(data, i, bytes);
 			}
 		}
 	}
