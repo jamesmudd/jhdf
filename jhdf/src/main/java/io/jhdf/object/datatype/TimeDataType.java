@@ -20,7 +20,7 @@ import java.time.Instant;
 import static io.jhdf.Utils.stripLeadingIndex;
 
 public class TimeDataType extends DataType implements OrderedDataType {
-	public static final int CLASS_ID = 2
+	public static final int CLASS_ID = 2;
 
 	private final ByteOrder order;
 	private final short bitPrecision;
