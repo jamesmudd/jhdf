@@ -1,5 +1,11 @@
 # jHDF Change Log
 
+## v0.9.0 - February 2025
+- *Breaking API change* Fix typo `WritiableDataset` to `WritableDataset` so you will need to make code updates if you are using writing. Thanks to @jshook
+- Allow files contain datatype version 0 to be read. Note a warning will be logged as this is out of spec. https://github.com/jamesmudd/jhdf/issues/524
+- Add support for reading the `time` datatype. This is not commonly used as it appears to be poorly specified, but it will be read as byte[] to be interpreted. https://github.com/jamesmudd/jhdf/issues/523
+- Build and dependency updates
+
 ## v0.8.6 - January 2025
 - Add support for reading implicit index chunked datasets https://github.com/jamesmudd/jhdf/issues/651 https://github.com/jamesmudd/jhdf/pull/655
 - Test fixes for fixed-array index datasets
