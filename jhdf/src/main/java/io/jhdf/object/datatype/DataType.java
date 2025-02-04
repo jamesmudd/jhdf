@@ -15,12 +15,15 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
 public abstract class DataType {
 
+	private static final Logger logger = LoggerFactory.getLogger(DataType.class);
 	private final int version;
 	private final int dataClass;
 	private final int size; // In bytes
@@ -42,7 +45,9 @@ public abstract class DataType {
 		int version = Utils.bitsToInt(classAndVersion, 4, 4);
 		int dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
 
-		if (version == 0 || version > 3) {
+		if (version == 0) {
+			logger.warn("Datatype version 0 detected this is out of spec, attempting to read anyway");
+		} else if (version > 3) {
 			throw new HdfException("Unrecognized datatype version '" + version + "' detected");
 		}
 
