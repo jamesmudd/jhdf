@@ -10,6 +10,7 @@
 package io.jhdf.nio;
 
 import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Feature;
 import com.google.common.jimfs.Jimfs;
 import io.jhdf.HdfFile;
 import io.jhdf.api.Attribute;
@@ -56,26 +57,44 @@ class NioPathTest
 {
 	private static final String 	HDF5_TEST_FILE_DIRECTORY_PATH	= "/hdf5";
 	private static       Path   	LOCAL_ROOT_DIRECTORY;
-	private static       FileSystem	NON_LOCAL_FILE_SYSTEM;
+	private static       FileSystem	NON_LOCAL_FILE_SYSTEM_WITH_FILE_CHANNEL_SUPPORT;
+	private static       FileSystem	NON_LOCAL_FILE_SYSTEM_WITHOUT_FILE_CHANNEL_SUPPORT;
 
 	@BeforeAll
 	static void setup() throws IOException {
 		LOCAL_ROOT_DIRECTORY = getPathToResource(HDF5_TEST_FILE_DIRECTORY_PATH);
 
-		NON_LOCAL_FILE_SYSTEM = Jimfs.newFileSystem(Configuration.unix());
-		copyFiles(LOCAL_ROOT_DIRECTORY, NON_LOCAL_FILE_SYSTEM.getPath("/"));
+		NON_LOCAL_FILE_SYSTEM_WITH_FILE_CHANNEL_SUPPORT = createNonLocalFileSystem("FS1", true);
+		copyFiles(LOCAL_ROOT_DIRECTORY, NON_LOCAL_FILE_SYSTEM_WITH_FILE_CHANNEL_SUPPORT.getPath("/"));
+
+		NON_LOCAL_FILE_SYSTEM_WITHOUT_FILE_CHANNEL_SUPPORT = createNonLocalFileSystem("FS2", false);
+		copyFiles(LOCAL_ROOT_DIRECTORY, NON_LOCAL_FILE_SYSTEM_WITHOUT_FILE_CHANNEL_SUPPORT.getPath("/"));
 	}
 
 	@AfterAll
 	static void shutdown() throws IOException {
-		NON_LOCAL_FILE_SYSTEM.close();
+		NON_LOCAL_FILE_SYSTEM_WITH_FILE_CHANNEL_SUPPORT.close();
+		NON_LOCAL_FILE_SYSTEM_WITHOUT_FILE_CHANNEL_SUPPORT.close();
 	}
 
 	@ParameterizedTest
 	@MethodSource("getTestFileNames")
-	void testNonDefaultFileSystemAccess(String testFileName) {
+	void testNonDefaultFileSystemAccessWithFileChannelSupport(String testFileName) throws IOException {
+		testNonDefaultFileSystemAccess(testFileName, true);
+	}
+
+	@ParameterizedTest
+	@MethodSource("getTestFileNames")
+	void testNonDefaultFileSystemAccessWithoutFileChannelSupport(String testFileName) throws IOException {
+		testNonDefaultFileSystemAccess(testFileName, false);
+	}
+
+	private void testNonDefaultFileSystemAccess(String testFileName, boolean withFileChannelSupport) throws IOException {
 		Path localTestFile = LOCAL_ROOT_DIRECTORY.resolve(testFileName);
-		Path nonLocalFileSystemRoot = NON_LOCAL_FILE_SYSTEM.getPath("/");
+		FileSystem nonLocalFileSystem = withFileChannelSupport
+			? NON_LOCAL_FILE_SYSTEM_WITH_FILE_CHANNEL_SUPPORT
+			: NON_LOCAL_FILE_SYSTEM_WITHOUT_FILE_CHANNEL_SUPPORT;
+		Path nonLocalFileSystemRoot = nonLocalFileSystem.getPath("/");
 		Path nonLocalTestFile = nonLocalFileSystemRoot.resolve(testFileName);
 		compareStructure(localTestFile, nonLocalTestFile);
 	}
@@ -203,6 +222,17 @@ class NioPathTest
 			}
 		}
 		return testFileNames;
+	}
+
+	private static FileSystem createNonLocalFileSystem(String name, boolean withFileChannelSupport) {
+		Configuration.Builder configurationBuilder = Configuration.unix().toBuilder();
+		if (withFileChannelSupport) {
+			configurationBuilder.setSupportedFeatures(Feature.FILE_CHANNEL);
+		} else {
+			configurationBuilder.setSupportedFeatures();
+		}
+		Configuration configuration = configurationBuilder.build();
+		return Jimfs.newFileSystem(name, configuration);
 	}
 
 	private static void copyFiles(Path sourceDirectory, Path targetDirectory) throws IOException {
