@@ -9,6 +9,7 @@
  */
 package io.jhdf.examples;
 
+import io.jhdf.TestUtils;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -22,14 +23,11 @@ import org.junit.jupiter.api.TestFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -67,17 +65,15 @@ public abstract class TestAllFilesBase {
 	private static final PathMatcher HDF5 = FileSystems.getDefault().getPathMatcher("glob:**.{hdf5,h5}");
 
 	@TestFactory
-	Stream<DynamicNode> allHdf5TestFiles() throws IOException, URISyntaxException {
+	Stream<DynamicNode> allHdf5TestFiles() throws IOException {
 
 		// Auto discover the test files assuming they exist in under the directory
 		// containing test_file.hdf5
-		URL resource = this.getClass().getResource("/hdf5/");
-		Objects.requireNonNull(resource);
-		Path path = Paths.get(resource.toURI()).getParent();
-		List<Path> files = Files.walk(path).filter(HDF5::matches).collect(Collectors.toList());
+		Path hdf5Path = TestUtils.getTestPath("");
+		List<Path> files = Files.walk(hdf5Path).filter(HDF5::matches).collect(Collectors.toList());
 
 		// Check at least some files have been discovered
-		assertThat("Less than 3 HDF5 test files discovered searched paths below: " + path.toAbsolutePath(),
+		assertThat("Less than 3 HDF5 test files discovered searched paths below: " + hdf5Path.toAbsolutePath(),
 			files.size(), is(greaterThan(2)));
 
 		// Make a test for each file

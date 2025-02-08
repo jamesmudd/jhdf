@@ -35,8 +35,8 @@ class SuperblockTest {
 
 	@BeforeEach
 	void setUp() throws FileNotFoundException {
-		final String testFileUrl = this.getClass().getResource("/hdf5/test_file.hdf5").getFile();
-		raf = new RandomAccessFile(new File(testFileUrl), "r");
+		File testFile = TestUtils.getTestFile("test_file.hdf5");
+		raf = new RandomAccessFile(testFile, "r");
 		fc = raf.getChannel();
 	}
 
@@ -86,8 +86,8 @@ class SuperblockTest {
 
 	@Test
 	void testReadingSuperblockExtension() throws FileNotFoundException {
-		final String testFileUrl = this.getClass().getResource("/hdf5/superblock-extension.hdf5").getFile();
-		raf = new RandomAccessFile(new File(testFileUrl), "r");
+		File testFile = TestUtils.getTestFile("superblock-extension.hdf5");
+		raf = new RandomAccessFile(testFile, "r");
 		fc = raf.getChannel();
 		Superblock superblock = Superblock.SuperblockV2V3.readSuperblock(fc, 0);
 		Optional<ObjectHeader> superblockExtension = superblock.getExtension();

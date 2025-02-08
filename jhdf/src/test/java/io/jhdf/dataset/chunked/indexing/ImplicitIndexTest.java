@@ -25,7 +25,7 @@ class ImplicitIndexTest {
 	private static HdfFile hdfFile;
 
 	@BeforeAll
-	static void setup() throws Exception {
+	static void setup() {
 		hdfFile = loadTestHdfFile(HDF5_TEST_FILE_NAME);
 	}
 

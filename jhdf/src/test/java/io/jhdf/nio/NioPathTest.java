@@ -13,6 +13,7 @@ import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Feature;
 import com.google.common.jimfs.Jimfs;
 import io.jhdf.HdfFile;
+import io.jhdf.TestUtils;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -25,13 +26,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,14 +53,13 @@ import static org.hamcrest.Matchers.notNullValue;
  */
 class NioPathTest
 {
-	private static final String 	HDF5_TEST_FILE_DIRECTORY_PATH	= "/hdf5";
 	private static       Path   	LOCAL_ROOT_DIRECTORY;
 	private static       FileSystem	NON_LOCAL_FILE_SYSTEM_WITH_FILE_CHANNEL_SUPPORT;
 	private static       FileSystem	NON_LOCAL_FILE_SYSTEM_WITHOUT_FILE_CHANNEL_SUPPORT;
 
 	@BeforeAll
 	static void setup() throws IOException {
-		LOCAL_ROOT_DIRECTORY = getPathToResource(HDF5_TEST_FILE_DIRECTORY_PATH);
+		LOCAL_ROOT_DIRECTORY = TestUtils.getTestPath("");
 
 		NON_LOCAL_FILE_SYSTEM_WITH_FILE_CHANNEL_SUPPORT = createNonLocalFileSystem("FS1", true);
 		copyFiles(LOCAL_ROOT_DIRECTORY, NON_LOCAL_FILE_SYSTEM_WITH_FILE_CHANNEL_SUPPORT.getPath("/"));
@@ -244,18 +241,6 @@ class NioPathTest
 					Files.copy(sourceFile, targetFile);
 				}
 			}
-		}
-	}
-
-	private static Path getPathToResource(String relativePath) {
-		URL testFileDirectoryUrl = NioPathTest.class.getResource(relativePath);
-		if (testFileDirectoryUrl == null) {
-			throw new IllegalStateException("No resource URL available for relative path '" + relativePath + "'");
-		}
-		try {
-			return Paths.get(testFileDirectoryUrl.toURI());
-		} catch (URISyntaxException e) {
-			throw new IllegalStateException("Invalid resource URL '" + testFileDirectoryUrl + "'");
 		}
 	}
 }

@@ -55,9 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class HdfFileTest {
 
 	private static final String HDF5_TEST_FILE_NAME = "test_file.hdf5";
-	private static final String HDF5_TEST_FILE_PATH = "/hdf5/" + HDF5_TEST_FILE_NAME;
 	private static final String HDF5_TEST_FILE_TWO_NAME = "test_file2.hdf5";
-	private static final String HDF5_TEST_FILE_TWO_PATH = "/hdf5/" + HDF5_TEST_FILE_TWO_NAME;
 	private static final String NON_HDF5_TEST_FILE_NAME = "/scripts/make_test_files.py";
 	private Path testFilePath;
 	private Path testFile2Path;
@@ -65,8 +63,8 @@ class HdfFileTest {
 
 	@BeforeEach
 	void setup() throws URISyntaxException {
-		testFilePath = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI());
-		testFile2Path = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_TWO_PATH).toURI());
+		testFilePath = TestUtils.getTestPath(HDF5_TEST_FILE_NAME);
+		testFile2Path = TestUtils.getTestPath(HDF5_TEST_FILE_TWO_NAME);
 		nonHdfFilePath = Paths.get(this.getClass().getResource(NON_HDF5_TEST_FILE_NAME).toURI());
 	}
 
@@ -82,11 +80,11 @@ class HdfFileTest {
 	}
 
 	@Test
-	void testOpeningFileWithLargeMaxDimensionsSize() throws URISyntaxException {
-		String filePath = "/hdf5/100B_max_dimension_size.hdf5";
+	void testOpeningFileWithLargeMaxDimensionsSize() {
+		String fileName = "100B_max_dimension_size.hdf5";
 
-		URI testFileUri = this.getClass().getResource(filePath).toURI();
-		try (HdfFile hdfFile = new HdfFile(new File(testFileUri))) {
+		File testFile = TestUtils.getTestFile(fileName);
+		try (HdfFile hdfFile = new HdfFile(testFile)) {
 			Dataset dataset = hdfFile.getDatasetByPath("/100B-MaxSize");
 
 			assertThat(dataset.getMaxSize().length, is(equalTo(1)));
@@ -285,16 +283,16 @@ class HdfFileTest {
 	}
 
 	@Test
-	void testURIConstructor() throws URISyntaxException {
-		URI uri = this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI();
+	void testURIConstructor() {
+		URI uri = testFilePath.toUri();
 		HdfFile hdfFile = new HdfFile(uri);
 		assertThat(hdfFile.getFile(), is(notNullValue()));
 		hdfFile.close();
 	}
 
 	@Test
-	void testFileConstructor() throws URISyntaxException {
-		File file = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI()).toFile();
+	void testFileConstructor() {
+		File file = testFilePath.toFile();
 		try (HdfFile hdfFile = new HdfFile(file)) {
 			assertThat(hdfFile.getFile(), is(notNullValue()));
 		}
@@ -302,7 +300,7 @@ class HdfFileTest {
 
 	@Test
 	void testReadingFromStream() throws IOException {
-		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_PATH).openStream();
+		try (InputStream inputStream = Files.newInputStream(testFilePath);
 			 HdfFile hdfFile = HdfFile.fromInputStream(inputStream)) {
 
 			assertThat(hdfFile.getUserBlockSize(), is(equalTo(0L)));
@@ -321,7 +319,7 @@ class HdfFileTest {
 	@Test
 	void testReadingFromStreamDeletesTempFileOnClose() throws IOException {
 		File tempFile;
-		try (InputStream inputStream = this.getClass().getResource(HDF5_TEST_FILE_PATH).openStream();
+		try (InputStream inputStream = Files.newInputStream(testFilePath);
 			 HdfFile hdfFile = HdfFile.fromInputStream(inputStream)) {
 			tempFile = hdfFile.getFile();
 			assertTrue(tempFile.exists());
@@ -330,9 +328,8 @@ class HdfFileTest {
 	}
 
 	@Test
-	void testLoadingInMemoryFile() throws IOException, URISyntaxException {
-		Path path = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI());
-		ByteBuffer byteBuffer = ByteBuffer.wrap(Files.readAllBytes(path));
+	void testLoadingInMemoryFile() throws IOException {
+		ByteBuffer byteBuffer = ByteBuffer.wrap(Files.readAllBytes(testFilePath));
 		HdfFile hdfFile = HdfFile.fromByteBuffer(byteBuffer);
 		assertThat(hdfFile, is(notNullValue()));
 		assertThat(hdfFile.inMemory(), is(true));
@@ -341,9 +338,8 @@ class HdfFileTest {
 	}
 
 	@Test
-	void testLoadingInMemoryFileFromByteArray() throws IOException, URISyntaxException {
-		Path path = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI());
-		byte[] bytes = Files.readAllBytes(path);
+	void testLoadingInMemoryFileFromByteArray() throws IOException {
+		byte[] bytes = Files.readAllBytes(testFilePath);
 		HdfFile hdfFile = HdfFile.fromBytes(bytes);
 		assertThat(hdfFile, is(notNullValue()));
 		assertThat(hdfFile.inMemory(), is(true));
@@ -354,9 +350,8 @@ class HdfFileTest {
 	}
 
 	@Test
-	void testLoadingInMemoryFileFromByteArrayTwo() throws IOException, URISyntaxException {
-		Path path = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI());
-		byte[] bytes = Files.readAllBytes(path);
+	void testLoadingInMemoryFileFromByteArrayTwo() throws IOException {
+		byte[] bytes = Files.readAllBytes(testFilePath);
 		HdfFile hdfFile = HdfFile.fromBytes(bytes);
 		assertThat(hdfFile, is(notNullValue()));
 		assertThat(hdfFile.inMemory(), is(true));
@@ -373,18 +368,16 @@ class HdfFileTest {
 	}
 
 	@Test
-	void testExternalFilesOnInMemoryThrows() throws IOException, URISyntaxException {
-		Path path = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI());
-		byte[] bytes = Files.readAllBytes(path);
+	void testExternalFilesOnInMemoryThrows() throws IOException {
+		byte[] bytes = Files.readAllBytes(testFilePath);
 		try (HdfFile hdfFile = HdfFile.fromBytes(bytes)) {
 			assertThrows(InMemoryHdfException.class, () -> hdfFile.addExternalFile(Mockito.mock(HdfFile.class)));
 		}
 	}
 
 	@Test
-	void testGettingFileChannelFromInMemoryFileThrows() throws IOException, URISyntaxException {
-		Path path = Paths.get(this.getClass().getResource(HDF5_TEST_FILE_PATH).toURI());
-		byte[] bytes = Files.readAllBytes(path);
+	void testGettingFileChannelFromInMemoryFileThrows() throws IOException {
+		byte[] bytes = Files.readAllBytes(testFilePath);
 		try (HdfFile hdfFile = HdfFile.fromBytes(bytes)) {
 			HdfBackingStorage hdfBackingStorage = hdfFile.getHdfBackingStorage();
 			assertThrows(InMemoryHdfException.class, hdfBackingStorage::getFileChannel);

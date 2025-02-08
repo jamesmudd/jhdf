@@ -17,13 +17,13 @@ import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfBrokenLinkException;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -41,8 +41,8 @@ class LinksTest {
 	private HdfFile hdfFile;
 
 	@BeforeEach
-	void setUp() throws URISyntaxException {
-		URI uri = this.getClass().getResource("/hdf5/test_file.hdf5").toURI();
+	void setUp() {
+		URI uri = TestUtils.getTestUri("test_file.hdf5");
 		hdfFile = new HdfFile(uri);
 		file = new File(uri);
 	}

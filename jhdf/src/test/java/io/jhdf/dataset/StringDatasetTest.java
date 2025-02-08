@@ -54,7 +54,7 @@ class StringDatasetTest {
 	private static HdfFile multiDimDatasetHdfFile;
 
 	@BeforeAll
-	static void setup() throws Exception {
+	static void setup() {
 		earliestHdfFile = loadTestHdfFile(HDF5_TEST_EARLIEST_FILE_NAME);
 		latestHdfFile = loadTestHdfFile(HDF5_TEST_LATEST_FILE_NAME);
 		utf8FixedHdfFile = loadTestHdfFile(HDF5_UTF8_FIXED);
