@@ -1,10 +1,28 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * https://jhdf.io
+ *
+ * Copyright (c) 2025 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
 package io.jhdf.nio;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.*;
+import java.nio.channels.Channel;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.channels.WritableByteChannel;
 
+/**
+ * Wraps a {@link SeekableByteChannel} within a {@link FileChannel}
+ */
 public class FileChannelFromSeekableByteChannel extends FileChannel
 {
 	private static final int MAX_TRANSFER_SIZE = 8192;
