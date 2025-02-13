@@ -40,7 +40,7 @@ class DatasetByAddressTest {
 	private static HdfFile earliestHdfFile;
 
 	@BeforeAll
-	static void setup() throws Exception {
+	static void setup() {
 		earliestHdfFile = loadTestHdfFile(HDF5_TEST_EARLIEST_FILE_NAME);
 	}
 

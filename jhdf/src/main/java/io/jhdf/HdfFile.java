@@ -20,6 +20,7 @@ import io.jhdf.dataset.DatasetLoader;
 import io.jhdf.dataset.NoParent;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.InMemoryHdfException;
+import io.jhdf.nio.FileChannelFromSeekableByteChannel;
 import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.DataTypeMessage;
 import io.jhdf.storage.HdfBackingStorage;
@@ -35,15 +36,18 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.nio.file.spi.FileSystemProvider;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
@@ -173,7 +177,15 @@ public class HdfFile implements Group, AutoCloseable {
 		try {
 			// Sonar would like this closed but we are implementing a file object which
 			// needs this channel for operation it is closed when this HdfFile is closed
-			FileChannel fc = FileChannel.open(hdfFile, StandardOpenOption.READ); // NOSONAR
+			FileChannel fc;
+			try {
+				fc = FileChannel.open(hdfFile, StandardOpenOption.READ); // NOSONAR
+			} catch (UnsupportedOperationException e) {
+				// some FileSystemProviders don't support FileChannels
+				FileSystemProvider provider = hdfFile.getFileSystem().provider();
+				SeekableByteChannel byteChannel = provider.newByteChannel(hdfFile, Collections.singleton(StandardOpenOption.READ));
+				fc = new FileChannelFromSeekableByteChannel(byteChannel);
+			}
 
 			// Find out if the file is a HDF5 file
 			boolean validSignature = false;

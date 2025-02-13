@@ -16,11 +16,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,9 +29,9 @@ class LocalHeapTest {
 	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
-	void setUp() throws IOException, URISyntaxException {
-		final URI testFileUri = this.getClass().getResource("/hdf5/test_file.hdf5").toURI();
-		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
+	void setUp() throws IOException {
+		Path testPath = TestUtils.getTestPath("test_file.hdf5");
+		FileChannel fc = FileChannel.open(testPath, StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
 		hdfBackingStorage = new HdfFileChannel(fc, sb);
 	}

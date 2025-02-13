@@ -14,11 +14,14 @@ import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
@@ -36,12 +39,31 @@ public final class TestUtils {
 		throw new AssertionError("No instances of TestUtils");
 	}
 
-	public static HdfFile loadTestHdfFile(String fileName) throws Exception {
+	public static HdfFile loadTestHdfFile(String fileName) {
+		Path testPath = getTestPath(fileName);
+		return new HdfFile(testPath);
+	}
+
+	public static File getTestFile(String fileName) {
+		Path testPath = getTestPath(fileName);
+		return testPath.toFile();
+	}
+
+	public static Path getTestPath(String fileName) {
+		URI testUri = getTestUri(fileName);
+		return Paths.get(testUri);
+	}
+
+	public static URI getTestUri(String fileName) {
 		URL url = TestUtils.class.getResource("/hdf5/" + fileName);
 		if (url == null) {
 			throw new RuntimeException("Could not find test file named: " + fileName);
 		}
-		return new HdfFile(Paths.get(url.toURI()));
+		try {
+			return url.toURI();
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("Cannot convert URL \"" + url + "\" to URI: " + e, e);
+		}
 	}
 
 	public static double[] toDoubleArray(Object data) {

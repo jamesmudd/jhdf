@@ -40,7 +40,7 @@ class CompressedChunkedDatasetTest {
 	private static HdfFile latestHdfFile;
 
 	@BeforeAll
-	static void setup() throws Exception {
+	static void setup() {
 		earliestHdfFile = loadTestHdfFile(HDF5_TEST_EARLIEST_FILE_NAME);
 		latestHdfFile = loadTestHdfFile(HDF5_TEST_LATEST_FILE_NAME);
 	}

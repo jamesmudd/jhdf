@@ -19,11 +19,9 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -40,9 +38,9 @@ class GlobalHeapTest {
 	private HdfFileChannel hdfFc;
 
 	@BeforeEach
-	void setup() throws IOException, URISyntaxException {
-		URI testFile = this.getClass().getResource("/hdf5/test_file.hdf5").toURI();
-		FileChannel fc = FileChannel.open(Paths.get(testFile), StandardOpenOption.READ);
+	void setup() throws IOException {
+		Path testPath = TestUtils.getTestPath("test_file.hdf5");
+		FileChannel fc = FileChannel.open(testPath, StandardOpenOption.READ);
 		sb = Superblock.readSuperblock(fc, 0);
 		hdfFc = new HdfFileChannel(fc, sb);
 
@@ -108,7 +106,7 @@ class GlobalHeapTest {
 	}
 
 	@Test
-	void testDifferentObjectZero() throws Exception {
+	void testDifferentObjectZero() {
 		HdfFile file = TestUtils.loadTestHdfFile("globalheaps_test.hdf5");
 		Object data = file.getAttribute("attribute").getData();
 		assertThat((String[]) data, is(arrayContaining(

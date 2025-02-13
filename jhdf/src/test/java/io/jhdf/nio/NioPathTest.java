@@ -9,7 +9,11 @@
  */
 package io.jhdf.nio;
 
+import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Feature;
+import com.google.common.jimfs.Jimfs;
 import io.jhdf.HdfFile;
+import io.jhdf.TestUtils;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
@@ -22,17 +26,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,7 +44,7 @@ import static org.hamcrest.Matchers.notNullValue;
  * that do not reside in the default file system. To do so, the test
  * <ol>
  *     <li>
- *         copies all test files into a temporary {@code ZipFileSystem} and
+ *         copies all test files into a {@code JimfsFileSystem} and
  *     </li>
  *     <li>
  *         evaluates that loading the local file and loading the non-local copy yields the same HDF5 structure representation.
@@ -55,40 +53,47 @@ import static org.hamcrest.Matchers.notNullValue;
  */
 class NioPathTest
 {
-	private static final String HDF5_TEST_FILE_DIRECTORY_PATH	= "/hdf5";
-	private static final String ZIP_FILE_NAME					= "nio_test.zip";
-	private static       Path   TEMP_DIR;
-	private static       Path   LOCAL_ROOT_DIRECTORY;
-	private static       URI    NON_LOCAL_ROOT_DIRECTORY_URI;
+	private static       Path   	LOCAL_ROOT_DIRECTORY;
+	private static       FileSystem	NON_LOCAL_FILE_SYSTEM_WITH_FILE_CHANNEL_SUPPORT;
+	private static       FileSystem	NON_LOCAL_FILE_SYSTEM_WITHOUT_FILE_CHANNEL_SUPPORT;
 
 	@BeforeAll
 	static void setup() throws IOException {
-		LOCAL_ROOT_DIRECTORY = getPathToResource(HDF5_TEST_FILE_DIRECTORY_PATH);
-		TEMP_DIR = Files.createTempDirectory("jHDF_NIO_test");
-		Path zipFile = TEMP_DIR.resolve(ZIP_FILE_NAME);
-		try (FileSystem zipFileSystem = createZipFileSystem(zipFile)) {
-			Path nonLocalRootDirectory = zipFileSystem.getPath("/");
-			NON_LOCAL_ROOT_DIRECTORY_URI = nonLocalRootDirectory.toUri();
-			copyFiles(LOCAL_ROOT_DIRECTORY, nonLocalRootDirectory);
-		}
+		LOCAL_ROOT_DIRECTORY = TestUtils.getTestPath("");
+
+		NON_LOCAL_FILE_SYSTEM_WITH_FILE_CHANNEL_SUPPORT = createNonLocalFileSystem("FS1", true);
+		copyFiles(LOCAL_ROOT_DIRECTORY, NON_LOCAL_FILE_SYSTEM_WITH_FILE_CHANNEL_SUPPORT.getPath("/"));
+
+		NON_LOCAL_FILE_SYSTEM_WITHOUT_FILE_CHANNEL_SUPPORT = createNonLocalFileSystem("FS2", false);
+		copyFiles(LOCAL_ROOT_DIRECTORY, NON_LOCAL_FILE_SYSTEM_WITHOUT_FILE_CHANNEL_SUPPORT.getPath("/"));
 	}
 
 	@AfterAll
 	static void shutdown() throws IOException {
-		if (TEMP_DIR != null && Files.isDirectory(TEMP_DIR)) {
-			delete(TEMP_DIR);
-		}
+		NON_LOCAL_FILE_SYSTEM_WITH_FILE_CHANNEL_SUPPORT.close();
+		NON_LOCAL_FILE_SYSTEM_WITHOUT_FILE_CHANNEL_SUPPORT.close();
 	}
 
 	@ParameterizedTest
 	@MethodSource("getTestFileNames")
-	void testNonDefaultFileSystemAccess(String testFileName) throws IOException {
+	void testNonDefaultFileSystemAccessWithFileChannelSupport(String testFileName) throws IOException {
+		testNonDefaultFileSystemAccess(testFileName, true);
+	}
+
+	@ParameterizedTest
+	@MethodSource("getTestFileNames")
+	void testNonDefaultFileSystemAccessWithoutFileChannelSupport(String testFileName) throws IOException {
+		testNonDefaultFileSystemAccess(testFileName, false);
+	}
+
+	private void testNonDefaultFileSystemAccess(String testFileName, boolean withFileChannelSupport) throws IOException {
 		Path localTestFile = LOCAL_ROOT_DIRECTORY.resolve(testFileName);
-		try (FileSystem ignored = openZipFileSystem(NON_LOCAL_ROOT_DIRECTORY_URI)) {
-			Path nonLocalRootDirectory = Paths.get(NON_LOCAL_ROOT_DIRECTORY_URI);
-			Path nonLocalTestFile = nonLocalRootDirectory.resolve(testFileName);
-			compareStructure(localTestFile, nonLocalTestFile);
-		}
+		FileSystem nonLocalFileSystem = withFileChannelSupport
+			? NON_LOCAL_FILE_SYSTEM_WITH_FILE_CHANNEL_SUPPORT
+			: NON_LOCAL_FILE_SYSTEM_WITHOUT_FILE_CHANNEL_SUPPORT;
+		Path nonLocalFileSystemRoot = nonLocalFileSystem.getPath("/");
+		Path nonLocalTestFile = nonLocalFileSystemRoot.resolve(testFileName);
+		compareStructure(localTestFile, nonLocalTestFile);
 	}
 
 	private void compareStructure(Path file1, Path file2) {
@@ -216,15 +221,15 @@ class NioPathTest
 		return testFileNames;
 	}
 
-	private static void delete(Path path) throws IOException {
-		if (Files.isDirectory(path)) {
-			try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
-				for (Path value : stream) {
-					delete(value);
-				}
-			}
+	private static FileSystem createNonLocalFileSystem(String name, boolean withFileChannelSupport) {
+		Configuration.Builder configurationBuilder = Configuration.unix().toBuilder();
+		if (withFileChannelSupport) {
+			configurationBuilder.setSupportedFeatures(Feature.FILE_CHANNEL);
+		} else {
+			configurationBuilder.setSupportedFeatures();
 		}
-		Files.delete(path);
+		Configuration configuration = configurationBuilder.build();
+		return Jimfs.newFileSystem(name, configuration);
 	}
 
 	private static void copyFiles(Path sourceDirectory, Path targetDirectory) throws IOException {
@@ -237,29 +242,5 @@ class NioPathTest
 				}
 			}
 		}
-	}
-
-	private static Path getPathToResource(String relativePath) {
-		URL testFileDirectoryUrl = NioPathTest.class.getResource(relativePath);
-		if (testFileDirectoryUrl == null) {
-			throw new IllegalStateException("No resource URL available for relative path '" + relativePath + "'");
-		}
-		try {
-			return Paths.get(testFileDirectoryUrl.toURI());
-		} catch (URISyntaxException e) {
-			throw new IllegalStateException("Invalid resource URL '" + testFileDirectoryUrl + "'");
-		}
-	}
-
-	private static FileSystem createZipFileSystem(Path zipFile) throws IOException {
-		URI zipFileUri = zipFile.toUri();
-		URI zipUri = URI.create("jar:" + zipFileUri);
-		return openZipFileSystem(zipUri);
-	}
-
-	private static FileSystem openZipFileSystem(URI uri) throws IOException {
-		Map<String, String> env = new HashMap<>();
-		env.put("create", "true");
-		return FileSystems.newFileSystem(uri, env);
 	}
 }

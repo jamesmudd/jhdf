@@ -42,7 +42,7 @@ class EnumDatasetTest {
 	private static HdfFile latestHdfFile;
 
 	@BeforeAll
-	static void setup() throws Exception {
+	static void setup() {
 		earliestHdfFile = loadTestHdfFile(ENUM_EARLIEST_TEST_FILE_NAME);
 		latestHdfFile = loadTestHdfFile(ENUM_LATEST_TEST_FILE_NAME);
 	}
