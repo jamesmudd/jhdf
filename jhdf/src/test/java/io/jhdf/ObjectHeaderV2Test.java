@@ -24,11 +24,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,9 +45,9 @@ class ObjectHeaderV2Test {
 	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
-	void setUp() throws IOException, URISyntaxException {
-		final URI testFileUri = this.getClass().getResource("/hdf5/test_file2.hdf5").toURI();
-		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
+	void setUp() throws IOException {
+		Path testPath = TestUtils.getTestPath("test_file2.hdf5");
+		FileChannel fc = FileChannel.open(testPath, StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
 		hdfBackingStorage = new HdfFileChannel(fc, sb);
 	}
@@ -189,10 +187,10 @@ class ObjectHeaderV2Test {
 	}
 
 	@Test
-	void testCreationOrderTracked() throws IOException, URISyntaxException {
+	void testCreationOrderTracked() throws IOException {
 		// this test fails without skipping the creation order in Message#readObjectHeaderV2Message
-		final URI testFileUri = this.getClass().getResource("/hdf5/test_attribute_with_creation_order.hdf5").toURI();
-		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
+		Path testPath = TestUtils.getTestPath("test_attribute_with_creation_order.hdf5");
+		FileChannel fc = FileChannel.open(testPath, StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
 		HdfBackingStorage hdfBackingStorage = new HdfFileChannel(fc, sb);
 

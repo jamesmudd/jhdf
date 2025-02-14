@@ -10,6 +10,7 @@
 package io.jhdf.object.message;
 
 import io.jhdf.Superblock;
+import io.jhdf.TestUtils;
 import io.jhdf.storage.HdfBackingStorage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,8 +41,8 @@ class AttributeMessageV3Test {
 
 	@BeforeEach
 	void setUp() throws IOException {
-		final String testFileUrl = this.getClass().getResource("/hdf5/test_file2.hdf5").getFile();
-		raf = new RandomAccessFile(new File(testFileUrl), "r");
+		File testFile = TestUtils.getTestFile("test_file2.hdf5");
+		raf = new RandomAccessFile(testFile, "r");
 		fc = raf.getChannel();
 		sb = Superblock.readSuperblock(fc, 0);
 		bb = fc.map(READ_ONLY, 270, 65);
