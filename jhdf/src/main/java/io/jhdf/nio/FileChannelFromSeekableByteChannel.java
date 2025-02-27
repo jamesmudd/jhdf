@@ -38,6 +38,18 @@ public class FileChannelFromSeekableByteChannel extends FileChannel
 	}
 
 	@Override
+	public int read(ByteBuffer dst, long position) throws IOException {
+		checkAccess(position);
+		long originalPosition = delegate.position();
+		try {
+			delegate.position(position);
+			return delegate.read(dst);
+		} finally {
+			delegate.position(originalPosition);
+		}
+	}
+
+	@Override
 	public long read(ByteBuffer[] dsts, int offset, int length) throws IOException {
 		int totalBytesRead = 0;
 		for (int i = offset; i < offset + length; i++) {
@@ -54,6 +66,18 @@ public class FileChannelFromSeekableByteChannel extends FileChannel
 	@Override
 	public int write(ByteBuffer src) throws IOException {
 		return delegate.write(src);
+	}
+
+	@Override
+	public int write(ByteBuffer src, long position) throws IOException {
+		checkAccess(position);
+		long originalPosition = delegate.position();
+		try {
+			delegate.position(position);
+			return delegate.write(src);
+		} finally {
+			delegate.position(originalPosition);
+		}
 	}
 
 	@Override
@@ -168,30 +192,6 @@ public class FileChannelFromSeekableByteChannel extends FileChannel
 			delegate.position(originalPosition);
 		}
 		return totalBytesTransferred;
-	}
-
-	@Override
-	public int read(ByteBuffer dst, long position) throws IOException {
-		checkAccess(position);
-		long originalPosition = delegate.position();
-		try {
-			delegate.position(position);
-			return delegate.read(dst);
-		} finally {
-			delegate.position(originalPosition);
-		}
-	}
-
-	@Override
-	public int write(ByteBuffer src, long position) throws IOException {
-		checkAccess(position);
-		long originalPosition = delegate.position();
-		try {
-			delegate.position(position);
-			return delegate.write(src);
-		} finally {
-			delegate.position(originalPosition);
-		}
 	}
 
 	@Override
