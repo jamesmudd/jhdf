@@ -43,9 +43,9 @@ public class FileChannelFromSeekableByteChannelTest
 {
 	private static final String	FILE_NAME_TO_READ				= "read_test";
 	private static final String	FILE_NAME_TO_WRITE				= "write_test";
-	private static final byte[] TEST_BYTES_TO_READ				= {9, 4, 8, 5, 0, 4, 7, 4, 6, 4};
-	private static final byte[] TEST_BYTES_TO_WRITE				= {0, 8, 3, 3, 2, 6, 0, 4, 5, 7};
-	private static final byte[] INITIAL_CONTENT_FILE_TO_WRITE	= {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+	private static final byte[]	TEST_BYTES_TO_READ				= {9, 4, 8, 5, 0, 4, 7, 4, 6, 4};
+	private static final byte[]	TEST_BYTES_TO_WRITE				= {0, 8, 3, 3, 2, 6, 0, 4, 5, 7};
+	private static final byte[]	INITIAL_CONTENT_FILE_TO_WRITE	= {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 	private static final NamedInt		NO_TRANSFER_LIMIT			= new NamedInt("unlimited byte transfer", 0);
 	private static final NamedInt		TWO_BYTE_TRANSFER_LIMIT		= new NamedInt("transfer limited to 2 bytes", 2);
