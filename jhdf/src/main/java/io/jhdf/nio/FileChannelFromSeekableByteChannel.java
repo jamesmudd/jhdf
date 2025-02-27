@@ -56,7 +56,7 @@ public class FileChannelFromSeekableByteChannel extends FileChannel
 			ByteBuffer dst = dsts[i];
 			int bytesRead = read(dst);
 			if (bytesRead == -1) {
-				break;
+				return totalBytesRead > 0 ? totalBytesRead : -1;
 			}
 			totalBytesRead += bytesRead;
 		}
