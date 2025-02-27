@@ -171,7 +171,7 @@ public class FileChannelFromSeekableByteChannel extends FileChannel
 		}
 	}
 
-	private long transferData(ReadableByteChannel from, WritableByteChannel to, long delegateStartPosition, long count) throws IOException {
+	private long transferData(ReadableByteChannel src, WritableByteChannel target, long delegateStartPosition, long count) throws IOException {
 		long originalPosition = delegate.position();
 		long totalBytesTransferred = 0;
 		try {
@@ -180,14 +180,41 @@ public class FileChannelFromSeekableByteChannel extends FileChannel
 			delegate.position(delegateStartPosition);
 			while (totalBytesTransferred < count) {
 				buffer.limit((int) Math.min(count - totalBytesTransferred, MAX_TRANSFER_SIZE));
-				int bytesRead = from.read(buffer);
+				int bytesRead = src.read(buffer);
 				if (bytesRead <= 0) {
 					break;
 				}
 				buffer.flip();
-				int bytesWritten = to.write(buffer);
+				int bytesWritten = target.write(buffer);
 				totalBytesTransferred += bytesWritten;
+
 				if (bytesWritten != bytesRead) {
+					/*
+					 * We have read more bytes from src than written to target. We must adjust the position
+					 * of src accordingly such that the read, but unwritten bytes are not lost forever.
+					 * If src is the delegate, then its position will be reset anyway.
+					 */
+					if (src != delegate) {
+						long readButUnwrittenBytes = bytesRead - bytesWritten;
+						if (src instanceof SeekableByteChannel) {
+							SeekableByteChannel srcChannel = (SeekableByteChannel) src;
+							srcChannel.position(srcChannel.position() - readButUnwrittenBytes);
+						} else {
+							/*
+							 * We can't adjust the position of src. Hence, we must force
+							 * writing the unwritten bytes.
+							 */
+							while (bytesWritten < bytesRead) {
+								int missingBytesWritten = target.write(buffer);
+								if (missingBytesWritten == 0) {
+									// avoid an infinite loop
+									throw new IOException("Failed to write bytes to position " + delegate.position());
+								}
+								bytesWritten += missingBytesWritten;
+								totalBytesTransferred += missingBytesWritten;
+							}
+						}
+					}
 					break;
 				}
 				buffer.clear();
