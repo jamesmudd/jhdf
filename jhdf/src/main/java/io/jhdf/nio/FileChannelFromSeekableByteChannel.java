@@ -59,6 +59,10 @@ public class FileChannelFromSeekableByteChannel extends FileChannel
 				return totalBytesRead > 0 ? totalBytesRead : -1;
 			}
 			totalBytesRead += bytesRead;
+			if  (dst.hasRemaining()) {
+				// For some reason the buffer has not been filled completely. This is a valid state in which we may return.
+				break;
+			}
 		}
 		return totalBytesRead;
 	}
@@ -87,6 +91,10 @@ public class FileChannelFromSeekableByteChannel extends FileChannel
 			ByteBuffer src = srcs[i];
 			int bytesWritten = write(src);
 			totalBytesWritten += bytesWritten;
+			if (src.hasRemaining()) {
+				// For some reason the buffer has not been written completely. This is a valid state in which we may return.
+				break;
+			}
 		}
 		return totalBytesWritten;
 	}
