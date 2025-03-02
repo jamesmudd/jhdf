@@ -44,17 +44,16 @@ class GroupTest {
 
 	@BeforeEach
 	void setUp() throws IOException {
-		final String testFileUrl = this.getClass().getResource("/hdf5/test_file.hdf5").getFile();
-		File file = new File(testFileUrl);
-		FileChannel fc = FileChannel.open(file.toPath(), StandardOpenOption.READ);
+		File testFile = TestUtils.getTestFile("test_file.hdf5");
+		FileChannel fc = FileChannel.open(testFile.toPath(), StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
 
 		hdfBackingStorage = new HdfFileChannel(fc, sb);
 
 		rootGroup = mock(Group.class);
 		when(rootGroup.getPath()).thenReturn("/");
-		when(rootGroup.getFile()).thenReturn(file);
-		when(rootGroup.getFileAsPath()).thenReturn(file.toPath());
+		when(rootGroup.getFile()).thenReturn(testFile);
+		when(rootGroup.getFileAsPath()).thenReturn(testFile.toPath());
 	}
 
 	@AfterEach

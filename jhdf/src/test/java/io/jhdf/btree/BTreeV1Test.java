@@ -10,6 +10,7 @@
 package io.jhdf.btree;
 
 import io.jhdf.Superblock;
+import io.jhdf.TestUtils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
@@ -18,10 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import static io.jhdf.Constants.UNDEFINED_ADDRESS;
@@ -36,9 +35,9 @@ class BTreeV1Test {
 	private HdfBackingStorage hdfBackingStorage;
 
 	@BeforeEach
-	void setUp() throws URISyntaxException, IOException {
-		final URI testFileUri = this.getClass().getResource("/hdf5/test_chunked_datasets_earliest.hdf5").toURI();
-		FileChannel fc = FileChannel.open(Paths.get(testFileUri), StandardOpenOption.READ);
+	void setUp() throws IOException {
+		Path testPath = TestUtils.getTestPath("test_chunked_datasets_earliest.hdf5");
+		FileChannel fc = FileChannel.open(testPath, StandardOpenOption.READ);
 		Superblock sb = Superblock.readSuperblock(fc, 0);
 		hdfBackingStorage = new HdfFileChannel(fc, sb);
 	}

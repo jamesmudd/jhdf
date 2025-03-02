@@ -60,7 +60,7 @@ class DatasetImplTest {
 	private static HdfFile hdfFile;
 
 	@BeforeAll
-	static void beforeAll() throws Exception {
+	static void beforeAll() {
 		hdfFile = loadTestHdfFile(HDF5_TEST_FILE_NAME);
 	}
 

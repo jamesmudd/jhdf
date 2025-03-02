@@ -77,8 +77,10 @@ public class HdfFileChannel implements HdfBackingStorage {
 			if (!memoryMappingFailed) {
 				try {
 					return fc.map(mode, address, length);
-				} catch (UnsupportedOperationException e) {
-					// many file systems do not support memory mapping
+				} catch (UnsupportedOperationException | IOException e) {
+					// Many file systems do not support memory mapping. Some throw an UnsupportedOperationException,
+					// others an IOException (cf. S3FileChannel of https://github.com/awslabs/aws-java-nio-spi-for-s3/).
+					// Falling back to readBufferNoOffset() is also valid if an IOException has a different cause.
 					memoryMappingFailed = true;
 				}
 			}

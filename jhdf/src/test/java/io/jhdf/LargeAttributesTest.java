@@ -31,7 +31,7 @@ class LargeAttributesTest {
 	private static HdfFile largeAttrHdfFile;
 
 	@BeforeAll
-	static void setup() throws Exception {
+	static void setup() {
 		largeAttrHdfFile = loadTestHdfFile(HDF5_TEST_FILE_NAME);
 	}
 
