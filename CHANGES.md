@@ -1,5 +1,10 @@
 # jHDF Change Log
 
+## v0.9.1 - March 2025
+- Improve Java FileSystem support. Allow use of `FileSystem` implementations that do not support `FileChannel`, also allows wider compatability if memory mapped file access is not possible. This improves the ability to use jHDF with file systems like S3. Thanks to @tbrunsch for this contribution.
+- Some improvements to test infrastructure. Also thanks to @tbrunsch
+- Build updates
+
 ## v0.9.0 - February 2025
 - *Breaking API change* Fix typo `WritiableDataset` to `WritableDataset` so you will need to make code updates if you are using writing. Thanks to @jshook
 - Allow files contain datatype version 0 to be read. Note a warning will be logged as this is out of spec. https://github.com/jamesmudd/jhdf/issues/524
