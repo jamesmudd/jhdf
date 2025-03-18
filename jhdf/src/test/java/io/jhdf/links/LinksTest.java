@@ -147,4 +147,25 @@ class LinksTest {
 		Dataset datasetThroughLink = hdfFile.getDatasetByPath("/links_group/external_link");
 		assertThat(datasetThroughLink.getData(), is(notNullValue()));
 	}
+
+	@Test
+	// Issue 689 https://github.com/jamesmudd/jhdf/issues/689
+	void testLinkToRootGroup() {
+		HdfFile externalLinkFile = new HdfFile(TestUtils.getTestFile("external_link.hdf5"));
+
+		Node rootSlash = externalLinkFile.getChild("root_slash");
+		Link rootSlashLink = (Link) rootSlash;
+		assertThat(rootSlashLink.isLink(), is(true));
+		assertThat(rootSlashLink.getTargetPath(), is("test_file.hdf5:/."));
+		// Resolve the link
+		rootSlashLink.getTarget();
+
+		Node rootDot = externalLinkFile.getChild("root_dot");
+		Link rootDotLink = (Link) rootDot;
+		assertThat(rootDotLink.isLink(), is(true));
+		assertThat(rootDotLink.getTargetPath(), is("test_file.hdf5:."));
+		// Resolve the link
+		rootSlashLink.getTarget();
+	}
+
 }
