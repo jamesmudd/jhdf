@@ -270,6 +270,10 @@ public class GroupImpl extends AbstractNode implements Group {
 
 	@Override
 	public Node getByPath(String path) {
+		// Special case when path is dot
+		if(path.equals(".")) {
+			return this;
+		}
 		// Try splitting into 2 sections the child of this group and the remaining path
 		// to pass down.
 		final String[] pathElements = path.split(Constants.PATH_SEPARATOR, 2);
