@@ -181,4 +181,26 @@ public abstract class DataType {
 	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
 		throw new UnsupportedHdfException("Data type [" + getClass().getSimpleName() + "] does not support writing");
 	}
+
+	/**
+	 * Reduce two data types. When derived datatypes from multiple chunks of data from the dataset
+	 * are presented, they need to be validated as consistent for the dataset, or enhanced to
+	 * support the superset of the two.
+	 *
+	 * @param dt2 The other, presumably compatible data type
+	 * @return A reduced data type
+	 */
+	public DataType reduce(DataType dt2) {
+		if (this instanceof StringData && dt2 instanceof StringData) {
+			return ((StringData)this).combine((StringData) dt2);
+		}
+		if (this.getSize() != dt2.getSize()) {
+			throw new HdfException("Can't reduce data types of different sizes");
+		}
+		if (this.getDataClass() != dt2.getDataClass()) {
+			throw new HdfException("Can't reduced data types of different data classes");
+		}
+		return this;
+	}
+
 }

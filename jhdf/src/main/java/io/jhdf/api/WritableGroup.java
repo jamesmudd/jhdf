@@ -15,4 +15,6 @@ public interface WritableGroup extends Group, WritableNode {
 	WritableDataset putDataset(String name, Object data);
 
 	WritableGroup putGroup(String name);
+
+	WritableDataset putWritableDataset(String name, WritableDataset dsb);
 }

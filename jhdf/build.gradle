@@ -78,6 +78,19 @@ test {
     testLogging {
         events "passed", "skipped", "failed"
     }
+
+minHeapSize = "128m" // initial heap size
+maxHeapSize = "8192m" // maximum heap size
+//jvmArgs '-XX:MaxPermSize=5gb' // mem argument for the test JVM
+
+}
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 def getGitHash = { ->

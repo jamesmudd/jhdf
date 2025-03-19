@@ -111,6 +111,17 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 	}
 
 	@Override
+	public WritableDataset putWritableDataset(String name, WritableDataset dsb) {
+		if(StringUtils.isBlank(name)) {
+			throw new IllegalArgumentException("name cannot be null or blank");
+		}
+		children.put(name, dsb);
+		logger.info("Added dataset [{}] to group [{}]", name, getPath());
+		return dsb;
+	}
+
+
+	@Override
 	public WritableGroup putGroup(String name) {
 		if(StringUtils.isBlank(name)) {
 			throw new IllegalArgumentException("name cannot be null or blank");
@@ -120,6 +131,8 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 		logger.info("Added group [{}] to group [{}]", name, getPath());
 		return newGroup;
 	}
+
+
 
 	@Override
 	public Iterator<Node> iterator() {

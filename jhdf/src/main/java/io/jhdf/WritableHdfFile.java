@@ -104,6 +104,22 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		return rootGroup.putGroup(name);
 	}
 
+	/**
+	 This is a way to put a dataset into a group when you are constructing the dataset directly.
+	 *
+	 * @param name the name of the dataset
+	 * @param dataset the dataset
+	 * @return the dataset
+	 */
+	@Override
+	public WritableDataset putWritableDataset(
+			String name,
+			WritableDataset dataset
+	)
+	{
+		return rootGroup.putWritableDataset(name, dataset);
+	}
+
 	@Override
 	public Map<String, Node> getChildren() {
 		return rootGroup.getChildren();

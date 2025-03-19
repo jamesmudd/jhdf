@@ -12,6 +12,7 @@ package io.jhdf.object.datatype;
 import io.jhdf.BufferBuilder;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.exceptions.HdfWritingException;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
 
@@ -270,4 +271,23 @@ public class StringData extends DataType {
 			", charset=" + charset +
 			'}';
 	}
+
+	/**
+	 Combine two StringData definitions, retaining size enough for both
+	 @param sd2 another definition to combine with
+	 @return a new StringData definition that take the place of both
+	 */
+	public StringData combine(StringData sd2) {
+		StringData dt2 = (StringData) sd2;
+
+		if (this.getCharset() != dt2.getCharset()) {
+			throw new HdfWritingException("Chunk data type does not match dataset data type");
+		}
+		if (this.getPaddingType() != dt2.getPaddingType()) {
+			throw new HdfWritingException("Chunk data type does not match dataset data type");
+		}
+
+		return new StringData(this.paddingType, this.charset, Math.max(this.getSize(), dt2.getSize()));
+	}
+
 }
