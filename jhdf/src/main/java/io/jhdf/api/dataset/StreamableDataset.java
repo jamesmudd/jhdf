@@ -26,19 +26,26 @@ import io.jhdf.object.message.DataSpace;
 
  <h2>Usage and Caveats</h2>
 
- <p>The structure of the chunks provided should be congruent to each other, divided among the
+ <p>The structure of the chunks provided should be congruent to each other, divided along the
  major dimension as slices of an array. The other dimensions are not meant to be partitioned in
- any way.</p>
+ any way. You will generally want to buffer large enough chunks of data to make bulk IO
+ efficient, but small enough to avoid heap or mmap limitations.</p>
 
  <p>
- Since the dataset content is not known at the tie it is added to the group, it is not
- possible to access the contents of the dataset as you would normally do with
- {@link WritableDataset#getData()} or {@link WritableDataset#getDataFlat()} methods. However, you
- can set the dimensions of the data assuming you know what they should be, in which case you can
+ While it is not as fast as having the data in memory, you can still access some dataset
+ properties by allowing them to be recomputed. This can be a wasteful operation, and is generally
+ not desired during bulk write streaming. To enable it, you will have to call {@link #enableCompute()}
+ first.</p>
+
+ <p>
+ You can set the dimensions of the data assuming you know what they should be, in which case you can
  also access {@link #getDimensions()}. Doing so without setting the dimensions will cause an
  error to be thrown. If the dimensions have been set, then they will be cross-checked at the time
- the dataset is written and an error will be thrown if they do not match.
+ the dataset is written and an error will be thrown if they do not match. As with other
+ properties, you can call {@link #enableCompute()} and then simply ask for the dimensions to be
+ computed over the input stream.
  </p>
+
  @author Jonathan Shook */
 public interface StreamableDataset extends WritableDataset {
 
@@ -50,7 +57,8 @@ public interface StreamableDataset extends WritableDataset {
    dimensions do not match the dimensions of the data as calculated during writing, then an exception
    will be thrown. This means that for each chunk of data provided, All dimensions except dimension 0
    must match, and that after buffering data to storage, the primary dimension must match the total
-   number of array elements of dimension 0 written.
+   number of array elements of dimension 0 written. Dimensions are not required to be set, and
+   will be calculated during stream processing otherwise.
    */
   void modifyDimensions(int[] dimensions);
 
