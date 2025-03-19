@@ -13,6 +13,7 @@ import io.jhdf.HdfFile;
 import io.jhdf.StreamableDatasetImpl;
 import io.jhdf.WritableHdfFile;
 import io.jhdf.api.dataset.StreamableDataset;
+import io.jhdf.exceptions.HdfWritingException;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,31 +21,65 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 class StreamableDatasetImplTest {
 
-  private static final Logger log = LoggerFactory.getLogger(StreamableDatasetImplTest.class);
+  private static final Logger logger = LoggerFactory.getLogger(StreamableDatasetImplTest.class);
 
   @Test
-  void testLargeDataset() {
-
-    System.out.println("memory: " + Runtime.getRuntime().maxMemory());
+  public void testDimensionChecking() {
     Path hdf5Out;
     try {
       hdf5Out = Files.createTempFile(
-          Path.of("."), // defaulting to /tmp isn't great for large files testing
-          this.getClass().getSimpleName() + "_BiggerThan2GbB_dataset",
-          ".hdf5"
+          Paths.get("."), // defaulting to /tmp isn't great for large files testing
+          this.getClass().getSimpleName() + "_BiggerThan2GbB_dataset", ".hdf5"
       );
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
 
-    List<Integer> chunkIdx = List.of(0, 1, 2, 3);
+    List<Integer> chunkIdx = Arrays.asList(0);
+    int chunkRows = (1024 * 1024) / Long.BYTES;
+    int rowsize = 1024;
+
+    IterableSource<Integer, long[][]> sf =
+        new IterableSource<>(chunkIdx, i -> getArrayData(i, rowsize, chunkRows));
+
+    WritableHdfFile out = HdfFile.write(hdf5Out);
+    StreamableDataset sd = new StreamableDatasetImpl(sf, "", out);
+    sd.modifyDimensions(new int[]{(chunkRows * chunkIdx.size()) + 1, rowsize});
+    out.putWritableDataset("testname", sd);
+//    out.close();
+    assertThrows(HdfWritingException.class, out::close);
+  }
+
+
+  @Test
+  public void testBasicStreaming() {
+
+    System.out.println("memory: " + Runtime.getRuntime().maxMemory());
+
+    Path hdf5Out;
+    try {
+      hdf5Out = Files.createTempFile(
+          Paths.get("."), // defaulting to /tmp isn't great for large files testing
+          this.getClass().getSimpleName() + "_BiggerThan2GbB_dataset", ".hdf5"
+      );
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    List<Integer> chunkIdx = Arrays.asList(0, 1, 2, 3);
     int chunkRows = (1024 * 1024) / Long.BYTES;
     int rowsize = 1024;
 
@@ -53,6 +88,20 @@ class StreamableDatasetImplTest {
 
     try (WritableHdfFile out = HdfFile.write(hdf5Out)) {
       StreamableDataset sd = new StreamableDatasetImpl(sf, "", out);
+
+      assertThrows(HdfWritingException.class, sd::getData);
+      assertThrows(HdfWritingException.class, sd::getDimensions);
+      assertThrows(HdfWritingException.class, sd::getDataFlat);
+      assertThrows(HdfWritingException.class, sd::getDataType);
+      assertThrows(HdfWritingException.class, sd::getJavaType);
+
+      sd.enableCompute();
+      assertThat(sd.getDimensions()).isNotNull();
+      assertThat(sd.getJavaType()).isNotNull();
+      assertThat(sd.getDataType()).isNotNull();
+      assertThat(sd.getSize()).isNotNull();
+      assertThat(sd.getSizeInBytes()).isNotNull();
+
       sd.modifyDimensions(new int[]{chunkRows * chunkIdx.size(), rowsize});
       out.putWritableDataset("testname", sd);
     }

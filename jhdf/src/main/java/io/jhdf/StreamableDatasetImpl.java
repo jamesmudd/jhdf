@@ -14,12 +14,18 @@ import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
 import io.jhdf.api.dataset.StreamableDataset;
-import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfWritingException;
 import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
-import io.jhdf.object.message.*;
+import io.jhdf.object.message.AttributeInfoMessage;
+import io.jhdf.object.message.AttributeMessage;
+import io.jhdf.object.message.DataLayout;
 import io.jhdf.object.message.DataLayoutMessage.ContiguousDataLayoutMessage;
+import io.jhdf.object.message.DataSpace;
+import io.jhdf.object.message.DataSpaceMessage;
+import io.jhdf.object.message.DataTypeMessage;
+import io.jhdf.object.message.FillValueMessage;
+import io.jhdf.object.message.Message;
 import io.jhdf.storage.HdfFileChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +34,12 @@ import java.io.File;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static io.jhdf.Utils.stripLeadingIndex;
@@ -64,6 +75,7 @@ public class StreamableDatasetImpl extends AbstractWritableNode implements Strea
     }
   }
 
+  @Override
   public void enableCompute() {
     this.computeEnabled = true;
   }
@@ -136,7 +148,7 @@ public class StreamableDatasetImpl extends AbstractWritableNode implements Strea
 
   private void ensureComputeEnabled(String method, String... additional) {
     if (!computeEnabled) {
-      throw new HdfException("For streaming datasets, some properties are not available without "
+      throw new HdfWritingException("For streaming datasets, some properties are not available without "
                              + "(possibly intenstive) compute over the input stream. If you want "
                              + "to use the " + method + " method, then you can call "
                              + ".enableCompute() first. Note that such methods will not be "

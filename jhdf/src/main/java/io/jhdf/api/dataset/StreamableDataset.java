@@ -1,3 +1,12 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * https://jhdf.io
+ *
+ * Copyright (c) 2025 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
 package io.jhdf.api.dataset;
 
 import io.jhdf.StreamableDatasetImpl;
@@ -32,6 +41,8 @@ import io.jhdf.object.message.DataSpace;
  </p>
  @author Jonathan Shook */
 public interface StreamableDataset extends WritableDataset {
+
+  void enableCompute();
 
   /**
    Sets the dimensions of this dataset, partially or fully. For StreamableDatasets, this can be set
