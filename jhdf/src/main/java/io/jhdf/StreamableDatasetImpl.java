@@ -45,19 +45,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import static io.jhdf.Utils.stripLeadingIndex;
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 
-/**
- TODO: This won't work well for variable sized and padded types like Strings */
 public class StreamableDatasetImpl extends AbstractWritableNode implements StreamableDataset {
 
   private static final Logger logger = LoggerFactory.getLogger(StreamableDatasetImpl.class);
 
-  //	private final Object data;
-  //  private final DataType dataTypePrototype;
   private final DataSpace dataSpacePrototype;
-  //
   private DataSpace userDimensionedSpace;
   private final Iterable<?> iterable;
-  // will double-buffer, this is only the hand-off, not the pre-read
   private final LinkedBlockingQueue<Object> chunks;
   private boolean computeEnabled;
 
