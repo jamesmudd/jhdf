@@ -16,8 +16,7 @@ import io.jhdf.object.message.DataSpace;
 
 
 /**
- Interface for streamable datasets
- <hr/>
+ <H2>Interface for streamable datasets</H2>
 
  <p>This type allows for users to provide arbitrarily large datasets during Hdf5 node
  construction. The dataset is not provided as a whole as with
