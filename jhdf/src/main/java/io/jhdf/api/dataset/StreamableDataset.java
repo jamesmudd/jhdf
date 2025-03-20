@@ -59,8 +59,9 @@ public interface StreamableDataset extends WritableDataset {
    must match, and that after buffering data to storage, the primary dimension must match the total
    number of array elements of dimension 0 written. Dimensions are not required to be set, and
    will be calculated during stream processing otherwise.
+   @param dimensions the dimensions to be applied to the current data shape
    */
-  void modifyDimensions(int[] dimensions);
+  public void modifyDimensions(int[] dimensions);
 
   /**
    Creates a new StreamableDataset from the given chunk supplier. The chunk supplier must not be
