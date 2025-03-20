@@ -58,7 +58,7 @@ class StreamableDatasetImplTest {
     WritableHdfFile out = HdfFile.write(hdf5Out);
     StreamableDataset sd = new StreamableDatasetImpl(sf, "", out);
     sd.modifyDimensions(new int[]{(chunkRows * chunkIdx.size()) + 1, rowsize});
-    out.putWritableDataset("testname", sd);
+    out.putDataset("testname", sd);
 //    out.close();
     assertThrows(HdfWritingException.class, out::close);
   }
@@ -103,7 +103,7 @@ class StreamableDatasetImplTest {
       assertThat(sd.getSizeInBytes()).isNotNull();
 
       sd.modifyDimensions(new int[]{chunkRows * chunkIdx.size(), rowsize});
-      out.putWritableDataset("testname", sd);
+      out.putDataset("testname", sd);
     }
   }
 
