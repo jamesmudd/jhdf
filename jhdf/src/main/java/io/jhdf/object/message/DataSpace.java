@@ -156,4 +156,107 @@ public class DataSpace {
 
 		return bufferBuilder.build();
 	}
+
+	/**
+	 When derived dataspaces from multiple chunks of data from the dataset
+	 are presented, they need to be validated as consistent for the dataset, or enhanced to
+	 support the superset of the two.
+	 @param ds2
+	 the other, presumably compatible data space
+	 @return a combined data space
+	 */
+	public DataSpace combineDim0(DataSpace ds2) {
+		if (this.type != ds2.type) {
+			throw new HdfException("Can't combine data spaces of different types");
+		}
+		if (this.dimensions.length != ds2.dimensions.length) {
+			throw new HdfException("Can't combine data spaces of incongruent dimensional structure");
+		}
+
+		int[] dims = Arrays.copyOf(this.dimensions, this.dimensions.length);
+		dims[0] = Math.addExact(this.dimensions[0], ds2.dimensions[0]);
+		if (dims.length > 1) {
+			for (int i = 1; i < dims.length; i++) {
+				if (this.dimensions[i] != ds2.dimensions[i]) {
+					throw new HdfException(
+							"Can't combine data spaces of incongruent dimensionality at dimension " + i);
+				}
+			}
+		}
+
+		long[] sizes = Arrays.copyOf(this.maxSizes, this.maxSizes.length);
+		sizes[0] = Math.addExact(this.maxSizes[0], ds2.maxSizes[0]);
+
+		return new DataSpace(this.version, this.maxSizesPresent, dims, sizes, this.type);
+	}
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer("DataSpace{");
+		sb.append("dimensions=");
+		if (dimensions == null)
+			sb.append("null");
+		else {
+			sb.append('[');
+			for (int i = 0; i < dimensions.length; ++i)
+				sb.append(i == 0 ? "" : ", ").append(dimensions[i]);
+			sb.append(']');
+		}
+		sb.append(", version=").append(version);
+		sb.append(", maxSizesPresent=").append(maxSizesPresent);
+		sb.append(", maxSizes=");
+		if (maxSizes == null)
+			sb.append("null");
+		else {
+			sb.append('[');
+			for (int i = 0; i < maxSizes.length; ++i)
+				sb.append(i == 0 ? "" : ", ").append(maxSizes[i]);
+			sb.append(']');
+		}
+		sb.append(", type=").append(type);
+		sb.append('}');
+		return sb.toString();
+	}
+
+	/**
+	 Resize a dataset's dimensions to those provided. Only the number of provided dimensions are
+	 altered, the rest are unchanged. For example, if you resize a 3D dataset with dimensions 10x10x10
+	 and the size 10x15, then the resulting size is 10x15x10.
+	 @param ds
+	 the dataset to resize
+	 @param dimensions
+	 the new dimensions
+	 @return the resized dataset
+	 */
+	public static DataSpace modifyDimensions(DataSpace ds, int[] dimensions) {
+		int[] newdims = Arrays.copyOf(ds.dimensions, ds.getDimensions().length);
+		System.arraycopy(dimensions, 0, newdims, 0, dimensions.length);
+		long[] newsizes = Arrays.copyOf(ds.maxSizes, ds.maxSizes.length);
+		for (int i = 0; i < dimensions.length; i++) {
+			newsizes[i] = dimensions[i];
+		}
+		return new DataSpace(ds.version, ds.maxSizesPresent, newdims, newsizes, ds.type);
+	}
+
+	@Override
+	public final boolean equals(Object o) {
+		if (!(o instanceof DataSpace))
+			return false;
+		DataSpace dataSpace = (DataSpace) o;
+
+		return version == dataSpace.version && maxSizesPresent == dataSpace.maxSizesPresent
+					 && type == dataSpace.type && Arrays.equals(dimensions, dataSpace.dimensions)
+					 && Arrays.equals(maxSizes, dataSpace.maxSizes);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = version;
+		result = 31 * result + Boolean.hashCode(maxSizesPresent);
+		result = 31 * result + Arrays.hashCode(dimensions);
+		result = 31 * result + Arrays.hashCode(maxSizes);
+		result = 31 * result + type;
+		return result;
+	}
+
 }

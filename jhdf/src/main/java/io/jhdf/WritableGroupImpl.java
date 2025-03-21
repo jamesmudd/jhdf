@@ -99,16 +99,30 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 		return false;
 	}
 
-	@Override
-	public WritableDataset putDataset(String name, Object data) {
-		if(StringUtils.isBlank(name)) {
-			throw new IllegalArgumentException("name cannot be null or blank");
-		}
-		WritableDatasetImpl writableDataset = new WritableDatasetImpl(data, name, this);
-		children.put(name, writableDataset);
-		logger.info("Added dataset [{}] to group [{}]", name, getPath());
-		return writableDataset;
-	}
+  @Override
+  public WritableDataset putDataset(String name, Object data) {
+    if (StringUtils.isBlank(name)) {
+      throw new IllegalArgumentException("name cannot be null or blank");
+    }
+
+    WritableDataset writableDataset = null;
+    if (data instanceof WritableDataset) {
+      logger.debug(
+          "putting pre-initialized WritableDataset '" + name + "' into group '" + this.getName()
+          + "'");
+      writableDataset = (WritableDataset) data;
+    } else {
+      logger.debug(
+          "putting inferred dataset with type and shape inference '" + name + "' into " + "group '"
+          + this.getName() + "'");
+      writableDataset = new WritableDatasetImpl(data, name, this);
+    }
+
+    children.put(name, writableDataset);
+    logger.info("Added dataset [{}] to group [{}]", name, getPath());
+    return writableDataset;
+  }
+
 
 	@Override
 	public WritableGroup putGroup(String name) {
@@ -120,6 +134,8 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 		logger.info("Added group [{}] to group [{}]", name, getPath());
 		return newGroup;
 	}
+
+
 
 	@Override
 	public Iterator<Node> iterator() {

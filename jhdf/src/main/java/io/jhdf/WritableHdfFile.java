@@ -62,6 +62,9 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		this.rootGroup.putAttribute("_jHDF", getJHdfInfo());
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public void close() {
 		try {
@@ -94,131 +97,209 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		return "jHDF - " + JhdfInfo.VERSION + " - " + JhdfInfo.OS + " - " + JhdfInfo.ARCH + " - " + JhdfInfo.BYTE_ORDER;
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public WritableDataset putDataset(String name, Object data) {
 		return rootGroup.putDataset(name, data);
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public WritableGroup putGroup(String name) {
 		return rootGroup.putGroup(name);
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public Map<String, Node> getChildren() {
 		return rootGroup.getChildren();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public Node getChild(String name) {
 		return rootGroup.getChild(name);
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public Node getByPath(String path) {
 		return rootGroup.getByPath(path);
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public Dataset getDatasetByPath(String path) {
 		return rootGroup.getDatasetByPath(path);
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public boolean isLinkCreationOrderTracked() {
 		return rootGroup.isLinkCreationOrderTracked();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public Group getParent() {
 		return rootGroup.getParent();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public String getName() {
 		return rootGroup.getName();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public String getPath() {
 		return rootGroup.getPath();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public Map<String, Attribute> getAttributes() {
 		return rootGroup.getAttributes();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public Attribute getAttribute(String name) {
 		return rootGroup.getAttribute(name);
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public Attribute putAttribute(String name, Object data) {
 		return rootGroup.putAttribute(name, data);
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public Attribute removeAttribute(String name) {
 		return rootGroup.removeAttribute(name);
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public NodeType getType() {
 		return rootGroup.getType();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public boolean isGroup() {
 		return rootGroup.isGroup();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public File getFile() {
 		return  path.toFile();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public Path getFileAsPath() {
 		return path;
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public HdfFile getHdfFile() {
 		return rootGroup.getHdfFile();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public long getAddress() {
 		return rootGroup.getAddress();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public boolean isLink() {
 		return rootGroup.isLink();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public boolean isAttributeCreationOrderTracked() {
 		return rootGroup.isAttributeCreationOrderTracked();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public Iterator<Node> iterator() {
 		return rootGroup.iterator();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public void forEach(Consumer<? super Node> action) {
 		rootGroup.forEach(action);
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public Spliterator<Node> spliterator() {
 		return rootGroup.spliterator();
 	}
 
+	/**
+	 {@inheritDoc}
+	 */
 	@Override
 	public long write(HdfFileChannel hdfFileChannel, long position) {
 		// TODO restructure interfaces to remove this method
