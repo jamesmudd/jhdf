@@ -1,5 +1,9 @@
 # jHDF Change Log
 
+## v0.9.2 - March 2025
+- Fix external links pointing to the root group https://github.com/jamesmudd/jhdf/issues/689
+- Add additional API for custom writing allowing for larger datasets to be written. Thanks to @jshook https://github.com/jamesmudd/jhdf/pull/692
+
 ## v0.9.1 - March 2025
 - Improve Java FileSystem support. Allow use of `FileSystem` implementations that do not support `FileChannel`, also allows wider compatability if memory mapped file access is not possible. This improves the ability to use jHDF with file systems like S3. Thanks to @tbrunsch for this contribution.
 - Some improvements to test infrastructure. Also thanks to @tbrunsch
