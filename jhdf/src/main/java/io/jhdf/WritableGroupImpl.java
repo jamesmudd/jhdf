@@ -41,97 +41,64 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class WritableGroupImpl extends AbstractWritableNode implements WritableGroup {
 
-  private static final Logger logger = LoggerFactory.getLogger(WritableGroupImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(WritableGroupImpl.class);
 
-  private final Map<String, WritableNode> children = new ConcurrentHashMap<>();
+	private final Map<String, WritableNode> children = new ConcurrentHashMap<>();
 
-  public WritableGroupImpl(Group parent, String name) {
-    super(parent, name);
-  }
+	public WritableGroupImpl(Group parent, String name) {
+		super(parent, name);
+	}
 
-  /**
-   {@inheritDoc}
-   */
-  @Override
-  public Map<String, Node> getChildren() {
-    return Collections.unmodifiableMap(children);
-  }
+	@Override
+	public Map<String, Node> getChildren() {
+		return Collections.unmodifiableMap(children);
+	}
 
-  /**
-   {@inheritDoc}
-   */
-  @Override
-  public Node getChild(String name) {
-    return children.get(name);
-  }
+	@Override
+	public Node getChild(String name) {
+		return children.get(name);
+	}
 
-  /**
-   {@inheritDoc}
-   */
-  @Override
-  public Node getByPath(String path) {
-    throw new UnsupportedHdfException("Not supported by writable groups");
-  }
+	@Override
+	public Node getByPath(String path) {
+		throw new UnsupportedHdfException("Not supported by writable groups");
+	}
 
-  /**
-   {@inheritDoc}
-   */
-  @Override
-  public Dataset getDatasetByPath(String path) {
-    throw new UnsupportedHdfException("Not supported by writable groups");
-  }
+	@Override
+	public Dataset getDatasetByPath(String path) {
+		throw new UnsupportedHdfException("Not supported by writable groups");
+	}
 
-  /**
-   {@inheritDoc}
-   */
-  @Override
-  public boolean isLinkCreationOrderTracked() {
-    return false;
-  }
+	@Override
+	public boolean isLinkCreationOrderTracked() {
+		return false;
+	}
 
-  /**
-   {@inheritDoc}
-   */
-  @Override
-  public NodeType getType() {
-    return NodeType.GROUP;
-  }
+	@Override
+	public NodeType getType() {
+		return NodeType.GROUP;
+	}
 
-  /**
-   {@inheritDoc}
-   */
-  @Override
-  public boolean isGroup() {
-    return true;
-  }
+	@Override
+	public boolean isGroup() {
+		return true;
+	}
 
-  /**
-   {@inheritDoc}
-   */
-  @Override
-  public long getAddress() {
-    return 0;
-  }
+	@Override
+	public long getAddress() {
+		return 0;
+	}
 
-  /**
-   {@inheritDoc}
-   */
-  @Override
-  public boolean isLink() {
-    return false;
-  }
+	@Override
+	public boolean isLink() {
+		return false;
+	}
 
-  /**
-   {@inheritDoc}
-   */
-  @Override
-  public boolean isAttributeCreationOrderTracked() {
-    return false;
-  }
+	@Override
+	public boolean isAttributeCreationOrderTracked() {
+		return false;
+	}
 
-  /**
-   {@inheritDoc}
-   */
   @Override
   public WritableDataset putDataset(String name, Object data) {
     if (StringUtils.isBlank(name)) {
@@ -156,91 +123,85 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
     return writableDataset;
   }
 
-  /**
-   {@inheritDoc}
-   */
-  @Override
-  public WritableGroup putGroup(String name) {
-    if (StringUtils.isBlank(name)) {
-      throw new IllegalArgumentException("name cannot be null or blank");
-    }
-    WritableGroupImpl newGroup = new WritableGroupImpl(this, name);
-    children.put(name, newGroup);
-    logger.info("Added group [{}] to group [{}]", name, getPath());
-    return newGroup;
-  }
+
+	@Override
+	public WritableGroup putGroup(String name) {
+		if(StringUtils.isBlank(name)) {
+			throw new IllegalArgumentException("name cannot be null or blank");
+		}
+		WritableGroupImpl newGroup = new WritableGroupImpl(this, name);
+		children.put(name, newGroup);
+		logger.info("Added group [{}] to group [{}]", name, getPath());
+		return newGroup;
+	}
 
 
-  /**
-   {@inheritDoc}
-   */
-  @Override
-  public Iterator<Node> iterator() {
-    Collection<Node> values = Collections.unmodifiableCollection(children.values());
-    return values.iterator();
-  }
 
-  public long write(HdfFileChannel hdfFileChannel, long position) {
-    logger.info("Writing group [{}] at position [{}]", getPath(), position);
+	@Override
+	public Iterator<Node> iterator() {
+		Collection<Node> values = Collections.unmodifiableCollection(children.values());
+		return values.iterator();
+	}
 
-    List<Message> messages = new ArrayList<>();
-    GroupInfoMessage groupInfoMessage = GroupInfoMessage.createBasic();
-    messages.add(groupInfoMessage);
-    LinkInfoMessage linkInfoMessage = LinkInfoMessage.createBasic();
-    messages.add(linkInfoMessage);
+	public long write(HdfFileChannel hdfFileChannel, long position) {
+		logger.info("Writing group [{}] at position [{}]", getPath(), position);
 
-    for (Map.Entry<String, WritableNode> child : children.entrySet()) {
-      LinkMessage linkMessage = LinkMessage.create(child.getKey(), 0L);
-      messages.add(linkMessage);
-    }
+		List<Message> messages = new ArrayList<>();
+		GroupInfoMessage groupInfoMessage = GroupInfoMessage.createBasic();
+		messages.add(groupInfoMessage);
+		LinkInfoMessage linkInfoMessage = LinkInfoMessage.createBasic();
+		messages.add(linkInfoMessage);
 
-    if (!getAttributes().isEmpty()) {
-      // Need an attribute info message to allow HDFView to see the attributes
-      AttributeInfoMessage attributeInfoMessage = AttributeInfoMessage.create();
-      messages.add(attributeInfoMessage);
-      for (Map.Entry<String, Attribute> attribute : getAttributes().entrySet()) {
-        logger.info("Writing attribute [{}] in group [{}]", attribute.getKey(), getName());
-        AttributeMessage attributeMessage =
-            AttributeMessage.create(attribute.getKey(), attribute.getValue());
-        messages.add(attributeMessage);
-      }
-    }
+		for (Map.Entry<String, WritableNode> child : children.entrySet()) {
+			LinkMessage linkMessage = LinkMessage.create(child.getKey(), 0L);
+			messages.add(linkMessage);
+		}
 
-    ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
+		if(!getAttributes().isEmpty()) {
+			// Need an attribute info message to allow HDFView to see the attributes
+			AttributeInfoMessage attributeInfoMessage = AttributeInfoMessage.create();
+			messages.add(attributeInfoMessage);
+			for (Map.Entry<String, Attribute> attribute : getAttributes().entrySet()) {
+				logger.info("Writing attribute [{}] in group [{}]", attribute.getKey(), getName());
+				AttributeMessage attributeMessage = AttributeMessage.create(attribute.getKey(), attribute.getValue());
+				messages.add(attributeMessage);
+			}
+		}
 
-    ByteBuffer tempBuffer = objectHeader.toBuffer();
-    int objectHeaderSize = tempBuffer.limit();
-    // Upto here just finding out the size of the OH can be much improved
+		ObjectHeader.ObjectHeaderV2 objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
 
-    // Start building another OH
-    messages = new ArrayList<>();
-    messages.add(groupInfoMessage);
-    messages.add(linkInfoMessage);
+		ByteBuffer tempBuffer = objectHeader.toBuffer();
+		int objectHeaderSize = tempBuffer.limit();
+		// Upto here just finding out the size of the OH can be much improved
 
-    if (!getAttributes().isEmpty()) {
-      AttributeInfoMessage attributeInfoMessage = AttributeInfoMessage.create();
-      messages.add(attributeInfoMessage);
-      for (Map.Entry<String, Attribute> attribute : getAttributes().entrySet()) {
-        logger.info("Writing attribute [{}]", attribute.getKey());
-        AttributeMessage attributeMessage =
-            AttributeMessage.create(attribute.getKey(), attribute.getValue());
-        messages.add(attributeMessage);
-      }
-    }
+		// Start building another OH
+		messages = new ArrayList<>();
+		messages.add(groupInfoMessage);
+		messages.add(linkInfoMessage);
 
-    long nextChildAddress = position + objectHeaderSize;
+		if(!getAttributes().isEmpty()) {
+			AttributeInfoMessage attributeInfoMessage = AttributeInfoMessage.create();
+			messages.add(attributeInfoMessage);
+			for (Map.Entry<String, Attribute> attribute : getAttributes().entrySet()) {
+				logger.info("Writing attribute [{}]", attribute.getKey());
+				AttributeMessage attributeMessage = AttributeMessage.create(attribute.getKey(), attribute.getValue());
+				messages.add(attributeMessage);
+			}
+		}
 
-    for (Map.Entry<String, WritableNode> child : children.entrySet()) {
-      LinkMessage linkMessage = LinkMessage.create(child.getKey(), nextChildAddress);
-      messages.add(linkMessage);
-      long endPosition = child.getValue().write(hdfFileChannel, nextChildAddress);
-      nextChildAddress = endPosition;
-    }
+		long nextChildAddress = position + objectHeaderSize;
 
-    objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
-    hdfFileChannel.write(objectHeader.toBuffer(), position);
+		for (Map.Entry<String, WritableNode> child : children.entrySet()) {
+			LinkMessage linkMessage = LinkMessage.create(child.getKey(), nextChildAddress);
+			messages.add(linkMessage);
+			long endPosition = child.getValue().write(hdfFileChannel, nextChildAddress);
+			nextChildAddress = endPosition;
+		}
 
-    logger.info("Finished writing group [{}]", getPath());
-    return nextChildAddress;
-  }
+		objectHeader = new ObjectHeader.ObjectHeaderV2(position, messages);
+		hdfFileChannel.write(objectHeader.toBuffer(), position);
+
+		logger.info("Finished writing group [{}]", getPath());
+		return nextChildAddress;
+	}
 }

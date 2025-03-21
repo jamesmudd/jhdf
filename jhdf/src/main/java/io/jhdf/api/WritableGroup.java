@@ -16,9 +16,7 @@ public interface WritableGroup extends Group, WritableNode {
 	 Put a named dataset into the group. The data object can either be any valid hdf5 dataset type,
 	 or it can be an instance of {@link WritableDataset}. In the former case, the dataset details
 	 are inferred from the provided data and a default implementation is provided for you. In the
-	 latter case, you can specialize what type of dataset you want to provide. This can be used,
-	 for example to enable efficient bulk writes for handling data larger than heap, with
-	 {@link io.jhdf.api.dataset.StreamableDataset};
+	 latter case, you can specialize what type of dataset you want to provide.
 
 	 * @param name The dataset name within this group
 	 * @param data The dataset array or implementation
