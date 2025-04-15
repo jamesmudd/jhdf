@@ -42,7 +42,7 @@ public class RemoteHdf5SliceDemo {
 		URI uri = new URI("https://users.abdenlab.org/reimonnt/Cardiac_HiC_PRJNA480492/distiller-nf/results/coolers_library_group/day80_ventricularCardiomyocyte_pool.hg38.mapq_30.100.mcool");
 		URL url = uri.toURL();
 
-		System.out.println("Opening remote HDF5 via HTTP range...");
+		System.out.println("Opening remote HDF5 via HTTP range: " + url);
 		long t0 = System.nanoTime();
 		try (SeekableByteChannel remoteChannel = new HttpRangeSeekableByteChannel(url);
 			 HdfFile hdf = new HdfFile(remoteChannel, uri)) {
