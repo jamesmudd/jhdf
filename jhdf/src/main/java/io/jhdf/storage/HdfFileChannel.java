@@ -56,6 +56,9 @@ public class HdfFileChannel implements HdfBackingStorage {
 			if(fc.size() < MAPPED_SIZE) {
 				logger.debug("File fully memory mapped");
 				mapNoOffset(0, Math.toIntExact(fc.size()));
+			} else {
+				logger.debug("File partially memory mapped");
+				mapNoOffset(0, MAPPED_SIZE);
 			}
 		} catch (IOException e) {
 			logger.warn("Create HDF file channel but couldn't get size", e);
