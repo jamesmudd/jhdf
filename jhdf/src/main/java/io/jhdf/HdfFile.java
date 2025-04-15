@@ -237,6 +237,53 @@ public class HdfFile implements Group, AutoCloseable {
 		return offset * 2;
 	}
 
+	public HdfFile(SeekableByteChannel channel, URI sourceUri) {
+		logger.info("Opening remote HDF5 file from URI: {}", sourceUri);
+		this.optionalFile = Optional.of(Paths.get(sourceUri.getPath()));
+
+		try {
+			FileChannel fc = new FileChannelFromSeekableByteChannel(channel);
+
+			// Validate HDF5 signature
+			boolean validSignature = false;
+			long offset;
+			for (offset = 0; offset < fc.size(); offset = nextOffset(offset)) {
+				logger.trace("Checking for signature at offset = {}", offset);
+				validSignature = Superblock.verifySignature(fc, offset);
+				if (validSignature) {
+					logger.debug("Found valid signature at offset = {}", offset);
+					break;
+				}
+			}
+			if (!validSignature) {
+				throw new HdfException("No valid HDF5 signature found in remote file");
+			}
+
+			Superblock superblock = Superblock.readSuperblock(fc, offset);
+			if (superblock.getBaseAddressByte() != offset) {
+				throw new HdfException("Invalid superblock base address detected in remote file");
+			}
+
+			hdfBackingStorage = new HdfFileChannel(fc, superblock);
+
+			if (superblock instanceof SuperblockV0V1) {
+				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
+				SymbolTableEntry ste = new SymbolTableEntry(hdfBackingStorage,
+					sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
+				this.rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, ste.getObjectHeaderAddress(), this);
+			} else if (superblock instanceof SuperblockV2V3) {
+				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
+				this.rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, sb.getRootGroupObjectHeaderAddress(), this);
+			} else {
+				throw new HdfException("Unsupported superblock version: " + superblock.getVersionOfSuperblock());
+			}
+
+		} catch (IOException e) {
+			throw new HdfException("Failed to open remote HDF5 file from URI: " + sourceUri, e);
+		}
+	}
+
+
 	public static WritableHdfFile write(Path path) {
 		return new WritableHdfFile(path);
 	}
