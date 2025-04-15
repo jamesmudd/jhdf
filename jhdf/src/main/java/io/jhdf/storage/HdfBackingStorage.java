@@ -22,9 +22,9 @@ import java.nio.channels.FileChannel;
 public interface HdfBackingStorage {
 	ByteBuffer readBufferFromAddress(long address, int length);
 
-	ByteBuffer map(long address, long length);
+	ByteBuffer map(long address, int length);
 
-	ByteBuffer mapNoOffset(long address, long length);
+	ByteBuffer mapNoOffset(long address, int length);
 
 	long getUserBlockSize();
 

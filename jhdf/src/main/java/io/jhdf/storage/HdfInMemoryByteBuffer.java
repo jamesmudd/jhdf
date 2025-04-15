@@ -33,12 +33,12 @@ public class HdfInMemoryByteBuffer implements HdfBackingStorage {
 	}
 
 	@Override
-	public ByteBuffer map(long address, long length) {
+	public ByteBuffer map(long address, int length) {
 		return mapNoOffset(address + superblock.getBaseAddressByte(), length);
 	}
 
 	@Override
-	public synchronized ByteBuffer mapNoOffset(long address, long length) {
+	public synchronized ByteBuffer mapNoOffset(long address, int length) {
 		byteBuffer.limit(Math.toIntExact(address + length));
 		byteBuffer.position(Math.toIntExact(address));
 		// Set order on sliced buffer always LE

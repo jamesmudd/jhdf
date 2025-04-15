@@ -37,7 +37,7 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 	@Override
 	public ByteBuffer getDataBuffer() {
 		try {
-			ByteBuffer data = hdfBackingStorage.map(contiguousDataLayoutMessage.getAddress(), getSizeInBytes());
+			ByteBuffer data = hdfBackingStorage.map(contiguousDataLayoutMessage.getAddress(), Math.toIntExact(getSizeInBytes()));
 			convertToCorrectEndiness(data);
 			return data;
 		} catch (Exception e) {

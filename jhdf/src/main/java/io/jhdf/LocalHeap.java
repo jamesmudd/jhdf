@@ -66,7 +66,7 @@ public class LocalHeap {
 			addressOfDataSegment = Utils.readBytesAsUnsignedLong(header, hdfBackingStorage.getSizeOfOffsets());
 			logger.trace("addressOfDataSegment = {}", addressOfDataSegment);
 
-			dataBuffer = hdfBackingStorage.map(addressOfDataSegment, dataSegmentSize);
+			dataBuffer = hdfBackingStorage.map(addressOfDataSegment, Math.toIntExact(dataSegmentSize));
 		} catch (Exception e) {
 			throw new HdfException("Error reading local heap", e);
 		}

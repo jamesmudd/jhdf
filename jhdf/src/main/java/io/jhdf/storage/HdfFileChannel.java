@@ -13,15 +13,20 @@ import io.jhdf.HdfFile;
 import io.jhdf.Superblock;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfWritingException;
-import io.jhdf.object.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
@@ -35,16 +40,23 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 public class HdfFileChannel implements HdfBackingStorage {
 
 	private static final Logger logger = LoggerFactory.getLogger(HdfFileChannel.class);
+	private static final int MAPPED_SIZE = 1_000_000;
 
 	private final FileChannel fc;
 	private final Superblock sb;
 	private boolean memoryMappingFailed;
+
+	private ConcurrentNavigableMap<Long, MappedByteBuffer> offsetToBufferMap = new ConcurrentSkipListMap<>();
 
 	public HdfFileChannel(FileChannel fileChannel, Superblock superblock) {
 		this.fc = fileChannel;
 		this.sb = superblock;
 		try {
 			logger.info("Created HDF file channel. File size [{}] bytes", fc.size());
+			if(fc.size() < MAPPED_SIZE) {
+				logger.debug("File fully memory mapped");
+				mapNoOffset(0, Math.toIntExact(fc.size()));
+			}
 		} catch (IOException e) {
 			logger.warn("Create HDF file channel but couldn't get size", e);
 		}
@@ -73,21 +85,36 @@ public class HdfFileChannel implements HdfBackingStorage {
 	}
 
 	@Override
-	public ByteBuffer map(long address, long length) {
+	public ByteBuffer map(long address, int length) {
 		return mapNoOffset(address + sb.getBaseAddressByte(), length);
 	}
 
 	@Override
-	public ByteBuffer mapNoOffset(long address, long length) {
+	public ByteBuffer mapNoOffset(long address, int length) {
 		return mapNoOffset(address, length, MapMode.READ_ONLY);
 	}
 
-	private ByteBuffer mapNoOffset(long address, long length, MapMode mode) {
+	private ByteBuffer mapNoOffset(long address, int length, MapMode mode) {
+		logger.trace("Request to map at address [{}] length [{}]", address, length);
+		Map.Entry<Long, MappedByteBuffer> bufferEntry = offsetToBufferMap.floorEntry(address);
+		if (bufferEntry != null) {
+			// Re have a candidate buffer lets see if the request is enclosed
+			int offset = Math.toIntExact(address - bufferEntry.getKey());
+			if(offset + length <= bufferEntry.getValue().capacity()) {
+				// The requested buffer is fully enclosed in this buffer
+				MappedByteBuffer sliced = bufferEntry.getValue().slice(offset, length);
+				sliced.order(bufferEntry.getValue().order());
+				logger.trace("Buffer sliced from map");
+				return sliced;
+			}
+		}
 		try {
 			if (!memoryMappingFailed) {
 				try {
-
-					return fc.map(mode, address, length);
+					MappedByteBuffer mappedByteBuffer = fc.map(mode, address, length);
+					offsetToBufferMap.put(address, mappedByteBuffer);
+					logger.debug("Mapped buffer at address [{}] length [{}]", address, length);
+					return mappedByteBuffer;
 				} catch (UnsupportedOperationException | IOException e) {
 					// Many file systems do not support memory mapping. Some throw an UnsupportedOperationException,
 					// others an IOException (cf. S3FileChannel of https://github.com/awslabs/aws-java-nio-spi-for-s3/).
@@ -97,7 +124,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 				}
 			}
 			// read channel into buffer instead of mapping it to memory
-			return readBufferNoOffset(address, Math.toIntExact(length));
+			return readBufferNoOffset(address, length);
 		} catch (IOException e) {
 			throw new HdfException("Failed to map buffer at address '" + address
 				+ "' of length '" + length + "'", e);
@@ -105,6 +132,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 	}
 
 	private ByteBuffer readBufferNoOffset(long address, int length) throws IOException {
+		logger.trace("Request to read at address [{}] length [{}]", address, length);
 		ByteBuffer bb = ByteBuffer.allocate(length);
 		int totalNumberOfBytesRead = 0;
 		while (totalNumberOfBytesRead < length) {
