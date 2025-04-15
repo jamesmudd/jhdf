@@ -13,6 +13,9 @@ import io.jhdf.HdfFile;
 import io.jhdf.Superblock;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfWritingException;
+import io.jhdf.object.message.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -31,6 +34,8 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
  */
 public class HdfFileChannel implements HdfBackingStorage {
 
+	private static final Logger logger = LoggerFactory.getLogger(HdfFileChannel.class);
+
 	private final FileChannel fc;
 	private final Superblock sb;
 	private boolean memoryMappingFailed;
@@ -38,6 +43,11 @@ public class HdfFileChannel implements HdfBackingStorage {
 	public HdfFileChannel(FileChannel fileChannel, Superblock superblock) {
 		this.fc = fileChannel;
 		this.sb = superblock;
+		try {
+			logger.info("Created HDF file channel. File size [{}] bytes", fc.size());
+		} catch (IOException e) {
+			logger.warn("Create HDF file channel but couldn't get size", e);
+		}
 	}
 
 	/**
@@ -72,15 +82,17 @@ public class HdfFileChannel implements HdfBackingStorage {
 		return mapNoOffset(address, length, MapMode.READ_ONLY);
 	}
 
-	public ByteBuffer mapNoOffset(long address, long length, MapMode mode) {
+	private ByteBuffer mapNoOffset(long address, long length, MapMode mode) {
 		try {
 			if (!memoryMappingFailed) {
 				try {
+
 					return fc.map(mode, address, length);
 				} catch (UnsupportedOperationException | IOException e) {
 					// Many file systems do not support memory mapping. Some throw an UnsupportedOperationException,
 					// others an IOException (cf. S3FileChannel of https://github.com/awslabs/aws-java-nio-spi-for-s3/).
 					// Falling back to readBufferNoOffset() is also valid if an IOException has a different cause.
+					logger.info("Attempting memory mapping failed, falling back");
 					memoryMappingFailed = true;
 				}
 			}
@@ -156,7 +168,6 @@ public class HdfFileChannel implements HdfBackingStorage {
 	}
 
 	public int write(ByteBuffer buffer, long position) {
-		// TODO check if writable
 		try {
 			return fc.write(buffer, position);
 		} catch (IOException e) {

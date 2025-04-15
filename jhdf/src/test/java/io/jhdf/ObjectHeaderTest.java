@@ -125,8 +125,9 @@ class ObjectHeaderTest {
 		LazyInitializer<ObjectHeader> lazyObjectHeader = ObjectHeader.lazyReadObjectHeader(hdfBackingStorage, 10904); // int8
 
 		// header
-		// Creating the lazy object header should not touch the file
-		Mockito.verifyNoInteractions(mockFc);
+		// Creating the lazy object header should only access the file size
+		Mockito.verify(mockFc).size();
+		Mockito.verifyNoMoreInteractions(mockFc);
 
 		// Get the actual header should cause the file to be read
 		lazyObjectHeader.get();
