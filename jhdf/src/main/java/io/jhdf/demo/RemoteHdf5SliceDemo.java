@@ -8,6 +8,34 @@ import java.net.URL;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Arrays;
 
+/**
+ * Demonstration of reading remote HDF5 files over HTTP using {@link HttpRangeSeekableByteChannel}
+ * and the new {@link HdfFile} constructor that supports custom {@link java.nio.channels.SeekableByteChannel}.
+ *
+ * <p>This example opens a publicly hosted `.hdf5/.mcool` file representing Hi-C data from
+ * a remote URL, without downloading the entire file. It uses HTTP range requests to read
+ * only the necessary bytes on demand.
+ *
+ * <p>The demo:
+ * <ul>
+ *   <li>Initializes a {@code HttpRangeSeekableByteChannel} with LRU caching for remote reads</li>
+ *   <li>Opens the HDF5 file using {@code new HdfFile(channel, URI)}</li>
+ *   <li>Loads the dataset at {@code /resolutions/1000/bins/start}</li>
+ *   <li>Reads the dataset in slices of 1000 rows using {@code getData(offset, shape)}</li>
+ *   <li>Prints the shape, the first few values, and the total values read</li>
+ * </ul>
+ *
+ * <p>This demonstrates and validates support for:
+ * <ul>
+ *   <li>Remote access to chunked HDF5 datasets via HTTP</li>
+ *   <li>Streaming partial data without needing to download the full file</li>
+ *   <li>Chunked and sliced data access in a real-world genomic `.mcool` file</li>
+ * </ul>
+ *
+ * <p>This is useful for efficiently working with large Hi-C or genomics datasets hosted
+ * on cloud or institutional storage without requiring full local copies.
+ */
+
 public class RemoteHdf5SliceDemo {
 
 	public static void main(String[] args) throws Exception {
