@@ -1,4 +1,13 @@
-package io.jhdf.demo;
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * https://jhdf.io
+ *
+ * Copyright (c) 2025 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
+package io.jhdf.examples;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
@@ -48,7 +57,7 @@ import java.util.List;
  * seamlessly in jHDF for large-scale scientific data.
  */
 
-public class ChunkedSliceReaderDemo {
+public class ReadSlicesOfChunkedExample {
 
 	public static void main(String[] args) {
 		String path = System.getProperty("user.home") + "/Downloads/day80_ventricularCardiomyocyte_pool.hg38.mapq_30.100.mcool";

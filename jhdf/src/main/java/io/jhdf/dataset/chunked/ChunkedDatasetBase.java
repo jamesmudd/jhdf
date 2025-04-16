@@ -15,7 +15,6 @@ import io.jhdf.api.Group;
 import io.jhdf.api.dataset.ChunkedDataset;
 import io.jhdf.dataset.DatasetBase;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.filter.FilterManager;
 import io.jhdf.filter.FilterPipeline;
 import io.jhdf.filter.PipelineFilterWithData;
@@ -27,7 +26,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import static java.lang.Math.toIntExact;
 
@@ -41,13 +44,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		lazyPipeline = new FilterPipelineLazyInitializer();
 	}
 
-	protected void fillDataFromChunk(final Chunk chunk,
-									 final byte[] dataArray,
-									 final int[] chunkDimensions,
-									 final int[] chunkInternalOffsets,
-									 final int[] dataOffsets,
-									 final int fastestChunkDim,
-									 final int elementSize) {
+	protected void fillDataFromChunk(final Chunk chunk, final byte[] dataArray, final int[] chunkDimensions, final int[] chunkInternalOffsets, final int[] dataOffsets, final int fastestChunkDim, final int elementSize) {
 
 		logger.trace("Filling data from chunk '{}'", chunk);
 
@@ -62,8 +59,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 			// Not a partial chunk so can always copy the max amount
 			final int length = fastestChunkDim * elementSize;
 			for (int i = 0; i < chunkInternalOffsets.length; i++) {
-				System.arraycopy(
-					chunkData, chunkInternalOffsets[i], // src
+				System.arraycopy(chunkData, chunkInternalOffsets[i], // src
 					dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
 					length); // length
 			}
@@ -84,11 +80,9 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 				}
 
 				// Its inside so we need to copy at least something. Now work out how much?
-				final int length = elementSize * Math.min(fastestChunkDim,
-					fastestChunkDim - (chunkOffset[highestDimIndex] + chunkDimensions[highestDimIndex] - getDimensions()[highestDimIndex]));
+				final int length = elementSize * Math.min(fastestChunkDim, fastestChunkDim - (chunkOffset[highestDimIndex] + chunkDimensions[highestDimIndex] - getDimensions()[highestDimIndex]));
 
-				System.arraycopy(
-					chunkData, chunkInternalOffsets[i], // src
+				System.arraycopy(chunkData, chunkInternalOffsets[i], // src
 					dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
 					length); // length
 			}
@@ -96,9 +90,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		}
 	}
 
-	private boolean partOfChunkIsOutsideDataset(final int chunkInternalOffsetIndex,
-												final int[] chunkDimensions,
-												final int[] chunkOffset) {
+	private boolean partOfChunkIsOutsideDataset(final int chunkInternalOffsetIndex, final int[] chunkDimensions, final int[] chunkOffset) {
 
 		int[] locationInChunk = Utils.linearIndexToDimensionIndex(chunkInternalOffsetIndex, chunkDimensions);
 		for (int j = 0; j < locationInChunk.length - 1; j++) {
@@ -158,8 +150,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		final int fastestChunkDim = chunkDimensions[chunkDimensions.length - 1];
 
 		// Parallel decoding and filling, this is where all the work is done
-		chunks.parallelStream().forEach(chunk -> fillDataFromChunk(chunk, dataArray, chunkDimensions,
-			chunkInternalOffsets, dataOffsets, fastestChunkDim, elementSize));
+		chunks.parallelStream().forEach(chunk -> fillDataFromChunk(chunk, dataArray, chunkDimensions, chunkInternalOffsets, dataOffsets, fastestChunkDim, elementSize));
 
 		return ByteBuffer.wrap(dataArray);
 	}
@@ -191,9 +182,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	 */
 	protected int[] getChunkInternalOffsets(int[] chunkDimensions, int elementSize) {
 		final int fastestChunkDim = chunkDimensions[chunkDimensions.length - 1];
-		final int numOfOffsets = Arrays.stream(chunkDimensions)
-			.limit(chunkDimensions.length - 1L)
-			.reduce(1, Math::multiplyExact);
+		final int numOfOffsets = Arrays.stream(chunkDimensions).limit(chunkDimensions.length - 1L).reduce(1, Math::multiplyExact);
 
 		final int[] chunkOffsets = new int[numOfOffsets];
 		for (int i = 0; i < numOfOffsets; i++) {
@@ -253,8 +242,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		try {
 			return hdfBackingStorage.map(chunk.getAddress(), chunk.getSize());
 		} catch (Exception e) {
-			throw new HdfException(
-				"Failed to read chunk for dataset '" + getPath() + "' at address " + chunk.getAddress());
+			throw new HdfException("Failed to read chunk for dataset '" + getPath() + "' at address " + chunk.getAddress());
 		}
 	}
 
@@ -282,8 +270,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	public ByteBuffer getRawChunkBuffer(int[] chunkOffset) {
 		final Chunk chunk = getChunk(new ChunkOffset(chunkOffset));
 		if (chunk == null) {
-			throw new HdfException("No chunk with offset " + Arrays.toString(chunkOffset) +
-				" in dataset: " + getPath());
+			throw new HdfException("No chunk with offset " + Arrays.toString(chunkOffset) + " in dataset: " + getPath());
 		}
 		return getDataBuffer(chunk);
 	}
@@ -292,8 +279,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	public byte[] getDecompressedChunk(int[] chunkOffset) {
 		final Chunk chunk = getChunk(new ChunkOffset(chunkOffset));
 		if (chunk == null) {
-			throw new HdfException("No chunk with offset " + Arrays.toString(chunkOffset) +
-				" in dataset: " + getPath());
+			throw new HdfException("No chunk with offset " + Arrays.toString(chunkOffset) + " in dataset: " + getPath());
 		}
 		return decompressChunk(chunk);
 	}
@@ -342,8 +328,8 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		int[] endChunk = new int[offset.length];
 
 		for (int i = 0; i < offset.length; i++) {
-			startChunk[i] = (int)(offset[i] / chunkDims[i]);
-			endChunk[i] = (int)((offset[i] + shape[i] - 1) / chunkDims[i]);
+			startChunk[i] = (int) (offset[i] / chunkDims[i]);
+			endChunk[i] = (int) ((offset[i] + shape[i] - 1) / chunkDims[i]);
 		}
 
 		for (int[] chunkCoords : getChunkCoordinateRange(startChunk, endChunk)) {
@@ -388,8 +374,8 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		int[] intersectStart = new int[rank];
 		int[] intersectEnd = new int[rank];
 		for (int i = 0; i < rank; i++) {
-			intersectStart[i] = Math.max((int)sliceOffset[i], chunkOffset[i]);
-			intersectEnd[i] = Math.min((int)(sliceOffset[i] + sliceShape[i]), chunkOffset[i] + chunkDims[i]);
+			intersectStart[i] = Math.max((int) sliceOffset[i], chunkOffset[i]);
+			intersectEnd[i] = Math.min((int) (sliceOffset[i] + sliceShape[i]), chunkOffset[i] + chunkDims[i]);
 		}
 
 		// Skip if no intersection
@@ -404,7 +390,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		for (int i = 0; i < rank; i++) {
 			copyShape[i] = intersectEnd[i] - intersectStart[i];
 			chunkStart[i] = intersectStart[i] - chunkOffset[i];
-			sliceStart[i] = intersectStart[i] - (int)sliceOffset[i];
+			sliceStart[i] = intersectStart[i] - (int) sliceOffset[i];
 		}
 
 		// Compute linear offsets for chunk and slice
@@ -430,11 +416,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 				sliceIdx += (sliceStart[d] + index[d]) * sliceStrides[d];
 			}
 
-			System.arraycopy(
-				chunkData, chunkIdx * elementSize,
-				dataArray, sliceIdx * elementSize,
-				elementSize
-			);
+			System.arraycopy(chunkData, chunkIdx * elementSize, dataArray, sliceIdx * elementSize, elementSize);
 		}
 	}
 

@@ -1,7 +1,17 @@
-package io.jhdf.demo;
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * https://jhdf.io
+ *
+ * Copyright (c) 2025 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
+package io.jhdf.examples;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
+import io.jhdf.storage.HttpRangeSeekableByteChannel;
 
 import java.net.URI;
 import java.net.URL;
@@ -36,7 +46,7 @@ import java.util.Arrays;
  * on cloud or institutional storage without requiring full local copies.
  */
 
-public class RemoteHdf5SliceDemo {
+public class RemoteHdf5SliceExample {
 
 	public static void main(String[] args) throws Exception {
 		URI uri = new URI("https://users.abdenlab.org/reimonnt/Cardiac_HiC_PRJNA480492/distiller-nf/results/coolers_library_group/day80_ventricularCardiomyocyte_pool.hg38.mapq_30.100.mcool");
@@ -44,16 +54,14 @@ public class RemoteHdf5SliceDemo {
 
 		System.out.println("Opening remote HDF5 via HTTP range: " + url);
 		long t0 = System.nanoTime();
-		try (SeekableByteChannel remoteChannel = new HttpRangeSeekableByteChannel(url);
-			 HdfFile hdf = new HdfFile(remoteChannel, uri)) {
+		try (SeekableByteChannel remoteChannel = new HttpRangeSeekableByteChannel(url); HdfFile hdf = new HdfFile(remoteChannel, uri)) {
 
-			String datasetPath = "/resolutions/1000/bins/start";
+			String datasetPath = "/resolutions/5000/pixels/bin1_id";
 			Dataset ds = hdf.getDatasetByPath(datasetPath);
 
 			long t1 = System.nanoTime();
 			System.out.printf("Opened dataset: %s [%.3f ms]\n", datasetPath, (t1 - t0) / 1e6);
 			System.out.println("Dimensions: " + Arrays.toString(ds.getDimensions()));
-
 
 			int[] dims = ds.getDimensions();
 			int totalLength = dims[0];
@@ -70,7 +78,7 @@ public class RemoteHdf5SliceDemo {
 
 				// Print first slice start
 				if (i == 0) {
-					System.out.println("First 5 values: " + Arrays.toString(Arrays.copyOf((int[]) slice, 5)));
+					System.out.println("First 5 values: " + Arrays.toString(Arrays.copyOf((long[]) slice, 5)));
 				}
 			}
 			long t2 = System.nanoTime();
