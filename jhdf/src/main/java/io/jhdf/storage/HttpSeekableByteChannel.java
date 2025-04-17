@@ -85,7 +85,7 @@ public class HttpSeekableByteChannel implements SeekableByteChannel {
 		this.blockSize = blockSize;
 		this.cache = new LruCache<>(maxCacheBlocks);
 		this.size = fetchRemoteSize(url);
-		logger.info("Initialized HttpRangeSeekableByteChannel for URL: {} with blockSize: {} bytes and cache capacity: {} blocks", url, blockSize, maxCacheBlocks);
+		logger.info("Initialized HttpRangeSeekableByteChannel for URL: {} with blockSize: {} KB and cache capacity: {} blocks", url, blockSize / 1024, maxCacheBlocks);
 	}
 
 	/**
