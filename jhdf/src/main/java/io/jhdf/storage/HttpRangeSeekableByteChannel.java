@@ -27,7 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * using HTTP range requests.
  * <p>
  * This channel supports read-only access to remote files by downloading blocks of data on demand
- * and caching them locally. The cache is configurable by block size and block count, or by specifying
+ * and caching them in-memory. The cache is configurable by block size and block count, or by specifying
  * the total cache size in MB. The default configuration uses 128 KB blocks and a cache that holds up to
  * 16 MB (i.e. 128 blocks).
  * </p>
@@ -42,24 +42,20 @@ public class HttpRangeSeekableByteChannel implements SeekableByteChannel {
 
 	// Default configuration constants.
 	private static final int DEFAULT_BLOCK_SIZE = 128 * 1024; // 128 KB blocks.
-	private static final int DEFAULT_CACHE_SIZE_MB = 16;        // 16 MB cache.
+	private static final int DEFAULT_CACHE_SIZE_MB = 16;      // 16 MB cache.
 	private static final int DEFAULT_MAX_CACHE_BLOCKS = DEFAULT_CACHE_SIZE_MB * 1024 * 1024 / DEFAULT_BLOCK_SIZE;
 	private static final int MAX_RETRIES = 3;
 
+	// Instance configuration
 	private final URL url;
 	private final long size;
 	private final int blockSize;
-	private final int maxCacheBlocks;
 	private final LruCache<Long, byte[]> cache;
-
-	// Lock to ensure thread-safety.
 	private final ReentrantLock lock = new ReentrantLock();
 
-	// Shared file pointer.
+	// Thread-safe position and metrics
 	private long position = 0;
 	private volatile boolean open = true;
-
-	// Metrics.
 	private long totalBytesRead = 0;
 	private int totalBlocksFetched = 0;
 	private int cacheHits = 0;
@@ -86,7 +82,6 @@ public class HttpRangeSeekableByteChannel implements SeekableByteChannel {
 	public HttpRangeSeekableByteChannel(URL url, int blockSize, int maxCacheBlocks) throws IOException {
 		this.url = url;
 		this.blockSize = blockSize;
-		this.maxCacheBlocks = maxCacheBlocks;
 		this.cache = new LruCache<>(maxCacheBlocks);
 		this.size = fetchRemoteSize(url);
 		logger.info("Initialized HttpRangeSeekableByteChannel for URL: {} with blockSize: {} bytes and cache capacity: {} blocks", url, blockSize, maxCacheBlocks);
@@ -178,11 +173,9 @@ public class HttpRangeSeekableByteChannel implements SeekableByteChannel {
 		byte[] block = cache.get(blockIndex);
 		if (block != null) {
 			cacheHits++;
-			logger.trace("Cache hit for block {}", blockIndex);
 			return block;
 		}
 		cacheMisses++;
-		logger.trace("Cache miss for block {}; fetching from remote", blockIndex);
 		block = fetchBlockFromRemote(blockIndex);
 		totalBlocksFetched++;
 		cache.put(blockIndex, block);
@@ -224,7 +217,7 @@ public class HttpRangeSeekableByteChannel implements SeekableByteChannel {
 				if (totalRead != expectedSize) {
 					throw new IOException("Incomplete read for block " + blockIndex + ": expected " + expectedSize + ", got " + totalRead);
 				}
-				logger.debug("Fetched block {} (bytes {}-{}) on attempt {}", blockIndex, start, end, attempt);
+				logger.trace("Fetched block {} (bytes {}-{}) on attempt {}", blockIndex, start, end, attempt);
 				return buffer;
 			} catch (IOException e) {
 				lastException = e;
