@@ -1,3 +1,13 @@
+/*
+ * This file is part of jHDF. A pure Java library for accessing HDF5 files.
+ *
+ * https://jhdf.io
+ *
+ * Copyright (c) 2025 James Mudd
+ *
+ * MIT License see 'LICENSE' file
+ */
+
 package io.jhdf.storage;
 
 import org.junit.jupiter.api.Test;
@@ -19,9 +29,7 @@ public class HttpSeekableByteChannelTest {
 
 	static {
 		try {
-			TEST_URL = new URL(
-				"https://raw.githubusercontent.com/jamesmudd/jhdf/refs/heads/master/README.md"
-			);
+			TEST_URL = new URL("https://raw.githubusercontent.com/jamesmudd/jhdf/refs/heads/master/README.md");
 		} catch (Exception e) {
 			throw new RuntimeException("Invalid test URL", e);
 		}
@@ -52,8 +60,7 @@ public class HttpSeekableByteChannelTest {
 			byte[] bytes = new byte[buffer.remaining()];
 			buffer.get(bytes);
 			String content = new String(bytes, StandardCharsets.UTF_8);
-			assertTrue(content.startsWith("# jHDF"),
-				"Content should start with '# jHDF'");
+			assertTrue(content.startsWith("# jHDF"), "Content should start with '# jHDF'");
 		}
 	}
 
@@ -68,8 +75,7 @@ public class HttpSeekableByteChannelTest {
 			byte[] bytes = new byte[buffer.remaining()];
 			buffer.get(bytes);
 			String content = new String(bytes, StandardCharsets.UTF_8);
-			assertEquals("HDF -", content,
-				"Bytes 3-7 should spell 'HDF -'");
+			assertEquals("HDF -", content, "Bytes 3-7 should spell 'HDF -'");
 		}
 	}
 
@@ -84,8 +90,7 @@ public class HttpSeekableByteChannelTest {
 			assertEquals(10, bytesRead, "Should read 10 bytes across block boundary");
 			buffer.flip();
 			String content = new String(buffer.array(), StandardCharsets.UTF_8);
-			assertEquals("F - Pure J", content,
-				"Cross-block read should yield 'F - Pure J'");
+			assertEquals("F - Pure J", content, "Cross-block read should yield 'F - Pure J'");
 		}
 	}
 
@@ -95,33 +100,24 @@ public class HttpSeekableByteChannelTest {
 			channel.position(channel.size());
 			ByteBuffer buffer = ByteBuffer.allocate(10);
 			int bytesRead = channel.read(buffer);
-			assertEquals(-1, bytesRead,
-				"Reading at EOF should return -1");
+			assertEquals(-1, bytesRead, "Reading at EOF should return -1");
 		}
 	}
 
 	@Test
 	void testPositionInvalid() throws IOException {
 		try (HttpSeekableByteChannel channel = new HttpSeekableByteChannel(TEST_URL)) {
-			assertThrows(IllegalArgumentException.class,
-				() -> channel.position(-1),
-				"Negative position should throw IllegalArgumentException");
+			assertThrows(IllegalArgumentException.class, () -> channel.position(-1), "Negative position should throw IllegalArgumentException");
 			long fileSize = channel.size();
-			assertThrows(IllegalArgumentException.class,
-				() -> channel.position(fileSize + 1),
-				"Position beyond size should throw IllegalArgumentException");
+			assertThrows(IllegalArgumentException.class, () -> channel.position(fileSize + 1), "Position beyond size should throw IllegalArgumentException");
 		}
 	}
 
 	@Test
 	void testUnsupportedOperations() throws IOException {
 		try (HttpSeekableByteChannel channel = new HttpSeekableByteChannel(TEST_URL)) {
-			assertThrows(UnsupportedOperationException.class,
-				() -> channel.truncate(10),
-				"truncate() should throw UnsupportedOperationException");
-			assertThrows(UnsupportedOperationException.class,
-				() -> channel.write(ByteBuffer.allocate(1)),
-				"write() should throw UnsupportedOperationException");
+			assertThrows(UnsupportedOperationException.class, () -> channel.truncate(10), "truncate() should throw UnsupportedOperationException");
+			assertThrows(UnsupportedOperationException.class, () -> channel.write(ByteBuffer.allocate(1)), "write() should throw UnsupportedOperationException");
 		}
 	}
 
@@ -132,8 +128,6 @@ public class HttpSeekableByteChannelTest {
 		channel.close();
 		assertFalse(channel.isOpen(), "Channel should be closed after close()");
 		ByteBuffer buffer = ByteBuffer.allocate(1);
-		assertThrows(IOException.class,
-			() -> channel.read(buffer),
-			"read() after close should throw IOException");
+		assertThrows(IOException.class, () -> channel.read(buffer), "read() after close should throw IOException");
 	}
 }
