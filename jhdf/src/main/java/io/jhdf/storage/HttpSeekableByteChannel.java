@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -36,9 +37,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * cache hits, and cache misses. These metrics are logged at the INFO level upon channel closure.
  * </p>
  */
-public class HttpRangeSeekableByteChannel implements SeekableByteChannel {
+public class HttpSeekableByteChannel implements SeekableByteChannel {
 
-	private static final Logger logger = LoggerFactory.getLogger(HttpRangeSeekableByteChannel.class);
+	private static final Logger logger = LoggerFactory.getLogger(HttpSeekableByteChannel.class);
 
 	// Default configuration constants.
 	private static final int DEFAULT_BLOCK_SIZE = 128 * 1024; // 128 KB blocks.
@@ -67,7 +68,7 @@ public class HttpRangeSeekableByteChannel implements SeekableByteChannel {
 	 * @param url the URL of the remote HDF5 file.
 	 * @throws IOException if an I/O error occurs while fetching the file size.
 	 */
-	public HttpRangeSeekableByteChannel(URL url) throws IOException {
+	public HttpSeekableByteChannel(URL url) throws IOException {
 		this(url, DEFAULT_BLOCK_SIZE, DEFAULT_MAX_CACHE_BLOCKS);
 	}
 
@@ -79,7 +80,7 @@ public class HttpRangeSeekableByteChannel implements SeekableByteChannel {
 	 * @param maxCacheBlocks the maximum number of blocks to be stored in the cache.
 	 * @throws IOException if an I/O error occurs while fetching the file size.
 	 */
-	public HttpRangeSeekableByteChannel(URL url, int blockSize, int maxCacheBlocks) throws IOException {
+	public HttpSeekableByteChannel(URL url, int blockSize, int maxCacheBlocks) throws IOException {
 		this.url = url;
 		this.blockSize = blockSize;
 		this.cache = new LruCache<>(maxCacheBlocks);
@@ -95,7 +96,7 @@ public class HttpRangeSeekableByteChannel implements SeekableByteChannel {
 	 * @param cacheSizeMB the total cache size in megabytes.
 	 * @throws IOException if an I/O error occurs while fetching the file size.
 	 */
-	public HttpRangeSeekableByteChannel(URL url, int cacheSizeMB) throws IOException {
+	public HttpSeekableByteChannel(URL url, int cacheSizeMB) throws IOException {
 		this(url, DEFAULT_BLOCK_SIZE, cacheSizeMB * 1024 * 1024 / DEFAULT_BLOCK_SIZE);
 	}
 
@@ -170,16 +171,23 @@ public class HttpRangeSeekableByteChannel implements SeekableByteChannel {
 	 * @throws IOException if an error occurs during remote fetching.
 	 */
 	private byte[] getOrFetchBlock(long blockIndex) throws IOException {
-		byte[] block = cache.get(blockIndex);
-		if (block != null) {
+		try {
+			int originalCacheHits = cacheHits;
 			cacheHits++;
-			return block;
+			return cache.computeIfAbsent(blockIndex, idx -> {
+				try {
+					byte[] block = fetchBlockFromRemote(idx);
+					totalBlocksFetched++;
+					cacheMisses++;
+					cacheHits = originalCacheHits;
+					return block;
+				} catch (IOException e) {
+					throw new UncheckedIOException(e);
+				}
+			});
+		} catch (UncheckedIOException e) {
+			throw e.getCause();
 		}
-		cacheMisses++;
-		block = fetchBlockFromRemote(blockIndex);
-		totalBlocksFetched++;
-		cache.put(blockIndex, block);
-		return block;
 	}
 
 	/**
@@ -289,7 +297,7 @@ public class HttpRangeSeekableByteChannel implements SeekableByteChannel {
 		try {
 			open = false;
 			cache.clear();
-			logger.info("Channel closed. Total bytes read: {}. Blocks fetched: {}. Cache hits: {}. Cache misses: {}.", totalBytesRead, totalBlocksFetched, cacheHits, cacheMisses);
+			logger.info("HttpSeekableByteChannel closed. Total bytes read: {}. Blocks fetched: {}. Cache hits: {}. Cache misses: {}.", totalBytesRead, totalBlocksFetched, cacheHits, cacheMisses);
 		} finally {
 			lock.unlock();
 		}
