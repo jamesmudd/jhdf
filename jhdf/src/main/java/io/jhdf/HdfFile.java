@@ -388,7 +388,7 @@ public class HdfFile implements Group, AutoCloseable {
 			logger.info("Closed HDF file '{}'", getFileAsPath().toAbsolutePath());
 		}
 
-		// Close httpSeekableByteChannel is it was set
+		// Close httpSeekableByteChannel if it was set
 		if (httpSeekableByteChannel != null) {
 			try {
 				httpSeekableByteChannel.close();
