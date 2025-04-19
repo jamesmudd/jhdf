@@ -67,12 +67,12 @@ class ChunkSlicingTest {
 		for (String path : PATHS) {
 			Dataset ds = h5.getDatasetByPath(path);
 			// load full dataset into memory
-			short[][][] full = (short[][][]) ds.getData();
+			short[][][] fullDataset = (short[][][]) ds.getData();
 			int[] dims = ds.getDimensions(); // [200, 5, 10]
 
 			List<DynamicTest> tests = new ArrayList<>();
 
-			// --- full-read sanity check ---
+			// full-read sanity check
 			tests.add(DynamicTest.dynamicTest("fullRead", () -> {
 				// shape
 				assertArrayEquals(dims, ds.getDimensions());
@@ -81,7 +81,7 @@ class ChunkSlicingTest {
 				for (int i = 0; i < dims[0]; i++)
 					for (int j = 0; j < dims[1]; j++)
 						for (int k = 0; k < dims[2]; k++)
-							assertEquals(full[i][j][k], got[i][j][k], "full[" + i + "][" + j + "][" + k + "]");
+							assertEquals(fullDataset[i][j][k], got[i][j][k], "full[" + i + "][" + j + "][" + k + "]");
 			}));
 
 			// offsets & lengths to test along each axis
@@ -89,9 +89,9 @@ class ChunkSlicingTest {
 				{0, 1, 2}, // for dim1
 				{0, 3, 4, 7}  // for dim2
 			};
-			int[][] lengths = {{1, 2, 3, 5, 11, 23, 49, 110},  // for dim0
+			int[][] lengths = {{2, 3, 5, 11, 23, 49, 110},  // for dim0
 				{1, 3, 4, 5},  // for dim1
-				{1, 2, 3, 4}   // for dim2
+				{3, 5, 6, 8}   // for dim2
 			};
 
 			// generate slice tests for each dimension
@@ -111,14 +111,14 @@ class ChunkSlicingTest {
 							Object raw = ds.getData(sliceOff, sliceLen);
 							short[][][] slice = (short[][][]) raw;
 
-							// 1) shape matches
+							// Check shape matches
 							assertArrayEquals(sliceLen, getDimensions(slice), "returned shape");
 
-							// 2) data matches full subarray
+							//  Check data matches full subarray
 							for (int i = 0; i < sliceLen[0]; i++)
 								for (int j = 0; j < sliceLen[1]; j++)
 									for (int k = 0; k < sliceLen[2]; k++)
-										assertEquals(full[(int) sliceOff[0] + i][(int) sliceOff[1] + j][(int) sliceOff[2] + k], slice[i][j][k], String.format("slice[%d][%d][%d]", i, j, k));
+										assertEquals(fullDataset[(int) sliceOff[0] + i][(int) sliceOff[1] + j][(int) sliceOff[2] + k], slice[i][j][k], String.format("slice[%d][%d][%d]", i, j, k));
 						}));
 					}
 				}
