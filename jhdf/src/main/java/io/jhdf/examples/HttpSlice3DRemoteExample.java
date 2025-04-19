@@ -51,16 +51,16 @@ public class HttpSlice3DRemoteExample {
 		// NeurIPS 2021 arXiv:2106.11535
 		URL url = new URL("https://zenodo.org/records/6975118/files/g.hdf5");
 
-		System.out.println("Opening remote HDF5 via HTTP range: " + url);
+		System.out.println("Opening remote HDF5 file for streaming via HTTP: " + url);
 		long t0 = System.nanoTime();
 		try (HdfFile hdf = new HdfFile(url)) {
 			String datasetPath = "/particle_features";
 			Dataset ds = hdf.getDatasetByPath(datasetPath);
 
 			long t1 = System.nanoTime();
-			System.out.printf("Opened HDF5 File: %s [%.2f ms]%n", datasetPath, (t1 - t0) / 1e6);
+			System.out.printf("Opened HDF5 file and found dataset: %s [%.2f ms]%n", datasetPath, (t1 - t0) / 1e6);
 			int[] dims = ds.getDimensions();
-			System.out.println("Dimensions: " + Arrays.toString(dims));  // [177252, 30, 4]
+			System.out.println("Dataset Dimensions: " + Arrays.toString(dims));  // [177252, 30, 4]
 
 			int totalLength = dims[0];
 			int sliceSize = 100;
