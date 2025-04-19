@@ -1,5 +1,4 @@
 /*
-/*
  * This file is part of jHDF. A pure Java library for accessing HDF5 files.
  *
  * https://jhdf.io
@@ -8,7 +7,6 @@
  *
  * MIT License see 'LICENSE' file
  */
-
 package io.jhdf.dataset.chunked;
 
 import io.jhdf.HdfFile;
