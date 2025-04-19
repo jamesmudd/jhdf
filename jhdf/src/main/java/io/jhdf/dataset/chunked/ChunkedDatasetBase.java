@@ -60,8 +60,8 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 			final int length = fastestChunkDim * elementSize;
 			for (int i = 0; i < chunkInternalOffsets.length; i++) {
 				System.arraycopy(chunkData, chunkInternalOffsets[i], // src
-					dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
-					length); // length
+								 dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
+								 length); // length
 			}
 		} else {
 			logger.trace("Handling partial chunk '{}'", chunk);
@@ -83,8 +83,8 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 				final int length = elementSize * Math.min(fastestChunkDim, fastestChunkDim - (chunkOffset[highestDimIndex] + chunkDimensions[highestDimIndex] - getDimensions()[highestDimIndex]));
 
 				System.arraycopy(chunkData, chunkInternalOffsets[i], // src
-					dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
-					length); // length
+								 dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
+								 length); // length
 			}
 
 		}
@@ -376,11 +376,6 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		for (int i = 0; i < rank; i++) {
 			intersectStart[i] = Math.max((int) sliceOffset[i], chunkOffset[i]);
 			intersectEnd[i] = Math.min((int) (sliceOffset[i] + sliceShape[i]), chunkOffset[i] + chunkDims[i]);
-		}
-
-		// Skip if no intersection
-		for (int i = 0; i < rank; i++) {
-			if (intersectStart[i] >= intersectEnd[i]) return;
 		}
 
 		// Dimensions for iteration

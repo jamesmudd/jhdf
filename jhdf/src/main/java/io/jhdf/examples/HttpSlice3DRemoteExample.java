@@ -84,7 +84,7 @@ public class HttpSlice3DRemoteExample {
 				// Count how many values we got: sliceLength * 30 * 4
 				int valuesRead = array.length * array[0].length * array[0][0].length;
 				totalValuesRead += valuesRead;
-				System.out.printf("Read slice of shape: [%d, %d, %d] containing %d float32 values\n", shape[0], shape[1], shape[2], valuesRead);
+				System.out.printf("Read slice of shape: [%d, %d, %d] at offset [%d, %d, %d] containing %d float32 values\n", shape[0], shape[1], shape[2], offset[0], offset[1], offset[2], valuesRead);
 
 				// Print the first 5 floats of the very first slice
 				if (i == 0) {
