@@ -2,9 +2,9 @@
 
 ## v0.9.3 - April 2025
 - Add support for slicing of chunked datasets. This allows accessing portions of large, chunked datasets using `getData(offset, length)`.
+- Add constructor to open an `HdfFile(URL url)` to support streaming reading of remote HDF5 files.
 - Add constructor for opening an `HdfFile` from a `SeekableByteChannel` providing the IO access to the underlying resource.
 - Add an implementation of `HttpSeekableByteChannel` supporting streaming of HDF5 files from remote HTTP(s) sources without a local copy.
-- Add constructor to open an `HdfFile(URL url)` to support streaming reading of remote HDF5 files.
 
 ## v0.9.2 - March 2025
 - Fix external links pointing to the root group https://github.com/jamesmudd/jhdf/issues/689

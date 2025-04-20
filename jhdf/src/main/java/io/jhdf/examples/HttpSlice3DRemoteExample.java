@@ -21,13 +21,13 @@ import java.util.Arrays;
  * and the new {@link HdfFile} constructor.
  *
  * <p>This example opens a publicly hosted `.hdf5` file from a remote URL, without downloading
- * the entire file. It uses HTTP range requests and an LRU cache to read only the necessary
- * bytes on demand.
+ * the entire file. It uses HTTP range requests and an in-memory LRU cache to read only the necessary
+ * chunks on demand.
  *
  * <p>The demo:
  * <ul>
- *   <li>Opens the HDF5 file using {@code new HdfFile(URL)} whcih initializes a
- *   {@code HttpRangeSeekableByteChannel} with LRU caching</li>
+ *   <li>Opens the HDF5 file using {@code new HdfFile(URL)} which initializes a
+ *   {@code HttpRangeSeekableByteChannel} with in-memory LRU caching</li>
  *   <li>Loads the dataset at {@code /resolutions/1000/bins/start}</li>
  *   <li>Reads the dataset in slices of 1000 rows using {@code getData(offset, shape)}</li>
  *   <li>Prints the shape, the first few values, and the total values read</li>
