@@ -15,7 +15,6 @@ import io.jhdf.api.Group;
 import io.jhdf.api.dataset.ChunkedDataset;
 import io.jhdf.dataset.DatasetBase;
 import io.jhdf.exceptions.HdfException;
-import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.filter.FilterManager;
 import io.jhdf.filter.FilterPipeline;
 import io.jhdf.filter.PipelineFilterWithData;
@@ -27,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -44,13 +44,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		lazyPipeline = new FilterPipelineLazyInitializer();
 	}
 
-	protected void fillDataFromChunk(final Chunk chunk,
-									 final byte[] dataArray,
-									 final int[] chunkDimensions,
-									 final int[] chunkInternalOffsets,
-									 final int[] dataOffsets,
-									 final int fastestChunkDim,
-									 final int elementSize) {
+	protected void fillDataFromChunk(final Chunk chunk, final byte[] dataArray, final int[] chunkDimensions, final int[] chunkInternalOffsets, final int[] dataOffsets, final int fastestChunkDim, final int elementSize) {
 
 		logger.trace("Filling data from chunk '{}'", chunk);
 
@@ -65,10 +59,9 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 			// Not a partial chunk so can always copy the max amount
 			final int length = fastestChunkDim * elementSize;
 			for (int i = 0; i < chunkInternalOffsets.length; i++) {
-				System.arraycopy(
-					chunkData, chunkInternalOffsets[i], // src
-					dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
-					length); // length
+				System.arraycopy(chunkData, chunkInternalOffsets[i], // src
+								 dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
+								 length); // length
 			}
 		} else {
 			logger.trace("Handling partial chunk '{}'", chunk);
@@ -87,21 +80,17 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 				}
 
 				// Its inside so we need to copy at least something. Now work out how much?
-				final int length = elementSize * Math.min(fastestChunkDim,
-					fastestChunkDim - (chunkOffset[highestDimIndex] + chunkDimensions[highestDimIndex] - getDimensions()[highestDimIndex]));
+				final int length = elementSize * Math.min(fastestChunkDim, fastestChunkDim - (chunkOffset[highestDimIndex] + chunkDimensions[highestDimIndex] - getDimensions()[highestDimIndex]));
 
-				System.arraycopy(
-					chunkData, chunkInternalOffsets[i], // src
-					dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
-					length); // length
+				System.arraycopy(chunkData, chunkInternalOffsets[i], // src
+								 dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
+								 length); // length
 			}
 
 		}
 	}
 
-	private boolean partOfChunkIsOutsideDataset(final int chunkInternalOffsetIndex,
-												final int[] chunkDimensions,
-												final int[] chunkOffset) {
+	private boolean partOfChunkIsOutsideDataset(final int chunkInternalOffsetIndex, final int[] chunkDimensions, final int[] chunkOffset) {
 
 		int[] locationInChunk = Utils.linearIndexToDimensionIndex(chunkInternalOffsetIndex, chunkDimensions);
 		for (int j = 0; j < locationInChunk.length - 1; j++) {
@@ -161,8 +150,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		final int fastestChunkDim = chunkDimensions[chunkDimensions.length - 1];
 
 		// Parallel decoding and filling, this is where all the work is done
-		chunks.parallelStream().forEach(chunk -> fillDataFromChunk(chunk, dataArray, chunkDimensions,
-			chunkInternalOffsets, dataOffsets, fastestChunkDim, elementSize));
+		chunks.parallelStream().forEach(chunk -> fillDataFromChunk(chunk, dataArray, chunkDimensions, chunkInternalOffsets, dataOffsets, fastestChunkDim, elementSize));
 
 		return ByteBuffer.wrap(dataArray);
 	}
@@ -194,9 +182,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	 */
 	protected int[] getChunkInternalOffsets(int[] chunkDimensions, int elementSize) {
 		final int fastestChunkDim = chunkDimensions[chunkDimensions.length - 1];
-		final int numOfOffsets = Arrays.stream(chunkDimensions)
-			.limit(chunkDimensions.length - 1L)
-			.reduce(1, Math::multiplyExact);
+		final int numOfOffsets = Arrays.stream(chunkDimensions).limit(chunkDimensions.length - 1L).reduce(1, Math::multiplyExact);
 
 		final int[] chunkOffsets = new int[numOfOffsets];
 		for (int i = 0; i < numOfOffsets; i++) {
@@ -256,8 +242,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		try {
 			return hdfBackingStorage.map(chunk.getAddress(), chunk.getSize());
 		} catch (Exception e) {
-			throw new HdfException(
-				"Failed to read chunk for dataset '" + getPath() + "' at address " + chunk.getAddress());
+			throw new HdfException("Failed to read chunk for dataset '" + getPath() + "' at address " + chunk.getAddress());
 		}
 	}
 
@@ -285,8 +270,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	public ByteBuffer getRawChunkBuffer(int[] chunkOffset) {
 		final Chunk chunk = getChunk(new ChunkOffset(chunkOffset));
 		if (chunk == null) {
-			throw new HdfException("No chunk with offset " + Arrays.toString(chunkOffset) +
-				" in dataset: " + getPath());
+			throw new HdfException("No chunk with offset " + Arrays.toString(chunkOffset) + " in dataset: " + getPath());
 		}
 		return getDataBuffer(chunk);
 	}
@@ -295,8 +279,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	public byte[] getDecompressedChunk(int[] chunkOffset) {
 		final Chunk chunk = getChunk(new ChunkOffset(chunkOffset));
 		if (chunk == null) {
-			throw new HdfException("No chunk with offset " + Arrays.toString(chunkOffset) +
-				" in dataset: " + getPath());
+			throw new HdfException("No chunk with offset " + Arrays.toString(chunkOffset) + " in dataset: " + getPath());
 		}
 		return decompressChunk(chunk);
 	}
@@ -322,9 +305,126 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	}
 
 	@Override
-	public ByteBuffer getSliceDataBuffer(long[] offset, int[] shape) {
-		throw new UnsupportedHdfException("Chunked datasets don't support slice reading");
+	public ByteBuffer getSliceDataBuffer(long[] sliceOffset, int[] sliceShape) {
+		logger.trace("Getting slice data buffer for {} with shape {}", Arrays.toString(sliceOffset), Arrays.toString(sliceShape));
+
+		final int elementSize = getDataType().getSize();
+		final int sliceSize = Arrays.stream(sliceShape).reduce(1, Math::multiplyExact) * elementSize;
+		final byte[] dataArray = new byte[sliceSize];
+
+		final List<Chunk> overlappingChunks = findOverlappingChunks(sliceOffset, sliceShape);
+		for (Chunk chunk : overlappingChunks) {
+			copyChunkSliceToBuffer(chunk, sliceOffset, sliceShape, dataArray, elementSize);
+		}
+
+		return ByteBuffer.wrap(dataArray);
 	}
+
+	private List<Chunk> findOverlappingChunks(long[] offset, int[] shape) {
+		int[] chunkDims = getChunkDimensions();
+		List<Chunk> overlapping = new ArrayList<>();
+
+		int[] startChunk = new int[offset.length];
+		int[] endChunk = new int[offset.length];
+
+		for (int i = 0; i < offset.length; i++) {
+			startChunk[i] = (int) (offset[i] / chunkDims[i]);
+			endChunk[i] = (int) ((offset[i] + shape[i] - 1) / chunkDims[i]);
+		}
+
+		for (int[] chunkCoords : getChunkCoordinateRange(startChunk, endChunk)) {
+			Chunk chunk = getChunk(new ChunkOffset(chunkCoords));
+			if (chunk != null) {
+				overlapping.add(chunk);
+			}
+		}
+		return overlapping;
+	}
+
+	private List<int[]> getChunkCoordinateRange(int[] start, int[] end) {
+		List<int[]> coords = new ArrayList<>();
+		int dims = start.length;
+		int[] current = Arrays.copyOf(start, dims);
+
+		while (true) {
+			coords.add(Arrays.copyOf(current, dims));
+			int dim = dims - 1;
+			while (dim >= 0) {
+				current[dim]++;
+				if (current[dim] > end[dim]) {
+					current[dim] = start[dim];
+					dim--;
+				} else {
+					break;
+				}
+			}
+			if (dim < 0) break;
+		}
+		return coords;
+	}
+
+	private void copyChunkSliceToBuffer(Chunk chunk, long[] sliceOffset, int[] sliceShape, byte[] dataArray, int elementSize) {
+		byte[] chunkData = decompressChunk(chunk);
+		int[] chunkOffset = chunk.getChunkOffset();
+		int[] chunkDims = getChunkDimensions();
+		int[] fullDims = getDimensions();
+		int rank = fullDims.length;
+
+		// Determine intersection between chunk and requested slice
+		int[] intersectStart = new int[rank];
+		int[] intersectEnd = new int[rank];
+		for (int i = 0; i < rank; i++) {
+			intersectStart[i] = Math.max((int) sliceOffset[i], chunkOffset[i]);
+			intersectEnd[i] = Math.min((int) (sliceOffset[i] + sliceShape[i]), chunkOffset[i] + chunkDims[i]);
+		}
+
+		// Dimensions for iteration
+		int[] copyShape = new int[rank];
+		int[] chunkStart = new int[rank];
+		int[] sliceStart = new int[rank];
+		for (int i = 0; i < rank; i++) {
+			copyShape[i] = intersectEnd[i] - intersectStart[i];
+			chunkStart[i] = intersectStart[i] - chunkOffset[i];
+			sliceStart[i] = intersectStart[i] - (int) sliceOffset[i];
+		}
+
+		// Compute linear offsets for chunk and slice
+		int[] chunkStrides = getStrides(chunkDims);
+		int[] sliceStrides = getStrides(sliceShape);
+
+		// Walk all positions within copyShape using n-dimensional counter
+		int total = Arrays.stream(copyShape).reduce(1, Math::multiplyExact);
+		int[] index = new int[rank];
+
+		for (int n = 0; n < total; n++) {
+			// Convert flat n to multi-index
+			int remainder = n;
+			for (int d = rank - 1; d >= 0; d--) {
+				index[d] = remainder % copyShape[d];
+				remainder /= copyShape[d];
+			}
+
+			// Compute source and destination linear positions
+			int chunkIdx = 0, sliceIdx = 0;
+			for (int d = 0; d < rank; d++) {
+				chunkIdx += (chunkStart[d] + index[d]) * chunkStrides[d];
+				sliceIdx += (sliceStart[d] + index[d]) * sliceStrides[d];
+			}
+
+			System.arraycopy(chunkData, chunkIdx * elementSize, dataArray, sliceIdx * elementSize, elementSize);
+		}
+	}
+
+	private int[] getStrides(int[] shape) {
+		int rank = shape.length;
+		int[] strides = new int[rank];
+		strides[rank - 1] = 1;
+		for (int i = rank - 2; i >= 0; i--) {
+			strides[i] = strides[i + 1] * shape[i + 1];
+		}
+		return strides;
+	}
+
 
 	@Override
 	public List<PipelineFilterWithData> getFilters() {

@@ -26,6 +26,7 @@ import io.jhdf.object.message.DataTypeMessage;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.storage.HdfInMemoryByteBuffer;
+import io.jhdf.storage.HttpSeekableByteChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
@@ -41,13 +45,13 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.nio.file.spi.FileSystemProvider;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
@@ -74,6 +78,8 @@ public class HdfFile implements Group, AutoCloseable {
 	private final Group rootGroup;
 
 	private final Set<HdfFile> openExternalFiles = new HashSet<>();
+
+	private HttpSeekableByteChannel httpSeekableByteChannel = null;
 
 	public HdfFile(File file) {
 		this(file.toPath());
@@ -144,8 +150,7 @@ public class HdfFile implements Group, AutoCloseable {
 		Superblock superblock = hdfBackingStorage.getSuperblock();
 		if (superblock instanceof SuperblockV0V1) {
 			SuperblockV0V1 sb = (SuperblockV0V1) superblock;
-			SymbolTableEntry ste = new SymbolTableEntry(hdfBackingStorage,
-				sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
+			SymbolTableEntry ste = new SymbolTableEntry(hdfBackingStorage, sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
 			this.rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, ste.getObjectHeaderAddress(), this);
 		} else if (superblock instanceof SuperblockV2V3) {
 			SuperblockV2V3 sb = (SuperblockV2V3) superblock;
@@ -214,8 +219,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 			if (superblock instanceof SuperblockV0V1) {
 				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
-				SymbolTableEntry ste = new SymbolTableEntry(hdfBackingStorage,
-					sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
+				SymbolTableEntry ste = new SymbolTableEntry(hdfBackingStorage, sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
 				rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, ste.getObjectHeaderAddress(), this);
 			} else if (superblock instanceof SuperblockV2V3) {
 				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
@@ -236,6 +240,115 @@ public class HdfFile implements Group, AutoCloseable {
 		}
 		return offset * 2;
 	}
+
+	/**
+	 * Opens an HDF5 file from a URL by creating an {@link HttpSeekableByteChannel}.
+	 * This is a convenience constructor that simplifies the creation of an HdfFile
+	 * from a URL, allowing streaming over HTTP.
+	 *
+	 * @param url The URL pointing to the HDF5 file.
+	 * @throws HdfException If the HDF5 file could not be opened or if it's not valid.
+	 */
+	public HdfFile(URL url) {
+		try {
+			logger.info("Opening remote HDF5 file from URL: {}", url);
+			this.optionalFile = Optional.of(Paths.get(url.toURI().getPath()));
+			httpSeekableByteChannel = new HttpSeekableByteChannel(url);
+			FileChannel fc = new FileChannelFromSeekableByteChannel(httpSeekableByteChannel);
+
+			// Validate HDF5 signature
+			boolean validSignature = false;
+			long offset;
+			for (offset = 0; offset < fc.size(); offset = nextOffset(offset)) {
+				logger.trace("Checking for signature at offset = {}", offset);
+				validSignature = Superblock.verifySignature(fc, offset);
+				if (validSignature) {
+					logger.debug("Found valid signature at offset = {}", offset);
+					break;
+				}
+			}
+			if (!validSignature) {
+				throw new HdfException("No valid HDF5 signature found in remote file");
+			}
+
+			Superblock superblock = Superblock.readSuperblock(fc, offset);
+			if (superblock.getBaseAddressByte() != offset) {
+				throw new HdfException("Invalid superblock base address detected in remote file");
+			}
+
+			hdfBackingStorage = new HdfFileChannel(fc, superblock);
+
+			if (superblock instanceof SuperblockV0V1) {
+				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
+				SymbolTableEntry ste = new SymbolTableEntry(hdfBackingStorage, sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
+				this.rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, ste.getObjectHeaderAddress(), this);
+			} else if (superblock instanceof SuperblockV2V3) {
+				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
+				this.rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, sb.getRootGroupObjectHeaderAddress(), this);
+			} else {
+				throw new HdfException("Unsupported superblock version: " + superblock.getVersionOfSuperblock());
+			}
+
+		} catch (IOException e) {
+			throw new HdfException("Failed to open remote HDF5 file from: " + url, e);
+		} catch (URISyntaxException e) {
+			throw new HdfException("Failed to parse URL: " + url, e);
+		}
+	}
+
+	/**
+	 * Opens an HDF5 file from a given SeekableByteChannel, which can be used for
+	 * remote or local file access, and URI for logging and file identification.
+	 *
+	 * @param channel   The SeekableByteChannel for reading the HDF5 file.
+	 * @param sourceUri The URI of the file, used for logging.
+	 * @throws HdfException If the HDF5 file could not be opened or if it's not valid.
+	 */
+	public HdfFile(SeekableByteChannel channel, URI sourceUri) {
+		logger.info("Opening remote HDF5 file from URI: {}", sourceUri);
+		this.optionalFile = Optional.of(Paths.get(sourceUri.getPath()));
+
+		try {
+			FileChannel fc = new FileChannelFromSeekableByteChannel(channel);
+
+			// Validate HDF5 signature
+			boolean validSignature = false;
+			long offset;
+			for (offset = 0; offset < fc.size(); offset = nextOffset(offset)) {
+				logger.trace("Checking for signature at offset = {}", offset);
+				validSignature = Superblock.verifySignature(fc, offset);
+				if (validSignature) {
+					logger.debug("Found valid signature at offset = {}", offset);
+					break;
+				}
+			}
+			if (!validSignature) {
+				throw new HdfException("No valid HDF5 signature found in remote file");
+			}
+
+			Superblock superblock = Superblock.readSuperblock(fc, offset);
+			if (superblock.getBaseAddressByte() != offset) {
+				throw new HdfException("Invalid superblock base address detected in remote file");
+			}
+
+			hdfBackingStorage = new HdfFileChannel(fc, superblock);
+
+			if (superblock instanceof SuperblockV0V1) {
+				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
+				SymbolTableEntry ste = new SymbolTableEntry(hdfBackingStorage, sb.getRootGroupSymbolTableAddress() - sb.getBaseAddressByte());
+				this.rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, ste.getObjectHeaderAddress(), this);
+			} else if (superblock instanceof SuperblockV2V3) {
+				SuperblockV2V3 sb = (SuperblockV2V3) superblock;
+				this.rootGroup = GroupImpl.createRootGroup(hdfBackingStorage, sb.getRootGroupObjectHeaderAddress(), this);
+			} else {
+				throw new HdfException("Unsupported superblock version: " + superblock.getVersionOfSuperblock());
+			}
+
+		} catch (IOException e) {
+			throw new HdfException("Failed to open remote HDF5 file from URI: " + sourceUri, e);
+		}
+	}
+
 
 	public static WritableHdfFile write(Path path) {
 		return new WritableHdfFile(path);
@@ -261,7 +374,7 @@ public class HdfFile implements Group, AutoCloseable {
 
 	/**
 	 * @throws HdfException if closing the file fails
-	 * @see java.io.RandomAccessFile#close()
+	 * @see RandomAccessFile#close()
 	 */
 	@Override
 	public void close() {
@@ -273,6 +386,16 @@ public class HdfFile implements Group, AutoCloseable {
 
 			hdfBackingStorage.close();
 			logger.info("Closed HDF file '{}'", getFileAsPath().toAbsolutePath());
+		}
+
+		// Close httpSeekableByteChannel if it was set
+		if (httpSeekableByteChannel != null) {
+			try {
+				httpSeekableByteChannel.close();
+				httpSeekableByteChannel = null;
+			} catch (IOException e) {
+				throw new HdfException("Failed to close http seekable byte channel", e);
+			}
 		}
 	}
 
