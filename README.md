@@ -26,29 +26,27 @@ try (WritableHdfFile hdfFile = HdfFile.write(Paths.get("jhdf.hdf5"))) {
     group.putDataset("doubles", new double[] {1.0, 2.0, 3.0, 4.0});
 }
 ```
-See  [WriteHdf5.java](jhdf/src/main/java/io/jhdf/examples/WriteHdf5.java) for a more extensive complete example. Note: writing files is still a early feature with many more functions to be added.
+See [WriteHdf5.java](jhdf/src/main/java/io/jhdf/examples/WriteHdf5.java) for a more extensive complete example. Note: writing files is still an early feature with many more functions to be added.
 
 For more examples see package [io.jhdf.examples](jhdf/src/main/java/io/jhdf/examples)
 
 ## Why should I use jHDF?
-- Easy integration with JVM based projects. The library is available on [Maven Central](https://central.sonatype.com/artifact/io.jhdf/jhdf), and [GitHub Packages](https://github.com/jamesmudd/jhdf/packages/), so using it should be as easy as adding any other dependency. To use the libraries supplied by the HDF Group you need to load native code, which means you need to handle this in your build, and it complicates distribution of your software on multiple platforms.
+- Easy integration with JVM based projects. The library is available on [Maven Central](https://central.sonatype.com/artifact/io.jhdf/jhdf), [GitHub Packages](https://github.com/jamesmudd/jhdf/packages/), and [JitPack.io](https://jitpack.io/#jamesmudd/jhdf) so using it should be as easy as adding any other dependency. To use the libraries supplied by the HDF Group you need to load native code, which means you need to handle this in your build, and it complicates distribution of your software on multiple platforms.
 - The API design intends to be familiar to Java programmers, so hopefully it works as you might expect. (If this is not the case, open an issue with suggestions for improvement)
 - No use of JNI, so you avoid all the issues associated with calling native code from the JVM.
 - Fully debug-able you can step fully through the library with a Java debugger.
 - Provides access to datasets `ByteBuffer`s to allow for custom reading logic, or integration with other libraries.
 - Integration with Java logging via SLF4J
-- Performance? Maybe, the library uses Java NIO `MappedByteBuffer`s which should provide fast file access. In addition, when accessing chunked datasets the library is parallelized to take advantage of modern CPUs. `jHDF` will also allow parallel reading of multiple datasets or multiple files. I have seen cases where `jHDF` is significantly faster than the C libraries, but as with all performance issues, it is case specific, so you will need to do your own tests on the cases you care about. If you do run tests please post the results so everyone can benefit, here are some results I am aware of:
+- Performance? Maybe, the library uses Java NIO `MappedByteBuffer`s which should provide fast file access. In addition, when accessing chunked datasets, the library is parallelized to take advantage of modern CPUs. `jHDF` will also allow parallel reading of multiple datasets or multiple files. I have seen cases where `jHDF` is significantly faster than the C libraries, but as with all performance issues, it is case-specific, so you will need to do your own tests on the cases you care about. If you do run tests please post the results so everyone can benefit, here are some results I am aware of:
     - [Peter Kirkham - Parallel IO Improvements](http://pkirkham.github.io/pyrus/parallel-io-improvements/)
     - [Apollo3zehn - hdf5-benchmark](https://github.com/Apollo3zehn/hdf5-benchmark)
 - Security - jHDF is pure Java, and therefore benefits from the [memory safety](https://www.memorysafety.org/docs/memory-safety/) provided by the JVM. The HDF5 Group library is written using non-memory safe languages, therefore susceptible to [memory related security bugs](https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=hdf5).
 
 ## Why should I not use jHDF?
-- If `jHDF` does not yet support a feature you need. If this is the case you should receive a `UnsupportedHdfException`, open an issue and support can be added. For scheduling, the features which will allow the most files to be read/written are prioritized. If you really want to use a new feature feel free to work on it and open a PR, any help is much appreciated.
-- If you want to read slices of chunked datasets (slicing of contiguous datasets is supported since v0.6.6). This is an excellent feature of HDF5, and one reason why it's suited to large datasets. Support will be added in the future, but currently it is not possible. If you would be interested in this please comment on, or react to [issue #52](https://github.com/jamesmudd/jhdf/issues/52)
-- If you want to read datasets larger than can fit in a Java array (i.e. `Integer.MAX_VALUE` elements). This issue would also be addressed by slicing.
+If you use HDF5 from Java I think you should give it a try. However, if `jHDF` does not yet support a feature you need, you should receive a `UnsupportedHdfException`, open an issue and support can be added. For scheduling, the features which will allow the most files to be read/written are prioritized. If you really want to use a new feature, feel free to work on it and open a PR. Any help is much appreciated.
 
 ## Why did I start jHDF?
-Mostly it's a challenge, HDF5 is a fairly complex file format with lots of flexibility, writing a library to access it is interesting. Also, as a widely used file format for storing scientific, engineering, and commercial data, it would seem like a good idea to be able to access HDF5 files with more than one library. In particular JVM languages are among the most widely used so having a native HDF5 implementation seems useful.
+Mostly it's a challenge, HDF5 is a fairly complex file format with lots of flexibility, writing a library to access it is interesting. Also, as a widely used file format for storing scientific, engineering, and commercial data, it would seem like a good idea to be able to access HDF5 files with more than one library. In particular, JVM languages are among the most widely used, so having a native HDF5 implementation seems useful.
 
 ## Developing jHDF
 - Fork this repository and clone your fork
@@ -56,8 +54,8 @@ Mostly it's a challenge, HDF5 is a fairly complex file format with lots of flexi
 - Import the Gradle project `jhdf` into your IDE.
 - Make your changes and add tests.
 - Run `./gradlew check` to run the build and tests.
-- Once you have made any changes please open a pull request.
+- Once you have made any changes, please open a pull request.
 
 To see other available Gradle tasks run `./gradlew tasks`
 
-If you have read this far please consider staring this repo. If you are using jHDF in a commercial product please consider making a donation. Thanks!
+If you have read this far, please consider staring at this repo. If you are using jHDF in a commercial product, please consider making a donation. Thanks!
