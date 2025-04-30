@@ -31,7 +31,7 @@ See  [WriteHdf5.java](jhdf/src/main/java/io/jhdf/examples/WriteHdf5.java) for a 
 For more examples see package [io.jhdf.examples](jhdf/src/main/java/io/jhdf/examples)
 
 ## Why should I use jHDF?
-- Easy integration with JVM based projects. The library is available on [Maven Central](https://central.sonatype.com/artifact/io.jhdf/jhdf), and [GitHub Packages](https://github.com/jamesmudd/jhdf/packages/), so using it should be as easy as adding any other dependency. To use the libraries supplied by the HDF Group you need to load native code, which means you need to handle this in your build, and it complicates distribution of your software on multiple platforms.
+- Easy integration with JVM based projects. The library is available on [Maven Central](https://central.sonatype.com/artifact/io.jhdf/jhdf), [GitHub Packages](https://github.com/jamesmudd/jhdf/packages/), and [JitPack.io](https://jitpack.io/#jamesmudd/jhdf) so using it should be as easy as adding any other dependency. To use the libraries supplied by the HDF Group you need to load native code, which means you need to handle this in your build, and it complicates distribution of your software on multiple platforms.
 - The API design intends to be familiar to Java programmers, so hopefully it works as you might expect. (If this is not the case, open an issue with suggestions for improvement)
 - No use of JNI, so you avoid all the issues associated with calling native code from the JVM.
 - Fully debug-able you can step fully through the library with a Java debugger.
