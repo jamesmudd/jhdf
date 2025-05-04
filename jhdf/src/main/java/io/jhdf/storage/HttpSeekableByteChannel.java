@@ -24,13 +24,18 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * A {@link SeekableByteChannel} implementation that reads HDF5 file data over HTTP/HTTPS
+ * A thread-safe {@link SeekableByteChannel} implementation that reads HDF5 file data over HTTP/HTTPS
  * using HTTP range requests.
  * <p>
  * This channel supports read-only access to remote files by downloading blocks of data on demand
  * and caching them in-memory. The cache is configurable by block size and block count, or by specifying
- * the total cache size in MB. The default configuration uses 128 KB blocks and a cache that holds up to
- * 16 MB (i.e. 128 blocks).
+ * the total cache size in MB. The default configuration uses 128 KB blocks and a cache that holds up to
+ * 16 MB (i.e. 128 blocks).
+ * </p>
+ * <p>
+ * This implementation is somewhat basic and uses only a simple in-memory cache and the older
+ * HttpURLConnection API. Users should consider implementing a FileChannel using the more recent HttpClient
+ * API for higher performance, auth, custom caching, and better concurrency for production usage.
  * </p>
  * <p>
  * Throughout its usage, the channel tracks metrics such as total bytes read, number of blocks fetched,
@@ -54,7 +59,7 @@ public class HttpSeekableByteChannel implements SeekableByteChannel {
 	private final LruCache<Long, byte[]> cache;
 	private final ReentrantLock lock = new ReentrantLock();
 
-	// Thread-safe position and metrics
+	// Position and metrics (protected by lock)
 	private long position = 0;
 	private volatile boolean open = true;
 	private long totalBytesRead = 0;
