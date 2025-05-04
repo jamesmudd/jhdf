@@ -357,6 +357,7 @@ public class HdfFile implements Group, AutoCloseable {
 	 * @throws HdfException If the HDF5 file could not be opened or if it's not valid.
 	 */
 	public HdfFile(FileChannel channel) {
+		this.optionalFile = Optional.empty();
 		try {
 			// Validate HDF5 signature
 			boolean validSignature = false;
