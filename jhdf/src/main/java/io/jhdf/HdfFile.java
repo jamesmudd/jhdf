@@ -357,14 +357,13 @@ public class HdfFile implements Group, AutoCloseable {
 	 * @throws HdfException If the HDF5 file could not be opened or if it's not valid.
 	 */
 	public HdfFile(FileChannel channel) {
-		FileChannel fc = channel;
 		try {
 			// Validate HDF5 signature
 			boolean validSignature = false;
 			long offset;
-			for (offset = 0; offset < fc.size(); offset = nextOffset(offset)) {
+			for (offset = 0; offset < channel.size(); offset = nextOffset(offset)) {
 				logger.trace("Checking for signature at offset = {}", offset);
-				validSignature = Superblock.verifySignature(fc, offset);
+				validSignature = Superblock.verifySignature(channel, offset);
 				if (validSignature) {
 					logger.debug("Found valid signature at offset = {}", offset);
 					break;
@@ -374,12 +373,12 @@ public class HdfFile implements Group, AutoCloseable {
 				throw new HdfException("No valid HDF5 signature found in remote file");
 			}
 
-			Superblock superblock = Superblock.readSuperblock(fc, offset);
+			Superblock superblock = Superblock.readSuperblock(channel, offset);
 			if (superblock.getBaseAddressByte() != offset) {
 				throw new HdfException("Invalid superblock base address detected in remote file");
 			}
 
-			hdfBackingStorage = new HdfFileChannel(fc, superblock);
+			hdfBackingStorage = new HdfFileChannel(channel, superblock);
 
 			if (superblock instanceof SuperblockV0V1) {
 				SuperblockV0V1 sb = (SuperblockV0V1) superblock;
@@ -433,16 +432,6 @@ public class HdfFile implements Group, AutoCloseable {
 
 			hdfBackingStorage.close();
 			logger.info("Closed HDF file '{}'", getFileAsPath().toAbsolutePath());
-		}
-
-		// Close httpSeekableByteChannel if it was set
-		if (httpSeekableByteChannel != null) {
-			try {
-				httpSeekableByteChannel.close();
-				httpSeekableByteChannel = null;
-			} catch (IOException e) {
-				throw new HdfException("Failed to close http seekable byte channel", e);
-			}
 		}
 	}
 
