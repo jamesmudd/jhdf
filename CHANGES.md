@@ -1,8 +1,8 @@
 # jHDF Change Log
 
-## v0.9.4 - April 2025
-- Fix: thread-safety of FileChannelFromSeekableByteChannel added via ReentrantLock
-- Add: `HdfFile(FileChannel chennel)` constructor for custom FileChannel providers
+## v0.9.4 - May 2025
+- Fix thread-safety of `FileChannelFromSeekableByteChannel` added via `ReentrantLock`. Thanks to @thomas-reimonn
+- Add `HdfFile(FileChannel chennel)` constructor for custom FileChannel providers. Thanks to @thomas-reimonn
 
 ## v0.9.3 - April 2025
 - Add support for slicing of chunked datasets. This allows accessing portions of large, chunked datasets using `getData(offset, length)`. Thanks to @thomas-reimonn https://github.com/jamesmudd/jhdf/issues/52
