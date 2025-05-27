@@ -10,12 +10,14 @@
 package io.jhdf.api;
 
 import io.jhdf.exceptions.HdfBrokenLinkException;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * HDF5 links interface. Used for soft (symbolic) links and external links
  *
  * @author James Mudd
  */
+@NullMarked
 public interface Link extends Node {
 
 	/**
