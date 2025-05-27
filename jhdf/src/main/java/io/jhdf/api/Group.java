@@ -11,6 +11,8 @@ package io.jhdf.api;
 
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfInvalidPathException;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 
@@ -20,6 +22,7 @@ import java.util.Map;
  *
  * @author James Mudd
  */
+@NullMarked
 public interface Group extends Node, Iterable<Node> {
 
 	/**
@@ -38,7 +41,7 @@ public interface Group extends Node, Iterable<Node> {
 	 * @return the child or <code>null</code> if there is no child
 	 * @throws HdfException if getting the children fails
 	 */
-	Node getChild(String name);
+	@Nullable Node getChild(String name);
 
 	/**
 	 * Gets a {@link Node} by path. The path given will be relative to this node.

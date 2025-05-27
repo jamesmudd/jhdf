@@ -10,6 +10,9 @@
 
 package io.jhdf.api;
 
+import org.jspecify.annotations.NullMarked;
+
+@NullMarked
 public interface WritableGroup extends Group, WritableNode {
 
 	/**
