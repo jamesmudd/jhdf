@@ -9,6 +9,8 @@
  */
 package io.jhdf.api;
 
+import org.jspecify.annotations.NullMarked;
+
 /**
  * Supplies a chunked dataset's data one chunk at a time.
  * <p>
@@ -23,6 +25,7 @@ package io.jhdf.api;
  * @since v0.14.0
  */
 @FunctionalInterface
+@NullMarked
 public interface ChunkProvider {
 
 	/**

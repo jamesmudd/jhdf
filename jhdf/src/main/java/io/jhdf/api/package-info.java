@@ -12,4 +12,7 @@
  *
  * @author James Mudd
  */
+@NullMarked
 package io.jhdf.api;
+
+import org.jspecify.annotations.NullMarked;
