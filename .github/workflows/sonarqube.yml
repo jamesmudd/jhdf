@@ -23,7 +23,7 @@ jobs:
               with:
                   java-version: '17'
                   architecture: 'x64'
-                  distribution: 'temurin'
+                  distribution: 'zulu'
                   cache: 'gradle'
 
             - name: Build
