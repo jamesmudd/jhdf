@@ -71,7 +71,7 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.27.3'
 
     // Alternative bitshuffle impl to check results against
-    testImplementation 'org.xerial.snappy:snappy-java:1.1.10.7'
+    testImplementation 'org.xerial.snappy:snappy-java:1.1.10.8'
     // For parsing h5dump XML output
     testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.19.1'
     testImplementation 'commons-io:commons-io:2.19.0'
