@@ -74,7 +74,7 @@ dependencies {
     testImplementation 'org.xerial.snappy:snappy-java:1.1.10.8'
     // For parsing h5dump XML output
     testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.19.2'
-    testImplementation 'commons-io:commons-io:2.19.0'
+    testImplementation 'commons-io:commons-io:2.20.0'
     // For a FileSystemProvider implementation without FileChannel support
     testImplementation 'com.google.jimfs:jimfs:1.3.1'
 }
