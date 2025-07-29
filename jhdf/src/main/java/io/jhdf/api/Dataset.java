@@ -14,6 +14,8 @@ import io.jhdf.exceptions.InvalidSliceHdfException;
 import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataLayout;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -22,6 +24,7 @@ import java.util.List;
  *
  * @author James Mudd
  */
+@NullMarked
 public interface Dataset extends Node {
 
 	/**
@@ -115,7 +118,7 @@ public interface Dataset extends Node {
 	 * @return the data in the dataset as a Java object or <code>null</code> if the
 	 * dataset is empty.
 	 */
-	Object getData();
+	@Nullable Object getData();
 
 	/**
 	 * Gets the data from the HDF5 dataset and converts it to a Java object, it differs from {@link #getData()} as the
@@ -128,7 +131,7 @@ public interface Dataset extends Node {
 	 *
 	 * @return the data as a 1D array
 	 */
-	Object getDataFlat();
+	@Nullable Object getDataFlat();
 
 	/**
 	 * Gets a slice of data from the HDF5 dataset and converts it to a Java object.
