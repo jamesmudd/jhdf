@@ -1,5 +1,13 @@
 # jHDF Change Log
 
+## v0.10.0 - July 2025
+- Drop support for Java 8 and 11. Allows for improved performance, dependency updates, and simplifies the testing matrix. https://github.com/jamesmudd/jhdf/issues/700
+- Dependency updates
+  - `org.slf4j:slf4j-api` to 2.0.17
+  - `org.apache.commons:commons-lang3` to 3.18.0
+  - Lots of others for test and build plugins
+- Move deployment to Maven Central Portal
+
 ## v0.9.4 - May 2025
 - Fix thread-safety of `FileChannelFromSeekableByteChannel` added via `ReentrantLock`. Thanks to @thomas-reimonn
 - Add `HdfFile(FileChannel chennel)` constructor for custom FileChannel providers. Thanks to @thomas-reimonn
