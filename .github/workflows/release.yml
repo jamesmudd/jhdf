@@ -98,8 +98,9 @@ jobs:
               env:
                   SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
                   SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+                  TAG: ${{ github.ref_name }}
               run: |
                   curl -sS -f -X POST \
                     -u "${SONATYPE_USERNAME}:${SONATYPE_PASSWORD}" \
-                    -H "Accept: application/json" \
-                    https://central.sonatype.com/manual/upload/defaultRepository/io.jhdf
+                    -H "Accept: */*" \
+                    "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/io.jhdf?publishing_type=user_managed&deployment_name=$TAG"
