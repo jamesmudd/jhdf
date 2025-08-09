@@ -102,4 +102,4 @@ jobs:
                   curl -sS -f -X POST \
                     -u "${SONATYPE_USERNAME}:${SONATYPE_PASSWORD}" \
                     -H "Accept: application/json" \
-                    https://central.sonatype.com/api/v1/manual/upload/defaultRepository/io.jhdf
+                    https://central.sonatype.com/manual/upload/defaultRepository/io.jhdf
