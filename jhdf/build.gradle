@@ -191,9 +191,10 @@ publishing {
                 password = System.getenv('GITHUB_TOKEN')
             }
         }
+        // https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#configuring-the-repository
         maven {
             name = 'Sonatype'
-            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            url "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
             credentials {
                 username System.getenv('SONATYPE_USERNAME')
                 password System.getenv('SONATYPE_PASSWORD')

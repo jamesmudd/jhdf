@@ -92,3 +92,14 @@ jobs:
                   SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
                   SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
               run: ./gradlew publishMavenPublicationToSonatypeRepository
+
+            # https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#1-modify-your-ci-script
+            - name: Call publishing endpoint
+              env:
+                  SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+                  SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+              run: |
+                  curl -sS -f -X POST \
+                    -u "${SONATYPE_USERNAME}:${SONATYPE_PASSWORD}" \
+                    -H "Accept: application/json" \
+                    https://central.sonatype.com/api/v1/manual/upload/defaultRepository/io.jhdf
