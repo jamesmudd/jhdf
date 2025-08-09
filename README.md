@@ -3,7 +3,7 @@
 
 This project is a pure Java implementation for accessing HDF5 files. It is written from the file format specification and is not using any HDF Group code, it is *not* a wrapper around the C libraries. The file format specification is available from the HDF Group [here](https://support.hdfgroup.org/documentation/hdf5/latest/_f_m_t3.html). More information on the format is available on [Wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format). I presented a webinar about jHDF for the HDF Group which is available on [YouTube](https://www.youtube.com/watch?v=pM8FICF4z_U) the example code used and slides can be found [here](https://github.com/jamesmudd/jhdf-webinar).
 
-The intention is to make a clean Java API to access HDF5 data. Currently, reading is very well-supported and writing supports limited use cases. For progress see the [change log](CHANGES.md). Java 8, 11, 17 and 21 are officially supported.
+The intention is to make a clean Java API to access HDF5 data. Currently, reading is very well-supported and writing supports limited use cases. For progress see the [change log](CHANGES.md). Java 17 and 21 are officially supported.
 
 Here is an example of reading a dataset with `jHDF` (see [ReadDataset.java](jhdf/src/main/java/io/jhdf/examples/ReadDataset.java))
 
