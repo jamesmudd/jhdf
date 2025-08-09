@@ -21,7 +21,7 @@ plugins {
 
     // Community plugins (need versions)
     id 'org.sonarqube' version '4.0.0.2929' // Code quality
-    id "com.github.spotbugs" version "6.2.2" // Static analysis
+    id "com.github.spotbugs" version "6.2.3" // Static analysis
     id "me.champeau.jmh" version "0.7.3" // JMH support
 }
 
@@ -68,7 +68,7 @@ dependencies {
 
     // Matchers
     testImplementation 'org.hamcrest:hamcrest:3.0'
-    testImplementation 'org.assertj:assertj-core:3.27.3'
+    testImplementation 'org.assertj:assertj-core:3.27.4'
 
     // Alternative bitshuffle impl to check results against
     testImplementation 'org.xerial.snappy:snappy-java:1.1.10.8'
