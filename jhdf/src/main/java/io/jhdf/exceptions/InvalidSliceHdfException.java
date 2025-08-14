@@ -25,7 +25,7 @@ public class InvalidSliceHdfException extends HdfException {
 
 	@Override
 	public String getMessage() {
-		return super.getMessage() + "sliceOffset=" + Arrays.toString(sliceOffset) +
+		return super.getMessage() + ", sliceOffset=" + Arrays.toString(sliceOffset) +
 			", sliceDimensions=" + Arrays.toString(sliceDimensions) +
 			", datasetDimensions=" + Arrays.toString(datasetDimensions) +
 			'}' ;
