@@ -23,7 +23,7 @@ jobs:
             -   uses: actions/checkout@v5
 
             -   name: Set up JDK
-                uses: actions/setup-java@v4
+                uses: actions/setup-java@v5
                 with:
                     java-version: ${{ matrix.java }}
                     distribution: 'zulu'
@@ -46,7 +46,7 @@ jobs:
             - uses: actions/checkout@v5
 
             - name: Set up JDK
-              uses: actions/setup-java@v4
+              uses: actions/setup-java@v5
               with:
                   # Must use the lowest supported Java version
                   java-version: '17'
