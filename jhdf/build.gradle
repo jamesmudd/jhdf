@@ -21,7 +21,7 @@ plugins {
 
     // Community plugins (need versions)
     id 'org.sonarqube' version '6.3.1.5724' // Code quality
-    id "com.github.spotbugs" version "6.3.0" // Static analysis
+    id "com.github.spotbugs" version "6.4.1" // Static analysis
     id "me.champeau.jmh" version "0.7.3" // JMH support
 }
 
