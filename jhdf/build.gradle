@@ -63,7 +63,7 @@ dependencies {
     testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.17'
 
     // Mocking
-    testImplementation 'org.mockito:mockito-core:5.19.0'
+    testImplementation 'org.mockito:mockito-core:5.20.0'
     testImplementation 'org.powermock:powermock-core:2.0.9'
 
     // Matchers
