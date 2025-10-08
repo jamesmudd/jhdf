@@ -20,6 +20,8 @@ package io.jhdf.api;
 
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataSpace;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 
@@ -29,6 +31,7 @@ import java.nio.ByteBuffer;
  *
  * @author James Mudd
  */
+@NullMarked
 public interface Attribute {
 
 	/**
@@ -62,9 +65,9 @@ public interface Attribute {
 	long getSizeInBytes();
 
 	/**
-	 * Gets the dimensions of this attributes dataset
+	 * Gets the dimensions of this attribute
 	 *
-	 * @return the dimensions of this attributes dataset
+	 * @return the dimensions of this attribute
 	 * @see Dataset#getDimensions()
 	 */
 	int[] getDimensions();
@@ -74,10 +77,10 @@ public interface Attribute {
 	 * of dimensions of the dataset as returned by {@link #getDimensions()}. The
 	 * type of the array will be the return value of {@link #getJavaType()}.
 	 *
-	 * @return the data in the dataset as a Java array
+	 * @return the data in the attribute as a Java array or <code>null</code> if the attribute is empty
 	 * @see Dataset#getData()
 	 */
-	Object getData();
+	@Nullable Object getData();
 
 	/**
 	 * Gets the Java type that will be used to represent this attributes data.
@@ -88,7 +91,7 @@ public interface Attribute {
 	Class<?> getJavaType();
 
 	/**
-	 * Checks if this dataset is scalar i.e is a single element with no dimensions.
+	 * Checks if this attribute is scalar i.e is a single element with no dimensions.
 	 *
 	 * @return <code>true</code> if dataset if scalar <code>false</code> otherwise
 	 * @see Dataset#isScalar()
@@ -96,7 +99,7 @@ public interface Attribute {
 	boolean isScalar();
 
 	/**
-	 * Checks if this dataset is empty i.e holds no data and no storage is
+	 * Checks if this attribute is empty i.e holds no data and no storage is
 	 * allocated.
 	 *
 	 * @return <code>true</code> if dataset if empty <code>false</code> otherwise

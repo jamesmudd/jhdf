@@ -46,6 +46,8 @@ repositories {
 }
 
 dependencies {
+    // Nullness annotations
+    api("org.jspecify:jspecify:1.0.0")
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     implementation 'org.slf4j:slf4j-api:2.0.17'
     implementation 'org.apache.commons:commons-lang3:3.19.0'
@@ -247,7 +249,8 @@ String buildRequireBundleHeader() {
         "slf4j.api": "org.slf4j:slf4j-api",
         "org.apache.commons.lang3": "org.apache.commons:commons-lang3",
         "com.ning.compress-lzf": "com.ning:compress-lzf",
-        "lz4-java": "org.lz4:lz4-java"
+        "lz4-java": "org.lz4:lz4-java",
+        "org.jspecify:jspecify": "org.jspecify:jspecify"
     ]
 
     def moduleToVersion = runtimeDependencies.collectEntries {
@@ -256,7 +259,9 @@ String buildRequireBundleHeader() {
 
     //  Check here to catch when dependencies are added/removed
     if(!bundleToModule.values().containsAll(moduleToVersion.keySet())) {
-        throw new IllegalStateException("Runtime dependencies not mapped for OSGi")
+        def missing = bundleToModule.values()
+        missing.removeAll(moduleToVersion.keySet())
+        throw new IllegalStateException("Runtime dependencies not mapped for OSGi: " + missing)
     }
 
     def header = bundleToModule.entrySet().stream()

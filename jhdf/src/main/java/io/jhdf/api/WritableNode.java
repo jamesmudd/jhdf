@@ -11,7 +11,9 @@
 package io.jhdf.api;
 
 import io.jhdf.storage.HdfFileChannel;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public interface WritableNode extends Node {
 
 	/**
