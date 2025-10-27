@@ -73,7 +73,7 @@ jobs:
 
             - name: Archive junit results
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                 name: junit-report-${{ matrix.os }}-${{ matrix.java }}
                 path: jhdf/build/reports/tests/test
