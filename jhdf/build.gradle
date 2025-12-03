@@ -52,7 +52,7 @@ dependencies {
     // lzf compression support
     implementation 'com.ning:compress-lzf:1.1.3'
     // lz5 support https://mvnrepository.com/artifact/org.lz4/lz4-java
-    implementation 'org.lz4:lz4-java:1.8.0'
+    implementation 'org.lz4:lz4-java:1.8.1'
 
     // TESTING
     // Use JUnit 5 test framework
