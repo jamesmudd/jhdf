@@ -1,5 +1,8 @@
 # jHDF Change Log
 
+## v0.11.0 - Unreleased
+- Add support for Java 25
+
 ## v0.10.0 - July 2025
 - Drop support for Java 8 and 11. Allows for improved performance, dependency updates, and simplifies the testing matrix. https://github.com/jamesmudd/jhdf/issues/700
 - Dependency updates
