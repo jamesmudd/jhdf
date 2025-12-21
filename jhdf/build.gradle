@@ -27,7 +27,7 @@ plugins {
 
 // Variables
 group = 'io.jhdf'
-version = '0.10.0'
+version = '0.11.0'
 
 compileJava {
     sourceCompatibility = "17"
@@ -223,7 +223,7 @@ spotbugs {
     reportsDir = file("$buildDir/reports/spotbugs")
 }
 
-sonarqube {
+sonar {
     properties {
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.organization", "jamesmudd-github"
