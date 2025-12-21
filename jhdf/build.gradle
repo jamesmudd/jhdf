@@ -223,7 +223,7 @@ spotbugs {
     reportsDir = file("$buildDir/reports/spotbugs")
 }
 
-sonarqube {
+sonar {
     properties {
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.organization", "jamesmudd-github"
