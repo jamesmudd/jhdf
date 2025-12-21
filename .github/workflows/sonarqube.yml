@@ -42,10 +42,10 @@ jobs:
               working-directory: jhdf
               run: ./gradlew jacocoTestReport
 
-            - name: Sonar
+            - name: Sonarqube Analysis
               working-directory: jhdf
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-                  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-              run: ./gradlew sonar --info
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+                SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+              run: ./gradlew sonarqube -Dsonar.host.url="$SONAR_HOST_URL" -Dsonar.login="$SONAR_TOKEN" --info
