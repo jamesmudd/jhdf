@@ -131,6 +131,22 @@ public interface Dataset extends Node {
 	Object getDataFlat();
 
 	/**
+	 * Gets a slice of data from the HDF5 dataset and converts it to a Java object, it differs from
+	 * {@link #getData(long[], int[])} as the data will be flat (i.e. 1D). Can offer improved performance over
+	 * {@link #getData(long[], int[])} for multiple dimension arrays.
+	 * <p>
+	 * The type of the returned array will be that returned by {@link #getJavaType()}. The size of the array returned
+	 * will be the product of the slice dimensions.
+	 *
+	 * @param sliceOffset     the position in the dataset the slice starts. Must have length equal to number of dimensions
+	 * @param sliceDimensions the dimensions of the slice to return. Must have length equal to number of dimensions
+	 * @return the slice of data from the dataset as a 1D array
+	 * @throws InvalidSliceHdfException if the <code>sliceOffset</code> or <code>sliceDimensions</code> are invalid
+	 * @throws HdfException             if the dataset can't be sliced
+	 */
+	Object getDataFlat(long[] sliceOffset, int[] sliceDimensions);
+
+	/**
 	 * Gets a slice of data from the HDF5 dataset and converts it to a Java object.
 	 * <p>
 	 * The returned object will be an array with the dimensions specified by <code>sliceDimensions</code> and type of
