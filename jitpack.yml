@@ -1,0 +1,5 @@
+jdk:
+  - openjdk17
+
+install:
+  - ./jhdf/gradlew -p jhdf publishToMavenLocal -x test -x checkstyleMain -x checkstyleTest
