@@ -140,7 +140,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 
 		final int elementSize = getDataType().getSize();
 
-		// Get all chunks because were reading the whole dataset
+		// Get all chunks because we're reading the whole dataset
 		final Collection<Chunk> chunks = getAllChunks();
 
 		// These are all the same for every chunk
@@ -320,19 +320,30 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		return ByteBuffer.wrap(dataArray);
 	}
 
+	/**
+		Return the collection of all chunks that contain at least one element in the given hypercube.
+		@param offset In elements
+		@param shape In elements
+	**/
 	private List<Chunk> findOverlappingChunks(long[] offset, int[] shape) {
 		int[] chunkDims = getChunkDimensions();
 		List<Chunk> overlapping = new ArrayList<>();
 
-		int[] startChunk = new int[offset.length];
-		int[] endChunk = new int[offset.length];
+		int[] startChunk = new int[offset.length];  // First chunk along each dimension that contains at least one element in the query hypercube.
+		int[] endChunk = new int[offset.length];    // Ditto for last chunk along each dimension.
 
+		// Convert bounds from elements to chunks.
 		for (int i = 0; i < offset.length; i++) {
 			startChunk[i] = (int) (offset[i] / chunkDims[i]);
 			endChunk[i] = (int) ((offset[i] + shape[i] - 1) / chunkDims[i]);
 		}
 
+		// Collect all chunks within the bounds determined above.
 		for (int[] chunkCoords : getChunkCoordinateRange(startChunk, endChunk)) {
+			// Must convert from chunk coordinates back to element coordinates.
+			for (int i = 0; i < chunkCoords.length; i++) {
+				chunkCoords[i] *= chunkDims[i];
+			}
 			Chunk chunk = getChunk(new ChunkOffset(chunkCoords));
 			if (chunk != null) {
 				overlapping.add(chunk);
@@ -341,6 +352,9 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		return overlapping;
 	}
 
+	/**
+		Given hypercube bounds in chunk coordinates, iterate all chunks within the hypercube. 
+	**/
 	private List<int[]> getChunkCoordinateRange(int[] start, int[] end) {
 		List<int[]> coords = new ArrayList<>();
 		int dims = start.length;
