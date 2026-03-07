@@ -45,6 +45,10 @@ repositories {
     mavenCentral()
 }
 
+dependencyLocking {
+    lockAllConfigurations()
+}
+
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     implementation 'org.slf4j:slf4j-api:2.0.17'
