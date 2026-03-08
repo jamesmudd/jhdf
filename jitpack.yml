@@ -1,0 +1,6 @@
+jdk:
+  - openjdk17
+
+install:
+  - cd jhdf
+  - ./gradlew clean build publishToMavenLocal -x test -x check
