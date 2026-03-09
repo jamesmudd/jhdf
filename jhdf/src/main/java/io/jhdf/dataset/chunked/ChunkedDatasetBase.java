@@ -353,7 +353,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	}
 
 	/**
-		Given hypercube bounds in chunk coordinates, iterate all chunks within the hypercube. 
+		Given hypercube bounds in chunk coordinates, iterate all chunks within the hypercube.
 	**/
 	private List<int[]> getChunkCoordinateRange(int[] start, int[] end) {
 		List<int[]> coords = new ArrayList<>();
