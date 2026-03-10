@@ -12,6 +12,7 @@ package io.jhdf;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Node;
 import io.jhdf.dataset.DatasetReader;
+import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.DataSpace;
@@ -64,14 +65,25 @@ public class AttributeImpl implements Attribute {
 	}
 
 	@Override
+	public long[] getDimensionsAsLong() {
+		return message.getDataSpace().getDimensionsAsLong();
+	}
+
+	@Override
 	public Object getData() {
 		logger.debug("Getting data for attribute '{}' of '{}'...", name, node.getPath());
 		if (isEmpty()) {
 			return null;
 		}
+		final int[] dimensions;
+		try {
+			dimensions = getDimensions();
+		} catch (ArithmeticException e) {
+			throw new HdfException("Attribute '" + getName() + "' on node '" + node.getPath() + "' has dimensions that exceed Integer.MAX_VALUE.", e);
+		}
 		DataType type = message.getDataType();
 		ByteBuffer bb = message.getDataBuffer();
-		return DatasetReader.readDataset(type, bb, getDimensions(), hdfBackingStorage);
+		return DatasetReader.readDataset(type, bb, dimensions, hdfBackingStorage);
 	}
 
 	@Override
@@ -84,7 +96,7 @@ public class AttributeImpl implements Attribute {
 		if (isEmpty()) {
 			return false;
 		}
-		return getDimensions().length == 0;
+		return getDimensionsAsLong().length == 0;
 	}
 
 	@Override

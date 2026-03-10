@@ -74,7 +74,7 @@ public class ChunkedDatasetV3 extends ChunkedDatasetBase {
 				return Collections.emptyMap();
 			}
 
-			final BTreeV1Data bTree = BTreeV1.createDataBTree(hdfBackingStorage, layoutMessage.getBTreeAddress(), getDimensions().length);
+			final BTreeV1Data bTree = BTreeV1.createDataBTree(hdfBackingStorage, layoutMessage.getBTreeAddress(), getDimensionsAsLong().length);
 			final Collection<Chunk> allChunks = bTree.getChunks();
 
 			return allChunks.stream().

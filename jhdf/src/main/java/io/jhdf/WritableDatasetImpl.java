@@ -81,6 +81,11 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 	}
 
 	@Override
+	public long[] getDimensionsAsLong() {
+		return dataSpace.getDimensionsAsLong();
+	}
+
+	@Override
 	public boolean isScalar() {
 		if (isEmpty()) {
 			return false;

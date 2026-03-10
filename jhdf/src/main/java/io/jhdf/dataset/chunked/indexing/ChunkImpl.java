@@ -21,14 +21,14 @@ public class ChunkImpl implements Chunk {
 
 	private final long address;
 	private final int size;
-	private final int[] chunkOffset;
+	private final long[] chunkOffset;
 	private final BitSet filterMask;
 
-	public ChunkImpl(long address, int size, int[] chunkOffset) {
+	public ChunkImpl(long address, int size, long[] chunkOffset) {
 		this(address, size, chunkOffset, NOT_FILTERED_MASK);
 	}
 
-	public ChunkImpl(long address, int size, int[] chunkOffset, BitSet filterMask) {
+	public ChunkImpl(long address, int size, long[] chunkOffset, BitSet filterMask) {
 		this.address = address;
 		this.size = size;
 		this.chunkOffset = ArrayUtils.clone(chunkOffset);
@@ -46,7 +46,7 @@ public class ChunkImpl implements Chunk {
 	}
 
 	@Override
-	public int[] getChunkOffset() {
+	public long[] getChunkOffset() {
 		return ArrayUtils.clone(chunkOffset);
 	}
 

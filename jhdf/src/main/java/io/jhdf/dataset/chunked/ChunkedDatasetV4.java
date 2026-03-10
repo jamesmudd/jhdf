@@ -71,7 +71,7 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
 		protected Map<ChunkOffset, Chunk> initialize() {
 			logger.debug("Creating chunk lookup for '{}'", getPath());
 
-			final DatasetInfo datasetInfo = new DatasetInfo(getChunkSizeInBytes(), getDimensions(), getChunkDimensions());
+			final DatasetInfo datasetInfo = new DatasetInfo(getChunkSizeInBytes(), getDimensionsAsLong(), getChunkDimensions());
 			final ChunkIndex chunkIndex;
 
 			if (layoutMessage.getAddress() == Constants.UNDEFINED_ADDRESS) {

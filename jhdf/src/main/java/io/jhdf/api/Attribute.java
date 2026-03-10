@@ -65,9 +65,19 @@ public interface Attribute {
 	 * Gets the dimensions of this attributes dataset
 	 *
 	 * @return the dimensions of this attributes dataset
+	 * @throws ArithmeticException if any dimension exceeds {@link Integer#MAX_VALUE}
 	 * @see Dataset#getDimensions()
 	 */
 	int[] getDimensions();
+
+	/**
+	 * Gets the dimensions of this attributes dataset as long values. This supports datasets with
+	 * dimensions exceeding {@link Integer#MAX_VALUE}.
+	 *
+	 * @return the dimensions of this attributes dataset
+	 * @see Dataset#getDimensionsAsLong()
+	 */
+	long[] getDimensionsAsLong();
 
 	/**
 	 * Gets the data from the attributes dataset and converts it into a Java array

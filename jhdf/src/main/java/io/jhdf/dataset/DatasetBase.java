@@ -90,6 +90,11 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	}
 
 	@Override
+	public long[] getDimensionsAsLong() {
+		return dataSpace.getDimensionsAsLong();
+	}
+
+	@Override
 	public long[] getMaxSize() {
 		return  dataSpace.getMaxSizes();
 	}
@@ -123,12 +128,19 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 			return null;
 		}
 
+		final int[] dims;
+		try {
+			dims = getDimensions();
+		} catch (ArithmeticException e) {
+			throw new HdfException("Dataset '" + getPath() + "' has dimensions that exceed Integer.MAX_VALUE. Use getData(sliceOffset, sliceDimensions) to read slices instead.", e);
+		}
+
 		final StopWatch stopWatch = StopWatch.createStarted();
 
 		final ByteBuffer bb = getDataBuffer();
 		final DataType type = getDataType();
 
-		final Object data = DatasetReader.readDataset(type, bb, getDimensions(), hdfBackingStorage);
+		final Object data = DatasetReader.readDataset(type, bb, dims, hdfBackingStorage);
 		stopWatch.stop();
 
 		logger.info("Finished getting data for [{}] took [{}ms]", getPath(), stopWatch.getTime(MILLISECONDS));
@@ -143,12 +155,17 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 			return ArrayUtils.EMPTY_OBJECT_ARRAY;
 		}
 
+		final int elements;
+		try {
+			elements = Math.toIntExact(getSize());
+		} catch (ArithmeticException e) {
+			throw new HdfException("Dataset '" + getPath() + "' has more than Integer.MAX_VALUE elements. Use getData(sliceOffset, sliceDimensions) to read slices instead.", e);
+		}
+
 		final StopWatch stopWatch = StopWatch.createStarted();
 
 		final ByteBuffer bb = getDataBuffer();
 		final DataType type = getDataType();
-
-		int elements = Math.toIntExact(getSize());
 
 		final Object data = DatasetReader.readDataset(type, bb, elements, hdfBackingStorage);
 		stopWatch.stop();
@@ -174,29 +191,31 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	}
 
 	private void validateSliceRequest(long[] sliceOffset, int[] sliceDimensions) {
-		final int numberOfDimensions = getDimensions().length;
+		final long[] datasetDimensions = getDimensionsAsLong();
+		final int numberOfDimensions = datasetDimensions.length;
 		if (sliceOffset.length != numberOfDimensions
 			|| sliceDimensions.length != numberOfDimensions
 		) {
-			throw new InvalidSliceHdfException("Requested slice does not match dataset dimensions", sliceOffset, sliceDimensions, getDimensions());
+			throw new InvalidSliceHdfException("Requested slice does not match dataset dimensions", sliceOffset, sliceDimensions, datasetDimensions);
 		}
 		for (int i = 0; i < sliceOffset.length; i++) {
 			if(sliceOffset[i] < 0) {
-				throw new InvalidSliceHdfException("Requested sliceOffset has negative value in dimension: " + i, sliceOffset, sliceDimensions, getDimensions());
+				throw new InvalidSliceHdfException("Requested sliceOffset has negative value in dimension: " + i, sliceOffset, sliceDimensions, datasetDimensions);
 			}
 			if(sliceDimensions[i] <= 0) {
-				throw new InvalidSliceHdfException("Requested sliceDimensions has negative or zero value in dimension: " + i, sliceOffset, sliceDimensions, getDimensions());
+				throw new InvalidSliceHdfException("Requested sliceDimensions has negative or zero value in dimension: " + i, sliceOffset, sliceDimensions, datasetDimensions);
 			}
 
-			if(sliceOffset[i] + sliceDimensions[i] > getDimensions()[i]) {
-				throw new InvalidSliceHdfException("Requested slice exceeds dataset in dimension: " + i, sliceOffset, sliceDimensions, getDimensions());
+			long maxStartOffset = datasetDimensions[i] - sliceDimensions[i];
+			if(sliceOffset[i] > maxStartOffset) {
+				throw new InvalidSliceHdfException("Requested slice exceeds dataset in dimension: " + i, sliceOffset, sliceDimensions, datasetDimensions);
 			}
 		}
 	}
 
 	@Override
 	public boolean isScalar() {
-		return getDimensions().length == 0;
+		return getDimensionsAsLong().length == 0;
 	}
 
 	@Override
