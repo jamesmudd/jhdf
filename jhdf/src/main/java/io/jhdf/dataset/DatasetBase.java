@@ -158,6 +158,28 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 	}
 
 	@Override
+	public Object getDataFlat(long[] sliceOffset, int[] sliceDimensions) {
+		if (isEmpty()) {
+			throw new HdfException("Cannot slice empty dataset");
+		}
+		if (isScalar()) {
+			throw new HdfException("Cannot slice scalar dataset");
+		}
+
+		validateSliceRequest(sliceOffset, sliceDimensions);
+
+		logger.debug("Getting flat data slice offset={} dimensions={} for [{}]'...", sliceOffset, sliceDimensions, getPath());
+		ByteBuffer sliceDataBuffer = getSliceDataBuffer(sliceOffset, sliceDimensions);
+
+		long elements = 1;
+		for (int dimension : sliceDimensions) {
+			elements = Math.multiplyExact(elements, dimension);
+		}
+
+		return DatasetReader.readDataset(getDataType(), sliceDataBuffer, Math.toIntExact(elements), hdfBackingStorage);
+	}
+
+	@Override
 	public Object getData(long[] sliceOffset, int[] sliceDimensions) {
 		if (isEmpty()) {
 			throw new HdfException("Cannot slice empty dataset");

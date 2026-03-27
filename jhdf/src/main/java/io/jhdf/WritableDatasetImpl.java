@@ -125,6 +125,11 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 	}
 
 	@Override
+	public Object getDataFlat(long[] sliceOffset, int[] sliceDimensions) {
+		throw new HdfWritingException("Slicing a writable dataset not supported");
+	}
+
+	@Override
 	public Object getData(long[] sliceOffset, int[] sliceDimensions) {
 		throw new HdfWritingException("Slicing a writable dataset not supported");
 	}
