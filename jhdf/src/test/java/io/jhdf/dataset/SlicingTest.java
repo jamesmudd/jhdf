@@ -16,12 +16,14 @@ import io.jhdf.exceptions.InvalidSliceHdfException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.getDimensions;
 import static org.apache.commons.lang3.ArrayUtils.subarray;
 import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SlicingTest {
@@ -64,6 +66,20 @@ class SlicingTest {
 		assertThat(toObject(slicedData[1][2]), is(subarray(fullData[1][2], 0, 10)));
 		assertThat(toObject(slicedData[1][3]), is(subarray(fullData[1][3], 0, 10)));
 		assertThat(toObject(slicedData[1][4]), is(subarray(fullData[1][4], 0, 10)));
+	}
+
+	@Test
+	void test3DSliceIntDatasetFlat() {
+		Dataset dataset = hdfFile.getDatasetByPath("/nD_Datasets/3D_int32");
+
+		long[] sliceOffset = new long[]{0, 2, 30};
+		int[] sliceDimensions = new int[]{1, 3, 15};
+
+		Object slicedData = dataset.getData(sliceOffset, sliceDimensions);
+		Object[] expectedFlat = flatten(slicedData);
+
+		int[] slicedFlat = (int[]) dataset.getDataFlat(sliceOffset, sliceDimensions);
+		assertArrayEquals(expectedFlat, toObject(slicedFlat));
 	}
 
 	@Test
@@ -126,11 +142,13 @@ class SlicingTest {
 	void testEmptyDatasetThrows() {
 		Dataset emptyDataset = scalarEmptyDatasetsHdfFile.getDatasetByPath("empty_uint_32");
 		assertThrows(HdfException.class, () -> emptyDataset.getData(new long[]{3}, new int[]{3}));
+		assertThrows(HdfException.class, () -> emptyDataset.getDataFlat(new long[]{3}, new int[]{3}));
 	}
 
 	@Test
 	void testScalarDatasetThrows() {
 		Dataset emptyDataset = scalarEmptyDatasetsHdfFile.getDatasetByPath("scalar_float_64");
 		assertThrows(HdfException.class, () -> emptyDataset.getData(new long[]{3}, new int[]{3}));
+		assertThrows(HdfException.class, () -> emptyDataset.getDataFlat(new long[]{3}, new int[]{3}));
 	}
 }
