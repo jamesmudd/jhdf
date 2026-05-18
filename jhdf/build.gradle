@@ -51,7 +51,7 @@ dependencyLocking {
 
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
-    implementation 'org.slf4j:slf4j-api:2.0.17'
+    implementation 'org.slf4j:slf4j-api:2.0.18'
     implementation 'org.apache.commons:commons-lang3:3.20.0'
     // lzf compression support
     implementation 'com.ning:compress-lzf:1.2.0'
@@ -64,7 +64,7 @@ dependencies {
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     // Logging impl for tests
-    testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.17'
+    testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.18'
 
     // Mocking
     testImplementation 'org.mockito:mockito-core:5.23.0'
