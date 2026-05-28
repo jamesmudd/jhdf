@@ -19,10 +19,10 @@ import org.apache.commons.lang3.ArrayUtils;
 public class DatasetInfo {
 
 	private final int chunkSizeInBytes;
-	private final int[] datasetDimensions;
+	private final long[] datasetDimensions;
 	private final int[] chunkDimensions;
 
-	public DatasetInfo(int chunkSizeInBytes, int[] datasetDimensions, int[] chunkDimensions) {
+	public DatasetInfo(int chunkSizeInBytes, long[] datasetDimensions, int[] chunkDimensions) {
 		this.chunkSizeInBytes = chunkSizeInBytes;
 		this.datasetDimensions = ArrayUtils.clone(datasetDimensions);
 		this.chunkDimensions = ArrayUtils.clone(chunkDimensions);
@@ -32,7 +32,7 @@ public class DatasetInfo {
 		return chunkSizeInBytes;
 	}
 
-	public int[] getDatasetDimensions() {
+	public long[] getDatasetDimensions() {
 		return ArrayUtils.clone(datasetDimensions);
 	}
 

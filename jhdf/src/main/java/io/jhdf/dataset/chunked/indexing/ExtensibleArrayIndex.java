@@ -58,7 +58,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 
 	private final List<Chunk> chunks;
 	private final int unfilteredChunkSize;
-	private final int[] datasetDimensions;
+	private final long[] datasetDimensions;
 	private final int[] chunkDimensions;
 
 	private final int minNumberOfElementsInDataBlock;
@@ -301,7 +301,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 		private boolean readElement(ByteBuffer bb, HdfBackingStorage hdfBackingStorage) {
 			final long chunkAddress = readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
 			if (chunkAddress != UNDEFINED_ADDRESS) {
-				final int[] chunkOffset = Utils.chunkIndexToChunkOffset(elementCounter, chunkDimensions, datasetDimensions);
+				final long[] chunkOffset = Utils.chunkIndexToChunkOffset(elementCounter, chunkDimensions, datasetDimensions);
 				if (filtered) { // Filtered
 					final int chunkSizeInBytes = Utils.readBytesAsUnsignedInt(bb, extensibleArrayElementSize - hdfBackingStorage.getSizeOfOffsets() - 4);
 					final BitSet filterMask = BitSet.valueOf(new byte[]{bb.get(), bb.get(), bb.get(), bb.get()});

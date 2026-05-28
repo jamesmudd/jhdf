@@ -44,4 +44,11 @@ class ExceptionsTest {
 		assertThat(ex.getCause(), is(nullValue()));
 	}
 
+	@Test
+	void testInvalidSliceHdfExceptionWithLongDatasetDimensions() {
+		long largeDimension = (long) Integer.MAX_VALUE + 42;
+		InvalidSliceHdfException ex = new InvalidSliceHdfException(TEST_MESSAGE, new long[]{0}, new int[]{10}, new long[]{largeDimension});
+		assertThat(ex.getMessage(), is(TEST_MESSAGE + "sliceOffset=[0], sliceDimensions=[10], datasetDimensions=[" + largeDimension + "]}"));
+	}
+
 }

@@ -368,6 +368,13 @@ class UtilsTest {
 		assertThat(Utils.chunkIndexToChunkOffset(chunkIndex, chunkDimensions, datasetDimensions), is(equalTo(expectedChunkOffset)));
 	}
 
+	@Test
+	void chunkIndexToChunkOffsetSupportsLongDatasetDimensions() {
+		long[] datasetDimensions = new long[]{(long) Integer.MAX_VALUE + 10};
+		long[] chunkOffset = Utils.chunkIndexToChunkOffset(Integer.MAX_VALUE + 9L, new int[]{1}, datasetDimensions);
+		assertThat(chunkOffset, is(equalTo(new long[]{(long) Integer.MAX_VALUE + 9})));
+	}
+
 	static Stream<Arguments> chunkIndexToChunkOffset() {
 		return Stream.of(
 			//1D
@@ -467,6 +474,16 @@ class UtilsTest {
 		// index higher than dimensions
 		assertThrows(IllegalArgumentException.class,
 			() -> Utils.dimensionIndexToLinearIndex(new int[]{4}, new int[]{1}));
+	}
+
+	@Test
+	void testDimensionIndexToLinearIndexSupportsLongDimensions() {
+		assertThat(Utils.dimensionIndexToLinearIndex(new long[]{1, 2}, new long[]{(long) Integer.MAX_VALUE + 10, 5}), is(7L));
+	}
+
+	@Test
+	void testTotalChunksSupportsLongDatasetDimensions() {
+		assertThat(Utils.totalChunks(new long[]{(long) Integer.MAX_VALUE + 5}, new int[]{1024}), is(2097153L));
 	}
 
 	static Stream<Arguments> testGetSetBit() {

@@ -18,14 +18,13 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.stream.IntStream;
 
 public class DataSpace {
 
 	private static final int MAX_SIZES_PRESENT_BIT = 0;
 	private final byte version;
 	private final boolean maxSizesPresent;
-	private final int[] dimensions;
+	private final long[] dimensions;
 	private final long[] maxSizes;
 	private final byte type; // TODO enum SCALAR SIMPLE NULL
 
@@ -50,12 +49,12 @@ public class DataSpace {
 
 		// Dimensions sizes
 		if (numberOfDimensions != 0) {
-			dimensions = new int[numberOfDimensions];
+			dimensions = new long[numberOfDimensions];
 			for (int i = 0; i < numberOfDimensions; i++) {
-				dimensions[i] = Utils.readBytesAsUnsignedInt(bb, sb.getSizeOfLengths());
+				dimensions[i] = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 			}
 		} else {
-			dimensions = new int[0];
+			dimensions = new long[0];
 		}
 
 		// Max dimension sizes
@@ -65,13 +64,13 @@ public class DataSpace {
 				maxSizes[i] = Utils.readBytesAsUnsignedLong(bb, sb.getSizeOfLengths());
 			}
 		} else {
-			maxSizes = Arrays.stream(dimensions).asLongStream().toArray();
+			maxSizes = dimensions.clone();
 		}
 
 		// Permutation indices - Note never implemented in HDF library!
 	}
 
-	private DataSpace(byte version, boolean maxSizesPresent, int[] dimensions, long[] maxSizes, byte type) {
+	private DataSpace(byte version, boolean maxSizesPresent, long[] dimensions, long[] maxSizes, byte type) {
 		this.version = version;
 		this.maxSizesPresent = maxSizesPresent;
 		this.dimensions = dimensions;
@@ -86,17 +85,18 @@ public class DataSpace {
 	public static DataSpace fromObject(Object data) {
 		if(data.getClass().isArray()) {
 			int[] dimensions1 = Utils.getDimensions(data);
+			long[] dimensionsAsLong = Arrays.stream(dimensions1).asLongStream().toArray();
 			return new DataSpace((byte) 2,
 				false,
-				dimensions1,
-				Arrays.stream(dimensions1).asLongStream().toArray(),
+				dimensionsAsLong,
+				dimensionsAsLong.clone(),
 				(byte) 1 // Simple
 			);
 		} else {
 			// Scalar
 			return new DataSpace((byte) 2,
 				false,
-				new int[] {},
+				new long[] {},
 				new long[] {},
 				(byte) 0); // Scalar
 		}
@@ -114,9 +114,7 @@ public class DataSpace {
 			return  0;
 		} else {
 			// Calculate the total length by multiplying all dimensions
-			return IntStream.of(dimensions)
-				.mapToLong(Long::valueOf) // Convert to long to avoid int overflow
-				.reduce(1, Math::multiplyExact);
+			return Arrays.stream(dimensions).reduce(1L, Math::multiplyExact);
 		}
 	}
 
@@ -129,6 +127,14 @@ public class DataSpace {
 	}
 
 	public int[] getDimensions() {
+		int[] dimensionsAsInt = new int[dimensions.length];
+		for (int i = 0; i < dimensions.length; i++) {
+			dimensionsAsInt[i] = Math.toIntExact(dimensions[i]);
+		}
+		return dimensionsAsInt;
+	}
+
+	public long[] getDimensionsAsLong() {
 		return ArrayUtils.clone(dimensions);
 	}
 
@@ -149,10 +155,10 @@ public class DataSpace {
 			.writeBitSet(flags, 1)
 			.writeByte(type);
 
-        for (int dimension : dimensions) {
+		for (long dimension : dimensions) {
 			// TODO should be size of length
-            bufferBuilder.writeLong(dimension);
-        }
+			bufferBuilder.writeLong(dimension);
+		}
 
 		return bufferBuilder.build();
 	}
@@ -173,7 +179,7 @@ public class DataSpace {
 			throw new HdfException("Can't combine data spaces of incongruent dimensional structure");
 		}
 
-		int[] dims = Arrays.copyOf(this.dimensions, this.dimensions.length);
+		long[] dims = Arrays.copyOf(this.dimensions, this.dimensions.length);
 		dims[0] = Math.addExact(this.dimensions[0], ds2.dimensions[0]);
 		if (dims.length > 1) {
 			for (int i = 1; i < dims.length; i++) {
@@ -228,14 +234,20 @@ public class DataSpace {
 	 the new dimensions
 	 @return the resized dataset
 	 */
-	public static DataSpace modifyDimensions(DataSpace ds, int[] dimensions) {
-		int[] newdims = Arrays.copyOf(ds.dimensions, ds.getDimensions().length);
+	public static DataSpace modifyDimensions(DataSpace ds, long[] dimensions) {
+		long[] newdims = Arrays.copyOf(ds.dimensions, ds.dimensions.length);
 		System.arraycopy(dimensions, 0, newdims, 0, dimensions.length);
 		long[] newsizes = Arrays.copyOf(ds.maxSizes, ds.maxSizes.length);
-		for (int i = 0; i < dimensions.length; i++) {
-			newsizes[i] = dimensions[i];
-		}
+		System.arraycopy(dimensions, 0, newsizes, 0, dimensions.length);
 		return new DataSpace(ds.version, ds.maxSizesPresent, newdims, newsizes, ds.type);
+	}
+
+	/**
+	 * @deprecated use {@link #modifyDimensions(DataSpace, long[])} instead
+	 */
+	@Deprecated
+	public static DataSpace modifyDimensions(DataSpace ds, int[] dimensions) {
+		return modifyDimensions(ds, Arrays.stream(dimensions).asLongStream().toArray());
 	}
 
 	@Override

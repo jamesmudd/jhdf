@@ -134,6 +134,12 @@ public abstract class TestAllFilesBase {
 		assertThat(dataset.getName(), is(notNullValue()));
 		assertThat(dataset.getPath(), is(group.getPath() + dataset.getName()));
 		assertThat(dataset.getParent(), is(sameInstance(group)));
+		long[] longDimensions = dataset.getDimensionsAsLong();
+		boolean hasLargeDimension = Arrays.stream(longDimensions).anyMatch(dimension -> dimension > Integer.MAX_VALUE);
+		if (hasLargeDimension) {
+			verifyLargeDimensionDataset(dataset);
+			return;
+		}
 		int[] dims = dataset.getDimensions();
 		assertThat(dims, is(notNullValue()));
 
@@ -239,6 +245,18 @@ public abstract class TestAllFilesBase {
 		if(fillValue != null) {
 			assertThat(fillValue, is(instanceOf(dataset.getJavaType()))); // check fill value is correct type
 		}
+	}
+
+	private static void verifyLargeDimensionDataset(Dataset dataset) {
+		assertThat(dataset.getDimensionsAsLong(), is(notNullValue()));
+		assertThat(dataset.getAttributes(), is(notNullValue()));
+		assertThat(dataset.isGroup(), is(false));
+		assertThat(dataset.isLink(), is(false));
+		assertThat(dataset.getType(), is(NodeType.DATASET));
+		assertThat(dataset.getDataLayout(), is(notNullValue()));
+		assertThat(dataset.getJavaType(), is(notNullValue()));
+		assertThat(dataset.getSizeInBytes(), is(greaterThan(0L)));
+		assertThat(dataset.getSize(), is(greaterThan(0L)));
 	}
 
 	private static Class<?> getType(Object data) {

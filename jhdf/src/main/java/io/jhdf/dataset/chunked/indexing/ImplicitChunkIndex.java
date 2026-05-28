@@ -13,14 +13,15 @@ import io.jhdf.Utils;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.DatasetInfo;
 
-import java.util.ArrayList;
+import java.util.AbstractCollection;
 import java.util.Collection;
-import java.util.List;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class ImplicitChunkIndex implements ChunkIndex {
 
 	private final int chunkSize;
-	private final int[] datasetDimensions;
+	private final long[] datasetDimensions;
 	private final int[] chunkDimensions;
 	private final long baseAddress;
 
@@ -33,14 +34,43 @@ public class ImplicitChunkIndex implements ChunkIndex {
 
 	@Override
 	public Collection<Chunk> getAllChunks() {
-		int totalChunks = Utils.totalChunks(datasetDimensions, chunkDimensions);
-		List<Chunk> chunks = new ArrayList<>(totalChunks);
-		for (int i = 0; i < totalChunks; i++) {
-			chunks.add(new ChunkImpl(baseAddress + i* chunkSize,
-				chunkSize,
-				Utils.chunkIndexToChunkOffset(i, chunkDimensions, datasetDimensions)));
-		}
-		return chunks;
+		final long totalChunks = Utils.totalChunks(datasetDimensions, chunkDimensions);
+		return new AbstractCollection<Chunk>() {
+			@Override
+			public Iterator<Chunk> iterator() {
+				return new Iterator<Chunk>() {
+					private long index = 0;
+
+					@Override
+					public boolean hasNext() {
+						return index < totalChunks;
+					}
+
+					@Override
+					public Chunk next() {
+						if (!hasNext()) {
+							throw new NoSuchElementException();
+						}
+						long chunkIndex = index++;
+						long chunkAddress = Math.addExact(baseAddress,
+							Math.multiplyExact(chunkIndex, (long) chunkSize));
+						return new ChunkImpl(chunkAddress,
+							chunkSize,
+							Utils.chunkIndexToChunkOffset(chunkIndex, chunkDimensions, datasetDimensions));
+					}
+				};
+			}
+
+			@Override
+			public int size() {
+				return totalChunks > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) totalChunks;
+			}
+
+			@Override
+			public boolean isEmpty() {
+				return totalChunks == 0;
+			}
+		};
 	}
 
 }
