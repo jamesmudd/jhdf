@@ -15,17 +15,13 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.dataset.ChunkedDataset;
 import io.jhdf.exceptions.HdfException;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -35,10 +31,7 @@ import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayContaining;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -154,5 +147,42 @@ class ChunkedV4DatasetTest {
 		intBuffer.get(chunkData);
 
 		assertThat(toObject(chunkData), is(arrayContaining(0, 1, 2, 3, 4, 5)));
+	}
+
+
+	@Test
+	void testSlicingFilteredBtreeV2Int32() {
+		Dataset dataset = hdfFile.getDatasetByPath("/filtered_btree_v2/int32");
+		assertThat(dataset, isA(ChunkedDataset.class));
+		assertThat(dataset.getDimensions(), is(equalTo(new int[]{5, 3})));
+
+		int[][] fullData = (int[][]) dataset.getData();
+
+		int rows = 5;
+		int cols = 3;
+
+		for (int offsetRow = 0; offsetRow < rows; offsetRow++) {
+			for (int offsetCol = 0; offsetCol < cols; offsetCol++) {
+				for (int sizeRow = 1; sizeRow <= rows - offsetRow; sizeRow++) {
+					for (int sizeCol = 1; sizeCol <= cols - offsetCol; sizeCol++) {
+						long[] sliceOffset = new long[]{offsetRow, offsetCol};
+						int[] sliceDimensions = new int[]{sizeRow, sizeCol};
+
+						int[][] slicedData = (int[][]) dataset.getData(sliceOffset, sliceDimensions);
+
+						for (int r = 0; r < sizeRow; r++) {
+							for (int c = 0; c < sizeCol; c++) {
+								int expected = fullData[offsetRow + r][offsetCol + c];
+								int actual = slicedData[r][c];
+								assertThat("Mismatch at slice offset=" + Arrays.toString(sliceOffset)
+										+ " dims=" + Arrays.toString(sliceDimensions)
+										+ " position=[" + r + "," + c + "]",
+									actual, is(equalTo(expected)));
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }
