@@ -151,7 +151,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 
 		final int elementSize = getDataType().getSize();
 
-		// Get all chunks because were reading the whole dataset
+		// Get all chunks because we're reading the whole dataset
 		final Collection<Chunk> chunks = getAllChunks();
 
 		// These are all the same for every chunk
@@ -332,19 +332,27 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		return ByteBuffer.wrap(dataArray);
 	}
 
+	/**
+		Return the collection of all chunks that contain at least one element in the given hypercube.
+		@param offset In elements
+		@param shape In elements
+	**/
 	private List<Chunk> findOverlappingChunks(long[] offset, int[] shape) {
 		int[] chunkDims = getChunkDimensions();
 		List<Chunk> overlapping = new ArrayList<>();
 
-		long[] startChunk = new long[offset.length];
-		long[] endChunk = new long[offset.length];
+		long[] startChunk = new long[offset.length];  // First chunk along each dimension that contains at least one element in the query hypercube.
+		long[] endChunk = new long[offset.length];    // Ditto for last chunk along each dimension.
 
+		// Convert bounds from elements to chunks.
 		for (int i = 0; i < offset.length; i++) {
 			startChunk[i] = offset[i] / chunkDims[i];
 			endChunk[i] = (offset[i] + shape[i] - 1) / chunkDims[i];
 		}
 
+		// Collect all chunks within the bounds determined above.
 		for (long[] chunkCoords : getChunkCoordinateRange(startChunk, endChunk)) {
+			// Must convert from chunk coordinates back to element coordinates.
 			long[] elementOffsets = new long[chunkCoords.length];
 			for (int i = 0; i < chunkCoords.length; i++) {
 				elementOffsets[i] = chunkCoords[i] * chunkDims[i];
@@ -357,6 +365,9 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		return overlapping;
 	}
 
+	/**
+		Given hypercube bounds in chunk coordinates, iterate all chunks within the hypercube.
+	**/
 	private List<long[]> getChunkCoordinateRange(long[] start, long[] end) {
 		List<long[]> coords = new ArrayList<>();
 		int dims = start.length;

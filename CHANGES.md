@@ -1,8 +1,14 @@
 # jHDF Change Log
 
-## v0.11.0 - Unreleased
+## v0.11.0 - June 2026
+- Fix chunk coordinate handling in chunked datasets so retrieval from chunk map succeeds. Thanks to @frothga https://github.com/jamesmudd/jhdf/pull/800 https://github.com/jamesmudd/jhdf/issues/727 and https://github.com/jamesmudd/jhdf/issues/760
 - Add support for Java 25
 - Fix dataset dimension parsing for dimensions larger than `Integer.MAX_VALUE`, adding long-dimension metadata access and slice support for large datasets
+- Switch from `com.ning:compress-lzf` to replacement `at.yawk.lz4:lz4-java` for LZ4 compression support
+- Enable Gradle dependency locking
+- Fix JitPack configuration for rolling jar releases
+- CI: Skip SonarQube job when SONAR_TOKEN is unavailable
+- Build and dependency updates
 
 ## v0.10.0 - July 2025
 - Drop support for Java 8 and 11. Allows for improved performance, dependency updates, and simplifies the testing matrix. https://github.com/jamesmudd/jhdf/issues/700
