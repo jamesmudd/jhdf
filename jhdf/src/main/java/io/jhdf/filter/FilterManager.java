@@ -43,6 +43,7 @@ public enum FilterManager {
 		addFilter(new LzfFilter());
 		addFilter(new BitShuffleFilter());
 		addFilter(new Lz4Filter());
+		addFilter(new ScaleOffsetFilter());
 
 		// Add dynamically loaded filters
 		ServiceLoader<Filter> serviceLoader = ServiceLoader.load(Filter.class);
