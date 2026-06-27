@@ -38,7 +38,7 @@ public class FixedArrayIndex implements ChunkIndex {
 	private final long address;
 	private final int unfilteredChunkSize;
 
-	private final int[] datasetDimensions;
+	private final long[] datasetDimensions;
 	private final int[] chunkDimensions;
 
 	private final int clientId;
@@ -213,14 +213,14 @@ public class FixedArrayIndex implements ChunkIndex {
 			final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
 			final int chunkSizeInBytes = Utils.readBytesAsUnsignedInt(bb, FixedArrayIndex.this.entrySize - hdfBackingStorage.getSizeOfOffsets() - 4);
 			final BitSet filterMask = BitSet.valueOf(new byte[]{bb.get(), bb.get(), bb.get(), bb.get()});
-			final int[] chunkOffset = Utils.chunkIndexToChunkOffset(i, FixedArrayIndex.this.chunkDimensions, FixedArrayIndex.this.datasetDimensions);
+			final long[] chunkOffset = Utils.chunkIndexToChunkOffset(i, FixedArrayIndex.this.chunkDimensions, FixedArrayIndex.this.datasetDimensions);
 
 			chunks.add(new ChunkImpl(chunkAddress, chunkSizeInBytes, chunkOffset, filterMask));
 		}
 
 		private void readUnfiltered(int sizeOfOffsets, ByteBuffer bb, int chunkIndex) {
 			final long chunkAddress = Utils.readBytesAsUnsignedLong(bb, sizeOfOffsets);
-			final int[] chunkOffset = Utils.chunkIndexToChunkOffset(chunkIndex, FixedArrayIndex.this.chunkDimensions, FixedArrayIndex.this.datasetDimensions);
+			final long[] chunkOffset = Utils.chunkIndexToChunkOffset(chunkIndex, FixedArrayIndex.this.chunkDimensions, FixedArrayIndex.this.datasetDimensions);
 			chunks.add(new ChunkImpl(chunkAddress, FixedArrayIndex.this.unfilteredChunkSize, chunkOffset));
 		}
 	}

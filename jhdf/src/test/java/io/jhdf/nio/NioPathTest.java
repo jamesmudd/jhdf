@@ -149,7 +149,7 @@ class NioPathTest
 
 		assertThat("Deviating sizes" + errorSuffix, attribute1.getSize(), is(attribute2.getSize()));
 		assertThat("Deviating sizes in bytes" + errorSuffix, attribute1.getSizeInBytes(), is(attribute2.getSizeInBytes()));
-		assertThat("Deviating dimensions" + errorSuffix, attribute1.getDimensions(), is(attribute2.getDimensions()));
+		assertThat("Deviating dimensions" + errorSuffix, attribute1.getDimensionsAsLong(), is(attribute2.getDimensionsAsLong()));
 		assertThat("Deviating Java types" + errorSuffix, attribute1.getJavaType(), is(attribute2.getJavaType()));
 		assertThat("Deviating isScalar flags" + errorSuffix, attribute1.isScalar(), is(attribute2.isScalar()));
 		assertThat("Deviating isScalar flags" + errorSuffix, attribute1.isEmpty(), is(attribute2.isEmpty()));
@@ -186,7 +186,7 @@ class NioPathTest
 		assertThat("Deviating sizes" + errorSuffix, dataset1.getSize(), is(dataset2.getSize()));
 		assertThat("Deviating sizes in bytes" + errorSuffix, dataset1.getSizeInBytes(), is(dataset2.getSizeInBytes()));
 		assertThat("Deviating storage sizes in bytes" + errorSuffix, dataset1.getStorageInBytes(), is(dataset2.getStorageInBytes()));
-		assertThat("Deviating dimensions" + errorSuffix, dataset1.getDimensions(), is(dataset2.getDimensions()));
+		assertThat("Deviating dimensions" + errorSuffix, dataset1.getDimensionsAsLong(), is(dataset2.getDimensionsAsLong()));
 		assertThat("Deviating isScalar flags" + errorSuffix, dataset1.isScalar(), is(dataset2.isScalar()));
 		assertThat("Deviating isScalar flags" + errorSuffix, dataset1.isEmpty(), is(dataset2.isEmpty()));
 		assertThat("Deviating isCompound flags" + errorSuffix, dataset1.isCompound(), is(dataset2.isCompound()));

@@ -21,7 +21,7 @@ public class SingleChunkIndex implements ChunkIndex {
 	private final Chunk singleChunk;
 
 	public SingleChunkIndex(ChunkedDataLayoutMessageV4 layoutMessageV4, DatasetInfo datasetInfo) {
-		final int[] chunkOffset = new int[datasetInfo.getDatasetDimensions().length]; // Single chunk so zero offset
+		final long[] chunkOffset = new long[datasetInfo.getDatasetDimensions().length]; // Single chunk so zero offset
 		if (layoutMessageV4.isFilteredSingleChunk()) {
 			this.singleChunk = new ChunkImpl(layoutMessageV4.getAddress(), layoutMessageV4.getSizeOfFilteredSingleChunk(), chunkOffset, layoutMessageV4.getFilterMaskFilteredSingleChunk());
 		} else {

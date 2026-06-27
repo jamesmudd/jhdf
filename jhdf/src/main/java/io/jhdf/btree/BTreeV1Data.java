@@ -66,9 +66,9 @@ public abstract class BTreeV1Data extends BTreeV1 {
 		private Chunk readKeyAsChunk(Superblock sb, int dataDimensions, ByteBuffer bb) {
 			final int chunkSize = Utils.readBytesAsUnsignedInt(bb, 4);
 			final BitSet filterMask = BitSet.valueOf(new byte[]{bb.get(), bb.get(), bb.get(), bb.get()});
-			final int[] chunkOffset = new int[dataDimensions];
+			final long[] chunkOffset = new long[dataDimensions];
 			for (int j = 0; j < dataDimensions; j++) {
-				chunkOffset[j] = Utils.readBytesAsUnsignedInt(bb, 8);
+				chunkOffset[j] = Utils.readBytesAsUnsignedLong(bb, 8);
 			}
 			long zero = Utils.readBytesAsUnsignedLong(bb, 8);
 			if (zero != 0) {

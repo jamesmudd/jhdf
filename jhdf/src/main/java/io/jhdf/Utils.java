@@ -311,6 +311,11 @@ public final class Utils {
 	}
 
 	public static long dimensionIndexToLinearIndex(long[] index, int[] dimensions) {
+		long[] dimensionsAsLong = Arrays.stream(dimensions).asLongStream().toArray();
+		return dimensionIndexToLinearIndex(index, dimensionsAsLong);
+	}
+
+	public static long dimensionIndexToLinearIndex(long[] index, long[] dimensions) {
 		if(index.length != dimensions.length) {
 			throw new IllegalArgumentException("Mismatched index and dimension lengths");
 		}
@@ -343,15 +348,29 @@ public final class Utils {
 	 * @return The chunk offset for the chunk of this index
 	 */
 	public static int[] chunkIndexToChunkOffset(int chunkIndex, int[] chunkDimensions, int[] datasetDimensions) {
-		final int[] chunkOffset = new int[chunkDimensions.length];
+		long[] chunkOffset = chunkIndexToChunkOffset((long) chunkIndex, chunkDimensions, datasetDimensions);
+		int[] chunkOffsetAsInt = new int[chunkOffset.length];
+		for (int i = 0; i < chunkOffset.length; i++) {
+			chunkOffsetAsInt[i] = Math.toIntExact(chunkOffset[i]);
+		}
+		return chunkOffsetAsInt;
+	}
+
+	public static long[] chunkIndexToChunkOffset(long chunkIndex, int[] chunkDimensions, int[] datasetDimensions) {
+		long[] dimensionsAsLong = Arrays.stream(datasetDimensions).asLongStream().toArray();
+		return chunkIndexToChunkOffset(chunkIndex, chunkDimensions, dimensionsAsLong);
+	}
+
+	public static long[] chunkIndexToChunkOffset(long chunkIndex, int[] chunkDimensions, long[] datasetDimensions) {
+		final long[] chunkOffset = new long[chunkDimensions.length];
 
 		// Start from the slowest dim
 		for (int i = 0; i < chunkOffset.length; i++) {
 			// Find out how many chunks make one chunk in this dim
-			int chunksBelowThisDim = 1;
+			long chunksBelowThisDim = 1L;
 			// Start one dim faster
 			for (int j = i + 1; j < chunkOffset.length; j++) {
-				chunksBelowThisDim *= (int) Math.ceil((double) datasetDimensions[j] / chunkDimensions[j]);
+				chunksBelowThisDim *= (long) Math.ceil((double) datasetDimensions[j] / chunkDimensions[j]);
 			}
 
 			chunkOffset[i] = (chunkIndex / chunksBelowThisDim) * chunkDimensions[i];
@@ -458,9 +477,13 @@ public final class Utils {
 	}
 
 	public static int totalChunks(int[] datasetDimensions, int[] chunkDimensions) {
-		int chunks = 1;
+		return Math.toIntExact(totalChunks(Arrays.stream(datasetDimensions).asLongStream().toArray(), chunkDimensions));
+	}
+
+	public static long totalChunks(long[] datasetDimensions, int[] chunkDimensions) {
+		long chunks = 1L;
 		for (int i = 0; i < datasetDimensions.length; i++) {
-			int chunksInDim = datasetDimensions[i] / chunkDimensions[i];
+			long chunksInDim = datasetDimensions[i] / chunkDimensions[i];
 			// If there is a partial chunk then we need to add one chunk in this dim
 			if(datasetDimensions[i] % chunkDimensions[i] != 0 ) chunksInDim++;
 			chunks *=  chunksInDim;

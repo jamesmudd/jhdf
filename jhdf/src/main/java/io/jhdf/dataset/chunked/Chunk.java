@@ -27,7 +27,7 @@ public interface Chunk {
 	 *
 	 * @return this chunks offset
 	 */
-	int[] getChunkOffset();
+	long[] getChunkOffset();
 
 	/**
 	 * Gets the address of this chunk in the file

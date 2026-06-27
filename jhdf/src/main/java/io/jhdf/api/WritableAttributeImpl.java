@@ -57,6 +57,11 @@ public class WritableAttributeImpl implements Attribute {
 	}
 
 	@Override
+	public long[] getDimensionsAsLong() {
+		return dataSpace.getDimensionsAsLong();
+	}
+
+	@Override
 	public Object getData() {
 		return data;
 	}
