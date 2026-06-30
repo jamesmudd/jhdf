@@ -23,7 +23,7 @@ plugins {
     id 'org.sonarqube' version '7.3.1.8318' // Code quality
     id "com.github.spotbugs" version "6.5.8" // Static analysis
     id "me.champeau.jmh" version "0.7.3" // JMH support
-    id 'biz.aQute.bnd.builder' version '7.1.0' // OSGi manifest generation
+    id 'biz.aQute.bnd.builder' version '7.3.0' // OSGi manifest generation
 }
 
 // Variables
