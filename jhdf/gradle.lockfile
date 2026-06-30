@@ -2,12 +2,12 @@
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
 at.yawk.lz4:lz4-java:1.11.0=compileClasspath,jmhCompileClasspath,jmhRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
-com.fasterxml.jackson.core:jackson-annotations:2.21=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
-com.fasterxml.jackson.core:jackson-core:2.21.3=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
-com.fasterxml.jackson.core:jackson-databind:2.21.3=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
-com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.21.3=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
-com.fasterxml.jackson:jackson-bom:2.21.3=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
-com.fasterxml.woodstox:woodstox-core:7.1.1=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.fasterxml.jackson.core:jackson-annotations:2.22=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.fasterxml.jackson.core:jackson-core:2.22.0=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.fasterxml.jackson.core:jackson-databind:2.22.0=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.22.0=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.fasterxml.jackson:jackson-bom:2.22.0=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.fasterxml.woodstox:woodstox-core:7.2.0=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
 com.github.spotbugs:spotbugs-annotations:4.10.2=spotbugs
 com.github.spotbugs:spotbugs:4.10.2=spotbugs
 com.github.stephenc.jcip:jcip-annotations:1.0-1=spotbugs
@@ -60,7 +60,7 @@ org.codehaus.plexus:plexus-classworlds:2.6.0=checkstyle
 org.codehaus.plexus:plexus-component-annotations:2.1.0=checkstyle
 org.codehaus.plexus:plexus-container-default:2.1.0=checkstyle
 org.codehaus.plexus:plexus-utils:3.3.0=checkstyle
-org.codehaus.woodstox:stax2-api:4.2.2=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
+org.codehaus.woodstox:stax2-api:4.3.0=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.dom4j:dom4j:2.2.0=spotbugs
 org.hamcrest:hamcrest:3.0=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.jacoco:org.jacoco.agent:0.8.14=jacocoAgent,jacocoAnt
