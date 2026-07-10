@@ -26,6 +26,18 @@ try (WritableHdfFile hdfFile = HdfFile.write(Paths.get("jhdf.hdf5"))) {
     group.putDataset("doubles", new double[] {1.0, 2.0, 3.0, 4.0});
 }
 ```
+
+Datasets can also be written chunked and compressed by providing `DatasetCreationOptions`
+
+```java
+try (WritableHdfFile hdfFile = HdfFile.write(Paths.get("jhdf.hdf5"))) {
+    hdfFile.putDataset("compressed", data, DatasetCreationOptions.builder()
+        .chunkDimensions(64, 64)
+        .shuffle()
+        .deflate(6)
+        .build());
+}
+```
 See [WriteHdf5.java](jhdf/src/main/java/io/jhdf/examples/WriteHdf5.java) for a more extensive complete example. Note: writing files is still an early feature with many more functions to be added.
 
 For more examples see package [io.jhdf.examples](jhdf/src/main/java/io/jhdf/examples)

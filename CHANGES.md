@@ -1,5 +1,8 @@
 # jHDF Change Log
 
+## Unreleased
+- Add support for writing chunked datasets with compression. Chunking and filters are requested via the new `DatasetCreationOptions` e.g. `putDataset(name, data, DatasetCreationOptions.builder().chunkDimensions(64, 64).shuffle().deflate(6).build())`. Deflate (gzip) and byte shuffle filters are supported for writing, and custom filters can encode via the new `Filter.encode` method. Chunked datasets are written using the v4 data layout message with single chunk or fixed array indexing.
+
 ## v0.12.0 - July 2026
 - Add dataset dimension parsing for dimensions larger than `Integer.MAX_VALUE`, adding long-dimension access and slicing support for large datasets. Thanks to @misha-at-genestack https://github.com/jamesmudd/jhdf/pull/825
 - Fix OSGi manifest generation by using the bnd Gradle plugin. Thanks to @laeubi https://github.com/jamesmudd/jhdf/pull/832

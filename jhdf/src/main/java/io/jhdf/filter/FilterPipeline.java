@@ -53,6 +53,23 @@ public class FilterPipeline {
 		return encodedData;
 	}
 
+	/**
+	 * Applies all the filters in this pipeline to encode the data for writing.
+	 *
+	 * @param data the data to be encoded
+	 * @return the encoded data
+	 * @throws HdfFilterException if the encode operation fails
+	 */
+	public byte[] encode(byte[] data) {
+
+		// Apply the filters, encoding so pipeline (forward) order
+		for (PipelineFilterWithData filter : filters) {
+			data = filter.encode(data);
+		}
+
+		return data;
+	}
+
 	@Override
 	public String toString() {
 		return "FilterPipeline{" +
