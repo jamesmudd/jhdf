@@ -36,6 +36,19 @@ public interface WritableGroup extends Group, WritableNode {
 	 */
 	WritableDataset putDataset(String name, Object data, DatasetCreationOptions options);
 
+	/**
+	 Put a named dataset into the group, optionally forcing the underlying fixed point
+	 (integer) data type to be written as unsigned. This only applies when {@code data} is a
+	 supported fixed point (integer) array/scalar (byte/short/int/long); requesting
+	 {@code unsigned} for any other data type will result in an exception.
+
+	 * @param name The dataset name within this group
+	 * @param data The dataset array or scalar, must be a fixed point (integer) type when {@code unsigned} is {@code true}
+	 * @param unsigned if {@code true} the dataset will be written as an unsigned fixed point type
+	 * @return the dataset, for further modification
+	 */
+	WritableDataset putDataset(String name, Object data, boolean unsigned);
+
 	WritableGroup putGroup(String name);
 
 }

@@ -25,10 +25,23 @@ public class WritableAttributeImpl implements Attribute {
 	private final DataSpace dataSpace;
 
 	public WritableAttributeImpl(String name, Node node, Object data) {
+		this(name, node, data, false);
+	}
+
+	/**
+	 * Creates a writable attribute, optionally forcing the underlying fixed point (integer)
+	 * data type to be written as unsigned.
+	 *
+	 * @param name the attribute name
+	 * @param node the node this attribute belongs to
+	 * @param data the attribute data, must be a supported fixed point (integer) array/scalar when {@code unsigned} is {@code true}
+	 * @param unsigned if {@code true} the data type will be written as unsigned fixed point
+	 */
+	public WritableAttributeImpl(String name, Node node, Object data, boolean unsigned) {
 		this.name = name;
 		this.node = node;
 		this.data = data;
-		this.dataType = DataType.fromObject(data);
+		this.dataType = DataType.fromObject(data, unsigned);
 		this.dataSpace = DataSpace.fromObject(data);
 	}
 	@Override

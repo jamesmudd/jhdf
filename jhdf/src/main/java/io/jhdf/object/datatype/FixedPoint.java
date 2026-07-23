@@ -60,13 +60,17 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 	}
 
 	public FixedPoint(int bytePrecision) {
+		this(bytePrecision, true);
+	}
+
+	public FixedPoint(int bytePrecision, boolean signed) {
 		// TODO arg validation
 		super(CLASS_ID, bytePrecision);
 		this.order = ByteOrder.nativeOrder();
 		this.bitPrecision = (short) (bytePrecision * 8);
 		this.lowPadding = false;
 		this.highPadding = false;
-		this.signed = true;
+		this.signed = signed;
 		this.bitOffset = 0; // TODO ok?
 	}
 

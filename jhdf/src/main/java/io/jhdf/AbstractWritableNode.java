@@ -88,6 +88,16 @@ public abstract class AbstractWritableNode implements WritableNode {
 	}
 
 	@Override
+	public Attribute putAttribute(String name, Object data, boolean unsigned) {
+		if(StringUtils.isBlank(name)) {
+			throw new IllegalArgumentException("name cannot be null or blank");
+		}
+		Objects.requireNonNull(data, "Cannot write null attributes");
+		WritableAttributeImpl attribute = new WritableAttributeImpl(name, this, data, unsigned);
+		return attributes.put(name, attribute);
+	}
+
+	@Override
 	public Attribute removeAttribute(String name) {
 		return attributes.remove(name);
 	}
