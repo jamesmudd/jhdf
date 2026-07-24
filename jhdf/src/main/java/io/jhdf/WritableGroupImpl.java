@@ -12,6 +12,7 @@ package io.jhdf;
 
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
+import io.jhdf.api.DatasetCreationOptions;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
@@ -118,6 +119,22 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
       writableDataset = new WritableDatasetImpl(data, name, this);
     }
 
+    children.put(name, writableDataset);
+    logger.info("Added dataset [{}] to group [{}]", name, getPath());
+    return writableDataset;
+  }
+
+  @Override
+  public WritableDataset putDataset(String name, Object data, DatasetCreationOptions options) {
+    if (StringUtils.isBlank(name)) {
+      throw new IllegalArgumentException("name cannot be null or blank");
+    }
+    if (data instanceof WritableDataset) {
+      throw new IllegalArgumentException(
+          "options cannot be applied to a pre-initialized WritableDataset");
+    }
+
+    WritableDataset writableDataset = new WritableDatasetImpl(data, name, this, options);
     children.put(name, writableDataset);
     logger.info("Added dataset [{}] to group [{}]", name, getPath());
     return writableDataset;

@@ -12,6 +12,7 @@ package io.jhdf;
 
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
+import io.jhdf.api.DatasetCreationOptions;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
@@ -103,6 +104,14 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	@Override
 	public WritableDataset putDataset(String name, Object data) {
 		return rootGroup.putDataset(name, data);
+	}
+
+	/**
+	 {@inheritDoc}
+	 */
+	@Override
+	public WritableDataset putDataset(String name, Object data, DatasetCreationOptions options) {
+		return rootGroup.putDataset(name, data, options);
 	}
 
 	/**
