@@ -35,7 +35,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -117,6 +116,20 @@ class ChunkedDatasetWritingTest {
 		return data;
 	}
 
+	private static int[][][][] intData4d(int d0, int d1, int d2, int d3) {
+		int[][][][] data = new int[d0][d1][d2][d3];
+		for (int i = 0; i < d0; i++) {
+			for (int j = 0; j < d1; j++) {
+				for (int k = 0; k < d2; k++) {
+					for (int l = 0; l < d3; l++) {
+						data[i][j][k][l] = i * 1000 + j * 100 + k * 10 + l;
+					}
+				}
+			}
+		}
+		return data;
+	}
+
 	@Nested
 	@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -130,6 +143,8 @@ class ChunkedDatasetWritingTest {
 		private final short[][] short2d = shortData2d(40, 40);
 		private final long[] long1d = longData1d(50);
 		private final int[][] int2d = intData2d(70, 70);
+		private final int[][][][] int4d = intData4d(3, 4, 5, 7);
+		private final float[][][] float3dCompressible = floatData3d(6, 8, 10);
 		private final String[] string1d = new String[]{"one", "two", "three", "four", "five", "six", "seven"};
 
 		@Test
@@ -203,6 +218,33 @@ class ChunkedDatasetWritingTest {
 				.deflate(2)
 				.build());
 
+			// 4D with deflate, partial chunks in every dimension
+			writableHdfFile.putDataset("int4d_deflate", int4d, DatasetCreationOptions.builder()
+				.chunkDimensions(2, 2, 3, 3)
+				.deflate(4)
+				.build());
+
+			// 4D with shuffle + deflate
+			writableHdfFile.putDataset("int4d_shuffle_deflate", int4d, DatasetCreationOptions.builder()
+				.chunkDimensions(2, 2, 3, 3)
+				.shuffle()
+				.deflate(6)
+				.build());
+
+			// 4D dataset dimensions exact multiple of chunk dimensions
+			writableHdfFile.putDataset("int4d_exact_chunks", intData4d(4, 6, 6, 9), DatasetCreationOptions.builder()
+				.chunkDimensions(2, 3, 3, 3)
+				.shuffle()
+				.deflate(5)
+				.build());
+
+			// 3D with shuffle + deflate (complements the existing float3d_deflate test)
+			writableHdfFile.putDataset("float3d_shuffle_deflate", float3dCompressible, DatasetCreationOptions.builder()
+				.chunkDimensions(3, 4, 5)
+				.shuffle()
+				.deflate(7)
+				.build());
+
 			// Fixed length strings chunked and compressed
 			writableHdfFile.putDataset("string1d_deflate", string1d, DatasetCreationOptions.builder()
 				.chunkDimensions(3)
@@ -224,7 +266,7 @@ class ChunkedDatasetWritingTest {
 			assertThat(datasetWithAttribute.getDataLayout(), is(DataLayout.CHUNKED));
 			List<String> writableFilterNames = datasetWithAttribute.getFilters().stream()
 				.map(PipelineFilterWithData::getName)
-				.collect(Collectors.toList());
+				.toList();
 			assertThat(writableFilterNames, contains("shuffle", "deflate"));
 
 			// Actually flush and write everything
@@ -243,6 +285,10 @@ class ChunkedDatasetWritingTest {
 				assertDatasetMatches(hdfFile, "short2d_whole_deflate", short2d, new int[]{40, 40}, true);
 				assertDatasetMatches(hdfFile, "int1d_exact_chunks", intData1d(20), new int[]{5}, false);
 				assertDatasetMatches(hdfFile, "int2d_many_chunks", int2d, new int[]{3, 3}, true);
+				assertDatasetMatches(hdfFile, "int4d_deflate", int4d, new int[]{2, 2, 3, 3}, true);
+				assertDatasetMatches(hdfFile, "int4d_shuffle_deflate", int4d, new int[]{2, 2, 3, 3}, true);
+				assertDatasetMatches(hdfFile, "int4d_exact_chunks", intData4d(4, 6, 6, 9), new int[]{2, 3, 3, 3}, true);
+				assertDatasetMatches(hdfFile, "float3d_shuffle_deflate", float3dCompressible, new int[]{3, 4, 5}, true);
 				assertDatasetMatches(hdfFile, "string1d_deflate", string1d, new int[]{3}, true);
 				assertDatasetMatches(hdfFile, "zz_group/double2d_in_group", double2d, new int[]{16, 8}, true);
 
@@ -257,12 +303,22 @@ class ChunkedDatasetWritingTest {
 				// Filter details are readable
 				Dataset shuffleDeflate = hdfFile.getDatasetByPath("double2d_shuffle_deflate");
 				List<PipelineFilterWithData> filters = shuffleDeflate.getFilters();
-				assertThat(filters.stream().map(PipelineFilterWithData::getName).collect(Collectors.toList()),
+				assertThat(filters.stream().map(PipelineFilterWithData::getName).toList(),
 					contains("shuffle", "deflate"));
 				// Shuffle filter data is the element size
 				assertThat(filters.get(0).getFilterData(), is(equalTo(new int[]{8})));
 				// Deflate filter data is the compression level
 				assertThat(filters.get(1).getFilterData(), is(equalTo(new int[]{6})));
+
+				// Filter details for 4D shuffle + deflate dataset
+				Dataset int4dShuffleDeflate = hdfFile.getDatasetByPath("int4d_shuffle_deflate");
+				List<PipelineFilterWithData> filters4d = int4dShuffleDeflate.getFilters();
+				assertThat(filters4d.stream().map(PipelineFilterWithData::getName).toList(),
+					contains("shuffle", "deflate"));
+				// Shuffle filter data is the element size for int (4 bytes)
+				assertThat(filters4d.get(0).getFilterData(), is(equalTo(new int[]{4})));
+				// Deflate filter data is the compression level
+				assertThat(filters4d.get(1).getFilterData(), is(equalTo(new int[]{6})));
 
 				// Just check the whole file is readable
 				TestAllFilesBase.verifyAttributes(hdfFile);
