@@ -140,7 +140,6 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
     return writableDataset;
   }
 
-
 	@Override
 	public WritableGroup putGroup(String name) {
 		if(StringUtils.isBlank(name)) {

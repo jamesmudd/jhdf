@@ -123,6 +123,36 @@ public abstract class DataType {
 		}
 	}
 
+	/**
+	 * Creates a {@link DataType} for the supplied data, optionally forcing it to be written
+	 * as an unsigned fixed point type. This is only applicable to integer (fixed point) data,
+	 * i.e. byte/short/int/long arrays. Requesting an unsigned type for any other data type
+	 * will result in an exception.
+	 *
+	 * @param data the data to create a {@link DataType} for
+	 * @param unsigned if {@code true} the returned {@link DataType} will be an unsigned fixed point type
+	 * @return the created {@link DataType}
+	 */
+	public static DataType fromObject(Object data, boolean unsigned) {
+		if (!unsigned) {
+			return fromObject(data);
+		}
+
+		final Class<?> type = Utils.getType(data);
+
+		if (type == byte.class || type == Byte.class) {
+			return new FixedPoint(1, false);
+		} else if (type == short.class || type == Short.class) {
+			return new FixedPoint(2, false);
+		} else if (type == int.class || type == Integer.class) {
+			return new FixedPoint(4, false);
+		} else if (type == long.class || type == Long.class) {
+			return new FixedPoint(8, false);
+		} else {
+			throw new HdfException("Unsigned data type is only supported for fixed point (integer) data, got: " + type);
+		}
+	}
+
 	public int getVersion() {
 		return version;
 	}

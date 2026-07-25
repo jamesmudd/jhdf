@@ -79,11 +79,11 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 	public WritableDatasetImpl(Object data, String name, Group parent, DatasetCreationOptions options) {
 		super(parent, name);
 		this.data = data;
-		this.dataType = DataType.fromObject(data);
-		this.dataSpace = DataSpace.fromObject(data);
 		if (options == null) {
 			options = DatasetCreationOptions.DEFAULT;
 		}
+		this.dataType = DataType.fromObject(data, options.isUnsigned());
+		this.dataSpace = DataSpace.fromObject(data);
 		this.chunkDimensions = resolveChunkDimensions(options);
 		this.requestedFilters = chunkDimensions != null ? options.getFilters() : Collections.emptyList();
 	}

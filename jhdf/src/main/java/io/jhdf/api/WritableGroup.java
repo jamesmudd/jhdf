@@ -25,12 +25,12 @@ public interface WritableGroup extends Group, WritableNode {
 	WritableDataset putDataset(String name, Object data);
 
 	/**
-	 Put a named dataset into the group specifying how it is stored e.g. chunked and compressed. See
-	 {@link DatasetCreationOptions}.
+	 Put a named dataset into the group specifying how it is stored e.g. chunked and compressed, and/or forcing the
+	 underlying fixed point (integer) data type to be written as unsigned. See {@link DatasetCreationOptions}.
 
 	 * @param name The dataset name within this group
 	 * @param data The dataset array
-	 * @param options Options controlling how the dataset is stored e.g. chunking and filters
+	 * @param options Options controlling how the dataset is stored e.g. chunking, filters and unsigned fixed point types
 	 * @return the dataset, for further modification
 	 * @since v0.13.0
 	 */

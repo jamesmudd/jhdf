@@ -45,10 +45,12 @@ public final class DatasetCreationOptions {
 
 	private final int[] chunkDimensions;
 	private final List<RequestedFilter> filters;
+	private final boolean unsigned;
 
 	private DatasetCreationOptions(Builder builder) {
 		this.chunkDimensions = ArrayUtils.clone(builder.chunkDimensions);
 		this.filters = Collections.unmodifiableList(new ArrayList<>(builder.filters));
+		this.unsigned = builder.unsigned;
 	}
 
 	public static Builder builder() {
@@ -60,6 +62,13 @@ public final class DatasetCreationOptions {
 	 */
 	public boolean isChunked() {
 		return chunkDimensions != null || !filters.isEmpty();
+	}
+
+	/**
+	 * @return true if the underlying fixed point (integer) data type should be written as unsigned
+	 */
+	public boolean isUnsigned() {
+		return unsigned;
 	}
 
 	/**
@@ -101,8 +110,21 @@ public final class DatasetCreationOptions {
 
 		private int[] chunkDimensions;
 		private final List<RequestedFilter> filters = new ArrayList<>();
+		private boolean unsigned;
 
 		private Builder() {
+		}
+
+		/**
+		 * Forces the underlying fixed point (integer) data type to be written as unsigned. This only applies when
+		 * the dataset data is a supported fixed point (integer) array/scalar (byte/short/int/long); requesting
+		 * unsigned for any other data type will result in an exception.
+		 *
+		 * @return this builder
+		 */
+		public Builder unsigned() {
+			this.unsigned = true;
+			return this;
 		}
 
 		/**

@@ -214,6 +214,14 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	 {@inheritDoc}
 	 */
 	@Override
+	public Attribute putAttribute(String name, Object data, boolean unsigned) {
+		return rootGroup.putAttribute(name, data, unsigned);
+	}
+
+	/**
+	 {@inheritDoc}
+	 */
+	@Override
 	public Attribute removeAttribute(String name) {
 		return rootGroup.removeAttribute(name);
 	}
