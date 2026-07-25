@@ -25,29 +25,16 @@ public interface WritableGroup extends Group, WritableNode {
 	WritableDataset putDataset(String name, Object data);
 
 	/**
-	 Put a named dataset into the group specifying how it is stored e.g. chunked and compressed. See
-	 {@link DatasetCreationOptions}.
+	 Put a named dataset into the group specifying how it is stored e.g. chunked and compressed, and/or forcing the
+	 underlying fixed point (integer) data type to be written as unsigned. See {@link DatasetCreationOptions}.
 
 	 * @param name The dataset name within this group
 	 * @param data The dataset array
-	 * @param options Options controlling how the dataset is stored e.g. chunking and filters
+	 * @param options Options controlling how the dataset is stored e.g. chunking, filters and unsigned fixed point types
 	 * @return the dataset, for further modification
 	 * @since v0.13.0
 	 */
 	WritableDataset putDataset(String name, Object data, DatasetCreationOptions options);
-
-	/**
-	 Put a named dataset into the group, optionally forcing the underlying fixed point
-	 (integer) data type to be written as unsigned. This only applies when {@code data} is a
-	 supported fixed point (integer) array/scalar (byte/short/int/long); requesting
-	 {@code unsigned} for any other data type will result in an exception.
-
-	 * @param name The dataset name within this group
-	 * @param data The dataset array or scalar, must be a fixed point (integer) type when {@code unsigned} is {@code true}
-	 * @param unsigned if {@code true} the dataset will be written as an unsigned fixed point type
-	 * @return the dataset, for further modification
-	 */
-	WritableDataset putDataset(String name, Object data, boolean unsigned);
 
 	WritableGroup putGroup(String name);
 

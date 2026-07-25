@@ -14,6 +14,7 @@ import io.jhdf.HdfFile;
 import io.jhdf.WritableHdfFile;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
+import io.jhdf.api.DatasetCreationOptions;
 import io.jhdf.exceptions.HdfException;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +31,8 @@ class UnsignedWritingTest {
 		Path tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 
-		writableHdfFile.putDataset("UnsignedShortDataset", new short[]{-1, 0, 1, 133}, true);
+		writableHdfFile.putDataset("UnsignedShortDataset", new short[]{-1, 0, 1, 133},
+			DatasetCreationOptions.builder().unsigned().build());
 		writableHdfFile.putAttribute("UnsignedByteAttribute", (byte) -1, true);
 
 		writableHdfFile.close();
@@ -53,7 +55,8 @@ class UnsignedWritingTest {
 		Path tempFile = Files.createTempFile(this.getClass().getSimpleName(), ".hdf5");
 		WritableHdfFile writableHdfFile = HdfFile.write(tempFile);
 
-		assertThatThrownBy(() -> writableHdfFile.putDataset("bad", 1.23, true))
+		assertThatThrownBy(() -> writableHdfFile.putDataset("bad", 1.23,
+			DatasetCreationOptions.builder().unsigned().build()))
 			.isInstanceOf(HdfException.class);
 
 		assertThatThrownBy(() -> writableHdfFile.putAttribute("bad", "notFixedPoint", true))

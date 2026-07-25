@@ -118,14 +118,6 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	 {@inheritDoc}
 	 */
 	@Override
-	public WritableDataset putDataset(String name, Object data, boolean unsigned) {
-		return rootGroup.putDataset(name, data, unsigned);
-	}
-
-	/**
-	 {@inheritDoc}
-	 */
-	@Override
 	public WritableGroup putGroup(String name) {
 		return rootGroup.putGroup(name);
 	}

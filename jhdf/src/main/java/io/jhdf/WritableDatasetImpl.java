@@ -73,44 +73,17 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 	private long storageInBytes = -1;
 
 	public WritableDatasetImpl(Object data, String name, Group parent) {
-		this(data, name, parent, DatasetCreationOptions.DEFAULT, false);
+		this(data, name, parent, DatasetCreationOptions.DEFAULT);
 	}
 
 	public WritableDatasetImpl(Object data, String name, Group parent, DatasetCreationOptions options) {
-		this(data, name, parent, options, false);
-	}
-
-	/**
-	 * Creates a writable dataset, optionally forcing the underlying fixed point (integer)
-	 * data type to be written as unsigned.
-	 *
-	 * @param data the dataset data, must be a supported fixed point (integer) array/scalar when {@code unsigned} is {@code true}
-	 * @param name the dataset name
-	 * @param parent the parent group
-	 * @param unsigned if {@code true} the data type will be written as unsigned fixed point
-	 */
-	public WritableDatasetImpl(Object data, String name, Group parent, boolean unsigned) {
-		this(data, name, parent, DatasetCreationOptions.DEFAULT, unsigned);
-	}
-
-	/**
-	 * Creates a writable dataset specifying how it is stored e.g. chunked and compressed, and
-	 * optionally forcing the underlying fixed point (integer) data type to be written as unsigned.
-	 *
-	 * @param data the dataset data, must be a supported fixed point (integer) array/scalar when {@code unsigned} is {@code true}
-	 * @param name the dataset name
-	 * @param parent the parent group
-	 * @param options Options controlling how the dataset is stored e.g. chunking and filters
-	 * @param unsigned if {@code true} the data type will be written as unsigned fixed point
-	 */
-	public WritableDatasetImpl(Object data, String name, Group parent, DatasetCreationOptions options, boolean unsigned) {
 		super(parent, name);
 		this.data = data;
-		this.dataType = DataType.fromObject(data, unsigned);
-		this.dataSpace = DataSpace.fromObject(data);
 		if (options == null) {
 			options = DatasetCreationOptions.DEFAULT;
 		}
+		this.dataType = DataType.fromObject(data, options.isUnsigned());
+		this.dataSpace = DataSpace.fromObject(data);
 		this.chunkDimensions = resolveChunkDimensions(options);
 		this.requestedFilters = chunkDimensions != null ? options.getFilters() : Collections.emptyList();
 	}
