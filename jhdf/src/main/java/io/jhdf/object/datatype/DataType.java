@@ -157,6 +157,35 @@ public abstract class DataType {
 	 */
 	public abstract Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage);
 
+	/**
+	 * Whether this {@link DataType} supports filling elements directly from a decompressed chunk
+	 * buffer into an already allocated output array. Types supporting it can be read using the
+	 * combined parallel read path in chunked datasets, where each chunk is read, decompressed,
+	 * converted and written into the final typed array in a single parallel step. Types returning
+	 * {@code false} fall back to reading into an intermediate {@link ByteBuffer} and converting
+	 * afterwards.
+	 *
+	 * @return true if this type supports direct filling
+	 */
+	public boolean supportsDirectFill() {
+		return false;
+	}
+
+	/**
+	 * Fills {@code length} elements from the decompressed chunk buffer into an innermost (1-D)
+	 * row of the output array. Implementations convert the raw bytes into the correct Java type
+	 * as part of the copy, so no intermediate full-dataset buffer is needed.
+	 *
+	 * @param rowArray            the innermost array of the output to fill (e.g. {@code int[]})
+	 * @param rowOffset           element offset within {@code rowArray} to start writing at
+	 * @param buffer              the decompressed chunk data
+	 * @param bufferElementOffset element offset within the chunk buffer to start reading from
+	 * @param length              number of elements to copy
+	 */
+	public void fillElements(Object rowArray, int rowOffset, ByteBuffer buffer, int bufferElementOffset, int length) {
+		throw new UnsupportedHdfException("Data type [" + getClass().getSimpleName() + "] does not support direct filling");
+	}
+
 	// TODO could be abstract when there are more impls
 	public ByteBuffer encodeData(Object data){
 		throw new UnsupportedHdfException("Data type [" + getClass().getSimpleName() + "] does not support writing");
