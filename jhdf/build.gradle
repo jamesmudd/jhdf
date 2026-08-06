@@ -55,7 +55,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:2.0.18'
     implementation 'org.apache.commons:commons-lang3:3.20.0'
     // lzf compression support
-    implementation 'com.ning:compress-lzf:1.2.0'
+    implementation 'com.ning:compress-lzf:1.2.1'
     // lz4 support https://mvnrepository.com/artifact/at.yawk.lz4/lz4-java
     implementation 'at.yawk.lz4:lz4-java:1.11.1'
 
