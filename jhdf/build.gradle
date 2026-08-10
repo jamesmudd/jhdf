@@ -57,7 +57,7 @@ dependencies {
     // lzf compression support
     implementation 'com.ning:compress-lzf:1.2.1'
     // lz4 support https://mvnrepository.com/artifact/at.yawk.lz4/lz4-java
-    implementation 'at.yawk.lz4:lz4-java:1.11.1'
+    implementation 'at.yawk.lz4:lz4-java:1.11.2'
 
     // TESTING
     // Use JUnit 5 test framework
