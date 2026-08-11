@@ -132,6 +132,14 @@ jacocoTestReport {
     }
 }
 
+// The main and test source sets both bundle a simplelogger.properties (info/debug). When the
+// fat JMH jar merges resources they collide and the test one (debug) wins, flooding the
+// benchmarks with per-chunk debug logging. Exclude both; slf4j-simple then defaults to info.
+// When running via './gradlew jmh' the copy in src/jmh/resources (warn) is used instead.
+jmhJar {
+    exclude('simplelogger.properties')
+}
+
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
     archiveClassifier = 'sources'
