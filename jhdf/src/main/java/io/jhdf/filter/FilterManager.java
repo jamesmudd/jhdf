@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -78,8 +78,19 @@ public enum FilterManager {
 	 * @throws HdfFilterException if a required filter is not available
 	 */
 	public static FilterPipeline getPipeline(FilterPipelineMessage filterPipelineMessage) {
-		List<FilterInfo> filters = filterPipelineMessage.getFilters();
+		return getPipeline(filterPipelineMessage.getFilters());
+	}
 
+	/**
+	 * Builds a new pipeline from a list of {@link FilterInfo}. Used when writing
+	 * chunked datasets.
+	 *
+	 * @param filters the filter specifications in pipeline (encode) order
+	 * @return the new pipeline
+	 * @throws HdfFilterException if a required filter is not available
+	 * @since v0.13.0
+	 */
+	public static FilterPipeline getPipeline(List<FilterInfo> filters) {
 		// Check all the required filters are available
 		if (!filters.stream().allMatch(filter -> ID_TO_FILTER.containsKey(filter.getId()))) {
 			// Figure out the missing filter

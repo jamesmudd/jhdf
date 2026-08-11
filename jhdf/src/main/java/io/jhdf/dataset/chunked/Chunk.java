@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -27,7 +27,7 @@ public interface Chunk {
 	 *
 	 * @return this chunks offset
 	 */
-	int[] getChunkOffset();
+	long[] getChunkOffset();
 
 	/**
 	 * Gets the address of this chunk in the file

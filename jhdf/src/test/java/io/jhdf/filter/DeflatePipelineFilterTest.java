@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -52,5 +52,25 @@ class DeflatePipelineFilterTest {
 	void decodeMalformedThrows()  {
 		DeflatePipelineFilter deflatePipelineFilter = new DeflatePipelineFilter();
 		assertThrows(HdfFilterException.class, () ->  deflatePipelineFilter.decode(new byte[]{1,2,3}, new int[0]));
+	}
+
+	@Test
+	void encodeDecodeRoundTrip() {
+		byte[] input = StringUtils.repeat("TestString", 50).getBytes(StandardCharsets.UTF_8);
+		DeflatePipelineFilter deflatePipelineFilter = new DeflatePipelineFilter();
+
+		// Compression level from the filter data
+		byte[] encoded = deflatePipelineFilter.encode(input, new int[]{4});
+		assertThat(encoded.length < input.length, is(true));
+		assertThat(deflatePipelineFilter.decode(encoded, new int[]{4}), is(input));
+	}
+
+	@Test
+	void encodeWithoutFilterDataUsesDefaultLevel() {
+		byte[] input = StringUtils.repeat("TestString", 50).getBytes(StandardCharsets.UTF_8);
+		DeflatePipelineFilter deflatePipelineFilter = new DeflatePipelineFilter();
+
+		byte[] encoded = deflatePipelineFilter.encode(input, new int[0]);
+		assertThat(deflatePipelineFilter.decode(encoded, new int[0]), is(input));
 	}
 }

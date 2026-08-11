@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -12,14 +12,14 @@ package io.jhdf.dataset.chunked;
 import java.util.Arrays;
 
 /**
- * Class to wrap an int[] to be used as Map keys
+ * Class to wrap a long[] to be used as Map keys
  *
  * @author James Mudd
  */
 public final class ChunkOffset {
-	private final int[] offset;
+	private final long[] offset;
 
-	public ChunkOffset(int[] chunkOffset) {
+	public ChunkOffset(long[] chunkOffset) {
 		this.offset = chunkOffset.clone(); // Defensive copy
 	}
 

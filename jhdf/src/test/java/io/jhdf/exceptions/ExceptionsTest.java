@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -42,6 +42,13 @@ class ExceptionsTest {
 		UnsupportedHdfException ex = new UnsupportedHdfException(TEST_MESSAGE);
 		assertThat(ex.getMessage(), is(TEST_MESSAGE));
 		assertThat(ex.getCause(), is(nullValue()));
+	}
+
+	@Test
+	void testInvalidSliceHdfExceptionWithLongDatasetDimensions() {
+		long largeDimension = (long) Integer.MAX_VALUE + 42;
+		InvalidSliceHdfException ex = new InvalidSliceHdfException(TEST_MESSAGE, new long[]{0}, new int[]{10}, new long[]{largeDimension});
+		assertThat(ex.getMessage(), is(TEST_MESSAGE + "sliceOffset=[0], sliceDimensions=[10], datasetDimensions=[" + largeDimension + "]}"));
 	}
 
 }

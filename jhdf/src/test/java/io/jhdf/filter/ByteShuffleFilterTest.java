@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -56,5 +56,34 @@ class ByteShuffleFilterTest {
 		assertThat(output, is(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, -40, -50, -60, -70}));
 	}
 
+	@Test
+	void testEncodeIsInverseOfDecode() {
+		byte[] input = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+		ByteShuffleFilter byteShuffleFilter = new ByteShuffleFilter();
+
+		byte[] encoded = byteShuffleFilter.encode(input, new int[]{4});
+		assertThat(encoded, is(new byte[]{1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12}));
+		assertThat(byteShuffleFilter.decode(encoded, new int[]{4}), is(input));
+	}
+
+	// When input length is not a multiple of the element size
+	@Test
+	void testEncodeWithMismatchedLength() {
+		byte[] input = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, -40, -50, -60};
+		ByteShuffleFilter byteShuffleFilter = new ByteShuffleFilter();
+
+		byte[] encoded = byteShuffleFilter.encode(input, new int[]{8});
+		// The 4 remainder bytes are copied unshuffled
+		assertThat(encoded, is(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, -40, -50, -60}));
+		assertThat(byteShuffleFilter.decode(encoded, new int[]{8}), is(input));
+	}
+
+	@Test
+	void testEncodeElementSize1IsNoOp() {
+		byte[] input = new byte[]{1, 2, 3};
+		ByteShuffleFilter byteShuffleFilter = new ByteShuffleFilter();
+
+		assertThat(byteShuffleFilter.encode(input, new int[]{1}), is(input));
+	}
 
 }

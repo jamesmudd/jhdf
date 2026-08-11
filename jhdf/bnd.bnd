@@ -1,0 +1,5 @@
+Bundle-SymbolicName: io.jhdf
+Bundle-Name: jhdf
+Bundle-Vendor: James Mudd
+Bundle-DocURL: https://jhdf.io/
+Export-Package: !io.jhdf.examples,!io.jhdf.examples.*,io.jhdf.*

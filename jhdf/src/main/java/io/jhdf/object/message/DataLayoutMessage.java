@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -235,6 +235,12 @@ public abstract class DataLayoutMessage extends Message {
 		private static final int DONT_FILTER_PARTIAL_BOUND_CHUNKS = 0;
 		private static final int SINGLE_INDEX_WITH_FILTER = 1;
 
+		public static final byte SINGLE_CHUNK_INDEX = 1;
+		public static final byte IMPLICIT_INDEX = 2;
+		public static final byte FIXED_ARRAY_INDEX = 3;
+		public static final byte EXTENSIBLE_ARRAY_INDEX = 4;
+		public static final byte B_TREE_V2_INDEX = 5;
+
 		private final long address;
 		private final byte indexingType;
 		private final int[] chunkDimensions;
@@ -252,6 +258,57 @@ public abstract class DataLayoutMessage extends Message {
 		private boolean isFilteredSingleChunk = false;
 		private int sizeOfFilteredSingleChunk;
 		private BitSet filterMaskFilteredSingleChunk;
+
+		/**
+		 * For writing. chunkDimensions must include the trailing element size 'dimension'.
+		 */
+		private ChunkedDataLayoutMessageV4(long address, byte indexingType, int[] chunkDimensions) {
+			super(Message.BASIC_FLAGS);
+			this.address = address;
+			this.indexingType = indexingType;
+			this.chunkDimensions = ArrayUtils.clone(chunkDimensions);
+		}
+
+		/**
+		 * Creates a single chunk (index type 1) layout message for an unfiltered dataset.
+		 *
+		 * @param address the address of the chunk data
+		 * @param chunkDimensions the chunk dimensions with the element size appended
+		 * @return the message
+		 */
+		public static ChunkedDataLayoutMessageV4 createSingleChunk(long address, int[] chunkDimensions) {
+			return new ChunkedDataLayoutMessageV4(address, SINGLE_CHUNK_INDEX, chunkDimensions);
+		}
+
+		/**
+		 * Creates a single chunk (index type 1) layout message for a filtered dataset.
+		 *
+		 * @param address the address of the chunk data
+		 * @param chunkDimensions the chunk dimensions with the element size appended
+		 * @param sizeOfFilteredChunk the size in bytes of the filtered (e.g. compressed) chunk
+		 * @return the message
+		 */
+		public static ChunkedDataLayoutMessageV4 createFilteredSingleChunk(long address, int[] chunkDimensions, int sizeOfFilteredChunk) {
+			ChunkedDataLayoutMessageV4 message = new ChunkedDataLayoutMessageV4(address, SINGLE_CHUNK_INDEX, chunkDimensions);
+			message.isFilteredSingleChunk = true;
+			message.sizeOfFilteredSingleChunk = sizeOfFilteredChunk;
+			message.filterMaskFilteredSingleChunk = new BitSet(32); // All filters applied
+			return message;
+		}
+
+		/**
+		 * Creates a fixed array (index type 3) layout message.
+		 *
+		 * @param address the address of the fixed array header
+		 * @param chunkDimensions the chunk dimensions with the element size appended
+		 * @param pageBits the number of bits needed to store the maximum number of elements in a data block page
+		 * @return the message
+		 */
+		public static ChunkedDataLayoutMessageV4 createFixedArray(long address, int[] chunkDimensions, int pageBits) {
+			ChunkedDataLayoutMessageV4 message = new ChunkedDataLayoutMessageV4(address, FIXED_ARRAY_INDEX, chunkDimensions);
+			message.pageBits = (byte) pageBits;
+			return message;
+		}
 
 		private ChunkedDataLayoutMessageV4(ByteBuffer bb, Superblock sb, BitSet flags) {
 			super(flags);
@@ -373,7 +430,58 @@ public abstract class DataLayoutMessage extends Message {
 
 		@Override
 		public ByteBuffer toBuffer() {
-			return null;
+			final BitSet chunkedFlags = new BitSet(8);
+			chunkedFlags.set(SINGLE_INDEX_WITH_FILTER, isFilteredSingleChunk);
+
+			final int dimSizeBytes = getDimensionSizeEncodedLength();
+
+			final BufferBuilder bufferBuilder = new BufferBuilder()
+				.writeByte(4) // Version
+				.writeByte(2) // Chunked storage
+				.writeBitSet(chunkedFlags, 1)
+				.writeByte(chunkDimensions.length)
+				.writeByte(dimSizeBytes);
+
+			for (int chunkDimension : chunkDimensions) {
+				bufferBuilder.writeUnsignedNumber(chunkDimension, dimSizeBytes);
+			}
+
+			bufferBuilder.writeByte(indexingType);
+
+			switch (indexingType) {
+				case SINGLE_CHUNK_INDEX:
+					if (isFilteredSingleChunk) {
+						bufferBuilder.writeLong(sizeOfFilteredSingleChunk); // Size of lengths
+						bufferBuilder.writeBitSet(filterMaskFilteredSingleChunk, 4);
+					}
+					break;
+
+				case FIXED_ARRAY_INDEX:
+					bufferBuilder.writeByte(pageBits);
+					break;
+
+				default:
+					throw new UnsupportedHdfException("Writing chunk indexing type not supported. type=" + indexingType);
+			}
+
+			return bufferBuilder
+				.writeLong(address) // Size of offsets
+				.build();
+		}
+
+		/**
+		 * The number of bytes used to encode each chunk dimension. Matches the calculation
+		 * in the HDF5 C library (H5D__chunk_set_sizes).
+		 */
+		private int getDimensionSizeEncodedLength() {
+			int maxEncodedBytes = 1;
+			for (int chunkDimension : chunkDimensions) {
+				// floor(log2(dim)) as the position of the highest set bit
+				final int log2 = 31 - Integer.numberOfLeadingZeros(chunkDimension);
+				final int encodedBytes = (log2 + 8) / 8;
+				maxEncodedBytes = Math.max(maxEncodedBytes, encodedBytes);
+			}
+			return maxEncodedBytes;
 		}
 	}
 

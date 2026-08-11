@@ -3,17 +3,20 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
 package io.jhdf.object.message;
 
+import io.jhdf.BufferBuilder;
+import io.jhdf.Constants;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -98,8 +101,58 @@ public class FilterPipelineMessage extends Message {
 
 	}
 
+	private FilterPipelineMessage(List<FilterInfo> filters) {
+		super(BASIC_FLAGS);
+		this.filters = new ArrayList<>(filters);
+	}
+
+	/**
+	 * Creates a filter pipeline message for writing.
+	 *
+	 * @param filters the filters in pipeline (encode) order
+	 * @return the new message
+	 * @since v0.13.0
+	 */
+	public static FilterPipelineMessage create(List<FilterInfo> filters) {
+		return new FilterPipelineMessage(filters);
+	}
+
 	public List<FilterInfo> getFilters() {
 		return filters;
+	}
+
+	@Override
+	public ByteBuffer toBuffer() {
+		final BufferBuilder bufferBuilder = new BufferBuilder()
+			.writeByte(2) // Version
+			.writeByte(filters.size());
+
+		for (FilterInfo filter : filters) {
+			bufferBuilder.writeShort(filter.getId());
+
+			// Filters below 256 are defined by the format so the name is not stored
+			final byte[] nameBytes;
+			if (filter.getId() >= 256) {
+				nameBytes = ArrayUtils.add(filter.getName().getBytes(StandardCharsets.US_ASCII), Constants.NULL);
+				bufferBuilder.writeShort(nameBytes.length);
+			} else {
+				nameBytes = null;
+			}
+
+			bufferBuilder.writeShort(filter.isOptional() ? 1 : 0); // Flags bit 0 = optional
+			final int[] data = filter.getData();
+			bufferBuilder.writeShort(data.length);
+
+			if (nameBytes != null) {
+				bufferBuilder.writeBytes(nameBytes);
+			}
+
+			for (int value : data) {
+				bufferBuilder.writeInt(value);
+			}
+		}
+
+		return bufferBuilder.build();
 	}
 
 	public static class FilterInfo {

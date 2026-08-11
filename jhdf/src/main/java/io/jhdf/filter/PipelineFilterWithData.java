@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -23,6 +23,10 @@ public class PipelineFilterWithData {
 
 	byte[] decode(byte[] data) {
 		return filter.decode(data, filterData);
+	}
+
+	byte[] encode(byte[] data) {
+		return filter.encode(data, filterData);
 	}
 
 	@Override

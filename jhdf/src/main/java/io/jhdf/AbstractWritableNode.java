@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -84,6 +84,16 @@ public abstract class AbstractWritableNode implements WritableNode {
 		}
 		Objects.requireNonNull(data, "Cannot write null attributes");
 		WritableAttributeImpl attribute = new WritableAttributeImpl(name, this, data);
+		return attributes.put(name, attribute);
+	}
+
+	@Override
+	public Attribute putAttribute(String name, Object data, boolean unsigned) {
+		if(StringUtils.isBlank(name)) {
+			throw new IllegalArgumentException("name cannot be null or blank");
+		}
+		Objects.requireNonNull(data, "Cannot write null attributes");
+		WritableAttributeImpl attribute = new WritableAttributeImpl(name, this, data, unsigned);
 		return attributes.put(name, attribute);
 	}
 

@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -28,9 +28,9 @@ public class NonFilteredDatasetChunks extends BTreeDatasetChunkRecord {
 	public NonFilteredDatasetChunks(ByteBuffer buffer, DatasetInfo datasetInfo) {
 		final long address = Utils.readBytesAsUnsignedLong(buffer, 8); // size of offsets
 
-		int[] chunkOffset = new int[datasetInfo.getDatasetDimensions().length];
+		long[] chunkOffset = new long[datasetInfo.getDatasetDimensions().length];
 		for (int i = 0; i < chunkOffset.length; i++) {
-			chunkOffset[i] = Utils.readBytesAsUnsignedInt(buffer, 8) * datasetInfo.getChunkDimensions()[i];
+			chunkOffset[i] = Utils.readBytesAsUnsignedLong(buffer, 8) * datasetInfo.getChunkDimensions()[i];
 		}
 
 		chunk = new ChunkImpl(address, datasetInfo.getChunkSizeInBytes(), chunkOffset);

@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -111,6 +111,32 @@ public class BufferBuilder {
 		try {
 			final byte[] bytes = Arrays.copyOf(bitSet.toByteArray(), lengthBytes); // Ensure empty Bitset are not shortened
 			dataOutputStream.write(bytes);
+			return this;
+		} catch (IOException e) {
+			throw new BufferBuilderException(e);
+		}
+	}
+
+	/**
+	 * Writes an unsigned number as little endian using the given number of bytes.
+	 *
+	 * @param value the value to write
+	 * @param lengthBytes the number of bytes used to store the value
+	 * @return this {@link BufferBuilder}
+	 */
+	public BufferBuilder writeUnsignedNumber(long value, int lengthBytes) {
+		if (lengthBytes < 1 || lengthBytes > 8) {
+			throw new IllegalArgumentException("lengthBytes must be in the range 1-8. lengthBytes=" + lengthBytes);
+		}
+		// Note for lengthBytes == 8 all values are accepted as they are treated as unsigned e.g UNDEFINED_ADDRESS
+		if (lengthBytes < 8 && (value < 0 || (value >>> (8 * lengthBytes)) != 0)) {
+			throw new IllegalArgumentException("Value [" + value + "] does not fit in [" + lengthBytes + "] bytes");
+		}
+		try {
+			// Little endian so least significant byte first
+			for (int i = 0; i < lengthBytes; i++) {
+				dataOutputStream.writeByte((int) (value >>> (8 * i)) & 0xFF);
+			}
 			return this;
 		} catch (IOException e) {
 			throw new BufferBuilderException(e);

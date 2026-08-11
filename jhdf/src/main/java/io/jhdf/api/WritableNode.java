@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -32,6 +32,19 @@ public interface WritableNode extends Node {
 	 * @return The attribute
 	 */
 	Attribute putAttribute(String name, Object data);
+
+	/**
+	 * Adds an attribute to this node, optionally forcing the underlying fixed point
+	 * (integer) data type to be written as unsigned. This only applies when {@code data} is
+	 * a supported fixed point (integer) array/scalar (byte/short/int/long); requesting
+	 * {@code unsigned} for any other data type will result in an exception.
+	 *
+	 * @param name The attributes name
+	 * @param data The attributes data, must be a fixed point (integer) type when {@code unsigned} is {@code true}
+	 * @param unsigned if {@code true} the attribute will be written as an unsigned fixed point type
+	 * @return The attribute
+	 */
+	Attribute putAttribute(String name, Object data, boolean unsigned);
 
 	/**
 	 * Removes an attribute from this node

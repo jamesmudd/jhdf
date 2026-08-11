@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -11,6 +11,7 @@ package io.jhdf.examples;
 
 import io.jhdf.HdfFile;
 import io.jhdf.WritableHdfFile;
+import io.jhdf.api.DatasetCreationOptions;
 import io.jhdf.api.WritableGroup;
 
 import java.nio.file.Paths;
@@ -41,6 +42,19 @@ public class WriteHdf5 {
 					{7, 8}
 				},
 			});
+
+			// Chunked and compressed dataset
+			double[][] bigData = new double[200][100];
+			for (int i = 0; i < bigData.length; i++) {
+				for (int j = 0; j < bigData[i].length; j++) {
+					bigData[i][j] = Math.sqrt(i) * j;
+				}
+			}
+			hdfFile.putDataset("compressed", bigData, DatasetCreationOptions.builder()
+				.chunkDimensions(50, 50)
+				.shuffle()
+				.deflate(6)
+				.build());
 		}
 	}
 }

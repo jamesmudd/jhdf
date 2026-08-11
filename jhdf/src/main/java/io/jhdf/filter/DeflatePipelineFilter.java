@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -16,15 +16,20 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public class DeflatePipelineFilter implements Filter {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeflatePipelineFilter.class);
 
+	public static final int ID = 1;
+
+	private static final int DEFAULT_COMPRESSION_LEVEL = 6;
+
 	@Override
 	public int getId() {
-		return 1;
+		return ID;
 	}
 
 	@Override
@@ -66,6 +71,45 @@ public class DeflatePipelineFilter implements Filter {
 		} finally {
 			// Close the inflater
 			inflater.end();
+		}
+	}
+
+	@Override
+	public byte[] encode(byte[] data, int[] filterData) {
+		// The single optional filter data value is the compression level
+		final int compressionLevel;
+		if (filterData.length > 0 && filterData[0] >= 0 && filterData[0] <= 9) {
+			compressionLevel = filterData[0];
+		} else {
+			compressionLevel = DEFAULT_COMPRESSION_LEVEL;
+		}
+
+		final Deflater deflater = new Deflater(compressionLevel);
+
+		try (final ByteArrayOutputStream baos = new ByteArrayOutputStream(data.length / 3 + 16)) {
+			deflater.setInput(data);
+			deflater.finish();
+			final byte[] buffer = new byte[4096];
+
+			// Do the compression
+			while (!deflater.finished()) {
+				int written = deflater.deflate(buffer);
+				baos.write(buffer, 0, written);
+			}
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Compressed chunk. Uncompressed size = {} bytes, Compressed size = {}",
+					deflater.getBytesRead(),
+					deflater.getBytesWritten());
+			}
+
+			return baos.toByteArray();
+
+		} catch (IOException e) {
+			throw new HdfFilterException("Deflating failed", e);
+		} finally {
+			// Close the deflater
+			deflater.end();
 		}
 	}
 }

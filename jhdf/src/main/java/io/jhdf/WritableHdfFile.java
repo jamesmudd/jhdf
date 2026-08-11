@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -12,6 +12,7 @@ package io.jhdf;
 
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
+import io.jhdf.api.DatasetCreationOptions;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
@@ -109,6 +110,14 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	 {@inheritDoc}
 	 */
 	@Override
+	public WritableDataset putDataset(String name, Object data, DatasetCreationOptions options) {
+		return rootGroup.putDataset(name, data, options);
+	}
+
+	/**
+	 {@inheritDoc}
+	 */
+	@Override
 	public WritableGroup putGroup(String name) {
 		return rootGroup.putGroup(name);
 	}
@@ -199,6 +208,14 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	@Override
 	public Attribute putAttribute(String name, Object data) {
 		return rootGroup.putAttribute(name, data);
+	}
+
+	/**
+	 {@inheritDoc}
+	 */
+	@Override
+	public Attribute putAttribute(String name, Object data, boolean unsigned) {
+		return rootGroup.putAttribute(name, data, unsigned);
 	}
 
 	/**

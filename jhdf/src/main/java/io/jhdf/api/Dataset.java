@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -50,8 +50,17 @@ public interface Dataset extends Node {
 	 * Gets the dimensions of this dataset
 	 *
 	 * @return the dimensions of this dataset
+	 * @throws ArithmeticException if any dimension exceeds {@link Integer#MAX_VALUE}
 	 */
 	int[] getDimensions();
+
+	/**
+	 * Gets the dimensions of this dataset as long values. This supports datasets with dimensions
+	 * exceeding {@link Integer#MAX_VALUE}.
+	 *
+	 * @return the dimensions of this dataset
+	 */
+	long[] getDimensionsAsLong();
 
 	/**
 	 * Checks if this dataset is scalar i.e is a single element with no dimensions.

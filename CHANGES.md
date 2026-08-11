@@ -1,7 +1,24 @@
 # jHDF Change Log
 
-## v0.11.0 - Unreleased
+## v0.13.0 - July 2026
+- Add support for writing chunked datasets with compression. Chunking and filters are requested via the new `DatasetCreationOptions` e.g. `putDataset(name, data, DatasetCreationOptions.builder().chunkDimensions(64, 64).shuffle().deflate(6).build())`. Deflate (gzip) and byte shuffle filters are supported for writing, and custom filters can encode via the new `Filter.encode` method. Chunked datasets are written using the v4 data layout message with single chunk or fixed array indexing. Thanks to @ebremer https://github.com/jamesmudd/jhdf/pull/841
+- Add support for writing unsigned datasets. Thanks to @laeubi https://github.com/jamesmudd/jhdf/pull/845
+- Build and dependency updates
+
+## v0.12.0 - July 2026
+- Add dataset dimension parsing for dimensions larger than `Integer.MAX_VALUE`, adding long-dimension access and slicing support for large datasets. Thanks to @misha-at-genestack https://github.com/jamesmudd/jhdf/pull/825
+- Fix OSGi manifest generation by using the bnd Gradle plugin. Thanks to @laeubi https://github.com/jamesmudd/jhdf/pull/832
+- Fix JitPack builds
+- Build and dependency updates
+
+## v0.11.0 - June 2026
+- Fix chunk coordinate handling in chunked datasets so retrieval from chunk map succeeds. Thanks to @frothga https://github.com/jamesmudd/jhdf/pull/800 https://github.com/jamesmudd/jhdf/issues/727 and https://github.com/jamesmudd/jhdf/issues/760
 - Add support for Java 25
+- Switch from `com.ning:compress-lzf` to replacement `at.yawk.lz4:lz4-java` for LZ4 compression support
+- Enable Gradle dependency locking
+- Fix JitPack configuration for rolling jar releases
+- CI: Skip SonarQube job when SONAR_TOKEN is unavailable
+- Build and dependency updates
 
 ## v0.10.0 - July 2025
 - Drop support for Java 8 and 11. Allows for improved performance, dependency updates, and simplifies the testing matrix. https://github.com/jamesmudd/jhdf/issues/700

@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -14,13 +14,17 @@ import java.util.Arrays;
 public class InvalidSliceHdfException extends HdfException {
 	final long[] sliceOffset;
 	final int[] sliceDimensions;
-	final int[] datasetDimensions;
+	final long[] datasetDimensions;
 
-	public InvalidSliceHdfException(String message, long[] sliceOffset, int[] sliceDimensions, int[] datasetDimensions) {
+	public InvalidSliceHdfException(String message, long[] sliceOffset, int[] sliceDimensions, long[] datasetDimensions) {
 		super(message);
 		this.sliceOffset = sliceOffset;
 		this.sliceDimensions = sliceDimensions;
 		this.datasetDimensions = datasetDimensions;
+	}
+
+	public InvalidSliceHdfException(String message, long[] sliceOffset, int[] sliceDimensions, int[] datasetDimensions) {
+		this(message, sliceOffset, sliceDimensions, Arrays.stream(datasetDimensions).asLongStream().toArray());
 	}
 
 	@Override
