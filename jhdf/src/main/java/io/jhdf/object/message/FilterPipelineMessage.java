@@ -13,7 +13,6 @@ import io.jhdf.BufferBuilder;
 import io.jhdf.Constants;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.UnsupportedHdfException;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -166,7 +165,7 @@ public class FilterPipelineMessage extends Message {
 			this.id = id;
 			this.name = name;
 			this.optional = optional;
-			this.data = ArrayUtils.clone(data);
+			this.data = data == null ? null : data.clone();
 		}
 
 		public int getId() {
@@ -182,7 +181,7 @@ public class FilterPipelineMessage extends Message {
 		}
 
 		public int[] getData() {
-			return ArrayUtils.clone(data);
+			return data == null ? null : data.clone();
 		}
 
 		@Override

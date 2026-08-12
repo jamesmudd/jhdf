@@ -9,12 +9,12 @@
  */
 package io.jhdf.api;
 
+import io.jhdf.Utils;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataSpace;
 
 import java.nio.ByteBuffer;
 
-import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 
 public class WritableAttributeImpl implements Attribute {
 
@@ -85,7 +85,7 @@ public class WritableAttributeImpl implements Attribute {
 		// For scalar datasets the returned type will be the wrapper class because
 		// getData returns Object
 		if (isScalar() && type.isPrimitive()) {
-			return primitiveToWrapper(type);
+			return Utils.primitiveToWrapper(type);
 		}
 		return type;
 	}

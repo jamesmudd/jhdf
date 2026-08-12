@@ -15,7 +15,6 @@ import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.UnsupportedHdfException;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
@@ -193,7 +192,7 @@ public abstract class DataLayoutMessage extends Message {
 			super(flags);
 			this.bTreeAddress = bTreeAddress;
 			this.size = size;
-			this.chunkDimensions = ArrayUtils.clone(chunkDimensions);
+			this.chunkDimensions = chunkDimensions == null ? null : chunkDimensions.clone();
 		}
 
 		private ChunkedDataLayoutMessage(ByteBuffer bb, Superblock sb, BitSet flags) {
@@ -221,7 +220,7 @@ public abstract class DataLayoutMessage extends Message {
 		}
 
 		public int[] getChunkDimensions() {
-			return ArrayUtils.clone(chunkDimensions);
+			return chunkDimensions == null ? null : chunkDimensions.clone();
 		}
 
 		@Override
@@ -407,7 +406,7 @@ public abstract class DataLayoutMessage extends Message {
 		}
 
 		public int[] getChunkDimensions() {
-			return ArrayUtils.clone(chunkDimensions);
+			return chunkDimensions == null ? null : chunkDimensions.clone();
 		}
 
 		public int getSizeOfFilteredSingleChunk() {

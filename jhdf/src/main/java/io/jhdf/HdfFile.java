@@ -27,7 +27,6 @@ import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.storage.HdfInMemoryByteBuffer;
 import io.jhdf.storage.HttpSeekableByteChannel;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -521,7 +520,7 @@ public class HdfFile implements Group, AutoCloseable {
 	public Node getByPath(String path) {
 		// As its the file its ok to have a leading slash but strip it here to be
 		// consistent with other groups
-		path = StringUtils.stripStart(path, Constants.PATH_SEPARATOR);
+		path = Utils.stripLeading(path, Constants.PATH_SEPARATOR);
 		return rootGroup.getByPath(path);
 	}
 
@@ -529,7 +528,7 @@ public class HdfFile implements Group, AutoCloseable {
 	public Dataset getDatasetByPath(String path) {
 		// As its the file its ok to have a leading slash but strip it here to be
 		// consistent with other groups
-		path = StringUtils.stripStart(path, Constants.PATH_SEPARATOR);
+		path = Utils.stripLeading(path, Constants.PATH_SEPARATOR);
 		return rootGroup.getDatasetByPath(path);
 	}
 

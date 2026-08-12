@@ -14,7 +14,6 @@ import io.jhdf.api.Attribute;
 import io.jhdf.api.Group;
 import io.jhdf.api.WritableAttributeImpl;
 import io.jhdf.api.WritableNode;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -79,7 +78,7 @@ public abstract class AbstractWritableNode implements WritableNode {
 
 	@Override
 	public Attribute putAttribute(String name, Object data) {
-		if(StringUtils.isBlank(name)) {
+		if(Utils.isBlank(name)) {
 			throw new IllegalArgumentException("name cannot be null or blank");
 		}
 		Objects.requireNonNull(data, "Cannot write null attributes");

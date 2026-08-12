@@ -9,8 +9,6 @@
  */
 package io.jhdf;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -164,7 +162,7 @@ public final class Utils {
 		buffer.get(bytes);
 		// BigInteger needs big endian so flip the order if needed
 		if (buffer.order() == LITTLE_ENDIAN) {
-			ArrayUtils.reverse(bytes);
+			reverse(bytes);
 		}
 		// Convert to a unsigned long throws if it overflows
 		return new BigInteger(1, bytes).intValueExact();
@@ -225,7 +223,7 @@ public final class Utils {
 		buffer.get(bytes);
 		// BigInteger needs big endian so flip the order if needed
 		if (buffer.order() == LITTLE_ENDIAN) {
-			ArrayUtils.reverse(bytes);
+			reverse(bytes);
 		}
 		// Convert to a unsigned long throws if it overflows
 		return new BigInteger(1, bytes).longValueExact();
@@ -419,7 +417,7 @@ public final class Utils {
 			data = Array.get(data, 0);
 			dims.add(Array.getLength(data));
 		}
-		return ArrayUtils.toPrimitive(dims.toArray(new Integer[0]));
+		return toPrimitive(dims.toArray(new Integer[0]));
 	}
 
 	public static Class<?> getType(Object obj) {
@@ -489,5 +487,176 @@ public final class Utils {
 			chunks *=  chunksInDim;
 		}
 		return chunks;
+	}
+
+	/**
+	 * Concatenates two {@code int} arrays into a single new array.
+	 *
+	 * @param array1 the first array
+	 * @param array2 the second array
+	 * @return a new array containing the elements of {@code array1} followed by {@code array2}
+	 */
+	public static int[] concat(int[] array1, int[] array2) {
+		int[] result = new int[array1.length + array2.length];
+		System.arraycopy(array1, 0, result, 0, array1.length);
+		System.arraycopy(array2, 0, result, array1.length, array2.length);
+		return result;
+	}
+
+	/**
+	 * Reverses the order of the elements in the given byte array, in place.
+	 *
+	 * @param bytes the array to reverse
+	 */
+	public static void reverse(byte[] bytes) {
+		for (int i = 0, j = bytes.length - 1; i < j; i++, j--) {
+			byte tmp = bytes[i];
+			bytes[i] = bytes[j];
+			bytes[j] = tmp;
+		}
+	}
+
+	/**
+	 * Converts the given primitive type to its corresponding wrapper class e.g. {@code int.class}
+	 * to {@code Integer.class}. If the given type is not primitive it is returned unchanged.
+	 *
+	 * @param type the type to convert
+	 * @return the wrapper type corresponding to the given primitive type
+	 */
+	public static Class<?> primitiveToWrapper(Class<?> type) {
+		return java.lang.invoke.MethodType.methodType(type).wrap().returnType();
+	}
+
+	/**
+	 * Removes all leading occurrences of the given separator from the start of the string.
+	 *
+	 * @param str       the string to strip
+	 * @param separator the leading string to remove, may be repeated
+	 * @return the stripped string
+	 */
+	public static String stripLeading(String str, String separator) {
+		int index = 0;
+		while (str.startsWith(separator, index)) {
+			index += separator.length();
+		}
+		return str.substring(index);
+	}
+
+	/**
+	 * Checks if the given string is {@code null}, empty, or contains only whitespace.
+	 *
+	 * @param str the string to check
+	 * @return <code>true</code> if the string is blank, <code>false</code> otherwise
+	 */
+	public static boolean isBlank(String str) {
+		return str == null || str.trim().isEmpty();
+	}
+
+	/**
+	 * Creates a readable {@link String} representation of the given data, supporting
+	 * scalars, primitive arrays, and (possibly nested) object arrays.
+	 *
+	 * @param data the data to convert, may be a scalar, or a primitive or object array
+	 * @return the string representation of the data
+	 */
+	public static String deepToString(Object data) {
+		if (data == null) {
+			return "null";
+		}
+		if (!data.getClass().isArray()) {
+			return String.valueOf(data);
+		}
+		if (data instanceof Object[]) {
+			Object[] array = (Object[]) data;
+			StringBuilder sb = new StringBuilder("[");
+			for (int i = 0; i < array.length; i++) {
+				if (i > 0) {
+					sb.append(", ");
+				}
+				sb.append(deepToString(array[i]));
+			}
+			return sb.append(']').toString();
+		}
+		if (data instanceof int[]) {
+			return Arrays.toString((int[]) data);
+		}
+		if (data instanceof long[]) {
+			return Arrays.toString((long[]) data);
+		}
+		if (data instanceof double[]) {
+			return Arrays.toString((double[]) data);
+		}
+		if (data instanceof float[]) {
+			return Arrays.toString((float[]) data);
+		}
+		if (data instanceof byte[]) {
+			return Arrays.toString((byte[]) data);
+		}
+		if (data instanceof short[]) {
+			return Arrays.toString((short[]) data);
+		}
+		if (data instanceof char[]) {
+			return Arrays.toString((char[]) data);
+		}
+		if (data instanceof boolean[]) {
+			return Arrays.toString((boolean[]) data);
+		}
+		throw new IllegalArgumentException("Unsupported array type: " + data.getClass());
+	}
+
+	public static boolean[] toPrimitive(Boolean[] array) {
+		boolean[] result = new boolean[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = array[i];
+		}
+		return result;
+	}
+
+	public static byte[] toPrimitive(Byte[] array) {
+		byte[] result = new byte[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = array[i];
+		}
+		return result;
+	}
+
+	public static short[] toPrimitive(Short[] array) {
+		short[] result = new short[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = array[i];
+		}
+		return result;
+	}
+
+	public static int[] toPrimitive(Integer[] array) {
+		int[] result = new int[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = array[i];
+		}
+		return result;
+	}
+
+	public static long[] toPrimitive(Long[] array) {
+		long[] result = new long[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = array[i];
+		}
+		return result;
+	}
+
+	public static float[] toPrimitive(Float[] array) {
+		float[] result = new float[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = array[i];
+		}
+		return result;
+	}
+
+	public static double[] toPrimitive(Double[] array) {
+		double[] result = new double[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = array[i];
+		}
+		return result;
 	}
 }

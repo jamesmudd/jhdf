@@ -13,7 +13,6 @@ import io.jhdf.Utils;
 import io.jhdf.dataset.CompoundDatasetReader;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -118,7 +117,7 @@ public class CompoundDataType extends DataType {
 		}
 
 		public int[] getDimensionSize() {
-			return ArrayUtils.clone(dimensionSize);
+			return dimensionSize == null ? null : dimensionSize.clone();
 		}
 
 		public int getOffset() {

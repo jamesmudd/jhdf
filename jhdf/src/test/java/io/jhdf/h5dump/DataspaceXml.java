@@ -11,7 +11,6 @@ package io.jhdf.h5dump;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.List;
 
@@ -36,7 +35,7 @@ public class DataspaceXml {
 	public int[] getDimensions() {
 		if(simpleDataspace == null) {
 			// Its scalar
-			return ArrayUtils.EMPTY_INT_ARRAY;
+			return new int[0];
 		} else {
 			return simpleDataspace.dimensions.stream()
 				.mapToInt(dim -> dim.size)

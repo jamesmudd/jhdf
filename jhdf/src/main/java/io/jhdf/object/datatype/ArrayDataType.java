@@ -9,9 +9,9 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.Utils;
 import io.jhdf.dataset.DatasetReader;
 import io.jhdf.storage.HdfBackingStorage;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -63,12 +63,12 @@ public class ArrayDataType extends DataType {
 	 * @return instance dimensions
 	 */
 	public int[] getArrayTypeDimensions() {
-		return ArrayUtils.clone(arrayTypeDimensions);
+		return arrayTypeDimensions == null ? null : arrayTypeDimensions.clone();
 	}
 
 	@Override
 	public Object fillData(ByteBuffer buffer, int[] dimensions, HdfBackingStorage hdfBackingStorage) {
-		final int[] mergedDimensions = ArrayUtils.addAll(dimensions, arrayTypeDimensions);
+		final int[] mergedDimensions = Utils.concat(dimensions, arrayTypeDimensions);
 		return DatasetReader.readDataset(getBaseType(), buffer, mergedDimensions, hdfBackingStorage);
 	}
 }

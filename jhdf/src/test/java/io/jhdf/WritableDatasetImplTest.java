@@ -12,7 +12,6 @@ package io.jhdf;
 import io.jhdf.api.NodeType;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayout;
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +32,7 @@ class WritableDatasetImplTest {
 		int[][] data = new int[][] {{1,2,3}, {4,5,6}};
 		WritableDatasetImpl writableDataset = new WritableDatasetImpl(data, "ints", null);
 		assertThat(writableDataset.getData()).isEqualTo(new int[][] {{1,2,3}, {4,5,6}});
-		assertThat(writableDataset.getDataFlat()).isEqualTo(ArrayUtils.toObject(new int[] {1,2,3, 4,5,6}));
+		assertThat(writableDataset.getDataFlat()).isEqualTo(TestUtils.toObject(new int[] {1,2,3, 4,5,6}));
 		assertThat(writableDataset.getDimensions()).isEqualTo(new int[]{2,3});
 		assertThat(writableDataset.getMaxSize()).isEqualTo(new long[]{2,3});
 		assertThat(writableDataset.getJavaType()).isEqualTo(int.class);

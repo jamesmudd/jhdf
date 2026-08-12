@@ -14,7 +14,6 @@ import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -414,7 +413,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 			if(primitive) {
 				buffer.put((byte[]) data);
 			} else {
-				buffer.put(ArrayUtils.toPrimitive((Byte[]) data));
+				buffer.put(Utils.toPrimitive((Byte[]) data));
 			}
 			buffer.rewind(); // Need to rewind as there is not a view
 			hdfFileChannel.write(buffer);
@@ -432,7 +431,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 			if(primitive) {
 				buffer.asShortBuffer().put((short[]) data);
 			} else {
-				buffer.asShortBuffer().put(ArrayUtils.toPrimitive((Short[]) data));
+				buffer.asShortBuffer().put(Utils.toPrimitive((Short[]) data));
 			}
 			hdfFileChannel.write(buffer);
 			buffer.clear();
@@ -449,7 +448,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 			if(primitive) {
 				buffer.asIntBuffer().put((int[]) data);
 			} else {
-				buffer.asIntBuffer().put(ArrayUtils.toPrimitive((Integer[]) data));
+				buffer.asIntBuffer().put(Utils.toPrimitive((Integer[]) data));
 			}
 			hdfFileChannel.write(buffer);
 			buffer.clear();
@@ -466,7 +465,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 			if(primitive) {
 				buffer.asLongBuffer().put((long[]) data);
 			} else {
-				buffer.asLongBuffer().put(ArrayUtils.toPrimitive((Long[]) data));
+				buffer.asLongBuffer().put(Utils.toPrimitive((Long[]) data));
 			}
 			hdfFileChannel.write(buffer);
 			buffer.clear();
@@ -483,7 +482,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 			if(primitive) {
 				buffer.put((byte[]) data);
 			} else {
-				buffer.put(ArrayUtils.toPrimitive((Byte[]) data));
+				buffer.put(Utils.toPrimitive((Byte[]) data));
 			}
 		}
 	}
@@ -497,7 +496,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 			if(primitive) {
 				buffer.put((short[]) data);
 			} else {
-				buffer.put(ArrayUtils.toPrimitive((Short[]) data));
+				buffer.put(Utils.toPrimitive((Short[]) data));
 			}
 		}
 	}
@@ -512,7 +511,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 			if(primative) {
 				buffer.put((int[]) data);
 			} else {
-				buffer.put(ArrayUtils.toPrimitive((Integer[]) data));
+				buffer.put(Utils.toPrimitive((Integer[]) data));
 			}
 		}
 	}
@@ -527,7 +526,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 			if(primitive) {
 				buffer.put((long[]) data);
 			} else {
-				buffer.put(ArrayUtils.toPrimitive((Long[]) data));
+				buffer.put(Utils.toPrimitive((Long[]) data));
 			}
 		}
 	}

@@ -9,7 +9,6 @@
  */
 package io.jhdf.dataset.chunked;
 
-import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * Data class for passing dataset information
@@ -24,8 +23,8 @@ public class DatasetInfo {
 
 	public DatasetInfo(int chunkSizeInBytes, long[] datasetDimensions, int[] chunkDimensions) {
 		this.chunkSizeInBytes = chunkSizeInBytes;
-		this.datasetDimensions = ArrayUtils.clone(datasetDimensions);
-		this.chunkDimensions = ArrayUtils.clone(chunkDimensions);
+		this.datasetDimensions = datasetDimensions == null ? null : datasetDimensions.clone();
+		this.chunkDimensions = chunkDimensions == null ? null : chunkDimensions.clone();
 	}
 
 	public int getChunkSizeInBytes() {
@@ -33,10 +32,10 @@ public class DatasetInfo {
 	}
 
 	public long[] getDatasetDimensions() {
-		return ArrayUtils.clone(datasetDimensions);
+		return datasetDimensions == null ? null : datasetDimensions.clone();
 	}
 
 	public int[] getChunkDimensions() {
-		return ArrayUtils.clone(chunkDimensions);
+		return chunkDimensions == null ? null : chunkDimensions.clone();
 	}
 }

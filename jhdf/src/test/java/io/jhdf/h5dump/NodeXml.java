@@ -11,8 +11,6 @@ package io.jhdf.h5dump;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-import static org.apache.commons.lang3.StringUtils.removeStart;
-
 public class NodeXml {
 
 	@JacksonXmlProperty(localName = "OBJ-XID")
@@ -25,7 +23,7 @@ public class NodeXml {
 	String name;
 
 	public long getObjectId() {
-		return Long.parseLong(removeStart(objId, "xid_"));
+		return Long.parseLong(objId.startsWith("xid_") ? objId.substring("xid_".length()) : objId);
 	}
 
 }

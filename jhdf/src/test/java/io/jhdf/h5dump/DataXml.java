@@ -10,7 +10,7 @@
 package io.jhdf.h5dump;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import org.apache.commons.lang3.StringUtils;
+import io.jhdf.Utils;
 
 import java.util.regex.Pattern;
 
@@ -21,7 +21,7 @@ public class DataXml {
 
 	public String[] getData() {
 		return PATTERN.splitAsStream(dataString)
-			.filter(StringUtils::isNotBlank)
+			.filter(s -> !Utils.isBlank(s))
 			.toArray(String[]::new);
 	}
 }

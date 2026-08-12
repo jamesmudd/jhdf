@@ -19,7 +19,6 @@ import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
 import io.jhdf.h5dump.HDF5FileXml;
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
@@ -68,7 +67,7 @@ class DatasetWritingTest {
 				for (Node node : datasets.values()) {
 					Dataset dataset = (Dataset) node;
 					assertThat(dataset.isScalar());
-					assertThat(dataset.getDimensions()).isEqualTo(ArrayUtils.EMPTY_INT_ARRAY);
+					assertThat(dataset.getDimensions()).isEqualTo(new int[0]);
 				}
 
 				// Just check thw whole file is readable

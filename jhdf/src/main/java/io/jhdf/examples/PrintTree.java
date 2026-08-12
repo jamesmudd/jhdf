@@ -12,7 +12,6 @@ package io.jhdf.examples;
 import io.jhdf.HdfFile;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
-import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Paths;
 
@@ -38,7 +37,7 @@ public class PrintTree {
 
 	private static void recursivePrintGroup(Group group, int level) {
 		level++;
-		String indent = StringUtils.repeat("    ", level);
+		String indent = "    ".repeat(level);
 		for (Node node : group) {
 			System.out.println(indent + node.getName()); //NOSONAR - sout in example
 			if (node instanceof Group) {

@@ -20,8 +20,8 @@ import io.jhdf.filter.FilterPipeline;
 import io.jhdf.filter.PipelineFilterWithData;
 import io.jhdf.object.message.FilterPipelineMessage;
 import io.jhdf.storage.HdfBackingStorage;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
+import io.jhdf.exceptions.ConcurrentException;
+import io.jhdf.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
-import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 
 public class AttributeImpl implements Attribute {
 	private static final Logger logger = LoggerFactory.getLogger(AttributeImpl.class);
@@ -105,7 +104,7 @@ public class AttributeImpl implements Attribute {
 		// For scalar datasets the returned type will be the wrapper class because
 		// getData returns Object
 		if (isScalar() && type.isPrimitive()) {
-			return primitiveToWrapper(type);
+			return Utils.primitiveToWrapper(type);
 		}
 		return type;
 	}

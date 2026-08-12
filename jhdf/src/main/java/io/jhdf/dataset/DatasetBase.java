@@ -11,6 +11,7 @@ package io.jhdf.dataset;
 
 import io.jhdf.AbstractNode;
 import io.jhdf.ObjectHeader;
+import io.jhdf.Utils;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
@@ -27,8 +28,6 @@ import io.jhdf.object.message.DataSpaceMessage;
 import io.jhdf.object.message.DataTypeMessage;
 import io.jhdf.object.message.FillValueMessage;
 import io.jhdf.storage.HdfBackingStorage;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +35,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 public abstract class DatasetBase extends AbstractNode implements Dataset {
 	private static final Logger logger = LoggerFactory.getLogger(DatasetBase.class);
@@ -110,7 +108,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		// For scalar datasets the returned type will be the wrapper class because
 		// getData returns Object
 		if (isScalar() && type.isPrimitive()) {
-			return primitiveToWrapper(type);
+			return Utils.primitiveToWrapper(type);
 		}
 		return type;
 	}
@@ -135,15 +133,15 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 			throw new HdfException("Dataset '" + getPath() + "' has dimensions that exceed Integer.MAX_VALUE. Use getData(sliceOffset, sliceDimensions) to read slices instead.", e);
 		}
 
-		final StopWatch stopWatch = StopWatch.createStarted();
+		final long startTimeNanos = System.nanoTime();
 
 		final ByteBuffer bb = getDataBuffer();
 		final DataType type = getDataType();
 
 		final Object data = DatasetReader.readDataset(type, bb, dims, hdfBackingStorage);
-		stopWatch.stop();
+		final long elapsedMillis = NANOSECONDS.toMillis(System.nanoTime() - startTimeNanos);
 
-		logger.info("Finished getting data for [{}] took [{}ms]", getPath(), stopWatch.getTime(MILLISECONDS));
+		logger.info("Finished getting data for [{}] took [{}ms]", getPath(), elapsedMillis);
 		return data;
 	}
 
@@ -152,7 +150,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		logger.info("Getting flat data for [{}]...", getPath());
 
 		if (isEmpty()) {
-			return ArrayUtils.EMPTY_OBJECT_ARRAY;
+			return new Object[0];
 		}
 
 		final int elements;
@@ -162,15 +160,15 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 			throw new HdfException("Dataset '" + getPath() + "' has more than Integer.MAX_VALUE elements. Use getData(sliceOffset, sliceDimensions) to read slices instead.", e);
 		}
 
-		final StopWatch stopWatch = StopWatch.createStarted();
+		final long startTimeNanos = System.nanoTime();
 
 		final ByteBuffer bb = getDataBuffer();
 		final DataType type = getDataType();
 
 		final Object data = DatasetReader.readDataset(type, bb, elements, hdfBackingStorage);
-		stopWatch.stop();
+		final long elapsedMillis = NANOSECONDS.toMillis(System.nanoTime() - startTimeNanos);
 
-		logger.info("Finished getting flat data for [{}] took [{}ms]", getPath(), stopWatch.getTime(MILLISECONDS));
+		logger.info("Finished getting flat data for [{}] took [{}ms]", getPath(), elapsedMillis);
 		return data;
 	}
 

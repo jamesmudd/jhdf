@@ -15,7 +15,7 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataTypeMessage;
 import io.jhdf.storage.HdfBackingStorage;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
+import io.jhdf.exceptions.ConcurrentException;
 
 public class CommittedDatatype extends AbstractNode {
 
