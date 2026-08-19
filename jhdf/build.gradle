@@ -90,6 +90,10 @@ test {
         events "passed", "skipped", "failed"
     }
 
+    // Opt in to tests that write multi gigabyte files, which are too slow and too large for a normal run.
+    // Forwarded from the Gradle JVM because the tests run forked: ./gradlew test -Djhdf.test.largeWrite=true
+    systemProperty 'jhdf.test.largeWrite', System.getProperty('jhdf.test.largeWrite', 'false')
+
 minHeapSize = "128m" // initial heap size
 maxHeapSize = "8192m" // maximum heap size
 //jvmArgs '-XX:MaxPermSize=5gb' // mem argument for the test JVM

@@ -12,6 +12,7 @@ package io.jhdf;
 
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
+import io.jhdf.api.ChunkProvider;
 import io.jhdf.api.DatasetCreationOptions;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
@@ -112,6 +113,15 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	@Override
 	public WritableDataset putDataset(String name, Object data, DatasetCreationOptions options) {
 		return rootGroup.putDataset(name, data, options);
+	}
+
+	/**
+	 {@inheritDoc}
+	 */
+	@Override
+	public WritableDataset putDataset(String name, Class<?> javaType, int[] dimensions,
+									  DatasetCreationOptions options, ChunkProvider chunkProvider) {
+		return rootGroup.putDataset(name, javaType, dimensions, options, chunkProvider);
 	}
 
 	/**

@@ -11,6 +11,7 @@
 package io.jhdf;
 
 import io.jhdf.api.Attribute;
+import io.jhdf.api.ChunkProvider;
 import io.jhdf.api.DatasetCreationOptions;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
@@ -51,6 +52,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.stripLeadingIndex;
@@ -61,6 +63,8 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 	private static final Logger logger = LoggerFactory.getLogger(WritableDatasetImpl.class);
 
 	private final Object data;
+	/** Supplies chunks on demand instead of holding the whole dataset, null when data is held in memory */
+	private final ChunkProvider chunkProvider;
 	private final DataType dataType;
 
 	private final DataSpace dataSpace;
@@ -79,6 +83,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 	public WritableDatasetImpl(Object data, String name, Group parent, DatasetCreationOptions options) {
 		super(parent, name);
 		this.data = data;
+		this.chunkProvider = null;
 		if (options == null) {
 			options = DatasetCreationOptions.DEFAULT;
 		}
@@ -86,6 +91,45 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 		this.dataSpace = DataSpace.fromObject(data);
 		this.chunkDimensions = resolveChunkDimensions(options);
 		this.requestedFilters = chunkDimensions != null ? options.getFilters() : Collections.emptyList();
+	}
+
+	/**
+	 * Creates a chunked dataset whose data is supplied a chunk at a time, so it is never held in memory as a whole.
+	 *
+	 * @param javaType the dataset's element type e.g. {@code double.class}
+	 * @param dimensions the dataset's dimensions
+	 * @param name the dataset name
+	 * @param parent the parent group
+	 * @param options must specify chunk dimensions
+	 * @param chunkProvider supplies each chunk when the file is written
+	 */
+	public WritableDatasetImpl(Class<?> javaType, int[] dimensions, String name, Group parent,
+							   DatasetCreationOptions options, ChunkProvider chunkProvider) {
+		super(parent, name);
+		this.data = null;
+		this.chunkProvider = Objects.requireNonNull(chunkProvider, "chunkProvider cannot be null");
+		Objects.requireNonNull(javaType, "javaType cannot be null");
+		if (dimensions == null || dimensions.length == 0) {
+			throw new HdfWritingException("Dimensions must be provided for a chunk provider dataset");
+		}
+		for (int dimension : dimensions) {
+			if (dimension < 1) {
+				throw new HdfWritingException("Dimensions " + Arrays.toString(dimensions) + " must all be positive");
+			}
+		}
+		if (options == null || !options.isChunked()) {
+			throw new HdfWritingException("Chunk dimensions must be specified to write a dataset from a chunk provider");
+		}
+		// A single element of the requested type and rank is enough to derive the data type and a dataspace of the
+		// right rank, without allocating anything proportional to the dataset. It must not be zero length in any
+		// dimension because the type is found by walking into the array.
+		final int[] oneOfEach = new int[dimensions.length];
+		Arrays.fill(oneOfEach, 1);
+		final Object prototype = Array.newInstance(javaType, oneOfEach);
+		this.dataType = DataType.fromObject(prototype, options.isUnsigned());
+		this.dataSpace = DataSpace.modifyDimensions(DataSpace.fromObject(prototype), dimensions);
+		this.chunkDimensions = resolveChunkDimensions(options);
+		this.requestedFilters = options.getFilters();
 	}
 
 	private int[] resolveChunkDimensions(DatasetCreationOptions options) {
@@ -126,10 +170,12 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 				+ Arrays.toString(resolvedChunkDimensions), e);
 		}
 
-		// Writing chunks encodes the full dataset into a single buffer first
-		if (dataSpace.getTotalLength() * dataType.getSize() > Integer.MAX_VALUE) {
+		// Slicing chunks out of memory encodes the full dataset into a single buffer first. A chunk provider never
+		// does that, so the limit is per chunk (checked above) rather than per dataset.
+		if (chunkProvider == null && dataSpace.getTotalLength() * dataType.getSize() > Integer.MAX_VALUE) {
 			throw new HdfWritingException("Dataset is too large to write chunked. Maximum is ["
-				+ Integer.MAX_VALUE + "] bytes");
+				+ Integer.MAX_VALUE + "] bytes, supply the data with a "
+				+ ChunkProvider.class.getSimpleName() + " to write a larger dataset");
 		}
 
 		return resolvedChunkDimensions;
@@ -182,7 +228,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 
 	@Override
 	public boolean isEmpty() {
-		return data == null;
+		return data == null && chunkProvider == null;
 	}
 
 	@Override
@@ -214,11 +260,13 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 
 	@Override
 	public Object getData() {
+		requireDataInMemory();
 		return data;
 	}
 
 	@Override
 	public Object getDataFlat() {
+		requireDataInMemory();
 		return flatten(data);
 	}
 
@@ -439,6 +487,33 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 			chunkSizeInBytes);
 	}
 
+	/**
+	 * A {@link ChunkSource} that asks the {@link ChunkProvider} for each chunk as it is written.
+	 */
+	private ChunkSource providerChunkSource(int chunkSizeInBytes) {
+		return chunkOffset -> {
+			final Object chunkData = chunkProvider.getChunk(chunkOffset);
+			if (chunkData == null) {
+				throw new HdfWritingException("No data supplied for the chunk at offset "
+					+ Arrays.toString(chunkOffset) + " of dataset [" + getPath() + "]");
+			}
+			final byte[] chunkBytes = dataType.encodeData(chunkData).array();
+			if (chunkBytes.length != chunkSizeInBytes) {
+				throw new HdfWritingException("The chunk at offset " + Arrays.toString(chunkOffset) + " of dataset ["
+					+ getPath() + "] encoded to [" + chunkBytes.length + "] bytes, expected [" + chunkSizeInBytes
+					+ "] bytes for chunk dimensions " + Arrays.toString(chunkDimensions));
+			}
+			return chunkBytes;
+		};
+	}
+
+	private void requireDataInMemory() {
+		if (chunkProvider != null) {
+			throw new HdfWritingException("Dataset [" + getPath() + "] is written from a "
+				+ ChunkProvider.class.getSimpleName() + " so its data is not held in memory");
+		}
+	}
+
 	private static final class ChunkedDataResult {
 		private final DataLayoutMessage dataLayoutMessage;
 		private final long endPosition;
@@ -458,7 +533,9 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 		final int totalChunks = getTotalChunks();
 		final boolean filtered = !filterInfos.isEmpty();
 
-		final ChunkSource chunkSource = inMemoryChunkSource(datasetDimensions, elementSize, chunkSizeInBytes);
+		final ChunkSource chunkSource = chunkProvider == null
+			? inMemoryChunkSource(datasetDimensions, elementSize, chunkSizeInBytes)
+			: providerChunkSource(chunkSizeInBytes);
 
 		final List<Chunk> chunks = new ArrayList<>(totalChunks);
 		long address = dataAddress;
