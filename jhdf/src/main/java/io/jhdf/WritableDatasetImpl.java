@@ -412,6 +412,33 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 		return Math.max(10, bitsNeeded);
 	}
 
+	/**
+	 * Supplies the raw, unfiltered, fully padded bytes of a single chunk.
+	 * <p>
+	 * Chunks are written to the file one at a time already; the only thing forcing the whole dataset into memory
+	 * is where those bytes come from. Naming that dependency lets a chunk be produced on demand instead of
+	 * sliced out of a buffer holding everything.
+	 *
+	 * @see #inMemoryChunkSource(int[], int, int)
+	 */
+	@FunctionalInterface
+	interface ChunkSource {
+		/**
+		 * @param chunkOffset the offset of the chunk within the dataset
+		 * @return exactly {@code chunkSizeInBytes} bytes, zero padded where the chunk overhangs the dataset
+		 */
+		byte[] chunkBytes(long[] chunkOffset);
+	}
+
+	/**
+	 * A {@link ChunkSource} that slices chunks out of the whole dataset encoded in memory.
+	 */
+	private ChunkSource inMemoryChunkSource(int[] datasetDimensions, int elementSize, int chunkSizeInBytes) {
+		final byte[] flatData = dataType.encodeData(data).array();
+		return chunkOffset -> extractChunk(flatData, datasetDimensions, chunkDimensions, chunkOffset, elementSize,
+			chunkSizeInBytes);
+	}
+
 	private static final class ChunkedDataResult {
 		private final DataLayoutMessage dataLayoutMessage;
 		private final long endPosition;
@@ -431,15 +458,14 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 		final int totalChunks = getTotalChunks();
 		final boolean filtered = !filterInfos.isEmpty();
 
-		// Encode the full dataset into a flat row major buffer then slice it into chunks
-		final byte[] flatData = dataType.encodeData(data).array();
+		final ChunkSource chunkSource = inMemoryChunkSource(datasetDimensions, elementSize, chunkSizeInBytes);
 
 		final List<Chunk> chunks = new ArrayList<>(totalChunks);
 		long address = dataAddress;
 		for (int chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
 			final long[] chunkOffset = Utils.chunkIndexToChunkOffset((long) chunkIndex, chunkDimensions, datasetDimensions);
 
-			byte[] chunkBytes = extractChunk(flatData, datasetDimensions, chunkDimensions, chunkOffset, elementSize, chunkSizeInBytes);
+			byte[] chunkBytes = chunkSource.chunkBytes(chunkOffset);
 			chunkBytes = applyFilters(chunkBytes, filterInfos);
 
 			writeFully(hdfFileChannel, ByteBuffer.wrap(chunkBytes), address);
