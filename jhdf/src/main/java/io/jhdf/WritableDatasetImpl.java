@@ -15,6 +15,7 @@ import io.jhdf.api.ChunkProvider;
 import io.jhdf.api.DatasetCreationOptions;
 import io.jhdf.api.Group;
 import io.jhdf.api.NodeType;
+import io.jhdf.api.StreamingDataset;
 import io.jhdf.api.WritableDataset;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.indexing.ChunkImpl;
@@ -58,13 +59,15 @@ import static io.jhdf.Utils.flatten;
 import static io.jhdf.Utils.stripLeadingIndex;
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 
-public class WritableDatasetImpl extends AbstractWritableNode implements WritableDataset {
+public class WritableDatasetImpl extends AbstractWritableNode implements StreamingDataset {
 
 	private static final Logger logger = LoggerFactory.getLogger(WritableDatasetImpl.class);
 
 	private final Object data;
 	/** Supplies chunks on demand instead of holding the whole dataset, null when data is held in memory */
 	private final ChunkProvider chunkProvider;
+	/** Set for a dataset streamed a chunk at a time; its data and index are written before the object header is */
+	private StreamingState streamingState;
 	private final DataType dataType;
 
 	private final DataSpace dataSpace;
@@ -105,9 +108,19 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 	 */
 	public WritableDatasetImpl(Class<?> javaType, int[] dimensions, String name, Group parent,
 							   DatasetCreationOptions options, ChunkProvider chunkProvider) {
+		this(javaType, dimensions, name, parent, options, Objects.requireNonNull(chunkProvider,
+			"chunkProvider cannot be null"), false);
+	}
+
+	/**
+	 * Creates a chunked dataset with no data, either pulled from a {@link ChunkProvider} or pushed a chunk at a
+	 * time through {@link StreamingDataset#writeChunk(long[], Object)}.
+	 */
+	WritableDatasetImpl(Class<?> javaType, int[] dimensions, String name, Group parent,
+						DatasetCreationOptions options, ChunkProvider chunkProvider, boolean streaming) {
 		super(parent, name);
 		this.data = null;
-		this.chunkProvider = Objects.requireNonNull(chunkProvider, "chunkProvider cannot be null");
+		this.chunkProvider = chunkProvider;
 		Objects.requireNonNull(javaType, "javaType cannot be null");
 		if (dimensions == null || dimensions.length == 0) {
 			throw new HdfWritingException("Dimensions must be provided for a chunk provider dataset");
@@ -170,12 +183,14 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 				+ Arrays.toString(resolvedChunkDimensions), e);
 		}
 
-		// Slicing chunks out of memory encodes the full dataset into a single buffer first. A chunk provider never
-		// does that, so the limit is per chunk (checked above) rather than per dataset.
-		if (chunkProvider == null && dataSpace.getTotalLength() * dataType.getSize() > Integer.MAX_VALUE) {
+		// Slicing chunks out of memory encodes the full dataset into a single buffer first, so it is bounded by
+		// what a byte[] can hold. Supplying chunks one at a time never does that, whether they are pulled from a
+		// ChunkProvider or pushed through a StreamingDataset, so there the limit is per chunk (checked above).
+		if (data != null && dataSpace.getTotalLength() * dataType.getSize() > Integer.MAX_VALUE) {
 			throw new HdfWritingException("Dataset is too large to write chunked. Maximum is ["
-				+ Integer.MAX_VALUE + "] bytes, supply the data with a "
-				+ ChunkProvider.class.getSimpleName() + " to write a larger dataset");
+				+ Integer.MAX_VALUE + "] bytes, supply the data a chunk at a time with a "
+				+ ChunkProvider.class.getSimpleName() + " or a " + StreamingDataset.class.getSimpleName()
+				+ " to write a larger dataset");
 		}
 
 		return resolvedChunkDimensions;
@@ -228,7 +243,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 
 	@Override
 	public boolean isEmpty() {
-		return data == null && chunkProvider == null;
+		return data == null && chunkProvider == null && streamingState == null;
 	}
 
 	@Override
@@ -385,7 +400,15 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 
 		final DataLayoutMessage dataLayoutMessage;
 		final long endPosition;
-		if (isChunked()) {
+		if (streamingState != null) {
+			if (!streamingState.closed) {
+				throw new HdfWritingException("Dataset [" + getPath() + "] was still streaming when the file was"
+					+ " closed. Close the dataset once every chunk has been written.");
+			}
+			// The chunks and the index were written as they arrived, so only the object header is left
+			dataLayoutMessage = streamingState.dataLayoutMessage;
+			endPosition = dataAddress;
+		} else if (isChunked()) {
 			final ChunkedDataResult result = writeChunkedData(hdfFileChannel, dataAddress, filterInfos);
 			dataLayoutMessage = result.dataLayoutMessage;
 			endPosition = result.endPosition;
@@ -512,6 +535,135 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Writabl
 			throw new HdfWritingException("Dataset [" + getPath() + "] is written from a "
 				+ ChunkProvider.class.getSimpleName() + " so its data is not held in memory");
 		}
+		if (streamingState != null) {
+			throw new HdfWritingException("Dataset [" + getPath() + "] is streamed a chunk at a time so its data is"
+				+ " not held in memory");
+		}
+	}
+
+	/**
+	 * Everything a dataset needs while its chunks are arriving: where to put them, what has arrived, and the layout
+	 * message the object header will need once it is all in.
+	 */
+	private final class StreamingState {
+		private final HdfFileChannel hdfFileChannel;
+		private final FileSpace fileSpace;
+		private final List<FilterInfo> filterInfos;
+		private final int chunkSizeInBytes;
+		private final int totalChunks;
+		/** Indexed by chunk index rather than appended to, so chunks may arrive in any order */
+		private final Chunk[] chunks;
+		private final long firstAddress;
+		private DataLayoutMessage dataLayoutMessage;
+		private boolean closed;
+
+		private StreamingState(HdfFileChannel hdfFileChannel, FileSpace fileSpace) {
+			this.hdfFileChannel = hdfFileChannel;
+			this.fileSpace = fileSpace;
+			this.filterInfos = resolveFilterInfos();
+			this.chunkSizeInBytes = Math.toIntExact(getChunkSizeInBytes(chunkDimensions));
+			this.totalChunks = getTotalChunks();
+			this.chunks = new Chunk[totalChunks];
+			this.firstAddress = fileSpace.nextAddress();
+		}
+	}
+
+	/**
+	 * Starts streaming, so chunks can be written before the file's tree exists.
+	 */
+	void startStreaming(HdfFileChannel hdfFileChannel, FileSpace fileSpace) {
+		if (streamingState != null) {
+			throw new HdfWritingException("Dataset [" + getPath() + "] is already streaming");
+		}
+		this.streamingState = new StreamingState(hdfFileChannel, fileSpace);
+	}
+
+	@Override
+	public void writeChunk(long[] chunkOffset, Object chunkData) {
+		final StreamingState state = requireStreaming();
+		if (state.closed) {
+			throw new HdfWritingException("Dataset [" + getPath() + "] is closed so cannot take more chunks");
+		}
+		Objects.requireNonNull(chunkData, "chunk data cannot be null");
+		final int chunkIndex = chunkIndexOf(chunkOffset);
+		if (state.chunks[chunkIndex] != null) {
+			throw new HdfWritingException("The chunk at offset " + Arrays.toString(chunkOffset) + " of dataset ["
+				+ getPath() + "] has already been written");
+		}
+
+		byte[] chunkBytes = dataType.encodeData(chunkData).array();
+		if (chunkBytes.length != state.chunkSizeInBytes) {
+			throw new HdfWritingException("The chunk at offset " + Arrays.toString(chunkOffset) + " of dataset ["
+				+ getPath() + "] encoded to [" + chunkBytes.length + "] bytes, expected [" + state.chunkSizeInBytes
+				+ "] bytes for chunk dimensions " + Arrays.toString(chunkDimensions));
+		}
+		chunkBytes = applyFilters(chunkBytes, state.filterInfos);
+
+		final long address = state.fileSpace.reserve(chunkBytes.length);
+		writeFully(state.hdfFileChannel, ByteBuffer.wrap(chunkBytes), address);
+		state.chunks[chunkIndex] = new ChunkImpl(address, chunkBytes.length, chunkOffset.clone());
+	}
+
+	@Override
+	public void close() {
+		final StreamingState state = requireStreaming();
+		if (state.closed) {
+			return;
+		}
+
+		for (int chunkIndex = 0; chunkIndex < state.totalChunks; chunkIndex++) {
+			if (state.chunks[chunkIndex] == null) {
+				throw new HdfWritingException("No data was written for the chunk at offset "
+					+ Arrays.toString(Utils.chunkIndexToChunkOffset((long) chunkIndex, chunkDimensions, getDimensions()))
+					+ " of dataset [" + getPath() + "]");
+			}
+		}
+
+		final boolean filtered = !state.filterInfos.isEmpty();
+		if (state.totalChunks == 1) {
+			final Chunk chunk = state.chunks[0];
+			state.dataLayoutMessage = createChunkedDataLayoutMessage(chunk.getAddress(), chunk.getSize(), filtered);
+		} else {
+			final long fixedArrayAddress = state.fileSpace.nextAddress();
+			final ByteBuffer fixedArrayBuffer = FixedArrayIndexWriter.createFixedArray(Arrays.asList(state.chunks),
+				fixedArrayAddress, state.chunkSizeInBytes, filtered, calculatePageBits(state.totalChunks));
+			state.fileSpace.reserve(fixedArrayBuffer.limit());
+			writeFully(state.hdfFileChannel, fixedArrayBuffer, fixedArrayAddress);
+			state.dataLayoutMessage = createChunkedDataLayoutMessage(fixedArrayAddress, 0, filtered);
+		}
+
+		this.storageInBytes = state.fileSpace.nextAddress() - state.firstAddress;
+		state.closed = true;
+		logger.info("Finished streaming dataset [{}]. Chunks [{}], storage size [{}] bytes",
+			getPath(), state.totalChunks, storageInBytes);
+	}
+
+	private StreamingState requireStreaming() {
+		if (streamingState == null) {
+			throw new HdfWritingException("Dataset [" + getPath() + "] is not streamed a chunk at a time");
+		}
+		return streamingState;
+	}
+
+	private int chunkIndexOf(long[] chunkOffset) {
+		final int[] datasetDimensions = getDimensions();
+		if (chunkOffset.length != datasetDimensions.length) {
+			throw new HdfWritingException("Chunk offset " + Arrays.toString(chunkOffset) + " does not match the "
+				+ datasetDimensions.length + " dimensions of dataset [" + getPath() + "]");
+		}
+		int chunkIndex = 0;
+		for (int dimension = 0; dimension < datasetDimensions.length; dimension++) {
+			final long offset = chunkOffset[dimension];
+			if (offset < 0 || offset >= datasetDimensions[dimension] || offset % chunkDimensions[dimension] != 0) {
+				throw new HdfWritingException("Chunk offset " + Arrays.toString(chunkOffset) + " is not the start of"
+					+ " a chunk of dataset [" + getPath() + "] with chunk dimensions "
+					+ Arrays.toString(chunkDimensions));
+			}
+			final int chunksInDimension =
+				(datasetDimensions[dimension] + chunkDimensions[dimension] - 1) / chunkDimensions[dimension];
+			chunkIndex = chunkIndex * chunksInDimension + Math.toIntExact(offset / chunkDimensions[dimension]);
+		}
+		return chunkIndex;
 	}
 
 	private static final class ChunkedDataResult {

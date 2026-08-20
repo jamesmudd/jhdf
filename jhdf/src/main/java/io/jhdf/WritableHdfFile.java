@@ -17,6 +17,7 @@ import io.jhdf.api.DatasetCreationOptions;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
+import io.jhdf.api.StreamingDataset;
 import io.jhdf.api.WritableGroup;
 import io.jhdf.api.WritableDataset;
 import io.jhdf.exceptions.HdfWritingException;
@@ -53,6 +54,20 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	 * tree is written, so a file without one is laid out exactly as it always was.
 	 */
 	private long nextFreeAddress = ROOT_GROUP_ADDRESS;
+
+	private final FileSpace fileSpace = new FileSpace() {
+		@Override
+		public long nextAddress() {
+			return nextFreeAddress;
+		}
+
+		@Override
+		public long reserve(long bytes) {
+			final long address = nextFreeAddress;
+			nextFreeAddress += bytes;
+			return address;
+		}
+	};
 
 	WritableHdfFile(Path path) {
 		logger.warn("Writing files is in alpha. Check files carefully!");
@@ -129,6 +144,30 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	public WritableDataset putDataset(String name, Class<?> javaType, int[] dimensions,
 									  DatasetCreationOptions options, ChunkProvider chunkProvider) {
 		return rootGroup.putDataset(name, javaType, dimensions, options, chunkProvider);
+	}
+
+	/**
+	 * Creates a chunked dataset written a chunk at a time, as the data becomes available, rather than from a
+	 * dataset already in memory. Chunks are written to the file as they are handed over, so the memory needed is
+	 * that of a single chunk.
+	 * <p>
+	 * The returned dataset must be closed, with every chunk written, before this file is closed.
+	 *
+	 * @param name the dataset name, in the root group
+	 * @param javaType the dataset's element type e.g. {@code double.class}
+	 * @param dimensions the dataset's dimensions
+	 * @param options options controlling how the dataset is stored, must specify chunk dimensions
+	 * @return the dataset to write chunks to
+	 * @since v0.14.0
+	 */
+	public StreamingDataset newStreamingDataset(String name, Class<?> javaType, int[] dimensions,
+												DatasetCreationOptions options) {
+		final WritableDatasetImpl dataset =
+			new WritableDatasetImpl(javaType, dimensions, name, rootGroup, options, null, true);
+		dataset.startStreaming(hdfFileChannel, fileSpace);
+		rootGroup.putDataset(name, dataset);
+		logger.info("Added streaming dataset [{}]", name);
+		return dataset;
 	}
 
 	/**
