@@ -81,7 +81,9 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		this.superblock = new Superblock.SuperblockV2V3();
 		this.hdfFileChannel = new HdfFileChannel(this.fileChannel, this.superblock);
 
-		this.rootGroup = new WritableGroupImpl(null, "/");
+		final WritableGroupImpl root = new WritableGroupImpl(null, "/");
+		root.setStreamingContext(this.hdfFileChannel, this.fileSpace);
+		this.rootGroup = root;
 		this.rootGroup.putAttribute("_jHDF", getJHdfInfo());
 	}
 
@@ -160,14 +162,10 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	 * @return the dataset to write chunks to
 	 * @since v0.14.0
 	 */
+	@Override
 	public StreamingDataset newStreamingDataset(String name, Class<?> javaType, int[] dimensions,
 												DatasetCreationOptions options) {
-		final WritableDatasetImpl dataset =
-			new WritableDatasetImpl(javaType, dimensions, name, rootGroup, options, null, true);
-		dataset.startStreaming(hdfFileChannel, fileSpace);
-		rootGroup.putDataset(name, dataset);
-		logger.info("Added streaming dataset [{}]", name);
-		return dataset;
+		return rootGroup.newStreamingDataset(name, javaType, dimensions, options);
 	}
 
 	/**

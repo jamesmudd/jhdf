@@ -15,6 +15,7 @@ import io.jhdf.WritableHdfFile;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.DatasetCreationOptions;
 import io.jhdf.api.StreamingDataset;
+import io.jhdf.api.WritableGroup;
 import io.jhdf.exceptions.HdfWritingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -225,6 +226,42 @@ class StreamingDatasetWritingTest {
 			}
 			dataset.close();
 		}
+	}
+
+	/** VCell writes its streamed datasets two groups deep, which is the normal case, not the root. */
+	@Test
+	void streamsIntoANestedGroup() throws Exception {
+		double[][][] data = doubleData3d(6, 8, 10);
+		int[] chunkDimensions = {2, 4, 5};
+		Path file = Files.createTempFile("nested", ".hdf5");
+
+		try (WritableHdfFile writableHdfFile = HdfFile.write(file)) {
+			WritableGroup variable = writableHdfFile.putGroup("SimID_1").putGroup("Ran_cyt");
+			try (StreamingDataset dataset = variable.newStreamingDataset("DataValues (XYT)", double.class,
+				new int[]{6, 8, 10}, DatasetCreationOptions.builder().chunkDimensions(chunkDimensions).build())) {
+				for (int i = 0; i < 6; i += 2) {
+					for (int j = 0; j < 8; j += 4) {
+						for (int k = 0; k < 10; k += 5) {
+							long[] offset = {i, j, k};
+							dataset.writeChunk(offset, chunkOf(data, offset, chunkDimensions));
+						}
+					}
+				}
+			}
+		}
+
+		try (HdfFile hdfFile = new HdfFile(file)) {
+			assertThat(hdfFile.getDatasetByPath("SimID_1/Ran_cyt/DataValues (XYT)").getData(), is(data));
+		}
+	}
+
+	@Test
+	void aGroupOutsideAFileCannotStream() {
+		WritableGroup detached = new io.jhdf.WritableGroupImpl(null, "detached");
+		HdfWritingException exception = assertThrows(HdfWritingException.class, () ->
+			detached.newStreamingDataset("values", double.class, new int[]{2, 2},
+				DatasetCreationOptions.builder().chunkDimensions(2, 2).build()));
+		assertThat(exception.getMessage(), containsString("nowhere to stream chunks to"));
 	}
 
 	/**

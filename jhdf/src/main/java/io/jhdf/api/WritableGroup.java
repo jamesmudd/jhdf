@@ -52,6 +52,23 @@ public interface WritableGroup extends Group, WritableNode {
 	WritableDataset putDataset(String name, Class<?> javaType, int[] dimensions, DatasetCreationOptions options,
 							   ChunkProvider chunkProvider);
 
+	/**
+	 Create a chunked dataset in this group written a chunk at a time, as the data becomes available, rather than
+	 from a dataset already in memory. Chunks are written to the file as they are handed over, so the memory needed
+	 is that of a single chunk.
+	 <p>
+	 The returned dataset must be closed, with every chunk written, before the file is closed.
+
+	 * @param name The dataset name within this group
+	 * @param javaType The dataset's element type e.g. {@code double.class}
+	 * @param dimensions The dataset's dimensions
+	 * @param options Options controlling how the dataset is stored, must specify chunk dimensions
+	 * @return the dataset to write chunks to
+	 * @since v0.14.0
+	 */
+	StreamingDataset newStreamingDataset(String name, Class<?> javaType, int[] dimensions,
+										 DatasetCreationOptions options);
+
 	WritableGroup putGroup(String name);
 
 }
