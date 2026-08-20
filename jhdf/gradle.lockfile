@@ -4,10 +4,10 @@
 # To regenerate this file, run: ./gradlew :dependencies --write-locks
 at.yawk.lz4:lz4-java:1.11.2=compileClasspath,jmhCompileClasspath,jmhRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-annotations:2.22=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
-com.fasterxml.jackson.core:jackson-core:2.22.1=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
-com.fasterxml.jackson.core:jackson-databind:2.22.1=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
-com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.22.1=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
-com.fasterxml.jackson:jackson-bom:2.22.1=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.fasterxml.jackson.core:jackson-core:2.22.2=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.fasterxml.jackson.core:jackson-databind:2.22.2=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.22.2=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.fasterxml.jackson:jackson-bom:2.22.2=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
 com.fasterxml.woodstox:woodstox-core:7.2.0=jmhRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
 com.github.spotbugs:spotbugs-annotations:4.10.3=spotbugs
 com.github.spotbugs:spotbugs:4.10.3=spotbugs
