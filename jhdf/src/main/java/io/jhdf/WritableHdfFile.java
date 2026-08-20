@@ -48,6 +48,12 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	private final HdfFileChannel hdfFileChannel;
 	private final WritableGroup rootGroup;
 
+	/**
+	 * The next address in the file not yet spoken for. Nothing moves it until a dataset streams data before the
+	 * tree is written, so a file without one is laid out exactly as it always was.
+	 */
+	private long nextFreeAddress = ROOT_GROUP_ADDRESS;
+
 	WritableHdfFile(Path path) {
 		logger.warn("Writing files is in alpha. Check files carefully!");
 		logger.info("Writing HDF5 file to [{}]", path.toAbsolutePath());
@@ -80,10 +86,11 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	private void flush() {
 		logger.info("Flushing to disk [{}]...", path.toAbsolutePath());
 		try {
-			rootGroup.write(hdfFileChannel, ROOT_GROUP_ADDRESS);
+			final long rootGroupAddress = nextFreeAddress;
+			rootGroup.write(hdfFileChannel, rootGroupAddress);
 			hdfFileChannel.write(getJHdfInfoBuffer());
 			long endOfFile = hdfFileChannel.getFileChannel().size();
-			hdfFileChannel.write(superblock.toBuffer(endOfFile), 0L);
+			hdfFileChannel.write(superblock.toBuffer(endOfFile, rootGroupAddress), 0L);
 			logger.info("Flushed to disk [{}] file is [{}] bytes", path.toAbsolutePath(), endOfFile);
 		} catch (IOException e) {
 			throw new HdfWritingException("Error getting file size", e);
