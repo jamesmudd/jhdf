@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static io.jhdf.TestUtils.loadTestHdfFile;
-import static org.apache.commons.lang3.ArrayUtils.toObject;
+import static io.jhdf.TestUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.emptyArray;

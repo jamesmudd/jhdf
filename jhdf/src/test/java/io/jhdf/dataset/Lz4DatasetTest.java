@@ -12,8 +12,7 @@ package io.jhdf.dataset;
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
 import io.jhdf.filter.PipelineFilterWithData;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
+import io.jhdf.Utils;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -70,7 +69,8 @@ class Lz4DatasetTest {
 		Object data = dataset.getData();
 
 		// convert Data to string list
-		List<Double> dataAsDouble = Arrays.stream(StringUtils.split(ArrayUtils.toString(data), ",{}"))
+		List<Double> dataAsDouble = Arrays.stream(Utils.deepToString(data).split("[^0-9.\\-]+"))
+			.filter(s -> !s.isEmpty())
 			.map(Double::parseDouble)
 			.collect(Collectors.toList());
 		assertThat(dataAsDouble, Matchers.contains(EXPECTED_DATA_DOUBLE));

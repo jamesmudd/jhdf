@@ -10,7 +10,6 @@
 package io.jhdf.dataset.chunked.indexing;
 
 import io.jhdf.dataset.chunked.Chunk;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -31,7 +30,7 @@ public class ChunkImpl implements Chunk {
 	public ChunkImpl(long address, int size, long[] chunkOffset, BitSet filterMask) {
 		this.address = address;
 		this.size = size;
-		this.chunkOffset = ArrayUtils.clone(chunkOffset);
+		this.chunkOffset = chunkOffset == null ? null : chunkOffset.clone();
 		this.filterMask = filterMask;
 	}
 
@@ -47,7 +46,7 @@ public class ChunkImpl implements Chunk {
 
 	@Override
 	public long[] getChunkOffset() {
-		return ArrayUtils.clone(chunkOffset);
+		return chunkOffset == null ? null : chunkOffset.clone();
 	}
 
 	@Override

@@ -28,8 +28,7 @@ import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.SymbolTableMessage;
 import io.jhdf.storage.HdfBackingStorage;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
+import io.jhdf.exceptions.ConcurrentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

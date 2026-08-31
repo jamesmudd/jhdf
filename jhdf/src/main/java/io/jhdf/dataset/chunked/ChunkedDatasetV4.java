@@ -22,9 +22,8 @@ import io.jhdf.dataset.chunked.indexing.SingleChunkIndex;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.object.message.DataLayoutMessage.ChunkedDataLayoutMessageV4;
 import io.jhdf.storage.HdfBackingStorage;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
+import io.jhdf.exceptions.ConcurrentException;
+import io.jhdf.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +53,7 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
 	public int[] getChunkDimensions() {
 		// TODO understand why there is an extra one on the end of this array
 		int[] chunkDimensions = layoutMessage.getChunkDimensions();
-		return ArrayUtils.subarray(chunkDimensions, 0, chunkDimensions.length - 1);
+		return Arrays.copyOfRange(chunkDimensions, 0, chunkDimensions.length - 1);
 	}
 
 	@Override

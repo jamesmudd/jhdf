@@ -10,7 +10,6 @@
 package io.jhdf.h5dump;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +39,7 @@ class EnabledIfH5DumpAvailableCondition implements ExecutionCondition {
 		try {
 			Process start = processBuilder.start();
 			String stdOut = IOUtils.toString(start.getInputStream(), StandardCharsets.UTF_8);
-			if (StringUtils.contains(stdOut, "h5dump")) {
+			if (stdOut.contains("h5dump")) {
 				return ConditionEvaluationResult.enabled("h5dump is on the path: " + stdOut);
 			} else {
 				return ConditionEvaluationResult.disabled("h5dump is not present");

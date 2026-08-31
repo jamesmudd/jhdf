@@ -11,7 +11,6 @@ package io.jhdf;
 
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.storage.HdfBackingStorage;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +80,7 @@ public class GroupSymbolTableNode {
 	}
 
 	public SymbolTableEntry[] getSymbolTableEntries() {
-		return ArrayUtils.clone(symbolTableEntries);
+		return symbolTableEntries == null ? null : symbolTableEntries.clone();
 	}
 
 	@Override

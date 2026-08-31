@@ -13,7 +13,7 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfFilterException;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
+import io.jhdf.LazyInitializer;
 
 import java.nio.ByteBuffer;
 

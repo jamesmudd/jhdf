@@ -14,7 +14,7 @@ import io.jhdf.exceptions.HdfFilterException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4SafeDecompressor;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
+import io.jhdf.LazyInitializer;
 
 import java.nio.ByteBuffer;
 

@@ -15,8 +15,8 @@ import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.DatasetInfo;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.storage.HdfBackingStorage;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
+import io.jhdf.exceptions.ConcurrentException;
+import io.jhdf.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

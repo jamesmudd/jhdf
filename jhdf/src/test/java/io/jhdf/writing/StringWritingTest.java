@@ -20,8 +20,6 @@ import io.jhdf.examples.TestAllFilesBase;
 import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
 import io.jhdf.h5dump.H5Dump;
 import io.jhdf.h5dump.HDF5FileXml;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -98,8 +96,8 @@ class StringWritingTest {
 			{"element 2,1", "element 2,2", "element 2,3", "element 2,4", "element 2,5"}
 		});
 
-		WritableDataset proseDataset = writableHdfFile.putDataset("prose", StringUtils.split(prose));
-		proseDataset.putAttribute("prose_attr", StringUtils.split(prose));
+		WritableDataset proseDataset = writableHdfFile.putDataset("prose", prose.trim().split("\\s+"));
+		proseDataset.putAttribute("prose_attr", prose.trim().split("\\s+"));
 
 		// Actually flush and write everything
 		writableHdfFile.close();
@@ -110,7 +108,7 @@ class StringWritingTest {
 			assertThat(datasets).hasSize(4);
 
 			String[] proseReadBackArray = (String[]) hdfFile.getDatasetByPath("prose").getData();
-			String proseReadback = StringUtils.joinWith(" ", (Object[]) proseReadBackArray);
+			String proseReadback = String.join(" ", proseReadBackArray);
 			assertThat(proseReadback).isEqualTo(prose);
 
 			// Just check thw whole file is readable
@@ -174,11 +172,11 @@ class StringWritingTest {
 
 		// Write a dataset with string attributes
 		String[] randomLongStringData = {
-			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
-			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
-			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
-			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
-			RandomStringUtils.insecure().nextAlphanumeric(234, 456),
+			TestUtils.randomAlphanumeric(234, 456),
+			TestUtils.randomAlphanumeric(234, 456),
+			TestUtils.randomAlphanumeric(234, 456),
+			TestUtils.randomAlphanumeric(234, 456),
+			TestUtils.randomAlphanumeric(234, 456),
 		};
 		WritableDataset writableDataset = writableHdfFile.putDataset("dataset", randomLongStringData);
 		writableDataset.putAttribute("attr", randomLongStringData);

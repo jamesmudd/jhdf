@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import static io.jhdf.filter.BitShuffleFilter.LZ4_COMPRESSION;
-import static org.apache.commons.lang3.ArrayUtils.toObject;
+import static io.jhdf.TestUtils.toObject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mockStatic;

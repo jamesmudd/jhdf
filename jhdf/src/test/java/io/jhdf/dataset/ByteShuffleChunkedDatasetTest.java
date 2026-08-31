@@ -13,7 +13,7 @@ import io.jhdf.HdfFile;
 import io.jhdf.Utils;
 import io.jhdf.api.Dataset;
 import io.jhdf.filter.PipelineFilterWithData;
-import org.apache.commons.lang3.ArrayUtils;
+import io.jhdf.TestUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
@@ -82,10 +82,10 @@ class ByteShuffleChunkedDatasetTest {
 			assertThat(filters,hasSize(2));
 			assertThat(filters.get(0).getName(), is("shuffle"));
 			assertThat(filters.get(0).getId(), is(2));
-			assertThat(ArrayUtils.toObject(filters.get(0).getFilterData()), is(arrayContaining(dataset.getDataType().getSize())));
+			assertThat(TestUtils.toObject(filters.get(0).getFilterData()), is(arrayContaining(dataset.getDataType().getSize())));
 			assertThat(filters.get(1).getName(), is("deflate"));
 			assertThat(filters.get(1).getId(), is(1));
-			assertThat(ArrayUtils.toObject(filters.get(1).getFilterData()), is(arrayContaining(compressionLevel)));
+			assertThat(TestUtils.toObject(filters.get(1).getFilterData()), is(arrayContaining(compressionLevel)));
 
 			Object data = dataset.getData();
 			assertThat(Utils.getDimensions(data), is(equalTo(new int[]{7, 5})));

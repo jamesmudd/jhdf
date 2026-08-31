@@ -13,7 +13,6 @@ import io.jhdf.Utils;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -166,7 +165,7 @@ public class BitField extends DataType implements OrderedDataType {
 			if(primitive) {
 				buffer.put(asByteArray((boolean[]) data));
 			} else {
-				buffer.put(asByteArray(ArrayUtils.toPrimitive((Boolean[]) data)));
+				buffer.put(asByteArray(Utils.toPrimitive((Boolean[]) data)));
 			}
 		}
 	}
@@ -225,7 +224,7 @@ public class BitField extends DataType implements OrderedDataType {
 			if(primitive) {
 				buffer.put(asByteArray((boolean[]) data));
 			} else {
-				buffer.put(asByteArray(ArrayUtils.toPrimitive((Boolean[]) data)));
+				buffer.put(asByteArray(Utils.toPrimitive((Boolean[]) data)));
 			}
 			buffer.rewind(); // Need to rewind as there is not a view
 			hdfFileChannel.write(buffer);

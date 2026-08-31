@@ -10,9 +10,9 @@
 package io.jhdf.examples;
 
 import io.jhdf.HdfFile;
+import io.jhdf.Utils;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.dataset.ChunkedDataset;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
@@ -29,14 +29,14 @@ public class RawChunkAccess {
 			if (dataset instanceof ChunkedDataset) {
 				ChunkedDataset chunkedDataset = (ChunkedDataset) dataset;
 				int[] chunkOffset = new int[chunkedDataset.getChunkDimensions().length];
-				System.out.println("Chunk offset: " + ArrayUtils.toString(chunkOffset)); //NOSONAR - sout in example
+				System.out.println("Chunk offset: " + Utils.deepToString(chunkOffset)); //NOSONAR - sout in example
 				// For the example just get the zero chunk but you can get any
 				ByteBuffer rawChunkBuffer = chunkedDataset.getRawChunkBuffer(chunkOffset);
 				// If you need the buffer just use it directly here, if you want the byte[]
 				byte[] byteArray = new byte[rawChunkBuffer.capacity()];
 				rawChunkBuffer.get(byteArray);
 				// Now you have the byte[] to use as you like
-				System.out.println("Raw bytes: " + ArrayUtils.toString(byteArray)); //NOSONAR - sout in example
+				System.out.println("Raw bytes: " + Utils.deepToString(byteArray)); //NOSONAR - sout in example
 			} else {
 				throw new IllegalArgumentException("Dataset is not chunked");
 			}

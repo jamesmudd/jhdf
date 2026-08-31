@@ -12,7 +12,6 @@ package io.jhdf;
 import io.jhdf.api.Dataset;
 import io.jhdf.dataset.DatasetBase;
 import io.jhdf.object.message.DataLayout;
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -237,9 +236,9 @@ class DatasetImplTest {
 	void testSlicedRead() {
 		Dataset dataset = (Dataset) hdfFile.getByPath(FLOAT64_PATH);
 		double[] dataSlice = (double[]) dataset.getData(new long[]{3}, new int[]{3});
-		assertThat(ArrayUtils.toObject(dataSlice), arrayWithSize(3));
+		assertThat(TestUtils.toObject(dataSlice), arrayWithSize(3));
 		double[] fullData = (double[]) dataset.getData();
 
-		assertThat(dataSlice, is(ArrayUtils.subarray(fullData, 3, 6)));
+		assertThat(dataSlice, is(TestUtils.subarray(fullData, 3, 6)));
 	}
 }

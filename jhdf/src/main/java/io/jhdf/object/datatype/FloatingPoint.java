@@ -14,7 +14,6 @@ import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -390,7 +389,7 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 			if(primitive) {
 				buffer.asDoubleBuffer().put((double[]) data);
 			} else {
-				buffer.asDoubleBuffer().put(ArrayUtils.toPrimitive((Double[]) data));
+				buffer.asDoubleBuffer().put(Utils.toPrimitive((Double[]) data));
 			}
 			hdfFileChannel.write(buffer);
 			buffer.clear();
@@ -407,7 +406,7 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 			if(primitive) {
 				buffer.asFloatBuffer().put((float[]) data);
 			} else {
-				buffer.asFloatBuffer().put(ArrayUtils.toPrimitive((Float[]) data));
+				buffer.asFloatBuffer().put(Utils.toPrimitive((Float[]) data));
 			}
 			hdfFileChannel.write(buffer);
 			buffer.clear();
@@ -424,7 +423,7 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 			if(primitive) {
 				buffer.put((float[]) data);
 			} else {
-				buffer.put(ArrayUtils.toPrimitive((Float[]) data));
+				buffer.put(Utils.toPrimitive((Float[]) data));
 			}
 		}
 	}
@@ -439,7 +438,7 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 			if(primitive) {
 				buffer.put((double[]) data);
 			} else {
-				buffer.put(ArrayUtils.toPrimitive((Double[]) data));
+				buffer.put(Utils.toPrimitive((Double[]) data));
 			}
 		}
 	}

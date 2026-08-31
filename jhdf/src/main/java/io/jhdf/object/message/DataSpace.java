@@ -13,7 +13,6 @@ import io.jhdf.BufferBuilder;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -135,11 +134,11 @@ public class DataSpace {
 	}
 
 	public long[] getDimensionsAsLong() {
-		return ArrayUtils.clone(dimensions);
+		return dimensions == null ? null : dimensions.clone();
 	}
 
 	public long [] getMaxSizes() {
-		return ArrayUtils.clone(maxSizes);
+		return maxSizes == null ? null : maxSizes.clone();
 	}
 
 	public boolean isMaxSizesPresent() {

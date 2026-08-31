@@ -10,7 +10,6 @@
 package io.jhdf.filter;
 
 import io.jhdf.exceptions.HdfFilterException;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -25,7 +24,7 @@ class DeflatePipelineFilterTest {
 
 	@Test
 	void decodeWorks() {
-		byte[] input = StringUtils.repeat( "TestString", 50).getBytes(StandardCharsets.UTF_8);
+		byte[] input = "TestString".repeat(50).getBytes(StandardCharsets.UTF_8);
 		byte[] compressedBuffer = new byte[1024];
 
 		Deflater deflater = new Deflater();

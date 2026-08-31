@@ -13,7 +13,6 @@ import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
-import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,9 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -34,9 +35,27 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 public final class TestUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestUtils.class);
+	private static final String ALPHANUMERIC_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 	private TestUtils() {
 		throw new AssertionError("No instances of TestUtils");
+	}
+
+	/**
+	 * Generates a random alphanumeric string with a random length in the given range.
+	 *
+	 * @param minLengthInclusive the minimum length of the generated string (inclusive)
+	 * @param maxLengthExclusive the maximum length of the generated string (exclusive)
+	 * @return a random alphanumeric string
+	 */
+	public static String randomAlphanumeric(int minLengthInclusive, int maxLengthExclusive) {
+		ThreadLocalRandom random = ThreadLocalRandom.current();
+		int length = random.nextInt(minLengthInclusive, maxLengthExclusive);
+		StringBuilder sb = new StringBuilder(length);
+		for (int i = 0; i < length; i++) {
+			sb.append(ALPHANUMERIC_CHARS.charAt(random.nextInt(ALPHANUMERIC_CHARS.length())));
+		}
+		return sb.toString();
 	}
 
 	public static HdfFile loadTestHdfFile(String fileName) {
@@ -78,6 +97,50 @@ public final class TestUtils {
 			.toArray(String[]::new);
 	}
 
+	public static Integer[] toObject(int[] array) {
+		Integer[] result = new Integer[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = array[i];
+		}
+		return result;
+	}
+
+	public static Byte[] toObject(byte[] array) {
+		Byte[] result = new Byte[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = array[i];
+		}
+		return result;
+	}
+
+	public static Float[] toObject(float[] array) {
+		Float[] result = new Float[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = array[i];
+		}
+		return result;
+	}
+
+	public static Double[] toObject(double[] array) {
+		Double[] result = new Double[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = array[i];
+		}
+		return result;
+	}
+
+	public static int[] subarray(int[] array, int startIndexInclusive, int endIndexExclusive) {
+		return Arrays.copyOfRange(array, startIndexInclusive, endIndexExclusive);
+	}
+
+	public static float[] subarray(float[] array, int startIndexInclusive, int endIndexExclusive) {
+		return Arrays.copyOfRange(array, startIndexInclusive, endIndexExclusive);
+	}
+
+	public static double[] subarray(double[] array, int startIndexInclusive, int endIndexExclusive) {
+		return Arrays.copyOfRange(array, startIndexInclusive, endIndexExclusive);
+	}
+
 	public static Boolean[] toBooleanArray(Object data) {
 		return Arrays.stream(Utils.flatten(data))
 			.map(el -> parseBoolean(el.toString()))
@@ -85,12 +148,28 @@ public final class TestUtils {
 	}
 
 	private static Boolean parseBoolean(String str) {
-		Boolean aBoolean = BooleanUtils.toBooleanObject(str);
-		if(aBoolean != null) {
-			return aBoolean;
+		if (str == null) {
+			return null;
+		}
+		switch (str.toLowerCase(Locale.ROOT)) {
+			case "true": case "yes": case "y": case "on": case "1":
+				return Boolean.TRUE;
+			case "false": case "no": case "n": case "off": case "0":
+				return Boolean.FALSE;
+			default:
+				break;
 		}
 		// Used for parsing h5dump output
-		return BooleanUtils.toBooleanObject(str, "0x01", "0x00", "null");
+		switch (str) {
+			case "0x01":
+				return Boolean.TRUE;
+			case "0x00":
+				return Boolean.FALSE;
+			case "null":
+				return null;
+			default:
+				throw new IllegalArgumentException("The String did not match any specified value: " + str);
+		}
 	}
 
 	public static void compareGroups(Group group1, Group group2) {

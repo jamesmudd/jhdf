@@ -15,7 +15,6 @@ import io.jhdf.exceptions.UnsupportedHdfException;
 import io.jhdf.object.message.Message;
 import io.jhdf.object.message.ObjectHeaderContinuationMessage;
 import io.jhdf.storage.HdfBackingStorage;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
