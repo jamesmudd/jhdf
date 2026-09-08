@@ -12,6 +12,7 @@ package io.jhdf.filter;
 import io.jhdf.exceptions.HdfFilterException;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class FilterPipeline {
 
 	public static final FilterPipeline NO_FILTERS = new FilterPipeline();
+	private static final BitSet NO_FILTERS_SKIPPED = new BitSet();
 
 	private final List<PipelineFilterWithData> filters = new ArrayList<>();
 
@@ -43,11 +45,27 @@ public class FilterPipeline {
 	 * @throws HdfFilterException if the decode operation fails
 	 */
 	public byte[] decode(byte[] encodedData) {
+		return decode(encodedData, NO_FILTERS_SKIPPED);
+	}
+
+	/**
+	 * Applies the filters in this pipeline to decode the data, skipping filters that
+	 * were not applied to the chunk when it was encoded.
+	 *
+	 * @param encodedData the data to be decoded
+	 * @param filterMask  the per-chunk filter mask; a set bit skips the filter at
+	 *                    the corresponding pipeline position
+	 * @return the decoded data
+	 * @throws HdfFilterException if the decode operation fails
+	 */
+	public byte[] decode(byte[] encodedData, BitSet filterMask) {
 
 		// Apply the filters, decoding so reverse order
-		for (int i = filters.size() -1; i >= 0; i--) {
-			PipelineFilterWithData filter = filters.get(i);
-			encodedData = filter.decode(encodedData);
+		for (int i = filters.size() - 1; i >= 0; i--) {
+			if (!filterMask.get(i)) {
+				PipelineFilterWithData filter = filters.get(i);
+				encodedData = filter.decode(encodedData);
+			}
 		}
 
 		return encodedData;

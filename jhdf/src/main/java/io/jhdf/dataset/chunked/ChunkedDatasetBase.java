@@ -241,7 +241,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 			}
 
 			// Decode using the pipeline applying the filters
-			final byte[] decodedBytes = pipeline.decode(encodedBytes);
+			final byte[] decodedBytes = pipeline.decode(encodedBytes, chunk.getFilterMask());
 			logger.trace("Decoded {}", chunk);
 
 			return decodedBytes;
