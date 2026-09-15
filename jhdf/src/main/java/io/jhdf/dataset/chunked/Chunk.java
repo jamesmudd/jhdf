@@ -20,6 +20,13 @@ public interface Chunk {
 	 */
 	int getSize();
 
+	/**
+	 * Gets the per-chunk filter mask. A set bit means that the filter at the
+	 * corresponding position in the original filter pipeline was not applied to
+	 * this chunk and must be skipped during decoding.
+	 *
+	 * @return the per-chunk filter mask
+	 */
 	BitSet getFilterMask();
 
 	/**
