@@ -20,7 +20,7 @@ plugins {
     id 'checkstyle' // Code style checks
 
     // Community plugins (need versions)
-    id 'org.sonarqube' version '7.4.0.8496' // Code quality
+    id 'org.sonarqube' version '7.5.0.8588' // Code quality
     id "com.github.spotbugs" version "6.5.10" // Static analysis
     id "me.champeau.jmh" version "0.7.3" // JMH support
     id 'biz.aQute.bnd.builder' version '7.4.0' // OSGi manifest generation
@@ -52,7 +52,7 @@ dependencyLocking {
 
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
-    implementation 'org.slf4j:slf4j-api:2.0.18'
+    implementation 'org.slf4j:slf4j-api:2.0.19'
     implementation 'org.apache.commons:commons-lang3:3.20.0'
     // lzf compression support
     implementation 'com.ning:compress-lzf:1.2.1'
@@ -65,7 +65,7 @@ dependencies {
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     // Logging impl for tests
-    testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.18'
+    testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.19'
 
     // Mocking
     testImplementation 'org.mockito:mockito-core:5.23.0'
