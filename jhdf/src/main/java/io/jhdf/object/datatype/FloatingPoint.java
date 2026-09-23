@@ -200,6 +200,39 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		return data;
 	}
 
+	@Override
+	public boolean supportsDirectFill() {
+		return true;
+	}
+
+	@Override
+	public void fillElements(Object rowArray, int rowOffset, ByteBuffer buffer, int bufferElementOffset, int length) {
+		final ByteOrder byteOrder = getByteOrder();
+		switch (getSize()) {
+			case 2:
+				fillHalfFloats(rowArray, rowOffset, buffer.duplicate().order(byteOrder).asShortBuffer(), bufferElementOffset, length);
+				break;
+			case 4:
+				buffer.duplicate().order(byteOrder).asFloatBuffer()
+						.get(bufferElementOffset, (float[]) rowArray, rowOffset, length);
+				break;
+			case 8:
+				buffer.duplicate().order(byteOrder).asDoubleBuffer()
+						.get(bufferElementOffset, (double[]) rowArray, rowOffset, length);
+				break;
+			default:
+				throw new HdfTypeException(
+					"Unsupported floating point type size " + getSize() + " bytes");
+		}
+	}
+
+	private static void fillHalfFloats(Object rowArray, int rowOffset, ShortBuffer buffer, int bufferElementOffset, int length) {
+		final float[] floatData = (float[]) rowArray;
+		for (int i = 0; i < length; i++) {
+			floatData[rowOffset + i] = toFloat(buffer.get(bufferElementOffset + i));
+		}
+	}
+
 	private static void fillData(Object data, int[] dims, ShortBuffer buffer) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
