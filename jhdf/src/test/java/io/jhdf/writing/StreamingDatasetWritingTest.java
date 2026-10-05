@@ -17,6 +17,9 @@ import io.jhdf.api.DatasetCreationOptions;
 import io.jhdf.api.StreamingDataset;
 import io.jhdf.api.WritableGroup;
 import io.jhdf.exceptions.HdfWritingException;
+import io.jhdf.h5dump.EnabledIfH5DumpAvailable;
+import io.jhdf.h5dump.H5Dump;
+import io.jhdf.h5dump.HDF5FileXml;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
@@ -27,6 +30,7 @@ import java.util.Arrays;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -252,6 +256,53 @@ class StreamingDatasetWritingTest {
 
 		try (HdfFile hdfFile = new HdfFile(file)) {
 			assertThat(hdfFile.getDatasetByPath("SimID_1/Ran_cyt/DataValues (XYT)").getData(), is(data));
+		}
+	}
+
+	/**
+	 * Streaming moves the root group off address 64, which nothing else in the suite does, so check the HDF5 library
+	 * itself can find it: a nested group, out of order filtered chunks, a single chunk dataset, and ordinary datasets
+	 * written before and after the streamed ones.
+	 */
+	@Test
+	@EnabledIfH5DumpAvailable
+	void readStreamedFileWithH5Dump() throws Exception {
+		double[][][] data = doubleData3d(7, 9, 5);
+		int[] chunkDimensions = {4, 4, 1};
+		Path file = Files.createTempFile("streamedH5Dump", ".hdf5");
+
+		try (WritableHdfFile writableHdfFile = HdfFile.write(file)) {
+			writableHdfFile.putDataset("before", new int[]{1, 2, 3});
+			WritableGroup variable = writableHdfFile.putGroup("SimID_1").putGroup("Ran_cyt");
+			variable.putAttribute("units", "uM");
+			try (StreamingDataset dataset = variable.newStreamingDataset("DataValues (XYT)", double.class,
+				new int[]{7, 9, 5},
+				DatasetCreationOptions.builder().chunkDimensions(chunkDimensions).shuffle().deflate(6).build())) {
+				// Time major and backwards, far from chunk index order
+				for (int k = 4; k >= 0; k--) {
+					for (int i = 0; i < 7; i += 4) {
+						for (int j = 0; j < 9; j += 4) {
+							long[] offset = {i, j, k};
+							dataset.writeChunk(offset, chunkOf(data, offset, chunkDimensions));
+						}
+					}
+				}
+			}
+			try (StreamingDataset single = writableHdfFile.newStreamingDataset("single", int.class,
+				new int[]{3, 4}, DatasetCreationOptions.builder().chunkDimensions(3, 4).build())) {
+				single.writeChunk(new long[]{0, 0}, new int[][]{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}});
+			}
+			writableHdfFile.putGroup("after").putDataset("contiguous", new double[]{1.5, 2.5});
+		}
+
+		// The HDF5 library reads it first, so a root group it cannot find fails here rather than in jHDF
+		HDF5FileXml hdf5FileXml = H5Dump.dumpAndParse(file);
+
+		try (HdfFile hdfFile = new HdfFile(file)) {
+			// The streamed chunks come first, so the root group is no longer straight after the superblock
+			assertThat(hdfFile.getAddress(), is(not(64L)));
+			assertThat(hdfFile.getDatasetByPath("SimID_1/Ran_cyt/DataValues (XYT)").getData(), is(data));
+			H5Dump.assetXmlAndHdfFileMatch(hdf5FileXml, hdfFile);
 		}
 	}
 
