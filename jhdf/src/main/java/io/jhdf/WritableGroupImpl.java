@@ -13,6 +13,7 @@ package io.jhdf;
 import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.ChunkProvider;
+import io.jhdf.api.StreamingDataset;
 import io.jhdf.api.DatasetCreationOptions;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
@@ -27,6 +28,7 @@ import io.jhdf.object.message.GroupInfoMessage;
 import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.Message;
+import io.jhdf.exceptions.HdfWritingException;
 import io.jhdf.storage.HdfFileChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -46,6 +48,36 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 	private static final Logger logger = LoggerFactory.getLogger(WritableGroupImpl.class);
 
 	private final Map<String, WritableNode> children = new ConcurrentHashMap<>();
+
+	/**
+	 * Where streamed chunks go. Inherited from the parent group so any group in the file can stream, and null for
+	 * a group built outside a file, which has nowhere to put them.
+	 */
+	private HdfFileChannel streamingChannel;
+	private FileSpace streamingSpace;
+
+	void setStreamingContext(HdfFileChannel hdfFileChannel, FileSpace fileSpace) {
+		this.streamingChannel = hdfFileChannel;
+		this.streamingSpace = fileSpace;
+	}
+
+	@Override
+	public StreamingDataset newStreamingDataset(String name, Class<?> javaType, int[] dimensions,
+			DatasetCreationOptions options) {
+		if (StringUtils.isBlank(name)) {
+			throw new IllegalArgumentException("name cannot be null or blank");
+		}
+		if (streamingChannel == null) {
+			throw new HdfWritingException("Group [" + getPath() + "] is not part of a file being written, so there"
+				+ " is nowhere to stream chunks to");
+		}
+		WritableDatasetImpl dataset =
+			new WritableDatasetImpl(javaType, dimensions, name, this, options, null, true);
+		dataset.startStreaming(streamingChannel, streamingSpace);
+		children.put(name, dataset);
+		logger.info("Added streaming dataset [{}] to group [{}]", name, getPath());
+		return dataset;
+	}
 
 	public WritableGroupImpl(Group parent, String name) {
 		super(parent, name);
@@ -161,6 +193,7 @@ public class WritableGroupImpl extends AbstractWritableNode implements WritableG
 			throw new IllegalArgumentException("name cannot be null or blank");
 		}
 		WritableGroupImpl newGroup = new WritableGroupImpl(this, name);
+		newGroup.setStreamingContext(streamingChannel, streamingSpace);
 		children.put(name, newGroup);
 		logger.info("Added group [{}] to group [{}]", name, getPath());
 		return newGroup;

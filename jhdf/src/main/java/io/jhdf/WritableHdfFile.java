@@ -17,6 +17,7 @@ import io.jhdf.api.DatasetCreationOptions;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.api.NodeType;
+import io.jhdf.api.StreamingDataset;
 import io.jhdf.api.WritableGroup;
 import io.jhdf.api.WritableDataset;
 import io.jhdf.exceptions.HdfWritingException;
@@ -48,6 +49,26 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	private final HdfFileChannel hdfFileChannel;
 	private final WritableGroup rootGroup;
 
+	/**
+	 * The next address in the file not yet spoken for. Nothing moves it until a dataset streams data before the
+	 * tree is written, so a file without one is laid out exactly as it always was.
+	 */
+	private long nextFreeAddress = ROOT_GROUP_ADDRESS;
+
+	private final FileSpace fileSpace = new FileSpace() {
+		@Override
+		public long nextAddress() {
+			return nextFreeAddress;
+		}
+
+		@Override
+		public long reserve(long bytes) {
+			final long address = nextFreeAddress;
+			nextFreeAddress += bytes;
+			return address;
+		}
+	};
+
 	WritableHdfFile(Path path) {
 		logger.warn("Writing files is in alpha. Check files carefully!");
 		logger.info("Writing HDF5 file to [{}]", path.toAbsolutePath());
@@ -60,7 +81,9 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 		this.superblock = new Superblock.SuperblockV2V3();
 		this.hdfFileChannel = new HdfFileChannel(this.fileChannel, this.superblock);
 
-		this.rootGroup = new WritableGroupImpl(null, "/");
+		final WritableGroupImpl root = new WritableGroupImpl(null, "/");
+		root.setStreamingContext(this.hdfFileChannel, this.fileSpace);
+		this.rootGroup = root;
 		this.rootGroup.putAttribute("_jHDF", getJHdfInfo());
 	}
 
@@ -80,10 +103,11 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	private void flush() {
 		logger.info("Flushing to disk [{}]...", path.toAbsolutePath());
 		try {
-			rootGroup.write(hdfFileChannel, ROOT_GROUP_ADDRESS);
+			final long rootGroupAddress = nextFreeAddress;
+			rootGroup.write(hdfFileChannel, rootGroupAddress);
 			hdfFileChannel.write(getJHdfInfoBuffer());
 			long endOfFile = hdfFileChannel.getFileChannel().size();
-			hdfFileChannel.write(superblock.toBuffer(endOfFile), 0L);
+			hdfFileChannel.write(superblock.toBuffer(endOfFile, rootGroupAddress), 0L);
 			logger.info("Flushed to disk [{}] file is [{}] bytes", path.toAbsolutePath(), endOfFile);
 		} catch (IOException e) {
 			throw new HdfWritingException("Error getting file size", e);
@@ -122,6 +146,26 @@ public class WritableHdfFile implements WritableGroup, AutoCloseable {
 	public WritableDataset putDataset(String name, Class<?> javaType, int[] dimensions,
 									  DatasetCreationOptions options, ChunkProvider chunkProvider) {
 		return rootGroup.putDataset(name, javaType, dimensions, options, chunkProvider);
+	}
+
+	/**
+	 * Creates a chunked dataset written a chunk at a time, as the data becomes available, rather than from a
+	 * dataset already in memory. Chunks are written to the file as they are handed over, so the memory needed is
+	 * that of a single chunk.
+	 * <p>
+	 * The returned dataset must be closed, with every chunk written, before this file is closed.
+	 *
+	 * @param name the dataset name, in the root group
+	 * @param javaType the dataset's element type e.g. {@code double.class}
+	 * @param dimensions the dataset's dimensions
+	 * @param options options controlling how the dataset is stored, must specify chunk dimensions
+	 * @return the dataset to write chunks to
+	 * @since v0.14.0
+	 */
+	@Override
+	public StreamingDataset newStreamingDataset(String name, Class<?> javaType, int[] dimensions,
+												DatasetCreationOptions options) {
+		return rootGroup.newStreamingDataset(name, javaType, dimensions, options);
 	}
 
 	/**
