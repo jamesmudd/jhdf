@@ -5,6 +5,9 @@
 /.gradle
 /build
 
+# Large data files downloaded for JMH benchmarks (see src/jmh/resources/README.md)
+/src/jmh/resources/*.hdf5
+
 # Eclipse
 /.settings
 .classpath
