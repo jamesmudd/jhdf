@@ -633,6 +633,18 @@ public abstract class Superblock {
 		}
 
 		public ByteBuffer toBuffer(long endOfFileAddress) {
+			return toBuffer(endOfFileAddress, rootGroupObjectHeaderAddress);
+		}
+
+		/**
+		 * The root group object header does not have to be the first thing in the file. Writing data before it
+		 * lets that data be streamed to the file while the tree describing it is still being built.
+		 *
+		 * @param endOfFileAddress the end of file address to record
+		 * @param rootGroupAddress the address the root group object header was written at
+		 * @return the encoded superblock
+		 */
+		public ByteBuffer toBuffer(long endOfFileAddress, long rootGroupAddress) {
 
 			BufferBuilder bufferBuilder = new BufferBuilder()
 					.writeBytes(HDF5_FILE_SIGNATURE)
@@ -643,7 +655,7 @@ public abstract class Superblock {
 					.writeLong(baseAddressByte)
 					.writeLong(superblockExtensionAddress)
 					.writeLong(endOfFileAddress)
-					.writeLong(rootGroupObjectHeaderAddress)
+					.writeLong(rootGroupAddress)
 					.appendChecksum();
 
 			return bufferBuilder.build();
