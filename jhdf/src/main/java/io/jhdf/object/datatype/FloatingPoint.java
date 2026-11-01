@@ -207,6 +207,28 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 	}
 
 	@Override
+	public RowFiller createRowFiller(ByteBuffer buffer) {
+		final ByteOrder byteOrder = getByteOrder();
+		switch (getSize()) {
+			case 2:
+				final ShortBuffer shortBuf = buffer.duplicate().order(byteOrder).asShortBuffer();
+				return (rowArray, rowOffset, bufferElementOffset, length) ->
+					fillHalfFloats(rowArray, rowOffset, shortBuf, bufferElementOffset, length);
+			case 4:
+				final FloatBuffer floatBuf = buffer.duplicate().order(byteOrder).asFloatBuffer();
+				return (rowArray, rowOffset, bufferElementOffset, length) ->
+					floatBuf.get(bufferElementOffset, (float[]) rowArray, rowOffset, length);
+			case 8:
+				final DoubleBuffer doubleBuf = buffer.duplicate().order(byteOrder).asDoubleBuffer();
+				return (rowArray, rowOffset, bufferElementOffset, length) ->
+					doubleBuf.get(bufferElementOffset, (double[]) rowArray, rowOffset, length);
+			default:
+				throw new HdfTypeException(
+					"Unsupported floating point type size " + getSize() + " bytes");
+		}
+	}
+
+	@Override
 	public void fillElements(Object rowArray, int rowOffset, ByteBuffer buffer, int bufferElementOffset, int length) {
 		final ByteOrder byteOrder = getByteOrder();
 		switch (getSize()) {
