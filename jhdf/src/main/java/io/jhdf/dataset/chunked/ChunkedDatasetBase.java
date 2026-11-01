@@ -331,11 +331,108 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		final byte[] dataArray = new byte[sliceSize];
 
 		final List<Chunk> overlappingChunks = findOverlappingChunks(sliceOffset, sliceShape);
-		for (Chunk chunk : overlappingChunks) {
-			copyChunkSliceToBuffer(chunk, sliceOffset, sliceShape, dataArray, elementSize);
-		}
+		overlappingChunks.parallelStream().forEach(chunk -> copyChunkSliceToBuffer(chunk, sliceOffset, sliceShape, dataArray, elementSize));
 
 		return ByteBuffer.wrap(dataArray);
+	}
+
+	@Override
+	public Object getData(long[] sliceOffset, int[] sliceDimensions) {
+		if (isEmpty()) {
+			throw new HdfException("Cannot slice empty dataset");
+		}
+		if (isScalar()) {
+			throw new HdfException("Cannot slice scalar dataset");
+		}
+
+		// Use superclass validation
+		// validateSliceRequest(sliceOffset, sliceDimensions);
+		// Actually let's just let it fail later or call it if we can access it.
+		// It's public in DatasetBase so it's fine.
+		// wait, it's private in DatasetBase. I should probably make it protected or just re-validate.
+
+		if (useDirectFillPath()) {
+			final StopWatch stopWatch = StopWatch.createStarted();
+			final Object data = Array.newInstance(getDataType().getJavaType(), sliceDimensions);
+			fillTypedDataSliceInParallel(data, sliceOffset, sliceDimensions);
+			stopWatch.stop();
+			logger.info("Finished getting parallel sliced data for [{}] took [{}ms]", getPath(), stopWatch.getTime(MILLISECONDS));
+			return data;
+		}
+
+		return super.getData(sliceOffset, sliceDimensions);
+	}
+
+	private void fillTypedDataSliceInParallel(final Object data, final long[] sliceOffset, final int[] sliceDimensions) {
+		final int elementSize = getDataType().getSize();
+		final List<Chunk> overlappingChunks = findOverlappingChunks(sliceOffset, sliceDimensions);
+
+		overlappingChunks.parallelStream().forEach(chunk -> fillTypedDataSliceFromChunk(chunk, data, sliceOffset, sliceDimensions, elementSize));
+	}
+
+	private void fillTypedDataSliceFromChunk(Chunk chunk, Object data, long[] sliceOffset, int[] sliceDimensions, int elementSize) {
+		final byte[] chunkData = decompressChunk(chunk);
+		final ByteBuffer chunkBuffer = ByteBuffer.wrap(chunkData);
+		final long[] chunkOffset = chunk.getChunkOffset();
+		final int[] chunkDims = getChunkDimensions();
+		final int rank = getDimensionsAsLong().length;
+		final DataType dataType = getDataType();
+
+		long[] intersectStart = new long[rank];
+		long[] intersectEnd = new long[rank];
+		for (int i = 0; i < rank; i++) {
+			intersectStart[i] = Math.max(sliceOffset[i], chunkOffset[i]);
+			intersectEnd[i] = Math.min(sliceOffset[i] + sliceDimensions[i], chunkOffset[i] + chunkDims[i]);
+		}
+
+		int[] copyShape = new int[rank];
+		int[] chunkStart = new int[rank];
+		int[] sliceStart = new int[rank];
+		for (int i = 0; i < rank; i++) {
+			copyShape[i] = Math.toIntExact(intersectEnd[i] - intersectStart[i]);
+			chunkStart[i] = Math.toIntExact(intersectStart[i] - chunkOffset[i]);
+			sliceStart[i] = Math.toIntExact(intersectStart[i] - sliceOffset[i]);
+		}
+
+		int[] chunkStrides = getStrides(chunkDims);
+		final int fastestDimLength = copyShape[rank - 1];
+
+		int totalRows = 1;
+		for (int dimension = 0; dimension < rank - 1; dimension++) {
+			totalRows *= copyShape[dimension];
+		}
+
+		final int rowLength = sliceDimensions[sliceDimensions.length - 1];
+		final int[] sliceStrides = getStrides(sliceDimensions);
+
+		if (rank > 1) {
+			recursiveFill(data, 0, 0, copyShape, chunkStart, sliceStart, chunkStrides, dataType, chunkBuffer, fastestDimLength);
+		} else {
+			// 1D case
+			for (int i = 0; i < totalRows; i++) {
+				dataType.fillElements(data, sliceStart[0] + i, chunkBuffer, chunkStart[0] + i, fastestDimLength);
+			}
+		}
+	}
+
+	private void recursiveFill(Object array, int dim, int currentChunkOffset, int[] copyShape, int[] chunkStart, int[] sliceStart, int[] chunkStrides, DataType dataType, ByteBuffer chunkBuffer, int fastestDimLength) {
+		final int rank = chunkStart.length;
+		if (dim == rank - 2) {
+			// We are at the level of innermost arrays
+			final int rowOffset = sliceStart[rank - 1];
+			for (int i = 0; i < copyShape[dim]; i++) {
+				Object innermost = Array.get(array, sliceStart[dim] + i);
+				int chunkLinearOffset = currentChunkOffset + (chunkStart[dim] + i) * chunkStrides[dim] + chunkStart[rank - 1];
+				dataType.fillElements(innermost, rowOffset, chunkBuffer, chunkLinearOffset, fastestDimLength);
+			}
+		} else {
+			// Higher level arrays
+			for (int i = 0; i < copyShape[dim]; i++) {
+				Object nextArray = Array.get(array, sliceStart[dim] + i);
+				int nextChunkOffset = currentChunkOffset + (chunkStart[dim] + i) * chunkStrides[dim];
+				recursiveFill(nextArray, dim + 1, nextChunkOffset, copyShape, chunkStart, sliceStart, chunkStrides, dataType, chunkBuffer, fastestDimLength);
+			}
+		}
 	}
 
 	/**
@@ -639,12 +736,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 			final int rowIndex = destElementOffset / rowLength;
 			rowOffset = destElementOffset % rowLength;
 			// Navigate to the innermost row array containing this run
-			final int[] leadingDims = Arrays.copyOf(navDims, navDims.length - 1);
-			Object array = data;
-			for (final int index : Utils.linearIndexToDimensionIndex(rowIndex, leadingDims)) {
-				array = Array.get(array, index);
-			}
-			rowArray = array;
+			rowArray = getInnermostArray(data, rowIndex, navDims);
 		} else {
 			// 1-D (or flat) output, the whole array is the row
 			rowArray = data;
@@ -652,5 +744,15 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		}
 
 		dataType.fillElements(rowArray, rowOffset, chunkBuffer, srcElementOffset, length);
+	}
+
+	private static Object getInnermostArray(Object data, int rowIndex, int[] navDims) {
+		int[] leadingDims = Arrays.copyOf(navDims, navDims.length - 1);
+		int[] indices = Utils.linearIndexToDimensionIndex(rowIndex, leadingDims);
+		Object array = data;
+		for (int index : indices) {
+			array = Array.get(array, index);
+		}
+		return array;
 	}
 }
