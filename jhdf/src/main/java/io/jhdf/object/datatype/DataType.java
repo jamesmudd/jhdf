@@ -202,6 +202,26 @@ public abstract class DataType {
 	}
 
 	/**
+	 * Interface for filling innermost rows from a chunk buffer into the target array.
+	 * An instance is created once per chunk to avoid allocating intermediate buffer wrappers per row.
+	 */
+	@FunctionalInterface
+	public interface RowFiller {
+		void fillRow(Object rowArray, int rowOffset, int bufferElementOffset, int length);
+	}
+
+	/**
+	 * Creates a {@link RowFiller} for the given chunk buffer.
+	 *
+	 * @param buffer the chunk buffer
+	 * @return a row filler instance
+	 */
+	public RowFiller createRowFiller(ByteBuffer buffer) {
+		return (rowArray, rowOffset, bufferElementOffset, length) ->
+			fillElements(rowArray, rowOffset, buffer, bufferElementOffset, length);
+	}
+
+	/**
 	 * Fills {@code length} elements from the decompressed chunk buffer into an innermost (1-D)
 	 * row of the output array. Implementations convert the raw bytes into the correct Java type
 	 * as part of the copy, so no intermediate full-dataset buffer is needed.

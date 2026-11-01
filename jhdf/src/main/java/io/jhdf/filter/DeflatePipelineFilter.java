@@ -41,13 +41,13 @@ public class DeflatePipelineFilter implements Filter {
 	public byte[] decode(byte[] compressedData, int[] filterData) {
 		final Inflater inflater = new Inflater();
 
-		// Make a guess that the decompressed data is 3 times larger than compressed.
+		// Make a guess that the decompressed data is 4 times larger than compressed.
 		// This is a performance optimisation to avoid resizing of the stream byte
 		// array.
-		try (final ByteArrayOutputStream baos = new ByteArrayOutputStream(compressedData.length * 3)) {
+		try (final ByteArrayOutputStream baos = new ByteArrayOutputStream(Math.max(compressedData.length * 4, 32768))) {
 			// Setup the inflater
 			inflater.setInput(compressedData);
-			final byte[] buffer = new byte[4096];
+			final byte[] buffer = new byte[32768];
 
 			// Do the decompression
 			while (!inflater.finished()) {

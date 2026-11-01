@@ -179,13 +179,86 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 	}
 
 	@Override
+	public RowFiller createRowFiller(ByteBuffer buffer) {
+		final ByteOrder byteOrder = getByteOrder();
+		if (isSigned()) {
+			switch (getSize()) {
+				case 1:
+					if (buffer.hasArray()) {
+						final byte[] array = buffer.array();
+						final int base = buffer.arrayOffset();
+						return (rowArray, rowOffset, bufferElementOffset, length) ->
+							System.arraycopy(array, base + bufferElementOffset, (byte[]) rowArray, rowOffset, length);
+					} else {
+						final ByteBuffer dup = buffer.duplicate().order(byteOrder);
+						return (rowArray, rowOffset, bufferElementOffset, length) ->
+							dup.get(bufferElementOffset, (byte[]) rowArray, rowOffset, length);
+					}
+				case 2:
+					final ShortBuffer shortBuf = buffer.duplicate().order(byteOrder).asShortBuffer();
+					return (rowArray, rowOffset, bufferElementOffset, length) ->
+						shortBuf.get(bufferElementOffset, (short[]) rowArray, rowOffset, length);
+				case 4:
+					final IntBuffer intBuf = buffer.duplicate().order(byteOrder).asIntBuffer();
+					return (rowArray, rowOffset, bufferElementOffset, length) ->
+						intBuf.get(bufferElementOffset, (int[]) rowArray, rowOffset, length);
+				case 8:
+					final LongBuffer longBuf = buffer.duplicate().order(byteOrder).asLongBuffer();
+					return (rowArray, rowOffset, bufferElementOffset, length) ->
+						longBuf.get(bufferElementOffset, (long[]) rowArray, rowOffset, length);
+				default:
+					throw new HdfTypeException(
+						"Unsupported signed integer type size " + getSize() + " bytes");
+			}
+		} else { // Unsigned
+			switch (getSize()) {
+				case 1:
+					if (buffer.hasArray()) {
+						final byte[] array = buffer.array();
+						final int base = buffer.arrayOffset();
+						return (rowArray, rowOffset, bufferElementOffset, length) -> {
+							final int[] intData = (int[]) rowArray;
+							final int srcOffset = base + bufferElementOffset;
+							for (int i = 0; i < length; i++) {
+								intData[rowOffset + i] = array[srcOffset + i] & 0xFF;
+							}
+						};
+					} else {
+						final ByteBuffer dup = buffer.duplicate().order(byteOrder);
+						return (rowArray, rowOffset, bufferElementOffset, length) ->
+							fillUnsignedBytes(rowArray, rowOffset, dup, bufferElementOffset, length);
+					}
+				case 2:
+					final ShortBuffer shortBuf = buffer.duplicate().order(byteOrder).asShortBuffer();
+					return (rowArray, rowOffset, bufferElementOffset, length) ->
+						fillUnsignedShorts(rowArray, rowOffset, shortBuf, bufferElementOffset, length);
+				case 4:
+					final IntBuffer intBuf = buffer.duplicate().order(byteOrder).asIntBuffer();
+					return (rowArray, rowOffset, bufferElementOffset, length) ->
+						fillUnsignedInts(rowArray, rowOffset, intBuf, bufferElementOffset, length);
+				case 8:
+					final LongBuffer longBuf = buffer.duplicate().order(byteOrder).asLongBuffer();
+					return (rowArray, rowOffset, bufferElementOffset, length) ->
+						fillUnsignedLongs(rowArray, rowOffset, longBuf, bufferElementOffset, length);
+				default:
+					throw new HdfTypeException(
+						"Unsupported unsigned integer type size " + getSize() + " bytes");
+			}
+		}
+	}
+
+	@Override
 	public void fillElements(Object rowArray, int rowOffset, ByteBuffer buffer, int bufferElementOffset, int length) {
 		final ByteOrder byteOrder = getByteOrder();
 		if (isSigned()) {
 			switch (getSize()) {
 				case 1:
-					buffer.duplicate().order(byteOrder)
-							.get(bufferElementOffset, (byte[]) rowArray, rowOffset, length);
+					if (buffer.hasArray()) {
+						System.arraycopy(buffer.array(), buffer.arrayOffset() + bufferElementOffset, (byte[]) rowArray, rowOffset, length);
+					} else {
+						buffer.duplicate().order(byteOrder)
+								.get(bufferElementOffset, (byte[]) rowArray, rowOffset, length);
+					}
 					break;
 				case 2:
 					buffer.duplicate().order(byteOrder).asShortBuffer()
@@ -226,8 +299,16 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 
 	private static void fillUnsignedBytes(Object rowArray, int rowOffset, ByteBuffer buffer, int bufferElementOffset, int length) {
 		final int[] intData = (int[]) rowArray;
-		for (int i = 0; i < length; i++) {
-			intData[rowOffset + i] = Byte.toUnsignedInt(buffer.get(bufferElementOffset + i));
+		if (buffer.hasArray()) {
+			final byte[] array = buffer.array();
+			final int base = buffer.arrayOffset() + bufferElementOffset;
+			for (int i = 0; i < length; i++) {
+				intData[rowOffset + i] = array[base + i] & 0xFF;
+			}
+		} else {
+			for (int i = 0; i < length; i++) {
+				intData[rowOffset + i] = Byte.toUnsignedInt(buffer.get(bufferElementOffset + i));
+			}
 		}
 	}
 

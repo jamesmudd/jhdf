@@ -229,12 +229,16 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	}
 
 	private byte[] decompressChunk(Chunk chunk) {
-		// Get the encoded (i.e. compressed buffer)
-		final ByteBuffer encodedBuffer = getDataBuffer(chunk);
-
-		// Get the encoded data from buffer
-		final byte[] encodedBytes = new byte[encodedBuffer.remaining()];
-		encodedBuffer.get(encodedBytes);
+		// Read the encoded chunk data from backing storage without memory mapping
+		// to avoid FileChannel map locks during parallel chunk reads
+		final ByteBuffer encodedBuffer = hdfBackingStorage.readBufferFromAddress(chunk.getAddress(), Math.toIntExact(chunk.getSize()));
+		final byte[] encodedBytes;
+		if (encodedBuffer.hasArray()) {
+			encodedBytes = encodedBuffer.array();
+		} else {
+			encodedBytes = new byte[encodedBuffer.remaining()];
+			encodedBuffer.get(encodedBytes);
+		}
 
 		try {
 			final FilterPipeline pipeline = this.lazyPipeline.get();
@@ -329,7 +333,11 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		final byte[] dataArray = new byte[sliceSize];
 
 		final List<Chunk> overlappingChunks = findOverlappingChunks(sliceOffset, sliceShape);
-		overlappingChunks.parallelStream().forEach(chunk -> copyChunkSliceToBuffer(chunk, sliceOffset, sliceShape, dataArray, elementSize));
+		if (overlappingChunks.size() == 1) {
+			copyChunkSliceToBuffer(overlappingChunks.get(0), sliceOffset, sliceShape, dataArray, elementSize);
+		} else {
+			overlappingChunks.parallelStream().forEach(chunk -> copyChunkSliceToBuffer(chunk, sliceOffset, sliceShape, dataArray, elementSize));
+		}
 
 		return ByteBuffer.wrap(dataArray);
 	}
@@ -354,7 +362,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 			final Object data = Array.newInstance(getDataType().getJavaType(), sliceDimensions);
 			fillTypedDataSliceInParallel(data, sliceOffset, sliceDimensions);
 			stopWatch.stop();
-			logger.info("Finished getting parallel sliced data for [{}] took [{}ms]", getPath(), stopWatch.getTime(MILLISECONDS));
+			logger.debug("Finished getting parallel sliced data for [{}] took [{}ms]", getPath(), stopWatch.getTime(MILLISECONDS));
 			return data;
 		}
 
@@ -365,16 +373,20 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		final int elementSize = getDataType().getSize();
 		final List<Chunk> overlappingChunks = findOverlappingChunks(sliceOffset, sliceDimensions);
 
-		overlappingChunks.parallelStream().forEach(chunk -> fillTypedDataSliceFromChunk(chunk, data, sliceOffset, sliceDimensions, elementSize));
+		if (overlappingChunks.size() == 1) {
+			fillTypedDataSliceFromChunk(overlappingChunks.get(0), data, sliceOffset, sliceDimensions, elementSize);
+		} else {
+			overlappingChunks.parallelStream().forEach(chunk -> fillTypedDataSliceFromChunk(chunk, data, sliceOffset, sliceDimensions, elementSize));
+		}
 	}
 
 	private void fillTypedDataSliceFromChunk(Chunk chunk, Object data, long[] sliceOffset, int[] sliceDimensions, int elementSize) {
 		final byte[] chunkData = decompressChunk(chunk);
 		final ByteBuffer chunkBuffer = ByteBuffer.wrap(chunkData);
+		final DataType.RowFiller rowFiller = getDataType().createRowFiller(chunkBuffer);
 		final long[] chunkOffset = chunk.getChunkOffset();
 		final int[] chunkDims = getChunkDimensions();
 		final int rank = getDimensionsAsLong().length;
-		final DataType dataType = getDataType();
 
 		long[] intersectStart = new long[rank];
 		long[] intersectEnd = new long[rank];
@@ -400,20 +412,17 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 			totalRows *= copyShape[dimension];
 		}
 
-		final int rowLength = sliceDimensions[sliceDimensions.length - 1];
-		final int[] sliceStrides = getStrides(sliceDimensions);
-
 		if (rank > 1) {
-			recursiveFill(data, 0, 0, copyShape, chunkStart, sliceStart, chunkStrides, dataType, chunkBuffer, fastestDimLength);
+			recursiveFill(data, 0, 0, copyShape, chunkStart, sliceStart, chunkStrides, rowFiller, fastestDimLength);
 		} else {
 			// 1D case
 			for (int i = 0; i < totalRows; i++) {
-				dataType.fillElements(data, sliceStart[0] + i, chunkBuffer, chunkStart[0] + i, fastestDimLength);
+				rowFiller.fillRow(data, sliceStart[0] + i, chunkStart[0] + i, fastestDimLength);
 			}
 		}
 	}
 
-	private void recursiveFill(Object array, int dim, int currentChunkOffset, int[] copyShape, int[] chunkStart, int[] sliceStart, int[] chunkStrides, DataType dataType, ByteBuffer chunkBuffer, int fastestDimLength) {
+	private void recursiveFill(Object array, int dim, int currentChunkOffset, int[] copyShape, int[] chunkStart, int[] sliceStart, int[] chunkStrides, DataType.RowFiller rowFiller, int fastestDimLength) {
 		final int rank = chunkStart.length;
 		if (dim == rank - 2) {
 			// We are at the level of innermost arrays
@@ -421,14 +430,14 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 			for (int i = 0; i < copyShape[dim]; i++) {
 				Object innermost = Array.get(array, sliceStart[dim] + i);
 				int chunkLinearOffset = currentChunkOffset + (chunkStart[dim] + i) * chunkStrides[dim] + chunkStart[rank - 1];
-				dataType.fillElements(innermost, rowOffset, chunkBuffer, chunkLinearOffset, fastestDimLength);
+				rowFiller.fillRow(innermost, rowOffset, chunkLinearOffset, fastestDimLength);
 			}
 		} else {
 			// Higher level arrays
 			for (int i = 0; i < copyShape[dim]; i++) {
 				Object nextArray = Array.get(array, sliceStart[dim] + i);
 				int nextChunkOffset = currentChunkOffset + (chunkStart[dim] + i) * chunkStrides[dim];
-				recursiveFill(nextArray, dim + 1, nextChunkOffset, copyShape, chunkStart, sliceStart, chunkStrides, dataType, chunkBuffer, fastestDimLength);
+				recursiveFill(nextArray, dim + 1, nextChunkOffset, copyShape, chunkStart, sliceStart, chunkStrides, rowFiller, fastestDimLength);
 			}
 		}
 	}
