@@ -200,6 +200,61 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		return data;
 	}
 
+	@Override
+	public boolean supportsDirectFill() {
+		return true;
+	}
+
+	@Override
+	public RowFiller createRowFiller(ByteBuffer buffer) {
+		final ByteOrder byteOrder = getByteOrder();
+		switch (getSize()) {
+			case 2:
+				final ShortBuffer shortBuf = buffer.duplicate().order(byteOrder).asShortBuffer();
+				return (rowArray, rowOffset, bufferElementOffset, length) ->
+					fillHalfFloats(rowArray, rowOffset, shortBuf, bufferElementOffset, length);
+			case 4:
+				final FloatBuffer floatBuf = buffer.duplicate().order(byteOrder).asFloatBuffer();
+				return (rowArray, rowOffset, bufferElementOffset, length) ->
+					floatBuf.get(bufferElementOffset, (float[]) rowArray, rowOffset, length);
+			case 8:
+				final DoubleBuffer doubleBuf = buffer.duplicate().order(byteOrder).asDoubleBuffer();
+				return (rowArray, rowOffset, bufferElementOffset, length) ->
+					doubleBuf.get(bufferElementOffset, (double[]) rowArray, rowOffset, length);
+			default:
+				throw new HdfTypeException(
+					"Unsupported floating point type size " + getSize() + " bytes");
+		}
+	}
+
+	@Override
+	public void fillElements(Object rowArray, int rowOffset, ByteBuffer buffer, int bufferElementOffset, int length) {
+		final ByteOrder byteOrder = getByteOrder();
+		switch (getSize()) {
+			case 2:
+				fillHalfFloats(rowArray, rowOffset, buffer.duplicate().order(byteOrder).asShortBuffer(), bufferElementOffset, length);
+				break;
+			case 4:
+				buffer.duplicate().order(byteOrder).asFloatBuffer()
+						.get(bufferElementOffset, (float[]) rowArray, rowOffset, length);
+				break;
+			case 8:
+				buffer.duplicate().order(byteOrder).asDoubleBuffer()
+						.get(bufferElementOffset, (double[]) rowArray, rowOffset, length);
+				break;
+			default:
+				throw new HdfTypeException(
+					"Unsupported floating point type size " + getSize() + " bytes");
+		}
+	}
+
+	private static void fillHalfFloats(Object rowArray, int rowOffset, ShortBuffer buffer, int bufferElementOffset, int length) {
+		final float[] floatData = (float[]) rowArray;
+		for (int i = 0; i < length; i++) {
+			floatData[rowOffset + i] = toFloat(buffer.get(bufferElementOffset + i));
+		}
+	}
+
 	private static void fillData(Object data, int[] dims, ShortBuffer buffer) {
 		if (dims.length > 1) {
 			for (int i = 0; i < dims[0]; i++) {
