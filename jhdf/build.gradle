@@ -50,6 +50,14 @@ dependencyLocking {
     lockAllConfigurations()
 }
 
+configurations.all {
+    resolutionStrategy {
+        // Guava is a transitive dependency of Jimfs and the Checkstyle tooling. Force the latest
+        // patched version so vulnerabilities in older releases (e.g. CVE-2026-102554) are avoided.
+        force 'com.google.guava:guava:33.8.0-jre'
+    }
+}
+
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     implementation 'org.slf4j:slf4j-api:2.0.20'
