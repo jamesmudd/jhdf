@@ -53,7 +53,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 	 */
 	@Override
 	public ByteBuffer readBufferFromAddress(long address, int length) {
-		long rawAddress = address + sb.getBaseAddressByte();
+		long rawAddress = Math.addExact(address, sb.getBaseAddressByte());
 		try {
 			return readBufferNoOffset(rawAddress, length);
 		} catch (IOException e) {
@@ -64,7 +64,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 
 	@Override
 	public ByteBuffer map(long address, long length) {
-		return mapNoOffset(address + sb.getBaseAddressByte(), length);
+		return mapNoOffset(Math.addExact(address, sb.getBaseAddressByte()), length);
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 			if (numberOfBytesRead <= 0) {
 				throw new IOException("Trying to read more bytes than available");
 			}
-			totalNumberOfBytesRead += numberOfBytesRead;
+			totalNumberOfBytesRead = Math.addExact(totalNumberOfBytesRead, numberOfBytesRead);
 		}
 		bb.order(LITTLE_ENDIAN);
 		bb.flip();

@@ -482,8 +482,31 @@ class UtilsTest {
 	}
 
 	@Test
+	void testDimensionIndexToLinearIndexOverflowIsRejected() {
+		assertThrows(ArithmeticException.class, () -> Utils.dimensionIndexToLinearIndex(
+			new long[]{Long.MAX_VALUE, 0}, new long[]{Long.MAX_VALUE, 2}));
+	}
+
+	@Test
 	void testTotalChunksSupportsLongDatasetDimensions() {
 		assertThat(Utils.totalChunks(new long[]{(long) Integer.MAX_VALUE + 5}, new int[]{1024}), is(2097153L));
+	}
+
+	@Test
+	void testTotalChunksOverflowIsRejected() {
+		assertThrows(ArithmeticException.class,
+			() -> Utils.totalChunks(new long[]{Long.MAX_VALUE, 2}, new int[]{1, 1}));
+	}
+
+	@Test
+	void testChunkIndexToChunkOffsetOverflowIsRejected() {
+		assertThrows(ArithmeticException.class,
+			() -> Utils.chunkIndexToChunkOffset(Long.MAX_VALUE, new int[]{2, 1}, new long[]{Long.MAX_VALUE, 1}));
+	}
+
+	@Test
+	void testNextMultipleOfEightOverflowIsRejected() {
+		assertThrows(ArithmeticException.class, () -> Utils.nextMultipleOfEight(Long.MAX_VALUE));
 	}
 
 	static Stream<Arguments> testGetSetBit() {

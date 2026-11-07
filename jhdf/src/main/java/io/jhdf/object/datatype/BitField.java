@@ -144,7 +144,7 @@ public class BitField extends DataType implements OrderedDataType {
 		final Class<?> type = Utils.getType(data);
 		final int[] dimensions = Utils.getDimensions(data);
 		final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
-		final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize())
+		final ByteBuffer buffer = ByteBuffer.allocate(Math.multiplyExact(totalElements, getSize()))
 			.order(order);
 		if(type == boolean.class) {
 			encodeBooleanData(data, dimensions, buffer, true);
@@ -203,7 +203,7 @@ public class BitField extends DataType implements OrderedDataType {
 		final Class<?> type = Utils.getType(data);
 		final int fastDimSize = dimensions[dimensions.length - 1];
 		// This buffer is reused
-		final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize())
+		final ByteBuffer buffer = ByteBuffer.allocate(Math.multiplyExact(fastDimSize, getSize()))
 			.order(order);
 		if (type == boolean.class) {
 			writeBooleanData(data, dimensions, buffer, hdfFileChannel, true);

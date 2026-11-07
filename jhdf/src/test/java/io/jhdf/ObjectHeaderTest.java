@@ -10,6 +10,7 @@
 package io.jhdf;
 
 import io.jhdf.ObjectHeader.ObjectHeaderV1;
+import io.jhdf.exceptions.HdfException;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
@@ -26,8 +27,11 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
@@ -110,6 +114,26 @@ class ObjectHeaderTest {
 		ObjectHeaderV1 ohV1 = (ObjectHeaderV1) oh;
 		// Two refs this one and a hard link /links/hard_link_to_int8
 		assertThat(ohV1.getReferenceCount(), is(equalTo(2)));
+	}
+
+	@Test
+	void testSelfReferencingContinuationMessageThrowsHdfException() throws IOException {
+		// Regression test for a malformed v1 object header whose continuation message points back at its own
+		// message block. Previously this caused unbounded recursion and a StackOverflowError. The file is
+		// space_padding_problem.hdf5 with the message count set to 0xFFFF and the continuation offset set to 112.
+		Path testPath = TestUtils.getResourcePath("/malformed/recursive_continuation_v1.hdf5");
+		FileChannel fc = FileChannel.open(testPath, StandardOpenOption.READ);
+		HdfBackingStorage malformedFileStorage = new HdfFileChannel(fc, Superblock.readSuperblock(fc, 0));
+		try {
+			HdfException exception = assertThrows(HdfException.class,
+				() -> ObjectHeader.readObjectHeader(malformedFileStorage, 96));
+
+			assertThat(exception.getCause(), is(instanceOf(HdfException.class)));
+			assertThat(exception.getCause().getMessage(), containsString("already been read"));
+		} finally {
+			malformedFileStorage.close();
+			fc.close();
+		}
 	}
 
 	@Test

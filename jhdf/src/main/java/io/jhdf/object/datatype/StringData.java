@@ -191,7 +191,7 @@ public class StringData extends DataType {
 	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
 		if (data.getClass().isArray()) {
 			final int fastDimSize = dimensions[dimensions.length - 1];
-			final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize());
+			final ByteBuffer buffer = ByteBuffer.allocate(Math.multiplyExact(fastDimSize, getSize()));
 			writeArrayData(data, dimensions, buffer, hdfFileChannel);
 		} else {
 			writeScalarData(data, hdfFileChannel);
@@ -216,7 +216,7 @@ public class StringData extends DataType {
 				String str = strings[i];
 				buffer.put(charset.encode(str))
 					.put(NULL)
-					.position((i + 1) * getSize());
+					.position(Math.multiplyExact(i + 1, getSize()));
 			}
 			buffer.rewind();
 			hdfFileChannel.write(buffer);
@@ -238,7 +238,7 @@ public class StringData extends DataType {
 		if (data.getClass().isArray()) {
 			final int[] dimensions = Utils.getDimensions(data);
 			final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
-			final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize());
+			final ByteBuffer buffer = ByteBuffer.allocate(Math.multiplyExact(totalElements, getSize()));
 			encodeDataInternal(data, dimensions, buffer);
 			return buffer;
 		} else {
@@ -259,7 +259,7 @@ public class StringData extends DataType {
                 String str = strings[i];
                 buffer.put(this.charset.encode(str))
                         .put(NULL)
-                        .position(offset + (i + 1) * getSize());
+                        .position(Math.addExact(offset, Math.multiplyExact(i + 1, getSize())));
             }
 		}
 	}

@@ -30,7 +30,8 @@ public class NonFilteredDatasetChunks extends BTreeDatasetChunkRecord {
 
 		long[] chunkOffset = new long[datasetInfo.getDatasetDimensions().length];
 		for (int i = 0; i < chunkOffset.length; i++) {
-			chunkOffset[i] = Utils.readBytesAsUnsignedLong(buffer, 8) * datasetInfo.getChunkDimensions()[i];
+			chunkOffset[i] = Math.multiplyExact(
+				Utils.readBytesAsUnsignedLong(buffer, 8), datasetInfo.getChunkDimensions()[i]);
 		}
 
 		chunk = new ChunkImpl(address, datasetInfo.getChunkSizeInBytes(), chunkOffset);
