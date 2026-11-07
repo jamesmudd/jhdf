@@ -248,10 +248,11 @@ public class FractalHeap {
 		private final List<Long> childBlockAddresses;
 
 		private IndirectBlock(long address) {
-			final int headerSize = 4 + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset
-				+ currentRowsInRootIndirectBlock * tableWidth * getRowSize() + 4;
+			final int indirectBlockEntries = Math.multiplyExact(currentRowsInRootIndirectBlock, tableWidth);
+			final long headerSize = 4L + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset
+				+ (long) indirectBlockEntries * getRowSize() + 4;
 
-			ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
+			ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, Math.toIntExact(headerSize));
 
 			byte[] formatSignatureBytes = new byte[4];
 			bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -275,8 +276,8 @@ public class FractalHeap {
 
 			final long blockOffset = readBytesAsUnsignedLong(bb, bytesToStoreOffset);
 
-			childBlockAddresses = new ArrayList<>(currentRowsInRootIndirectBlock * tableWidth);
-			for (int i = 0; i < currentRowsInRootIndirectBlock * tableWidth; i++) {
+			childBlockAddresses = new ArrayList<>(indirectBlockEntries);
+			for (int i = 0; i < indirectBlockEntries; i++) {
 				// TODO only works for unfiltered
 				long childAddress = readBytesAsUnsignedLong(bb, getRowSize());
 				if (childAddress == UNDEFINED_ADDRESS) {
@@ -373,7 +374,7 @@ public class FractalHeap {
 		if (row < 2) {
 			return startingBlockSize;
 		} else {
-			int size = startingBlockSize * TWO.pow(row - 1).intValueExact();
+			int size = Math.multiplyExact(startingBlockSize, TWO.pow(row - 1).intValueExact());
 			if (size < maxDirectBlockSize) {
 				return size;
 			} else {

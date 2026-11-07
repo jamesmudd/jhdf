@@ -113,7 +113,8 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
 		}
 
 		private int getChunkSizeInBytes() {
-			return Arrays.stream(getChunkDimensions()).reduce(1, Math::multiplyExact) * getDataType().getSize();
+			return Math.multiplyExact(
+				Arrays.stream(getChunkDimensions()).reduce(1, Math::multiplyExact), getDataType().getSize());
 		}
 
 	}

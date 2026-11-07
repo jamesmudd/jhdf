@@ -56,7 +56,8 @@ public class Lz4Filter implements Filter {
 
 		final int decompressedBlockSize = Utils.readBytesAsUnsignedInt(byteBuffer, 4);
 
-		final long blocks = (totalDecompressedSize + decompressedBlockSize - 1) / decompressedBlockSize;
+		final long blocks = totalDecompressedSize / decompressedBlockSize
+			+ (totalDecompressedSize % decompressedBlockSize == 0 ? 0 : 1);
 
 		int offset = 0;
 		byte[] compressedBlock = new byte[0];

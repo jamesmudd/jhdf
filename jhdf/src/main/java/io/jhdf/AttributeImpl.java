@@ -56,7 +56,7 @@ public class AttributeImpl implements Attribute {
 
 	@Override
 	public long getSizeInBytes() {
-		return getSize() * message.getDataType().getSize();
+		return Math.multiplyExact(getSize(), message.getDataType().getSize());
 	}
 
 	@Override
