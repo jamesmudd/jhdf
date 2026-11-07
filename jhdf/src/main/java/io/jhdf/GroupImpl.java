@@ -270,29 +270,34 @@ public class GroupImpl extends AbstractNode implements Group {
 
 	@Override
 	public Node getByPath(String path) {
-		// Special case when path is dot
-		if(path.equals(".")) {
-			return this;
-		}
-		// Try splitting into 2 sections the child of this group and the remaining path
-		// to pass down.
-		final String[] pathElements = path.split(Constants.PATH_SEPARATOR, 2);
-		Node child = getChild(pathElements[0]);
-		// If we have a link try to resolve it
-		if (child instanceof Link) {
-			child = ((Link) child).getTarget();
-		}
-		if (pathElements.length == 1 && child != null) {
-			// There is no remaining path to resolve so we have the result
-			return child;
-		} else if (child instanceof Group) {
-			// The next level is also a group so try to keep resolving the remaining path
-			return ((Group) child).getByPath(pathElements[1]);
-		} else {
-			// Path can't be resolved
-			throw new HdfInvalidPathException(getPath() + path, getFileAsPath());
-		}
+		Group currentGroup = this;
+		String remainingPath = path;
 
+		while (true) {
+			// Special case when path is dot
+			if (remainingPath.equals(".")) {
+				return currentGroup;
+			}
+
+			// Split into the child of the current group and the remaining path
+			final String[] pathElements = remainingPath.split(Constants.PATH_SEPARATOR, 2);
+			Node child = currentGroup.getChild(pathElements[0]);
+			// If we have a link try to resolve it
+			if (child instanceof Link) {
+				child = ((Link) child).getTarget();
+			}
+			if (pathElements.length == 1 && child != null) {
+				// There is no remaining path to resolve so we have the result
+				return child;
+			} else if (child instanceof Group) {
+				// The next level is also a group so keep resolving the remaining path
+				currentGroup = (Group) child;
+				remainingPath = pathElements[1];
+			} else {
+				// Path can't be resolved
+				throw new HdfInvalidPathException(currentGroup.getPath() + remainingPath, getFileAsPath());
+			}
+		}
 	}
 
 	@Override
