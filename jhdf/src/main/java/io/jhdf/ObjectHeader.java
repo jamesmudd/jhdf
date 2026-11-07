@@ -24,13 +24,21 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.jhdf.Utils.readBytesAsUnsignedInt;
 
 public abstract class ObjectHeader {
 	private static final Logger logger = LoggerFactory.getLogger(ObjectHeader.class);
+
+	/**
+	 * The maximum number of continuation blocks which will be followed for a single object header. Real HDF5 files use
+	 * only a handful of continuation blocks so this is generous while still bounding the recursion.
+	 */
+	private static final int MAX_CONTINUATION_DEPTH = 16;
 
 	/**
 	 * The location of this Object header in the file
@@ -40,6 +48,11 @@ public abstract class ObjectHeader {
 	 * The messages contained in this object header
 	 */
 	protected final List<Message> messages = new ArrayList<>();
+	/**
+	 * The offsets of the continuation blocks which have already been read for this object header. Used to detect
+	 * malformed files which create cycles of continuation blocks.
+	 */
+	private final Set<Long> visitedContinuationOffsets = new HashSet<>();
 
 	public long getAddress() {
 		return address;
@@ -57,6 +70,31 @@ public abstract class ObjectHeader {
 
 	protected ObjectHeader(long address) {
 		this.address = address;
+	}
+
+	/**
+	 * Checks a continuation block can safely be read. This protects against malformed files which create cycles of
+	 * continuation blocks or long continuation chains, either of which would otherwise cause unbounded recursion.
+	 *
+	 * @param continuationMessage the continuation message to check
+	 * @param currentDepth the number of continuation blocks already read for this object header
+	 * @throws HdfException if the continuation block should not be followed
+	 */
+	protected void checkContinuationMessage(ObjectHeaderContinuationMessage continuationMessage, int currentDepth) {
+		if (currentDepth >= MAX_CONTINUATION_DEPTH) {
+			throw new HdfException("Object header continuation chain exceeds the maximum depth of "
+				+ MAX_CONTINUATION_DEPTH);
+		}
+
+		final long offset = continuationMessage.getOffset();
+		if (offset == address) {
+			throw new HdfException("Object header continuation message points at its own object header, address: "
+				+ offset);
+		}
+		if (!visitedContinuationOffsets.add(offset)) {
+			throw new HdfException("Object header continuation message points at a continuation block which has already "
+				+ "been read, address: " + offset);
+		}
 	}
 
 	public <T extends Message> List<T> getMessagesOfType(Class<T> type) {
@@ -119,7 +157,7 @@ public abstract class ObjectHeader {
 				address += 16;
 				header = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
-				readMessages(hdfBackingStorage, header, numberOfMessages);
+				readMessages(hdfBackingStorage, header, numberOfMessages, 0);
 
 				logger.debug("Read object header from address: {}", address);
 
@@ -128,17 +166,18 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb, int numberOfMessages) {
+		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb, int numberOfMessages, int continuationDepth) {
 			while (bb.remaining() > 4 && messages.size() < numberOfMessages) {
 				Message m = Message.readObjectHeaderV1Message(bb, hdfBackingStorage);
 				messages.add(m);
 
 				if (m instanceof ObjectHeaderContinuationMessage) {
 					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
+					checkContinuationMessage(ohcm, continuationDepth);
 
 					ByteBuffer continuationBuffer = hdfBackingStorage.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
 
-					readMessages(hdfBackingStorage, continuationBuffer, numberOfMessages);
+					readMessages(hdfBackingStorage, continuationBuffer, numberOfMessages, continuationDepth + 1);
 				}
 			}
 		}
@@ -265,7 +304,7 @@ public abstract class ObjectHeader {
 
 				// There might be a gap at the end of the header of up to 4 bytes
 				// message type (1_byte) + message size (2 bytes) + message flags (1 byte)
-				readMessages(hdfBackingStorage, bb);
+				readMessages(hdfBackingStorage, bb, 0);
 
 				// Checksum
 				headerSize += 4;
@@ -352,13 +391,15 @@ public abstract class ObjectHeader {
 			return bufferBuilder.build();
 		}
 
-		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb) {
+		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb, int continuationDepth) {
 			while (bb.remaining() >= 8) {
 				Message m = Message.readObjectHeaderV2Message(bb, hdfBackingStorage, this.isAttributeCreationOrderTracked());
 				messages.add(m);
 
 				if (m instanceof ObjectHeaderContinuationMessage) {
 					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
+					checkContinuationMessage(ohcm, continuationDepth);
+
 					ByteBuffer continuationBuffer = hdfBackingStorage.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
 
 					// Verify continuation block signature
@@ -370,7 +411,7 @@ public abstract class ObjectHeader {
 					}
 
 					// Recursively read messages
-					readMessages(hdfBackingStorage, continuationBuffer);
+					readMessages(hdfBackingStorage, continuationBuffer, continuationDepth + 1);
 
 					continuationBuffer.rewind();
 					ChecksumUtils.validateChecksum(continuationBuffer);
