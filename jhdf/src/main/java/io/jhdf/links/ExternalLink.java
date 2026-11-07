@@ -41,22 +41,32 @@ public class ExternalLink extends AbstractLink {
 	private class ExternalLinkTargetLazyInitializer extends LazyInitializer<Node> {
 		@Override
 		protected Node initialize() {
-			// Open the external file
-			final HdfFile externalFile = new HdfFile(getTargetFile());
-			// Tell this file about it to keep track of open external files
-			getHdfFile().addExternalFile(externalFile);
-			return externalFile.getByPath(targetPath);
+			final Path resolvedTargetFile = getTargetFile();
+			return LinkResolutionGuard.resolve(getResolutionKey(resolvedTargetFile), () -> {
+				// Open the external file
+				final HdfFile externalFile = new HdfFile(resolvedTargetFile);
+				// Tell this file about it to keep track of open external files
+				getHdfFile().addExternalFile(externalFile);
+				return externalFile.getByPath(targetPath);
+			});
 		}
+	}
 
-		private Path getTargetFile() {
-			// Check if the target file path is absolute
-			if (targetFile.startsWith(File.separator)) {
-				return Paths.get(targetFile);
-			} else {
-				// Need to resolve the full path
-				Path thisFilesDirectory = parent.getFileAsPath().getParent();
-				return thisFilesDirectory != null ? thisFilesDirectory.resolve(targetFile) : null;
-			}
+	private String getResolutionKey(Path resolvedTargetFile) {
+		final String fileKey = resolvedTargetFile == null
+			? "null"
+			: resolvedTargetFile.toAbsolutePath().normalize().toString();
+		return "external:" + fileKey + ":" + targetPath;
+	}
+
+	private Path getTargetFile() {
+		// Check if the target file path is absolute
+		if (targetFile.startsWith(File.separator)) {
+			return Paths.get(targetFile);
+		} else {
+			// Need to resolve the full path
+			Path thisFilesDirectory = parent.getFileAsPath().getParent();
+			return thisFilesDirectory != null ? thisFilesDirectory.resolve(targetFile) : null;
 		}
 	}
 

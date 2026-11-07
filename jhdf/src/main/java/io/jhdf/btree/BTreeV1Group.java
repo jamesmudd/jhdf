@@ -15,6 +15,7 @@ import io.jhdf.storage.HdfBackingStorage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * V1 B-trees where the node type is 0 i.e. points to group nodes
@@ -60,7 +61,8 @@ public abstract class BTreeV1Group extends BTreeV1 {
 
 		private final List<BTreeV1> childNodes;
 
-		/* package */ BTreeV1GroupNonLeafNode(HdfBackingStorage hdfBackingStorage, long address) {
+		/* package */ BTreeV1GroupNonLeafNode(HdfBackingStorage hdfBackingStorage, long address,
+										   Set<Long> visitedAddresses, int depth) {
 			super(hdfBackingStorage, address);
 
 			final int keyBytes = (2 * entriesUsed + 1) * hdfBackingStorage.getSizeOfLengths();
@@ -75,7 +77,7 @@ public abstract class BTreeV1Group extends BTreeV1 {
 			for (int i = 0; i < entriesUsed; i++) {
 				keysAndPointersBuffer.position(keysAndPointersBuffer.position() + hdfBackingStorage.getSizeOfOffsets());
 				long childAddress = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, hdfBackingStorage.getSizeOfOffsets());
-				childNodes.add(createGroupBTree(hdfBackingStorage, childAddress));
+				childNodes.add(createGroupBTree(hdfBackingStorage, childAddress, visitedAddresses, depth + 1));
 			}
 
 		}

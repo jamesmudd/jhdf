@@ -21,9 +21,11 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +41,9 @@ public abstract class ObjectHeader {
 	 * only a handful of continuation blocks so this is generous while still bounding the recursion.
 	 */
 	private static final int MAX_CONTINUATION_DEPTH = 16;
+	private static final int MAX_OBJECT_HEADER_NESTING = 16;
+	private static final ThreadLocal<Deque<Long>> OBJECT_HEADER_READ_STACK =
+		ThreadLocal.withInitial(ArrayDeque::new);
 
 	/**
 	 * The location of this Object header in the file
@@ -461,12 +466,29 @@ public abstract class ObjectHeader {
 	}
 
 	public static ObjectHeader readObjectHeader(HdfBackingStorage hdfBackingStorage, long address) {
-		ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, 1);
-		byte version = bb.get();
-		if (version == 1) {
-			return new ObjectHeaderV1(hdfBackingStorage, address);
-		} else {
-			return new ObjectHeaderV2(hdfBackingStorage, address);
+		final Deque<Long> readStack = OBJECT_HEADER_READ_STACK.get();
+		if (readStack.contains(address)) {
+			throw new HdfException("Recursive object header reference at address: " + address);
+		}
+		if (readStack.size() >= MAX_OBJECT_HEADER_NESTING) {
+			throw new HdfException("Object header nesting exceeds the maximum depth of "
+				+ MAX_OBJECT_HEADER_NESTING);
+		}
+
+		readStack.push(address);
+		try {
+			ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, 1);
+			byte version = bb.get();
+			if (version == 1) {
+				return new ObjectHeaderV1(hdfBackingStorage, address);
+			} else {
+				return new ObjectHeaderV2(hdfBackingStorage, address);
+			}
+		} finally {
+			readStack.pop();
+			if (readStack.isEmpty()) {
+				OBJECT_HEADER_READ_STACK.remove();
+			}
 		}
 	}
 

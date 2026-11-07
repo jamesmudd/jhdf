@@ -21,7 +21,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static io.jhdf.Utils.createSubBuffer;
 import static io.jhdf.Utils.readBytesAsUnsignedInt;
@@ -31,6 +33,7 @@ import static io.jhdf.btree.record.BTreeRecord.readRecord;
 public class BTreeV2<T extends BTreeRecord> {
 
 	private static final int NODE_OVERHEAD_BYTES = 10;
+	private static final int MAX_BTREE_DEPTH = 64;
 
 	private static final byte[] BTREE_NODE_V2_SIGNATURE = "BTHD".getBytes(StandardCharsets.US_ASCII);
 	private static final byte[] BTREE_INTERNAL_NODE_SIGNATURE = "BTIN".getBytes(StandardCharsets.US_ASCII);
@@ -92,6 +95,9 @@ public class BTreeV2<T extends BTreeRecord> {
 			nodeSize = Utils.readBytesAsUnsignedInt(bb, 4);
 			recordSize = Utils.readBytesAsUnsignedInt(bb, 2);
 			final int depth = Utils.readBytesAsUnsignedInt(bb, 2);
+			if (depth > MAX_BTREE_DEPTH) {
+				throw new HdfException("B tree depth exceeds the maximum depth of " + MAX_BTREE_DEPTH);
+			}
 
 			final int splitPercent = Utils.readBytesAsUnsignedInt(bb, 1);
 			final int mergePercent = Utils.readBytesAsUnsignedInt(bb, 1);
@@ -106,7 +112,8 @@ public class BTreeV2<T extends BTreeRecord> {
 
 			records = new ArrayList<>(totalNumberOfRecordsInTree);
 
-			readRecords(hdfBackingStorage, rootNodeAddress, depth, numberOfRecordsInRoot, totalNumberOfRecordsInTree, datasetInfo);
+			readRecords(hdfBackingStorage, rootNodeAddress, depth, numberOfRecordsInRoot, totalNumberOfRecordsInTree,
+				datasetInfo, new HashSet<>());
 
 		} catch (HdfException e) {
 			throw new HdfException("Error reading B Tree node", e);
@@ -114,7 +121,12 @@ public class BTreeV2<T extends BTreeRecord> {
 
 	}
 
-	private void readRecords(HdfBackingStorage hdfBackingStorage, long address, int depth, int numberOfRecords, int totalRecords, DatasetInfo datasetInfo) {
+	private void readRecords(HdfBackingStorage hdfBackingStorage, long address, int depth, int numberOfRecords,
+							 int totalRecords, DatasetInfo datasetInfo, Set<Long> visitedAddresses) {
+
+		if (!visitedAddresses.add(address)) {
+			throw new HdfException("B tree cycle detected at address: " + address);
+		}
 
 		ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, nodeSize);
 
@@ -142,6 +154,9 @@ public class BTreeV2<T extends BTreeRecord> {
 		}
 
 		if (!leafNode) {
+			if (depth <= 0) {
+				throw new HdfException("B tree internal node found at depth 0");
+			}
 			for (int i = 0; i < numberOfRecords + 1; i++) {
 				final long childAddress = readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
 				int sizeOfNumberOfRecords = getSizeOfNumberOfRecords(nodeSize, depth, totalRecords, recordSize,
@@ -154,7 +169,8 @@ public class BTreeV2<T extends BTreeRecord> {
 				} else {
 					totalNumberOfChildRecords = -1;
 				}
-				readRecords(hdfBackingStorage, childAddress, depth - 1, numberOfChildRecords, totalNumberOfChildRecords, datasetInfo);
+				readRecords(hdfBackingStorage, childAddress, depth - 1, numberOfChildRecords,
+					totalNumberOfChildRecords, datasetInfo, visitedAddresses);
 			}
 		}
 		bb.limit(bb.position() + 4);

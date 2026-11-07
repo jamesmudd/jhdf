@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 
@@ -94,7 +95,8 @@ public abstract class BTreeV1Data extends BTreeV1 {
 
 		private final List<BTreeV1Data> childNodes;
 
-		/* package */ BTreeV1DataNonLeafNode(HdfBackingStorage hdfBackingStorage, long address, int dataDimensions) {
+		/* package */ BTreeV1DataNonLeafNode(HdfBackingStorage hdfBackingStorage, long address, int dataDimensions,
+										  Set<Long> visitedAddresses, int depth) {
 			super(hdfBackingStorage, address);
 
 			final int keySize = Math.addExact(8, Math.multiplyExact(Math.addExact(dataDimensions, 1), 8));
@@ -110,7 +112,8 @@ public abstract class BTreeV1Data extends BTreeV1 {
 			for (int i = 0; i < entriesUsed; i++) {
 				keysAndPointersBuffer.position(keysAndPointersBuffer.position() + keySize);
 				long childAddress = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, hdfBackingStorage.getSizeOfOffsets());
-				childNodes.add(BTreeV1.createDataBTree(hdfBackingStorage, childAddress, dataDimensions));
+				childNodes.add(BTreeV1.createDataBTree(hdfBackingStorage, childAddress, dataDimensions,
+					visitedAddresses, depth + 1));
 			}
 		}
 
