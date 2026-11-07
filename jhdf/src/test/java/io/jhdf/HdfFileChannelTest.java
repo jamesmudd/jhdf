@@ -68,6 +68,8 @@ class HdfFileChannelTest {
 			bb.put("TEST".getBytes(US_ASCII)); // Put test data in buffer
 			return 4;
 		}).when(fc).read(any(ByteBuffer.class), eq(3L));
+		// The read ends exactly at the end of the file
+		when(fc.size()).thenReturn(7L);
 
 		// Read 4 bytes
 		ByteBuffer bb = hdfFc.readBufferFromAddress(3, 4);
@@ -77,7 +79,48 @@ class HdfFileChannelTest {
 	}
 
 	@Test
+	void testReadingMoreBytesThanTheFileContainsThrows() throws IOException {
+		when(fc.size()).thenReturn(100L);
+
+		// A length field read from a corrupt file must not be used to size an allocation
+		assertThrows(HdfException.class, () -> hdfFc.readBufferFromAddress(0, 1000));
+
+		// Crucially nothing was read, and with the fix nothing was allocated either
+		Mockito.verify(fc, Mockito.never()).read(any(ByteBuffer.class), anyLong());
+	}
+
+	@Test
+	void testReadingPastTheEndOfTheFileThrows() throws IOException {
+		when(fc.size()).thenReturn(100L);
+
+		assertThrows(HdfException.class, () -> hdfFc.readBufferFromAddress(96, 5));
+
+		Mockito.verify(fc, Mockito.never()).read(any(ByteBuffer.class), anyLong());
+	}
+
+	@Test
+	void testReadingAtANegativeAddressThrows() throws IOException {
+		when(fc.size()).thenReturn(100L);
+
+		assertThrows(HdfException.class, () -> hdfFc.readBufferFromAddress(-1, 5));
+
+		Mockito.verify(fc, Mockito.never()).read(any(ByteBuffer.class), anyLong());
+	}
+
+	@Test
+	void testReadingAtAnAddressWhichOverflowsThrows() throws IOException {
+		when(fc.size()).thenReturn(100L);
+		when(sb.getBaseAddressByte()).thenReturn(Long.MAX_VALUE);
+
+		// address + base address overflows to a negative value
+		assertThrows(HdfException.class, () -> hdfFc.readBufferFromAddress(1, 5));
+
+		Mockito.verify(fc, Mockito.never()).read(any(ByteBuffer.class), anyLong());
+	}
+
+	@Test
 	void testReadingChannelThrows() throws IOException {
+		when(fc.size()).thenReturn(100L);
 		when(fc.read(any(ByteBuffer.class), anyLong())).thenThrow(IOException.class);
 
 		assertThrows(HdfException.class, () -> hdfFc.readBufferFromAddress(3, 4));
@@ -88,6 +131,7 @@ class HdfFileChannelTest {
 	void testMap() throws IOException {
 		MappedByteBuffer mockMappedByteBuffer = mock(MappedByteBuffer.class);
 		when(fc.map(any(MapMode.class), anyLong(), anyLong())).thenReturn(mockMappedByteBuffer);
+		when(fc.size()).thenReturn(100L);
 
 		assertThat(hdfFc.map(20, 10), is(sameInstance(mockMappedByteBuffer)));
 	}
@@ -95,8 +139,29 @@ class HdfFileChannelTest {
 	@Test
 	void testMapThrows() throws IOException {
 		when(fc.map(any(MapMode.class), anyLong(), anyLong())).thenThrow(IOException.class);
+		when(fc.size()).thenReturn(100L);
 
 		assertThrows(HdfException.class, () -> hdfFc.map(20, 10));
+	}
+
+	@Test
+	void testMapBeyondTheEndOfTheFileThrows() throws IOException {
+		when(fc.size()).thenReturn(100L);
+
+		assertThrows(HdfException.class, () -> hdfFc.map(96, 5));
+
+		Mockito.verify(fc, Mockito.never()).map(any(MapMode.class), anyLong(), anyLong());
+	}
+
+	@Test
+	void testMapReadWriteBeyondTheEndOfTheFileIsAllowed() throws IOException {
+		when(fc.size()).thenReturn(100L);
+
+		// Mapping beyond the end of the file is a valid way to grow it, only read only mappings are bounds checked
+		hdfFc.mapNoOffset(96, 5, MapMode.READ_WRITE);
+
+		Mockito.verify(fc).map(MapMode.READ_WRITE, 96, 5);
+		Mockito.verify(fc, Mockito.never()).size();
 	}
 
 	@Test
