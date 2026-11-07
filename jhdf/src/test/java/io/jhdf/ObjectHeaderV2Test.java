@@ -11,6 +11,7 @@ package io.jhdf;
 
 import io.jhdf.ObjectHeader.ObjectHeaderV2;
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.GroupInfoMessage;
 import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
@@ -40,6 +41,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ObjectHeaderV2Test {
@@ -51,6 +53,7 @@ class ObjectHeaderV2Test {
 
 	private static final int FIRST_CONTINUATION_BLOCK_OFFSET = 512;
 	private static final int CONTINUATION_BLOCK_SIZE = 28; // Signature + continuation message + checksum
+	private static final int OBJECT_HEADER_SPACING = 64;
 
 	private HdfBackingStorage hdfBackingStorage;
 
@@ -265,6 +268,80 @@ class ObjectHeaderV2Test {
 
 		assertThat(exception.getCause(), is(instanceOf(HdfException.class)));
 		assertThat(exception.getCause().getMessage(), containsString("maximum depth"));
+	}
+
+	@Test
+	void testRecursiveSharedMessageCycleThrowsHdfException() {
+		HdfBackingStorage inMemoryStorage = new HdfInMemoryByteBuffer(
+			createObjectHeaderWithSharedDatatype(0),
+			new Superblock.SuperblockV2V3());
+
+		HdfException exception = assertThrows(HdfException.class,
+			() -> ObjectHeader.readObjectHeader(inMemoryStorage, 0));
+
+		assertThat(findCauseContaining(exception, "Recursive object header reference"), is(notNullValue()));
+	}
+
+	@Test
+	void testSharedMessageChainDepthExceededThrowsHdfException() {
+		final int numberOfObjectHeaders = 20;
+		ByteBuffer file = ByteBuffer.allocate(numberOfObjectHeaders * OBJECT_HEADER_SPACING)
+			.order(LITTLE_ENDIAN);
+		for (int i = 0; i < numberOfObjectHeaders; i++) {
+			file.position(i * OBJECT_HEADER_SPACING);
+			file.put(createObjectHeaderWithSharedDatatype((long) (i + 1) * OBJECT_HEADER_SPACING));
+		}
+
+		HdfBackingStorage inMemoryStorage = new HdfInMemoryByteBuffer(file, new Superblock.SuperblockV2V3());
+
+		HdfException exception = assertThrows(HdfException.class,
+			() -> ObjectHeader.readObjectHeader(inMemoryStorage, 0));
+
+		assertThat(findCauseContaining(exception, "maximum depth"), is(notNullValue()));
+	}
+
+	private static Throwable findCauseContaining(Throwable throwable, String messagePart) {
+		for (Throwable cause = throwable; cause != null; cause = cause.getCause()) {
+			if (cause.getMessage() != null && cause.getMessage().contains(messagePart)) {
+				return cause;
+			}
+		}
+		return null;
+	}
+
+	private static ByteBuffer createObjectHeaderWithSharedDatatype(long targetAddress) {
+		ByteBuffer sharedMessage = new BufferBuilder()
+			.writeByte(1) // Shared message version
+			.writeByte(0) // Shared message type
+			.writeBytes(new byte[6]) // Reserved
+			.writeLong(targetAddress)
+			.build();
+
+		ByteBuffer attributeMessage = new BufferBuilder()
+			.writeByte(2) // Attribute message version
+			.writeByte(1) // Flags: datatype is shared
+			.writeShort(1) // Name size including null terminator
+			.writeShort(sharedMessage.capacity())
+			.writeShort(0) // Dataspace size, not reached before the cycle is detected
+			.writeByte(0) // Empty null terminated name
+			.writeBuffer(sharedMessage)
+			.build();
+
+		ByteBuffer message = new BufferBuilder()
+			.writeByte(AttributeMessage.MESSAGE_TYPE)
+			.writeShort(attributeMessage.capacity())
+			.writeByte(0) // Message flags
+			.writeBuffer(attributeMessage)
+			.build();
+
+		return new BufferBuilder()
+			.writeBytes("OHDR".getBytes(StandardCharsets.US_ASCII))
+			.writeByte(2) // Version
+			.writeByte(0b10) // Size of chunk 0 is stored in 4 bytes
+			.writeInt(message.capacity())
+			.writeBuffer(message)
+			.appendChecksum()
+			.build();
 	}
 
 	private static ByteBuffer createObjectHeaderWithContinuation(long continuationOffset, int continuationLength) {

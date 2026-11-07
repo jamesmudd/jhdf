@@ -18,7 +18,9 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class to represent V1 B-trees
@@ -36,6 +38,7 @@ public abstract class BTreeV1 {
 
 	private static final byte[] BTREE_NODE_V1_SIGNATURE = "TREE".getBytes(StandardCharsets.US_ASCII);
 	private static final int HEADER_BYTES = 6;
+	private static final int MAX_BTREE_DEPTH = 64;
 
 	/**
 	 * The location of this B tree in the file
@@ -46,6 +49,13 @@ public abstract class BTreeV1 {
 	private final long rightSiblingAddress;
 
 	public static BTreeV1Group createGroupBTree(HdfBackingStorage hdfBackingStorage, long address) {
+		return createGroupBTree(hdfBackingStorage, address, new HashSet<>(), 0);
+	}
+
+	/* package */ static BTreeV1Group createGroupBTree(HdfBackingStorage hdfBackingStorage, long address,
+													   Set<Long> visitedAddresses, int depth) {
+		checkTraversal(address, visitedAddresses, depth);
+
 		ByteBuffer header = readHeaderAndValidateSignature(hdfBackingStorage, address);
 
 		final byte nodeType = header.get();
@@ -56,7 +66,7 @@ public abstract class BTreeV1 {
 		final byte nodeLevel = header.get();
 
 		if (nodeLevel > 0) {
-			return new BTreeV1Group.BTreeV1GroupNonLeafNode(hdfBackingStorage, address);
+			return new BTreeV1Group.BTreeV1GroupNonLeafNode(hdfBackingStorage, address, visitedAddresses, depth);
 		} else {
 			return new BTreeV1Group.BTreeV1GroupLeafNode(hdfBackingStorage, address);
 		}
@@ -64,6 +74,13 @@ public abstract class BTreeV1 {
 	}
 
 	public static BTreeV1Data createDataBTree(HdfBackingStorage hdfBackingStorage, long address, int dataDimensions) {
+		return createDataBTree(hdfBackingStorage, address, dataDimensions, new HashSet<>(), 0);
+	}
+
+	/* package */ static BTreeV1Data createDataBTree(HdfBackingStorage hdfBackingStorage, long address,
+													int dataDimensions, Set<Long> visitedAddresses, int depth) {
+		checkTraversal(address, visitedAddresses, depth);
+
 		ByteBuffer header = readHeaderAndValidateSignature(hdfBackingStorage, address);
 
 		final byte nodeType = header.get();
@@ -74,9 +91,19 @@ public abstract class BTreeV1 {
 		final byte nodeLevel = header.get();
 
 		if (nodeLevel > 0) {
-			return new BTreeV1Data.BTreeV1DataNonLeafNode(hdfBackingStorage, address, dataDimensions);
+			return new BTreeV1Data.BTreeV1DataNonLeafNode(hdfBackingStorage, address, dataDimensions,
+				visitedAddresses, depth);
 		} else {
 			return new BTreeV1Data.BTreeV1DataLeafNode(hdfBackingStorage, address, dataDimensions);
+		}
+	}
+
+	private static void checkTraversal(long address, Set<Long> visitedAddresses, int depth) {
+		if (depth >= MAX_BTREE_DEPTH) {
+			throw new HdfException("B tree exceeds the maximum depth of " + MAX_BTREE_DEPTH);
+		}
+		if (!visitedAddresses.add(address)) {
+			throw new HdfException("B tree cycle detected at address: " + address);
 		}
 	}
 

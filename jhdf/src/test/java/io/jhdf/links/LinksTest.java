@@ -21,13 +21,16 @@ import io.jhdf.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.net.URI;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.notNullValue;
@@ -75,6 +78,28 @@ class LinksTest {
 		assertThat(softLink.getAttribute("missing_attribute"), is(nullValue()));
 		assertThat(softLink.isAttributeCreationOrderTracked(), is(false));
 
+	}
+
+	@Test
+	void testSoftLinkCycleIsDetected() {
+		HdfFile mockHdfFile = Mockito.mock(HdfFile.class);
+		Group mockParent = Mockito.mock(Group.class);
+		Mockito.when(mockHdfFile.inMemory()).thenReturn(true);
+		Mockito.when(mockParent.getHdfFile()).thenReturn(mockHdfFile);
+		Mockito.when(mockParent.getPath()).thenReturn("/");
+
+		SoftLink softLink = new SoftLink("/cycle", "cycle", mockParent);
+		Mockito.when(mockHdfFile.getByPath("/cycle")).thenAnswer(invocation -> softLink.getTarget());
+
+		HdfBrokenLinkException exception = assertThrows(HdfBrokenLinkException.class, softLink::getTarget);
+
+		Throwable cause = exception;
+		while (cause != null && (cause.getMessage() == null
+			|| !cause.getMessage().contains("Cyclic link resolution"))) {
+			cause = cause.getCause();
+		}
+		assertThat(cause, is(notNullValue()));
+		assertThat(cause, is(instanceOf(HdfException.class)));
 	}
 
 	@Test
