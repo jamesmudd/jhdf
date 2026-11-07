@@ -238,7 +238,7 @@ public class HdfFile implements Group, AutoCloseable {
 		if (offset == 0) {
 			return 512L;
 		}
-		return offset * 2;
+		return Math.multiplyExact(offset, 2);
 	}
 
 	/**

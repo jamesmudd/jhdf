@@ -61,7 +61,7 @@ public class WritableAttributeImpl implements Attribute {
 
 	@Override
 	public long getSizeInBytes() {
-		return getSize() * dataType.getSize();
+		return Math.multiplyExact(getSize(), dataType.getSize());
 	}
 
 	@Override

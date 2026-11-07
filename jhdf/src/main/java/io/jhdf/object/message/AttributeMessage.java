@@ -116,7 +116,8 @@ public class AttributeMessage extends Message {
 				throw new UnsupportedHdfException("Unsupported Attribute message version. Detected version: " + version);
 		}
 
-		final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
+		final int dataSize = Math.toIntExact(
+			Math.multiplyExact(dataSpace.getTotalLength(), dataType.getSize()));
 		if (dataSize == 0) {
 			data = null;
 		} else {
