@@ -32,14 +32,15 @@ public class FilteredDatasetChunks extends BTreeDatasetChunkRecord {
 		final int chunkSizeBytes = buffer.limit()
 			- 8 // size of offsets
 			- 4 // filter mask
-			- datasetInfo.getDatasetDimensions().length * 8; // dimension offsets
+			- Math.multiplyExact(datasetInfo.getDatasetDimensions().length, 8); // dimension offsets
 
 		final int chunkSize = Utils.readBytesAsUnsignedInt(buffer, chunkSizeBytes);
 		final BitSet filterMask = BitSet.valueOf(new byte[]{buffer.get(), buffer.get(), buffer.get(), buffer.get()});
 
 		long[] chunkOffset = new long[datasetInfo.getDatasetDimensions().length];
 		for (int i = 0; i < chunkOffset.length; i++) {
-			chunkOffset[i] = Utils.readBytesAsUnsignedLong(buffer, 8) * datasetInfo.getChunkDimensions()[i];
+			chunkOffset[i] = Math.multiplyExact(
+				Utils.readBytesAsUnsignedLong(buffer, 8), datasetInfo.getChunkDimensions()[i]);
 		}
 
 		chunk = new ChunkImpl(address, chunkSize, chunkOffset, filterMask);

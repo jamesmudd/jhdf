@@ -240,7 +240,7 @@ public abstract class ObjectHeader {
 			try {
 				ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, 6);
 				address += 6;
-				headerSize += 6;
+				headerSize = Math.addExact(headerSize, 6);
 
 				byte[] formatSignatureBytes = new byte[OBJECT_HEADER_V2_SIGNATURE.length];
 				bb.get(formatSignatureBytes);
@@ -267,7 +267,7 @@ public abstract class ObjectHeader {
 				if (flags.get(TIMESTAMPS_PRESENT)) {
 					bb = hdfBackingStorage.readBufferFromAddress(address, 16);
 					address += 16;
-					headerSize += 16;
+					headerSize = Math.addExact(headerSize, 16);
 
 					accessTime = Utils.readBytesAsUnsignedLong(bb, 4);
 					modificationTime = Utils.readBytesAsUnsignedLong(bb, 4);
@@ -284,7 +284,7 @@ public abstract class ObjectHeader {
 				if (flags.get(NUMBER_OF_ATTRIBUTES_PRESENT)) {
 					bb = hdfBackingStorage.readBufferFromAddress(address, 4);
 					address += 4;
-					headerSize += 4;
+					headerSize = Math.addExact(headerSize, 4);
 
 					maximumNumberOfCompactAttributes = readBytesAsUnsignedInt(bb, 2);
 					maximumNumberOfDenseAttributes = readBytesAsUnsignedInt(bb, 2);
@@ -295,19 +295,19 @@ public abstract class ObjectHeader {
 
 				bb = hdfBackingStorage.readBufferFromAddress(address, sizeOfChunk0);
 				address += sizeOfChunk0;
-				headerSize += sizeOfChunk0;
+				headerSize = Math.addExact(headerSize, sizeOfChunk0);
 
 				int sizeOfMessages = readBytesAsUnsignedInt(bb, sizeOfChunk0);
 
 				bb = hdfBackingStorage.readBufferFromAddress(address, sizeOfMessages);
-				headerSize += sizeOfMessages;
+				headerSize = Math.addExact(headerSize, sizeOfMessages);
 
 				// There might be a gap at the end of the header of up to 4 bytes
 				// message type (1_byte) + message size (2 bytes) + message flags (1 byte)
 				readMessages(hdfBackingStorage, bb, 0);
 
 				// Checksum
-				headerSize += 4;
+				headerSize = Math.addExact(headerSize, 4);
 				ByteBuffer fullHeaderBuffer = hdfBackingStorage.readBufferFromAddress(super.getAddress(), headerSize);
 				ChecksumUtils.validateChecksum(fullHeaderBuffer);
 

@@ -81,7 +81,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 
 	@Override
 	public long getSizeInBytes() {
-		return getSize() * dataType.getSize();
+		return Math.multiplyExact(getSize(), dataType.getSize());
 	}
 
 	@Override

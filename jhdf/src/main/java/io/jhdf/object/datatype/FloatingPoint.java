@@ -314,7 +314,7 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		if (data.getClass().isArray()) {
 			final int[] dimensions = Utils.getDimensions(data);
 			final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
-			final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize())
+			final ByteBuffer buffer = ByteBuffer.allocate(Math.multiplyExact(totalElements, getSize()))
 				.order(order);
 			if(type == float.class) {
 				encodeFloatData(data, dimensions, buffer.asFloatBuffer(), true);
@@ -351,7 +351,7 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		if (data.getClass().isArray()) {
 			final int fastDimSize = dimensions[dimensions.length - 1];
 			// This buffer is reused
-			final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize())
+			final ByteBuffer buffer = ByteBuffer.allocate(Math.multiplyExact(fastDimSize, getSize()))
 				.order(order);
 
 			if(type == float.class) {

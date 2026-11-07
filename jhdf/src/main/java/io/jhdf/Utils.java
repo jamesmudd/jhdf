@@ -97,14 +97,14 @@ public final class Utils {
 		if (pos % 8 == 0) {
 			return; // Already on a 8 byte multiple
 		}
-		bb.position(pos + (8 - (pos % 8)));
+		bb.position(Math.addExact(pos, 8 - (pos % 8)));
 	}
 
 	public static long nextMultipleOfEight(long value) {
 		if (value % 8 == 0) {
 			return value; // Already on a 8 byte multiple
 		}
-		return value + (8 - (value % 8));
+		return Math.addExact(value, 8 - (value % 8));
 	}
 
 	/**
@@ -249,7 +249,7 @@ public final class Utils {
 		headerData.order(source.order());
 
 		// Move the buffer past this header
-		source.position(source.position() + length);
+		source.position(Math.addExact(source.position(), length));
 		return headerData;
 	}
 
@@ -332,9 +332,9 @@ public final class Utils {
 		for (int i = 0; i < dimensions.length; i++) {
 			long temp = index[i];
 			for (int j = i + 1; j < dimensions.length; j++) {
-				temp *= dimensions[j];
+				temp = Math.multiplyExact(temp, dimensions[j]);
 			}
-			linear += temp;
+			linear = Math.addExact(linear, temp);
 		}
 		return linear;
 	}
@@ -370,11 +370,15 @@ public final class Utils {
 			long chunksBelowThisDim = 1L;
 			// Start one dim faster
 			for (int j = i + 1; j < chunkOffset.length; j++) {
-				chunksBelowThisDim *= (long) Math.ceil((double) datasetDimensions[j] / chunkDimensions[j]);
+				// Ceiling division without the intermediate add that could overflow
+				final long chunksInDim = datasetDimensions[j] / chunkDimensions[j]
+					+ (datasetDimensions[j] % chunkDimensions[j] == 0 ? 0 : 1);
+				chunksBelowThisDim = Math.multiplyExact(chunksBelowThisDim, chunksInDim);
 			}
 
-			chunkOffset[i] = (chunkIndex / chunksBelowThisDim) * chunkDimensions[i];
-			chunkIndex -= chunkOffset[i] / chunkDimensions[i] * chunksBelowThisDim;
+			final long chunkIndexInDim = chunkIndex / chunksBelowThisDim;
+			chunkOffset[i] = Math.multiplyExact(chunkIndexInDim, chunkDimensions[i]);
+			chunkIndex = Math.subtractExact(chunkIndex, Math.multiplyExact(chunkIndexInDim, chunksBelowThisDim));
 		}
 
 		return chunkOffset;
@@ -392,7 +396,7 @@ public final class Utils {
 
 	// See https://stackoverflow.com/a/4674035
 	public static void setBit(byte[] bytes, int bit, boolean value) {
-		if(bit < 0 || bit >= bytes.length * 8){
+		if(bit < 0 || bit >= bytes.length * 8L){
 			throw new IllegalArgumentException("bit index out of range. index=" + bit);
 		}
 		final int byteIndex = bit / 8;
@@ -486,7 +490,7 @@ public final class Utils {
 			long chunksInDim = datasetDimensions[i] / chunkDimensions[i];
 			// If there is a partial chunk then we need to add one chunk in this dim
 			if(datasetDimensions[i] % chunkDimensions[i] != 0 ) chunksInDim++;
-			chunks *=  chunksInDim;
+			chunks = Math.multiplyExact(chunks, chunksInDim);
 		}
 		return chunks;
 	}
