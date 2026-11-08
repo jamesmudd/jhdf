@@ -145,6 +145,8 @@ class ObjectHeaderTest {
 			bb.put(hdfBackingStorage.readBufferFromAddress(address, bb.capacity()));
 			return bb.capacity();
 		}).when(mockFc).read(any(ByteBuffer.class), anyLong());
+		// Reads are bounds checked against the size of the file
+		Mockito.when(mockFc.size()).thenReturn(hdfBackingStorage.size());
 		HdfBackingStorage hdfBackingStorage = new HdfFileChannel(mockFc, sb);
 		LazyInitializer<ObjectHeader> lazyObjectHeader = ObjectHeader.lazyReadObjectHeader(hdfBackingStorage, 10904); // int8
 
@@ -157,6 +159,8 @@ class ObjectHeaderTest {
 
 		// Check the file was read
 		verify(mockFc, Mockito.atLeastOnce()).read(any(ByteBuffer.class), anyLong());
+		// And the size of the file was checked to bounds check the reads
+		verify(mockFc, Mockito.atLeastOnce()).size();
 
 		// Ensure nothing else was done to the file
 		Mockito.verifyNoMoreInteractions(mockFc);

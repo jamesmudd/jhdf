@@ -74,6 +74,11 @@ public class HdfFileChannel implements HdfBackingStorage {
 
 	public ByteBuffer mapNoOffset(long address, long length, MapMode mode) {
 		try {
+			if (mode == MapMode.READ_ONLY) {
+				// Only reads of the file are bounds checked. Mapping beyond the end of the file is a valid way to
+				// grow it so must remain possible for other modes.
+				checkReadWithinFile(address, length);
+			}
 			if (!memoryMappingFailed) {
 				try {
 					return fc.map(mode, address, length);
@@ -93,6 +98,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 	}
 
 	private ByteBuffer readBufferNoOffset(long address, int length) throws IOException {
+		checkReadWithinFile(address, length);
 		ByteBuffer bb = ByteBuffer.allocate(length);
 		int totalNumberOfBytesRead = 0;
 		while (totalNumberOfBytesRead < length) {
@@ -105,6 +111,28 @@ public class HdfFileChannel implements HdfBackingStorage {
 		bb.order(LITTLE_ENDIAN);
 		bb.flip();
 		return bb;
+	}
+
+	/**
+	 * Checks a read of {@code length} bytes starting at {@code address} is entirely within the file.
+	 * <p>
+	 * Addresses and lengths are read from the file itself so in a corrupt or malicious file they can be
+	 * arbitrarily large. Without this check a single malformed length field can request a multi gigabyte
+	 * allocation and an {@link OutOfMemoryError}, which would escape the public API as an {@link Error} rather
+	 * than being reported as a clean {@link HdfException}.
+	 *
+	 * @param address the address to read from
+	 * @param length  the number of bytes to read
+	 * @throws HdfException  if the read is not entirely within the file
+	 * @throws IOException  if the file size could not be determined
+	 */
+	private void checkReadWithinFile(long address, long length) throws IOException {
+		final long fileSize = fc.size();
+		// Written to avoid overflow, an address near Long.MAX_VALUE must not wrap around and appear valid
+		if (address < 0 || length < 0 || address > fileSize || length > fileSize - address) {
+			throw new HdfException("Attempted to read " + length + " bytes at address " + address
+				+ " but the file is only " + fileSize + " bytes");
+		}
 	}
 
 	@Override

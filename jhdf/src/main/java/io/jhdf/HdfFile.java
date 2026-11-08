@@ -306,7 +306,11 @@ public class HdfFile implements Group, AutoCloseable {
 	 */
 	public HdfFile(SeekableByteChannel channel, URI sourceUri) {
 		logger.info("Opening remote HDF5 file from URI: {}", sourceUri);
-		this.optionalFile = Optional.of(Paths.get(sourceUri.getPath()));
+		// file URIs must be converted with Paths.get(URI) so a Windows drive letter is handled correctly.
+		// For example sourceUri.getPath() returns "/C:/data/file.hdf5" which is not a valid Windows path.
+		this.optionalFile = Optional.of("file".equalsIgnoreCase(sourceUri.getScheme())
+			? Paths.get(sourceUri)
+			: Paths.get(sourceUri.getPath()));
 
 		try {
 			FileChannel fc = new FileChannelFromSeekableByteChannel(channel);
