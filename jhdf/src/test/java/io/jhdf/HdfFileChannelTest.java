@@ -112,10 +112,20 @@ class HdfFileChannelTest {
 		when(fc.size()).thenReturn(100L);
 		when(sb.getBaseAddressByte()).thenReturn(Long.MAX_VALUE);
 
-		// address + base address overflows to a negative value
-		assertThrows(HdfException.class, () -> hdfFc.readBufferFromAddress(1, 5));
+		// address + base address overflows, exact arithmetic detects this before the bounds check
+		assertThrows(ArithmeticException.class, () -> hdfFc.readBufferFromAddress(1, 5));
 
 		Mockito.verify(fc, Mockito.never()).read(any(ByteBuffer.class), anyLong());
+	}
+
+	@Test
+	void testReadingAtANegativeRawAddressThrows() throws IOException {
+		when(fc.size()).thenReturn(100L);
+
+		// mapNoOffset can be called directly so a negative address must still be rejected by the bounds check
+		assertThrows(HdfException.class, () -> hdfFc.mapNoOffset(-1, 5));
+
+		Mockito.verify(fc, Mockito.never()).map(any(MapMode.class), anyLong(), anyLong());
 	}
 
 	@Test
