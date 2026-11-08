@@ -52,7 +52,7 @@ public class Lz4Filter implements Filter {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(encodedData);
 
 		final long totalDecompressedSize = Utils.readBytesAsUnsignedLong(byteBuffer, 8);
-		final byte[] decompressed = new byte[Math.toIntExact(totalDecompressedSize)];
+		final byte[] decompressed = new byte[Utils.toIntExact(totalDecompressedSize)];
 
 		final int decompressedBlockSize = Utils.readBytesAsUnsignedInt(byteBuffer, 4);
 

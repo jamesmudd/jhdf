@@ -218,7 +218,7 @@ public class FractalHeap {
 
 				ByteBuffer bb = entry.getValue().getData();
 				bb.order(LITTLE_ENDIAN);
-				bb.position(Math.toIntExact(offset - entry.getKey()));
+				bb.position(Utils.toIntExact(offset - entry.getKey()));
 				return createSubBuffer(bb, length);
 
 			case 1: // Huge objects
@@ -248,11 +248,11 @@ public class FractalHeap {
 		private final List<Long> childBlockAddresses;
 
 		private IndirectBlock(long address) {
-			final int indirectBlockEntries = Math.multiplyExact(currentRowsInRootIndirectBlock, tableWidth);
+			final int indirectBlockEntries = Utils.multiplyExact(currentRowsInRootIndirectBlock, tableWidth);
 			final long headerSize = 4L + 1 + sb.getSizeOfOffsets() + bytesToStoreOffset
 				+ (long) indirectBlockEntries * getRowSize() + 4;
 
-			ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, Math.toIntExact(headerSize));
+			ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, Utils.toIntExact(headerSize));
 
 			byte[] formatSignatureBytes = new byte[4];
 			bb.get(formatSignatureBytes, 0, formatSignatureBytes.length);
@@ -374,7 +374,7 @@ public class FractalHeap {
 		if (row < 2) {
 			return startingBlockSize;
 		} else {
-			int size = Math.multiplyExact(startingBlockSize, TWO.pow(row - 1).intValueExact());
+			int size = Utils.multiplyExact(startingBlockSize, TWO.pow(row - 1).intValueExact());
 			if (size < maxDirectBlockSize) {
 				return size;
 			} else {

@@ -113,7 +113,7 @@ class HdfFileChannelTest {
 		when(sb.getBaseAddressByte()).thenReturn(Long.MAX_VALUE);
 
 		// address + base address overflows, exact arithmetic detects this before the bounds check
-		assertThrows(ArithmeticException.class, () -> hdfFc.readBufferFromAddress(1, 5));
+		assertThrows(HdfException.class, () -> hdfFc.readBufferFromAddress(1, 5));
 
 		Mockito.verify(fc, Mockito.never()).read(any(ByteBuffer.class), anyLong());
 	}

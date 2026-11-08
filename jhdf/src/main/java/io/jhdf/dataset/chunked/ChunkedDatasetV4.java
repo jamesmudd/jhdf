@@ -10,6 +10,7 @@
 package io.jhdf.dataset.chunked;
 
 import io.jhdf.Constants;
+import io.jhdf.Utils;
 import io.jhdf.ObjectHeader;
 import io.jhdf.api.Group;
 import io.jhdf.dataset.chunked.indexing.BTreeIndex;
@@ -113,7 +114,7 @@ public class ChunkedDatasetV4 extends ChunkedDatasetBase {
 		}
 
 		private int getChunkSizeInBytes() {
-			return Math.multiplyExact(
+			return Utils.multiplyExact(
 				Arrays.stream(getChunkDimensions()).reduce(1, Math::multiplyExact), getDataType().getSize());
 		}
 

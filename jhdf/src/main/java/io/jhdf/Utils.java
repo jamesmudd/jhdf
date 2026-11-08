@@ -9,6 +9,7 @@
  */
 package io.jhdf;
 
+import io.jhdf.exceptions.HdfException;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
@@ -29,6 +30,349 @@ public final class Utils {
 
 	private Utils() {
 		throw new AssertionError("No instances of Utils");
+	}
+
+	/**
+	 * Adds two ints, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param a the first value
+	 * @param b the second value
+	 * @return the sum
+	 * @throws HdfException if the result overflows an int
+	 */
+	public static int addExact(int a, int b) {
+		try {
+			return Math.addExact(a, b);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Adds two longs, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param a the first value
+	 * @param b the second value
+	 * @return the sum
+	 * @throws HdfException if the result overflows a long
+	 */
+	public static long addExact(long a, long b) {
+		try {
+			return Math.addExact(a, b);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Subtracts two ints, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param a the first value
+	 * @param b the second value
+	 * @return the difference
+	 * @throws HdfException if the result overflows an int
+	 */
+	public static int subtractExact(int a, int b) {
+		try {
+			return Math.subtractExact(a, b);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Subtracts two longs, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param a the first value
+	 * @param b the second value
+	 * @return the difference
+	 * @throws HdfException if the result overflows a long
+	 */
+	public static long subtractExact(long a, long b) {
+		try {
+			return Math.subtractExact(a, b);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Multiplies two ints, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param a the first value
+	 * @param b the second value
+	 * @return the product
+	 * @throws HdfException if the result overflows an int
+	 */
+	public static int multiplyExact(int a, int b) {
+		try {
+			return Math.multiplyExact(a, b);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Multiplies a long and an int, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param a the first value
+	 * @param b the second value
+	 * @return the product
+	 * @throws HdfException if the result overflows a long
+	 */
+	public static long multiplyExact(long a, int b) {
+		try {
+			return Math.multiplyExact(a, b);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Multiplies two longs, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param a the first value
+	 * @param b the second value
+	 * @return the product
+	 * @throws HdfException if the result overflows a long
+	 */
+	public static long multiplyExact(long a, long b) {
+		try {
+			return Math.multiplyExact(a, b);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Increments an int, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param a the value to increment
+	 * @return the incremented value
+	 * @throws HdfException if the result overflows an int
+	 */
+	public static int incrementExact(int a) {
+		try {
+			return Math.incrementExact(a);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Increments a long, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param a the value to increment
+	 * @return the incremented value
+	 * @throws HdfException if the result overflows a long
+	 */
+	public static long incrementExact(long a) {
+		try {
+			return Math.incrementExact(a);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Decrements an int, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param a the value to decrement
+	 * @return the decremented value
+	 * @throws HdfException if the result overflows an int
+	 */
+	public static int decrementExact(int a) {
+		try {
+			return Math.decrementExact(a);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Decrements a long, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param a the value to decrement
+	 * @return the decremented value
+	 * @throws HdfException if the result overflows a long
+	 */
+	public static long decrementExact(long a) {
+		try {
+			return Math.decrementExact(a);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Negates an int, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param a the value to negate
+	 * @return the negated value
+	 * @throws HdfException if the result overflows an int
+	 */
+	public static int negateExact(int a) {
+		try {
+			return Math.negateExact(a);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Negates a long, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param a the value to negate
+	 * @return the negated value
+	 * @throws HdfException if the result overflows a long
+	 */
+	public static long negateExact(long a) {
+		try {
+			return Math.negateExact(a);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Converts a long to an int, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param value the value to convert
+	 * @return the value as an int
+	 * @throws HdfException if the value does not fit in an int
+	 */
+	public static int toIntExact(long value) {
+		try {
+			return Math.toIntExact(value);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Returns the absolute value of an int, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param value the value to inspect
+	 * @return the absolute value
+	 * @throws HdfException if the value cannot be represented as a positive int
+	 */
+	public static int absExact(int value) {
+		try {
+			return Math.absExact(value);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Returns the absolute value of a long, reporting overflow as an {@link HdfException}.
+	 *
+	 * @param value the value to inspect
+	 * @return the absolute value
+	 * @throws HdfException if the value cannot be represented as a positive long
+	 */
+	public static long absExact(long value) {
+		try {
+			return Math.absExact(value);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Divides two ints with floor rounding, reporting arithmetic failures as an {@link HdfException}.
+	 *
+	 * @param a the dividend
+	 * @param b the divisor
+	 * @return the floor division result
+	 * @throws HdfException if the divisor is zero
+	 */
+	public static int floorDiv(int a, int b) {
+		try {
+			return Math.floorDiv(a, b);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Divides two longs with floor rounding, reporting arithmetic failures as an {@link HdfException}.
+	 *
+	 * @param a the dividend
+	 * @param b the divisor
+	 * @return the floor division result
+	 * @throws HdfException if the divisor is zero
+	 */
+	public static long floorDiv(long a, long b) {
+		try {
+			return Math.floorDiv(a, b);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Divides a long by an int with floor rounding, reporting arithmetic failures as an {@link HdfException}.
+	 *
+	 * @param a the dividend
+	 * @param b the divisor
+	 * @return the floor division result
+	 * @throws HdfException if the divisor is zero
+	 */
+	public static long floorDiv(long a, int b) {
+		try {
+			return Math.floorDiv(a, b);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Returns the floor modulus of two ints, reporting arithmetic failures as an {@link HdfException}.
+	 *
+	 * @param a the dividend
+	 * @param b the divisor
+	 * @return the floor modulus result
+	 * @throws HdfException if the divisor is zero
+	 */
+	public static int floorMod(int a, int b) {
+		try {
+			return Math.floorMod(a, b);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Returns the floor modulus of two longs, reporting arithmetic failures as an {@link HdfException}.
+	 *
+	 * @param a the dividend
+	 * @param b the divisor
+	 * @return the floor modulus result
+	 * @throws HdfException if the divisor is zero
+	 */
+	public static long floorMod(long a, long b) {
+		try {
+			return Math.floorMod(a, b);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
+	}
+
+	/**
+	 * Returns the floor modulus of a long and an int, reporting arithmetic failures as an {@link HdfException}.
+	 *
+	 * @param a the dividend
+	 * @param b the divisor
+	 * @return the floor modulus result
+	 * @throws HdfException if the divisor is zero
+	 */
+	public static int floorMod(long a, int b) {
+		try {
+			return Math.floorMod(a, b);
+		} catch (ArithmeticException e) {
+			throw new HdfException("Arithmetic overflow", e);
+		}
 	}
 
 	/**

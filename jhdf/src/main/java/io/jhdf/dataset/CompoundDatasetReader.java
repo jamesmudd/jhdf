@@ -10,6 +10,7 @@
 package io.jhdf.dataset;
 
 import io.jhdf.object.datatype.CompoundDataType;
+import io.jhdf.Utils;
 import io.jhdf.object.datatype.CompoundDataType.CompoundDataMember;
 import io.jhdf.storage.HdfBackingStorage;
 
@@ -35,11 +36,11 @@ public final class CompoundDatasetReader {
 		for (CompoundDataMember member : members) {
 			final byte[] memberBytes = new byte[member.getDataType().getSize()];
 			final ByteBuffer memberBuffer = ByteBuffer.allocate(
-				Math.multiplyExact(member.getDataType().getSize(), sizeAsInt));
+				Utils.multiplyExact(member.getDataType().getSize(), sizeAsInt));
 
 			// Loop through the date buffer extracting the bytes for this member
 			for (int i = 0; i < sizeAsInt; i++) {
-				buffer.position(Math.addExact(Math.multiplyExact(type.getSize(), i), member.getOffset()));
+				buffer.position(Utils.addExact(Utils.multiplyExact(type.getSize(), i), member.getOffset()));
 				buffer.get(memberBytes, 0, memberBytes.length);
 				memberBuffer.put(memberBytes);
 			}

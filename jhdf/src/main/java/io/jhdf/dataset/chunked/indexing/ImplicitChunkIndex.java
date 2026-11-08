@@ -52,8 +52,8 @@ public class ImplicitChunkIndex implements ChunkIndex {
 							throw new NoSuchElementException();
 						}
 						long chunkIndex = index++;
-						long chunkAddress = Math.addExact(baseAddress,
-							Math.multiplyExact(chunkIndex, (long) chunkSize));
+						long chunkAddress = Utils.addExact(baseAddress,
+							Utils.multiplyExact(chunkIndex, (long) chunkSize));
 						return new ChunkImpl(chunkAddress,
 							chunkSize,
 							Utils.chunkIndexToChunkOffset(chunkIndex, chunkDimensions, datasetDimensions));

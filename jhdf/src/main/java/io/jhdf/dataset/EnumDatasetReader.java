@@ -10,6 +10,7 @@
 package io.jhdf.dataset;
 
 import io.jhdf.exceptions.HdfException;
+import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.datatype.EnumDataType;
@@ -119,7 +120,7 @@ public class EnumDatasetReader {
 			// Convert to enum values
 			String[] stringData = (String[]) data;
 			for (int i = 0; i < tempBuffer.length; i++) {
-				stringData[i] = enumMapping.get(Math.toIntExact(Integer.toUnsignedLong(tempBuffer[i])));
+				stringData[i] = enumMapping.get(Utils.toIntExact(Integer.toUnsignedLong(tempBuffer[i])));
 			}
 		}
 	}

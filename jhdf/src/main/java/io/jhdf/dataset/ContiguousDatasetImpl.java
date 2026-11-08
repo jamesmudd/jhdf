@@ -50,7 +50,7 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 		int totalElementsInSlice = Arrays.stream(sliceDimensions).reduce(1, Math::multiplyExact);
 
 		ByteBuffer byteBuffer = ByteBuffer.allocate(
-			Math.multiplyExact(totalElementsInSlice, getDataType().getSize()));
+			Utils.multiplyExact(totalElementsInSlice, getDataType().getSize()));
 		convertToCorrectEndiness(byteBuffer);
 
 		long[] currentOffset = sliceOffset.clone();
@@ -70,11 +70,11 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 			}
 		} else {
 			// fastest dim so read some data
-			long offsetBytes = Math.multiplyExact(
+			long offsetBytes = Utils.multiplyExact(
 				Utils.dimensionIndexToLinearIndex(currentOffset, getDimensionsAsLong()), getDataType().getSize());
-			long fileOffset = Math.addExact(contiguousDataLayoutMessage.getAddress(), offsetBytes);
+			long fileOffset = Utils.addExact(contiguousDataLayoutMessage.getAddress(), offsetBytes);
 
-			final int fastestDimLengthBytes = Math.multiplyExact(
+			final int fastestDimLengthBytes = Utils.multiplyExact(
 				sliceDimensions[sliceDimensions.length - 1], getDataType().getSize());
 
 			byteBuffer.put(hdfBackingStorage.readBufferFromAddress(fileOffset, fastestDimLengthBytes));
