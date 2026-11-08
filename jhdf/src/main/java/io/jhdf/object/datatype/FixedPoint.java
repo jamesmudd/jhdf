@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
@@ -206,7 +207,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 		final Class<?> type = Utils.getType(data);
 		final int[] dimensions = Utils.getDimensions(data);
 		final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
-		final ByteBuffer buffer = ByteBuffer.allocate(totalElements * getSize())
+		final ByteBuffer buffer = ByteBuffer.allocate(ArithmeticUtils.multiplyExact(totalElements, getSize()))
 			.order(order);
 		if(type == byte.class) {
 			encodeByteData(data, dimensions, buffer, true);
@@ -381,7 +382,7 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 		final Class<?> type = Utils.getType(data);
 		final int fastDimSize = dimensions[dimensions.length - 1];
 		// This buffer is reused
-		final ByteBuffer buffer = ByteBuffer.allocate(fastDimSize * getSize())
+		final ByteBuffer buffer = ByteBuffer.allocate(ArithmeticUtils.multiplyExact(fastDimSize, getSize()))
 			.order(order);
 		if(type == byte.class) {
 			writeByteData(data, dimensions, buffer, hdfFileChannel, true);

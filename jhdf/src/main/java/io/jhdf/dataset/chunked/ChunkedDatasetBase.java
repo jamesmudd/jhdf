@@ -67,10 +67,10 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 
 		if (!isPartialChunk(chunk)) {
 			// Not a partial chunk so can always copy the max amount
-			final int length = fastestChunkDim * elementSize;
+			final int length = Math.multiplyExact(fastestChunkDim, elementSize);
 			for (int i = 0; i < chunkInternalOffsets.length; i++) {
 				System.arraycopy(chunkData, chunkInternalOffsets[i], // src
-								 dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
+								 dataArray, Math.multiplyExact(Math.addExact(dataOffsets[i], initialChunkOffset), elementSize), // dest
 								 length); // length
 			}
 		} else {
@@ -90,10 +90,10 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 				}
 
 				// Its inside so we need to copy at least something. Now work out how much?
-				final int length = elementSize * Math.min(fastestChunkDim, fastestChunkDim - (chunkOffset[highestDimIndex] + chunkDimensions[highestDimIndex] - datasetDimensions[highestDimIndex]));
+				final int length = Math.multiplyExact(elementSize, Math.min(fastestChunkDim, fastestChunkDim - (chunkOffset[highestDimIndex] + chunkDimensions[highestDimIndex] - datasetDimensions[highestDimIndex])));
 
 				System.arraycopy(chunkData, chunkInternalOffsets[i], // src
-								 dataArray, (dataOffsets[i] + initialChunkOffset) * elementSize, // dest
+								 dataArray, Math.multiplyExact(Math.addExact(dataOffsets[i], initialChunkOffset), elementSize), // dest
 								 length); // length
 			}
 
@@ -134,7 +134,8 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 
 			int dataOffset = 0;
 			for (int j = 0; j < chunkDimIndex.length; j++) {
-				dataOffset += chunkDimIndex[j] * dimensionLinearOffsets[j];
+				dataOffset = Math.addExact(dataOffset,
+					Math.multiplyExact(chunkDimIndex[j], dimensionLinearOffsets[j]));
 			}
 			dataOffsets[i] = dataOffset;
 		}
@@ -179,7 +180,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		// dimensionLinearOffsets.length - 1 because a step in the fastest dim is always 1
 		for (int i = 0; i < dimensionLinearOffsets.length - 1; i++) {
 			for (int j = i + 1; j < dimensionLinearOffsets.length; j++) {
-				dimensionLinearOffsets[i] *= datasetDimensions[j];
+				dimensionLinearOffsets[i] = Math.multiplyExact(dimensionLinearOffsets[i], datasetDimensions[j]);
 			}
 		}
 		return dimensionLinearOffsets;
@@ -198,7 +199,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 
 		final int[] chunkOffsets = new int[numOfOffsets];
 		for (int i = 0; i < numOfOffsets; i++) {
-			chunkOffsets[i] = i * fastestChunkDim * elementSize;
+			chunkOffsets[i] = Math.multiplyExact(Math.multiplyExact(i, fastestChunkDim), elementSize);
 		}
 		return chunkOffsets;
 	}
@@ -321,7 +322,8 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		logger.trace("Getting slice data buffer for {} with shape {}", Arrays.toString(sliceOffset), Arrays.toString(sliceShape));
 
 		final int elementSize = getDataType().getSize();
-		final int sliceSize = Arrays.stream(sliceShape).reduce(1, Math::multiplyExact) * elementSize;
+		final int sliceSize = Math.multiplyExact(
+			Arrays.stream(sliceShape).reduce(1, Math::multiplyExact), elementSize);
 		final byte[] dataArray = new byte[sliceSize];
 
 		final List<Chunk> overlappingChunks = findOverlappingChunks(sliceOffset, sliceShape);
@@ -347,7 +349,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		// Convert bounds from elements to chunks.
 		for (int i = 0; i < offset.length; i++) {
 			startChunk[i] = offset[i] / chunkDims[i];
-			endChunk[i] = (offset[i] + shape[i] - 1) / chunkDims[i];
+			endChunk[i] = Math.addExact(offset[i], (long) shape[i] - 1) / chunkDims[i];
 		}
 
 		// Collect all chunks within the bounds determined above.
@@ -355,7 +357,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 			// Must convert from chunk coordinates back to element coordinates.
 			long[] elementOffsets = new long[chunkCoords.length];
 			for (int i = 0; i < chunkCoords.length; i++) {
-				elementOffsets[i] = chunkCoords[i] * chunkDims[i];
+				elementOffsets[i] = Math.multiplyExact(chunkCoords[i], chunkDims[i]);
 			}
 			Chunk chunk = getChunk(new ChunkOffset(elementOffsets));
 			if (chunk != null) {
@@ -422,10 +424,10 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		int[] chunkStrides = getStrides(chunkDims);
 		int[] sliceStrides = getStrides(sliceShape);
 
-		final int fastestDimBytes = copyShape[rank - 1] * elementSize;
+		final int fastestDimBytes = Math.multiplyExact(copyShape[rank - 1], elementSize);
 		int totalRows = 1;
 		for (int dimension = 0; dimension < rank - 1; dimension++) {
-			totalRows *= copyShape[dimension];
+			totalRows = Math.multiplyExact(totalRows, copyShape[dimension]);
 		}
 		int[] index = new int[rank - 1];
 
@@ -439,11 +441,14 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 			int chunkIdx = chunkStart[rank - 1];
 			int sliceIdx = sliceStart[rank - 1];
 			for (int d = 0; d < rank - 1; d++) {
-				chunkIdx += (chunkStart[d] + index[d]) * chunkStrides[d];
-				sliceIdx += (sliceStart[d] + index[d]) * sliceStrides[d];
+				chunkIdx = Math.addExact(chunkIdx,
+					Math.multiplyExact(Math.addExact(chunkStart[d], index[d]), chunkStrides[d]));
+				sliceIdx = Math.addExact(sliceIdx,
+					Math.multiplyExact(Math.addExact(sliceStart[d], index[d]), sliceStrides[d]));
 			}
 
-			System.arraycopy(chunkData, chunkIdx * elementSize, dataArray, sliceIdx * elementSize, fastestDimBytes);
+			System.arraycopy(chunkData, Math.multiplyExact(chunkIdx, elementSize),
+				dataArray, Math.multiplyExact(sliceIdx, elementSize), fastestDimBytes);
 		}
 	}
 
@@ -452,7 +457,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		int[] strides = new int[rank];
 		strides[rank - 1] = 1;
 		for (int i = rank - 2; i >= 0; i--) {
-			strides[i] = strides[i + 1] * shape[i + 1];
+			strides[i] = Math.multiplyExact(strides[i + 1], shape[i + 1]);
 		}
 		return strides;
 	}

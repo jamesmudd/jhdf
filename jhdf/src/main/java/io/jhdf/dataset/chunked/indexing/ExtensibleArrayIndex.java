@@ -9,6 +9,7 @@
  */
 package io.jhdf.dataset.chunked.indexing;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Utils;
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.dataset.chunked.Chunk;
@@ -131,15 +132,15 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 		private ExtensibleArrayIndexBlock(HdfBackingStorage hdfBackingStorage, long address) {
 
 			// Figure out the size of the index block
-			final int headerSize = 6 + hdfBackingStorage.getSizeOfOffsets()
+			final long headerSize = 6L + hdfBackingStorage.getSizeOfOffsets()
 				// TODO need to handle filtered elements
-				+ hdfBackingStorage.getSizeOfOffsets() * numberOfElementsInIndexBlock // direct chunk pointers
-				+ 6 * extensibleArrayElementSize // Always up to 6 data block pointers are in the index block
-				+ numberOfSecondaryBlocks * hdfBackingStorage.getSizeOfOffsets() // Secondary block addresses.
+				+ (long) hdfBackingStorage.getSizeOfOffsets() * numberOfElementsInIndexBlock // direct chunk pointers
+				+ 6L * extensibleArrayElementSize // Always up to 6 data block pointers are in the index block
+				+ (long) numberOfSecondaryBlocks * hdfBackingStorage.getSizeOfOffsets() // Secondary block addresses.
 				+ 4; // checksum
 
 
-			final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
+			final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, ArithmeticUtils.toIntExact(headerSize));
 
 			verifySignature(bb, EXTENSIBLE_ARRAY_INDEX_BLOCK_SIGNATURE);
 
@@ -193,11 +194,11 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 			private ExtensibleArrayDataBlock(HdfBackingStorage hdfBackingStorage, long address) {
 
 				final int numberOfElementsInDataBlock = dataBlockElementCounter.getNextNumberOfChunks();
-				final int headerSize = 6 + hdfBackingStorage.getSizeOfOffsets() + blockOffsetSize
-					+ numberOfElementsInDataBlock * extensibleArrayElementSize // elements (chunks)
+				final long headerSize = 6L + hdfBackingStorage.getSizeOfOffsets() + blockOffsetSize
+					+ (long) numberOfElementsInDataBlock * extensibleArrayElementSize // elements (chunks)
 					+ 4; // checksum
 
-				final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
+				final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, ArithmeticUtils.toIntExact(headerSize));
 
 				verifySignature(bb, EXTENSIBLE_ARRAY_DATA_BLOCK_SIGNATURE);
 
@@ -239,14 +240,14 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 			private ExtensibleArraySecondaryBlock(HdfBackingStorage hdfBackingStorage, long address) {
 
 				final int numberOfPointers = secondaryBlockPointerCounter.getNextNumberOfPointers();
-				final int secondaryBlockSize = 6 + hdfBackingStorage.getSizeOfOffsets() +
+				final long secondaryBlockSize = 6L + hdfBackingStorage.getSizeOfOffsets() +
 					blockOffsetSize +
 					// Page Bitmap ?
-					numberOfPointers * extensibleArrayElementSize +
+					(long) numberOfPointers * extensibleArrayElementSize +
 					4; // checksum
 
 
-				final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, secondaryBlockSize);
+				final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, ArithmeticUtils.toIntExact(secondaryBlockSize));
 
 				verifySignature(bb, EXTENSIBLE_ARRAY_SECONDARY_BLOCK_SIGNATURE);
 
@@ -351,14 +352,14 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 				blockCounter++;
 			} else if (increaseNumberOfBlocksNext) {
 				increaseNumberOfBlocksNext = false;
-				numberOfBlocks *= 2;
+				numberOfBlocks = ArithmeticUtils.multiplyExact(numberOfBlocks, 2);
 				blockCounter = 1;
 			} else {
 				increaseNumberOfBlocksNext = true;
-				blockSizeMultiplier *= 2;
+				blockSizeMultiplier = ArithmeticUtils.multiplyExact(blockSizeMultiplier, 2);
 				blockCounter = 1;
 			}
-			return blockSizeMultiplier * minNumberOfElementsInDataBlock;
+			return ArithmeticUtils.multiplyExact(blockSizeMultiplier, minNumberOfElementsInDataBlock);
 		}
 
 		@Override
@@ -388,7 +389,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 			if (counter < REPEATS) {
 				counter++;
 			} else {
-				numberOfPointers *= 2;
+				numberOfPointers = ArithmeticUtils.multiplyExact(numberOfPointers, 2);
 				counter = 1;
 			}
 			return numberOfPointers;

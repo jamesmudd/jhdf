@@ -9,7 +9,9 @@
  */
 package io.jhdf.storage;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Superblock;
+import io.jhdf.Utils;
 import io.jhdf.exceptions.InMemoryHdfException;
 
 import java.nio.ByteBuffer;
@@ -34,13 +36,13 @@ public class HdfInMemoryByteBuffer implements HdfBackingStorage {
 
 	@Override
 	public ByteBuffer map(long address, long length) {
-		return mapNoOffset(address + superblock.getBaseAddressByte(), length);
+		return mapNoOffset(ArithmeticUtils.addExact(address, superblock.getBaseAddressByte()), length);
 	}
 
 	@Override
 	public synchronized ByteBuffer mapNoOffset(long address, long length) {
-		byteBuffer.limit(Math.toIntExact(address + length));
-		byteBuffer.position(Math.toIntExact(address));
+		byteBuffer.limit(ArithmeticUtils.toIntExact(ArithmeticUtils.addExact(address, length)));
+		byteBuffer.position(ArithmeticUtils.toIntExact(address));
 		// Set order on sliced buffer always LE
 		return byteBuffer.slice().order(LITTLE_ENDIAN);
 	}

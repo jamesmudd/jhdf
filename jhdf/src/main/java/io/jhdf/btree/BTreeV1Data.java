@@ -9,6 +9,7 @@
  */
 package io.jhdf.btree;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.dataset.chunked.Chunk;
@@ -20,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 
@@ -46,10 +48,10 @@ public abstract class BTreeV1Data extends BTreeV1 {
 		/* package */ BTreeV1DataLeafNode(HdfBackingStorage hdfBackingStorage, long address, int dataDimensions) {
 			super(hdfBackingStorage, address);
 
-			final int keySize = 4 + 4 + (dataDimensions + 1) * 8;
-			final int keyBytes = (entriesUsed + 1) * keySize;
-			final int childPointerBytes = entriesUsed * hdfBackingStorage.getSizeOfOffsets();
-			final int keysAndPointersBytes = keyBytes + childPointerBytes;
+			final int keySize = ArithmeticUtils.addExact(8, ArithmeticUtils.multiplyExact(ArithmeticUtils.addExact(dataDimensions, 1), 8));
+			final int keyBytes = ArithmeticUtils.multiplyExact(ArithmeticUtils.addExact(entriesUsed, 1), keySize);
+			final int childPointerBytes = ArithmeticUtils.multiplyExact(entriesUsed, hdfBackingStorage.getSizeOfOffsets());
+			final int keysAndPointersBytes = ArithmeticUtils.addExact(keyBytes, childPointerBytes);
 
 			final long keysAddress = address + 8L + 2L * hdfBackingStorage.getSizeOfOffsets();
 			final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(keysAddress, keysAndPointersBytes);
@@ -94,13 +96,14 @@ public abstract class BTreeV1Data extends BTreeV1 {
 
 		private final List<BTreeV1Data> childNodes;
 
-		/* package */ BTreeV1DataNonLeafNode(HdfBackingStorage hdfBackingStorage, long address, int dataDimensions) {
+		/* package */ BTreeV1DataNonLeafNode(HdfBackingStorage hdfBackingStorage, long address, int dataDimensions,
+										  Set<Long> visitedAddresses, int depth) {
 			super(hdfBackingStorage, address);
 
-			final int keySize = 4 + 4 + (dataDimensions + 1) * 8;
-			final int keyBytes = (entriesUsed + 1) * keySize;
-			final int childPointerBytes = entriesUsed * hdfBackingStorage.getSizeOfOffsets();
-			final int keysAndPointersBytes = keyBytes + childPointerBytes;
+			final int keySize = ArithmeticUtils.addExact(8, ArithmeticUtils.multiplyExact(ArithmeticUtils.addExact(dataDimensions, 1), 8));
+			final int keyBytes = ArithmeticUtils.multiplyExact(ArithmeticUtils.addExact(entriesUsed, 1), keySize);
+			final int childPointerBytes = ArithmeticUtils.multiplyExact(entriesUsed, hdfBackingStorage.getSizeOfOffsets());
+			final int keysAndPointersBytes = ArithmeticUtils.addExact(keyBytes, childPointerBytes);
 
 			final long keysAddress = address + 8L + 2L * hdfBackingStorage.getSizeOfOffsets();
 			final ByteBuffer keysAndPointersBuffer = hdfBackingStorage.readBufferFromAddress(keysAddress, keysAndPointersBytes);
@@ -110,7 +113,8 @@ public abstract class BTreeV1Data extends BTreeV1 {
 			for (int i = 0; i < entriesUsed; i++) {
 				keysAndPointersBuffer.position(keysAndPointersBuffer.position() + keySize);
 				long childAddress = Utils.readBytesAsUnsignedLong(keysAndPointersBuffer, hdfBackingStorage.getSizeOfOffsets());
-				childNodes.add(BTreeV1.createDataBTree(hdfBackingStorage, childAddress, dataDimensions));
+				childNodes.add(BTreeV1.createDataBTree(hdfBackingStorage, childAddress, dataDimensions,
+					visitedAddresses, depth + 1));
 			}
 		}
 

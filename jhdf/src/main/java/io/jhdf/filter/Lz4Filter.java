@@ -9,6 +9,7 @@
  */
 package io.jhdf.filter;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfFilterException;
 import net.jpountz.lz4.LZ4Factory;
@@ -52,11 +53,12 @@ public class Lz4Filter implements Filter {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(encodedData);
 
 		final long totalDecompressedSize = Utils.readBytesAsUnsignedLong(byteBuffer, 8);
-		final byte[] decompressed = new byte[Math.toIntExact(totalDecompressedSize)];
+		final byte[] decompressed = new byte[ArithmeticUtils.toIntExact(totalDecompressedSize)];
 
 		final int decompressedBlockSize = Utils.readBytesAsUnsignedInt(byteBuffer, 4);
 
-		final long blocks = (totalDecompressedSize + decompressedBlockSize - 1) / decompressedBlockSize;
+		final long blocks = totalDecompressedSize / decompressedBlockSize
+			+ (totalDecompressedSize % decompressedBlockSize == 0 ? 0 : 1);
 
 		int offset = 0;
 		byte[] compressedBlock = new byte[0];

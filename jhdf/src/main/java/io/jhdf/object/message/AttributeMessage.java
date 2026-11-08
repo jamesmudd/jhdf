@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.message;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.BufferBuilder;
 import io.jhdf.Constants;
 import io.jhdf.ObjectHeader;
@@ -116,7 +117,8 @@ public class AttributeMessage extends Message {
 				throw new UnsupportedHdfException("Unsupported Attribute message version. Detected version: " + version);
 		}
 
-		final int dataSize = Math.toIntExact(dataSpace.getTotalLength() * dataType.getSize());
+		final int dataSize = ArithmeticUtils.toIntExact(
+			ArithmeticUtils.multiplyExact(dataSpace.getTotalLength(), dataType.getSize()));
 		if (dataSize == 0) {
 			data = null;
 		} else {

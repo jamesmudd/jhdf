@@ -9,6 +9,7 @@
  */
 package io.jhdf.links;
 
+import io.jhdf.HdfFile;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.exceptions.HdfBrokenLinkException;
@@ -33,8 +34,16 @@ public class SoftLink extends AbstractLink {
 	private class LinkTargetLazyInitializer extends LazyInitializer<Node> {
 		@Override
 		protected Node initialize() {
-			return parent.getHdfFile().getByPath(target);
+			return LinkResolutionGuard.resolve(getResolutionKey(), () -> parent.getHdfFile().getByPath(target));
 		}
+	}
+
+	private String getResolutionKey() {
+		final HdfFile hdfFile = getHdfFile();
+		final String fileKey = hdfFile.inMemory()
+			? "memory:" + System.identityHashCode(hdfFile)
+			: hdfFile.getFileAsPath().toAbsolutePath().normalize().toString();
+		return "soft:" + fileKey + ":" + getPath();
 	}
 
 	@Override

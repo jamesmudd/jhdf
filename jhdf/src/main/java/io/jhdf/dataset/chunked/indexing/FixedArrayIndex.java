@@ -9,6 +9,7 @@
  */
 package io.jhdf.dataset.chunked.indexing;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Utils;
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.dataset.chunked.Chunk;
@@ -81,7 +82,7 @@ public class FixedArrayIndex implements ChunkIndex {
 
 		maxNumberOfEntries = Utils.readBytesAsUnsignedInt(bb, hdfBackingStorage.getSizeOfLengths());
 		pageSize = 1 << pageBits;
-		pages = (maxNumberOfEntries + pageSize -1) / pageSize;
+		pages = maxNumberOfEntries / pageSize + (maxNumberOfEntries % pageSize == 0 ? 0 : 1);
 
 		dataBlockAddress = Utils.readBytesAsUnsignedLong(bb, hdfBackingStorage.getSizeOfOffsets());
 
@@ -114,12 +115,13 @@ public class FixedArrayIndex implements ChunkIndex {
 
 		private FixedArrayDataBlock(HdfBackingStorage hdfBackingStorage, long address) {
 
-			int pageBitmapBytes = (pages + 7) / 8;
-			int headerSize = 6 + hdfBackingStorage.getSizeOfOffsets() + FixedArrayIndex.this.entrySize * FixedArrayIndex.this.maxNumberOfEntries + 4;
+			int pageBitmapBytes = ArithmeticUtils.toIntExact((pages + 7L) / 8);
+			long headerSize = 6L + hdfBackingStorage.getSizeOfOffsets()
+				+ (long) FixedArrayIndex.this.entrySize * FixedArrayIndex.this.maxNumberOfEntries + 4;
 			if(pages > 1) {
-				headerSize += pageBitmapBytes + (4 * pages);
+				headerSize += pageBitmapBytes + (4L * pages);
 			}
-			final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, headerSize);
+			final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, ArithmeticUtils.toIntExact(headerSize));
 			bb.mark();
 
 			byte[] formatSignatureBytes = new byte[4];

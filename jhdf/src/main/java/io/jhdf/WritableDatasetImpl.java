@@ -186,7 +186,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Streami
 		// Slicing chunks out of memory encodes the full dataset into a single buffer first, so it is bounded by
 		// what a byte[] can hold. Supplying chunks one at a time never does that, whether they are pulled from a
 		// ChunkProvider or pushed through a StreamingDataset, so there the limit is per chunk (checked above).
-		if (data != null && dataSpace.getTotalLength() * dataType.getSize() > Integer.MAX_VALUE) {
+		if (data != null && Math.multiplyExact(dataSpace.getTotalLength(), dataType.getSize()) > Integer.MAX_VALUE) {
 			throw new HdfWritingException("Dataset is too large to write chunked. Maximum is ["
 				+ Integer.MAX_VALUE + "] bytes, supply the data a chunk at a time with a "
 				+ ChunkProvider.class.getSimpleName() + " or a " + StreamingDataset.class.getSimpleName()
@@ -211,7 +211,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Streami
 
 	@Override
 	public long getSizeInBytes() {
-		return getSize() * dataType.getSize();
+		return Math.multiplyExact(getSize(), dataType.getSize());
 	}
 
 	@Override
@@ -659,9 +659,10 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Streami
 					+ " a chunk of dataset [" + getPath() + "] with chunk dimensions "
 					+ Arrays.toString(chunkDimensions));
 			}
-			final int chunksInDimension =
-				(datasetDimensions[dimension] + chunkDimensions[dimension] - 1) / chunkDimensions[dimension];
-			chunkIndex = chunkIndex * chunksInDimension + Math.toIntExact(offset / chunkDimensions[dimension]);
+			final int chunksInDimension = datasetDimensions[dimension] / chunkDimensions[dimension]
+				+ (datasetDimensions[dimension] % chunkDimensions[dimension] == 0 ? 0 : 1);
+			chunkIndex = Math.addExact(Math.multiplyExact(chunkIndex, chunksInDimension),
+				Math.toIntExact(offset / chunkDimensions[dimension]));
 		}
 		return chunkIndex;
 	}
@@ -746,7 +747,8 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Streami
 		final int fastestOffset = Math.toIntExact(chunkOffset[rank - 1]);
 
 		// The bytes to copy for each contiguous run, may be clipped by the edge of the dataset
-		final int runLengthBytes = Math.min(fastestChunkDim, datasetDimensions[rank - 1] - fastestOffset) * elementSize;
+		final int runLengthBytes = Math.multiplyExact(
+			Math.min(fastestChunkDim, datasetDimensions[rank - 1] - fastestOffset), elementSize);
 
 		// Every combination of the chunk dimensions except the fastest is a contiguous run in the dataset
 		final int[] runDimensions = Arrays.copyOf(chunkDimensions, rank - 1);
@@ -766,8 +768,10 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Streami
 			}
 			datasetIndex[rank - 1] = fastestOffset;
 
-			final int sourceOffsetBytes = Utils.dimensionIndexToLinearIndex(datasetIndex, datasetDimensions) * elementSize;
-			final int destinationOffsetBytes = run * fastestChunkDim * elementSize;
+			final int sourceOffsetBytes = Math.multiplyExact(
+				Utils.dimensionIndexToLinearIndex(datasetIndex, datasetDimensions), elementSize);
+			final int destinationOffsetBytes = Math.multiplyExact(
+				Math.multiplyExact(run, fastestChunkDim), elementSize);
 			System.arraycopy(flatData, sourceOffsetBytes, chunkBytes, destinationOffsetBytes, runLengthBytes);
 		}
 		return chunkBytes;
@@ -786,7 +790,7 @@ public class WritableDatasetImpl extends AbstractWritableNode implements Streami
 
 		dataType.writeData(data, getDimensions(), hdfFileChannel);
 
-		return  dataSpace.getTotalLength() * dataType.getSize();
+		return Math.multiplyExact(dataSpace.getTotalLength(), dataType.getSize());
 	}
 
 

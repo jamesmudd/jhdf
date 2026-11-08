@@ -9,6 +9,7 @@
  */
 package io.jhdf.filter;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfFilterException;
 import io.jhdf.exceptions.UnsupportedHdfException;
@@ -50,7 +51,7 @@ public class BitShuffleFilter implements Filter {
 	@Override
 	public byte[] decode(byte[] encodedData, int[] filterData) {
 		final int blockSize = filterData[3] == 0 ? getDefaultBlockSize(filterData[2]) : filterData[3];
-		final int blockSizeBytes = blockSize * filterData[2];
+		final int blockSizeBytes = ArithmeticUtils.multiplyExact(blockSize, filterData[2]);
 
 		switch (filterData[4]) {
 			case NO_COMPRESSION:
@@ -69,7 +70,7 @@ public class BitShuffleFilter implements Filter {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(encodedData);
 
 		final long totalDecompressedSize = Utils.readBytesAsUnsignedLong(byteBuffer, 8);
-		final byte[] decompressed = new byte[Math.toIntExact(totalDecompressedSize)];
+		final byte[] decompressed = new byte[ArithmeticUtils.toIntExact(totalDecompressedSize)];
 
 		final int decompressedBlockSize = Utils.readBytesAsUnsignedInt(byteBuffer, 4);
 		final byte[] decomressedBuffer = new byte[decompressedBlockSize];
@@ -93,7 +94,7 @@ public class BitShuffleFilter implements Filter {
 			try {
 				final int decompressedBytes = lzz4Decompressor.get().decompress(compressedBuffer, 0, compressedBlockLength, decomressedBuffer, 0);
 				unshuffle(decomressedBuffer, decompressedBytes, decompressed, offset, filterData[2]);
-				offset += decompressedBytes;
+				offset = ArithmeticUtils.addExact(offset, decompressedBytes);
 			} catch (Exception e) {
 				throw new HdfFilterException("Failed LZ4 decompression", e);
 			}
@@ -134,8 +135,8 @@ public class BitShuffleFilter implements Filter {
 
 	protected void unshuffle(byte[] shuffledBuffer, int shuffledLength, byte[] unshuffledBuffer, int unshuffledOffset, int elementSize) {
 		final int elements = shuffledLength / elementSize;
-		final int elementSizeBits = elementSize * 8;
-		final int unshuffledOffsetBits = unshuffledOffset * 8;
+		final int elementSizeBits = ArithmeticUtils.multiplyExact(elementSize, 8);
+		final int unshuffledOffsetBits = ArithmeticUtils.multiplyExact(unshuffledOffset, 8);
 
 		if (elements < 8) {
 			// https://github.com/xerial/snappy-java/issues/296#issuecomment-964469607
@@ -151,13 +152,16 @@ public class BitShuffleFilter implements Filter {
 			for (int j = 0; j < elementsToShuffle; j++) {
 				boolean bit = Utils.getBit(shuffledBuffer, pos);
 				if (bit) {
-					Utils.setBit(unshuffledBuffer, unshuffledOffsetBits + j * elementSizeBits + i, true);
+					Utils.setBit(unshuffledBuffer, ArithmeticUtils.addExact(ArithmeticUtils.addExact(unshuffledOffsetBits,
+						ArithmeticUtils.multiplyExact(j, elementSizeBits)), i), true);
 				}
 				pos++; // step through the input array
 			}
 		}
 
-		System.arraycopy(shuffledBuffer, elementsToShuffle * elementSize, unshuffledBuffer, elementsToShuffle * elementSize, elementsToCopy * elementSize);
+		System.arraycopy(shuffledBuffer, ArithmeticUtils.multiplyExact(elementsToShuffle, elementSize),
+			unshuffledBuffer, ArithmeticUtils.multiplyExact(elementsToShuffle, elementSize),
+			ArithmeticUtils.multiplyExact(elementsToCopy, elementSize));
 	}
 
 	// https://github.com/kiyo-masui/bitshuffle/blob/master/src/bitshuffle_core.c#L1830

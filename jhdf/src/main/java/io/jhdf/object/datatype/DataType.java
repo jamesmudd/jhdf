@@ -24,6 +24,8 @@ import java.util.BitSet;
 public abstract class DataType {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataType.class);
+	private static final int MAX_DATA_TYPE_NESTING_DEPTH = 64;
+	private static final ThreadLocal<Integer> DATA_TYPE_NESTING = new ThreadLocal<>();
 	private final int version;
 	private final int dataClass;
 	private final int size; // In bytes
@@ -37,51 +39,64 @@ public abstract class DataType {
 	}
 
 	public static DataType readDataType(ByteBuffer bb) {
-		// Mark buffer position
-		bb.mark();
-
-		// Class and version
-		final BitSet classAndVersion = BitSet.valueOf(new byte[]{bb.get()});
-		int version = Utils.bitsToInt(classAndVersion, 4, 4);
-		int dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
-
-		if (version == 0) {
-			logger.warn("Datatype version 0 detected this is out of spec, attempting to read anyway");
-		} else if (version > 3) {
-			throw new HdfException("Unrecognized datatype version '" + version + "' detected");
+		final Integer currentNesting = DATA_TYPE_NESTING.get();
+		final int nesting = currentNesting == null ? 0 : currentNesting;
+		if (nesting >= MAX_DATA_TYPE_NESTING_DEPTH) {
+			throw new HdfException("Datatype nesting exceeds the maximum depth of " + MAX_DATA_TYPE_NESTING_DEPTH);
 		}
+		DATA_TYPE_NESTING.set(nesting + 1);
+		try {
+			// Mark buffer position
+			bb.mark();
 
-		// Move the buffer back to the start of the data type message
-		bb.reset();
+			// Class and version
+			final BitSet classAndVersion = BitSet.valueOf(new byte[]{bb.get()});
+			int version = Utils.bitsToInt(classAndVersion, 4, 4);
+			int dataClass = Utils.bitsToInt(classAndVersion, 0, 4);
 
-		// TODO all class IDs
-		switch (dataClass) {
-			case FixedPoint.CLASS_ID: // Fixed point
-				return new FixedPoint(bb);
-			case FloatingPoint.CLASS_ID: // Floating point
-				return new FloatingPoint(bb);
-			case TimeDataType.CLASS_ID: // Time
-				return new TimeDataType(bb);
-			case StringData.CLASS_ID: // String
-				return new StringData(bb);
-			case BitField.CLASS_ID: // Bit field
-				return new BitField(bb);
-			case 5: // Opaque
-				return new OpaqueDataType(bb);
-			case 6: // Compound
-				return new CompoundDataType(bb);
-			case 7: // Reference
-				return new Reference(bb);
-			case 8: // Enum
-				return new EnumDataType(bb);
-			case 9: // Variable length
-				return new VariableLength(bb);
-			case 10: // Array
-				return new ArrayDataType(bb);
-			default:
-				throw new HdfException("Unrecognized data class = " + dataClass);
+			if (version == 0) {
+				logger.warn("Datatype version 0 detected this is out of spec, attempting to read anyway");
+			} else if (version > 3) {
+				throw new HdfException("Unrecognized datatype version '" + version + "' detected");
+			}
+
+			// Move the buffer back to the start of the data type message
+			bb.reset();
+
+			// TODO all class IDs
+			switch (dataClass) {
+				case FixedPoint.CLASS_ID: // Fixed point
+					return new FixedPoint(bb);
+				case FloatingPoint.CLASS_ID: // Floating point
+					return new FloatingPoint(bb);
+				case TimeDataType.CLASS_ID: // Time
+					return new TimeDataType(bb);
+				case StringData.CLASS_ID: // String
+					return new StringData(bb);
+				case BitField.CLASS_ID: // Bit field
+					return new BitField(bb);
+				case 5: // Opaque
+					return new OpaqueDataType(bb);
+				case 6: // Compound
+					return new CompoundDataType(bb);
+				case 7: // Reference
+					return new Reference(bb);
+				case 8: // Enum
+					return new EnumDataType(bb);
+				case 9: // Variable length
+					return new VariableLength(bb);
+				case 10: // Array
+					return new ArrayDataType(bb);
+				default:
+					throw new HdfException("Unrecognized data class = " + dataClass);
+			}
+		} finally {
+			if (nesting == 0) {
+				DATA_TYPE_NESTING.remove();
+			} else {
+				DATA_TYPE_NESTING.set(nesting);
+			}
 		}
-
 	}
 
 	protected DataType(ByteBuffer bb) {

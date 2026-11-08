@@ -9,6 +9,9 @@
  */
 package io.jhdf.storage;
 
+import io.jhdf.ArithmeticUtils;
+import io.jhdf.Utils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +105,7 @@ public class HttpSeekableByteChannel implements SeekableByteChannel {
 	 * @throws IOException if an I/O error occurs while fetching the file size.
 	 */
 	public HttpSeekableByteChannel(URL url, int cacheSizeMB) throws IOException {
-		this(url, DEFAULT_BLOCK_SIZE, cacheSizeMB * 1024 * 1024 / DEFAULT_BLOCK_SIZE);
+		this(url, DEFAULT_BLOCK_SIZE, ArithmeticUtils.toIntExact((long) cacheSizeMB * 1024 * 1024 / DEFAULT_BLOCK_SIZE));
 	}
 
 	/**

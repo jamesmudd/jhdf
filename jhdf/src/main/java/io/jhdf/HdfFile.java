@@ -116,7 +116,7 @@ public class HdfFile implements Group, AutoCloseable {
 		// Find out if the buffer is a HDF5 file
 		boolean validSignature = false;
 		int offset;
-		for (offset = 0; offset < byteBuffer.capacity(); offset = Math.toIntExact(nextOffset(offset))) {
+		for (offset = 0; offset < byteBuffer.capacity(); offset = ArithmeticUtils.toIntExact(nextOffset(offset))) {
 			logger.trace("Checking for signature at offset = {}", offset);
 			validSignature = Superblock.verifySignature(byteBuffer, offset);
 			if (validSignature) {
@@ -238,7 +238,7 @@ public class HdfFile implements Group, AutoCloseable {
 		if (offset == 0) {
 			return 512L;
 		}
-		return offset * 2;
+		return ArithmeticUtils.multiplyExact(offset, 2);
 	}
 
 	/**
@@ -306,7 +306,11 @@ public class HdfFile implements Group, AutoCloseable {
 	 */
 	public HdfFile(SeekableByteChannel channel, URI sourceUri) {
 		logger.info("Opening remote HDF5 file from URI: {}", sourceUri);
-		this.optionalFile = Optional.of(Paths.get(sourceUri.getPath()));
+		// file URIs must be converted with Paths.get(URI) so a Windows drive letter is handled correctly.
+		// For example sourceUri.getPath() returns "/C:/data/file.hdf5" which is not a valid Windows path.
+		this.optionalFile = Optional.of("file".equalsIgnoreCase(sourceUri.getScheme())
+			? Paths.get(sourceUri)
+			: Paths.get(sourceUri.getPath()));
 
 		try {
 			FileChannel fc = new FileChannelFromSeekableByteChannel(channel);

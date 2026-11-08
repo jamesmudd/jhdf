@@ -55,9 +55,23 @@ public final class TestUtils {
 	}
 
 	public static URI getTestUri(String fileName) {
-		URL url = TestUtils.class.getResource("/hdf5/" + fileName);
+		return getResourceUri("/hdf5/" + fileName);
+	}
+
+	/**
+	 * Gets a path to a test resource using an absolute resource path e.g. {@code /malformed/test.hdf5}.
+	 *
+	 * @param resourcePath the absolute path to the resource
+	 * @return the path to the resource
+	 */
+	public static Path getResourcePath(String resourcePath) {
+		return Paths.get(getResourceUri(resourcePath));
+	}
+
+	private static URI getResourceUri(String resourcePath) {
+		URL url = TestUtils.class.getResource(resourcePath);
 		if (url == null) {
-			throw new RuntimeException("Could not find test file named: " + fileName);
+			throw new RuntimeException("Could not find test resource: " + resourcePath);
 		}
 		try {
 			return url.toURI();

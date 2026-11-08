@@ -107,6 +107,25 @@ class HdfFileTest {
 	}
 
 	@Test
+	void testOpeningFileWithSelfReferencingContinuationFailsCleanly() {
+		// Regression test for an object header continuation cycle. This must surface as an HdfException and
+		// must not escape as a StackOverflowError.
+		Path malformedFilePath = TestUtils.getResourcePath("/malformed/recursive_continuation_v1.hdf5");
+		try (HdfFile hdfFile = new HdfFile(malformedFilePath)) {
+			assertThrows(HdfException.class, hdfFile::getChildren);
+		}
+	}
+
+	@Test
+	void testOpeningInMemoryFileWithSelfReferencingContinuationFailsCleanly() throws IOException {
+		Path malformedFilePath = TestUtils.getResourcePath("/malformed/recursive_continuation_v1.hdf5");
+		byte[] bytes = Files.readAllBytes(malformedFilePath);
+		try (HdfFile hdfFile = HdfFile.fromBytes(bytes)) {
+			assertThrows(HdfException.class, hdfFile::getChildren);
+		}
+	}
+
+	@Test
 	void testRootGroup() {
 		try (HdfFile hdfFile = new HdfFile(testFilePath)) {
 			assertThat(hdfFile.getName(), is(equalTo(HDF5_TEST_FILE_NAME)));

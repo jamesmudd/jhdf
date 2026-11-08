@@ -21,16 +21,29 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.jhdf.Utils.readBytesAsUnsignedInt;
 
 public abstract class ObjectHeader {
 	private static final Logger logger = LoggerFactory.getLogger(ObjectHeader.class);
+
+	/**
+	 * The maximum number of continuation blocks which will be followed for a single object header. Real HDF5 files use
+	 * only a handful of continuation blocks so this is generous while still bounding the recursion.
+	 */
+	private static final int MAX_CONTINUATION_DEPTH = 16;
+	private static final int MAX_OBJECT_HEADER_NESTING = 16;
+	private static final ThreadLocal<Deque<Long>> OBJECT_HEADER_READ_STACK =
+		ThreadLocal.withInitial(ArrayDeque::new);
 
 	/**
 	 * The location of this Object header in the file
@@ -40,6 +53,11 @@ public abstract class ObjectHeader {
 	 * The messages contained in this object header
 	 */
 	protected final List<Message> messages = new ArrayList<>();
+	/**
+	 * The offsets of the continuation blocks which have already been read for this object header. Used to detect
+	 * malformed files which create cycles of continuation blocks.
+	 */
+	private final Set<Long> visitedContinuationOffsets = new HashSet<>();
 
 	public long getAddress() {
 		return address;
@@ -57,6 +75,31 @@ public abstract class ObjectHeader {
 
 	protected ObjectHeader(long address) {
 		this.address = address;
+	}
+
+	/**
+	 * Checks a continuation block can safely be read. This protects against malformed files which create cycles of
+	 * continuation blocks or long continuation chains, either of which would otherwise cause unbounded recursion.
+	 *
+	 * @param continuationMessage the continuation message to check
+	 * @param currentDepth the number of continuation blocks already read for this object header
+	 * @throws HdfException if the continuation block should not be followed
+	 */
+	protected void checkContinuationMessage(ObjectHeaderContinuationMessage continuationMessage, int currentDepth) {
+		if (currentDepth >= MAX_CONTINUATION_DEPTH) {
+			throw new HdfException("Object header continuation chain exceeds the maximum depth of "
+				+ MAX_CONTINUATION_DEPTH);
+		}
+
+		final long offset = continuationMessage.getOffset();
+		if (offset == address) {
+			throw new HdfException("Object header continuation message points at its own object header, address: "
+				+ offset);
+		}
+		if (!visitedContinuationOffsets.add(offset)) {
+			throw new HdfException("Object header continuation message points at a continuation block which has already "
+				+ "been read, address: " + offset);
+		}
 	}
 
 	public <T extends Message> List<T> getMessagesOfType(Class<T> type) {
@@ -119,7 +162,7 @@ public abstract class ObjectHeader {
 				address += 16;
 				header = hdfBackingStorage.readBufferFromAddress(address, headerSize);
 
-				readMessages(hdfBackingStorage, header, numberOfMessages);
+				readMessages(hdfBackingStorage, header, numberOfMessages, 0);
 
 				logger.debug("Read object header from address: {}", address);
 
@@ -128,17 +171,18 @@ public abstract class ObjectHeader {
 			}
 		}
 
-		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb, int numberOfMessages) {
+		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb, int numberOfMessages, int continuationDepth) {
 			while (bb.remaining() > 4 && messages.size() < numberOfMessages) {
 				Message m = Message.readObjectHeaderV1Message(bb, hdfBackingStorage);
 				messages.add(m);
 
 				if (m instanceof ObjectHeaderContinuationMessage) {
 					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
+					checkContinuationMessage(ohcm, continuationDepth);
 
 					ByteBuffer continuationBuffer = hdfBackingStorage.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
 
-					readMessages(hdfBackingStorage, continuationBuffer, numberOfMessages);
+					readMessages(hdfBackingStorage, continuationBuffer, numberOfMessages, continuationDepth + 1);
 				}
 			}
 		}
@@ -201,7 +245,7 @@ public abstract class ObjectHeader {
 			try {
 				ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, 6);
 				address += 6;
-				headerSize += 6;
+				headerSize = ArithmeticUtils.addExact(headerSize, 6);
 
 				byte[] formatSignatureBytes = new byte[OBJECT_HEADER_V2_SIGNATURE.length];
 				bb.get(formatSignatureBytes);
@@ -228,7 +272,7 @@ public abstract class ObjectHeader {
 				if (flags.get(TIMESTAMPS_PRESENT)) {
 					bb = hdfBackingStorage.readBufferFromAddress(address, 16);
 					address += 16;
-					headerSize += 16;
+					headerSize = ArithmeticUtils.addExact(headerSize, 16);
 
 					accessTime = Utils.readBytesAsUnsignedLong(bb, 4);
 					modificationTime = Utils.readBytesAsUnsignedLong(bb, 4);
@@ -245,7 +289,7 @@ public abstract class ObjectHeader {
 				if (flags.get(NUMBER_OF_ATTRIBUTES_PRESENT)) {
 					bb = hdfBackingStorage.readBufferFromAddress(address, 4);
 					address += 4;
-					headerSize += 4;
+					headerSize = ArithmeticUtils.addExact(headerSize, 4);
 
 					maximumNumberOfCompactAttributes = readBytesAsUnsignedInt(bb, 2);
 					maximumNumberOfDenseAttributes = readBytesAsUnsignedInt(bb, 2);
@@ -256,19 +300,19 @@ public abstract class ObjectHeader {
 
 				bb = hdfBackingStorage.readBufferFromAddress(address, sizeOfChunk0);
 				address += sizeOfChunk0;
-				headerSize += sizeOfChunk0;
+				headerSize = ArithmeticUtils.addExact(headerSize, sizeOfChunk0);
 
 				int sizeOfMessages = readBytesAsUnsignedInt(bb, sizeOfChunk0);
 
 				bb = hdfBackingStorage.readBufferFromAddress(address, sizeOfMessages);
-				headerSize += sizeOfMessages;
+				headerSize = ArithmeticUtils.addExact(headerSize, sizeOfMessages);
 
 				// There might be a gap at the end of the header of up to 4 bytes
 				// message type (1_byte) + message size (2 bytes) + message flags (1 byte)
-				readMessages(hdfBackingStorage, bb);
+				readMessages(hdfBackingStorage, bb, 0);
 
 				// Checksum
-				headerSize += 4;
+				headerSize = ArithmeticUtils.addExact(headerSize, 4);
 				ByteBuffer fullHeaderBuffer = hdfBackingStorage.readBufferFromAddress(super.getAddress(), headerSize);
 				ChecksumUtils.validateChecksum(fullHeaderBuffer);
 
@@ -352,13 +396,15 @@ public abstract class ObjectHeader {
 			return bufferBuilder.build();
 		}
 
-		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb) {
+		private void readMessages(HdfBackingStorage hdfBackingStorage, ByteBuffer bb, int continuationDepth) {
 			while (bb.remaining() >= 8) {
 				Message m = Message.readObjectHeaderV2Message(bb, hdfBackingStorage, this.isAttributeCreationOrderTracked());
 				messages.add(m);
 
 				if (m instanceof ObjectHeaderContinuationMessage) {
 					ObjectHeaderContinuationMessage ohcm = (ObjectHeaderContinuationMessage) m;
+					checkContinuationMessage(ohcm, continuationDepth);
+
 					ByteBuffer continuationBuffer = hdfBackingStorage.readBufferFromAddress(ohcm.getOffset(), ohcm.getLength());
 
 					// Verify continuation block signature
@@ -370,7 +416,7 @@ public abstract class ObjectHeader {
 					}
 
 					// Recursively read messages
-					readMessages(hdfBackingStorage, continuationBuffer);
+					readMessages(hdfBackingStorage, continuationBuffer, continuationDepth + 1);
 
 					continuationBuffer.rewind();
 					ChecksumUtils.validateChecksum(continuationBuffer);
@@ -420,12 +466,29 @@ public abstract class ObjectHeader {
 	}
 
 	public static ObjectHeader readObjectHeader(HdfBackingStorage hdfBackingStorage, long address) {
-		ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, 1);
-		byte version = bb.get();
-		if (version == 1) {
-			return new ObjectHeaderV1(hdfBackingStorage, address);
-		} else {
-			return new ObjectHeaderV2(hdfBackingStorage, address);
+		final Deque<Long> readStack = OBJECT_HEADER_READ_STACK.get();
+		if (readStack.contains(address)) {
+			throw new HdfException("Recursive object header reference at address: " + address);
+		}
+		if (readStack.size() >= MAX_OBJECT_HEADER_NESTING) {
+			throw new HdfException("Object header nesting exceeds the maximum depth of "
+				+ MAX_OBJECT_HEADER_NESTING);
+		}
+
+		readStack.push(address);
+		try {
+			ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, 1);
+			byte version = bb.get();
+			if (version == 1) {
+				return new ObjectHeaderV1(hdfBackingStorage, address);
+			} else {
+				return new ObjectHeaderV2(hdfBackingStorage, address);
+			}
+		} finally {
+			readStack.pop();
+			if (readStack.isEmpty()) {
+				OBJECT_HEADER_READ_STACK.remove();
+			}
 		}
 	}
 

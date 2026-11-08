@@ -9,6 +9,7 @@
  */
 package io.jhdf.dataset;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.ObjectHeader;
 import io.jhdf.Utils;
 import io.jhdf.api.Group;
@@ -49,7 +50,8 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 	public ByteBuffer getSliceDataBuffer(long[] sliceOffset, int[] sliceDimensions) {
 		int totalElementsInSlice = Arrays.stream(sliceDimensions).reduce(1, Math::multiplyExact);
 
-		ByteBuffer byteBuffer = ByteBuffer.allocate(totalElementsInSlice * getDataType().getSize());
+		ByteBuffer byteBuffer = ByteBuffer.allocate(
+			ArithmeticUtils.multiplyExact(totalElementsInSlice, getDataType().getSize()));
 		convertToCorrectEndiness(byteBuffer);
 
 		long[] currentOffset = sliceOffset.clone();
@@ -69,10 +71,12 @@ public class ContiguousDatasetImpl extends DatasetBase implements ContiguousData
 			}
 		} else {
 			// fastest dim so read some data
-			long offsetBytes = Utils.dimensionIndexToLinearIndex(currentOffset, getDimensionsAsLong()) * getDataType().getSize();
-			long fileOffset = contiguousDataLayoutMessage.getAddress() + offsetBytes;
+			long offsetBytes = ArithmeticUtils.multiplyExact(
+				Utils.dimensionIndexToLinearIndex(currentOffset, getDimensionsAsLong()), getDataType().getSize());
+			long fileOffset = ArithmeticUtils.addExact(contiguousDataLayoutMessage.getAddress(), offsetBytes);
 
-			final int fastestDimLengthBytes = sliceDimensions[sliceDimensions.length - 1] * getDataType().getSize();
+			final int fastestDimLengthBytes = ArithmeticUtils.multiplyExact(
+				sliceDimensions[sliceDimensions.length - 1], getDataType().getSize());
 
 			byteBuffer.put(hdfBackingStorage.readBufferFromAddress(fileOffset, fastestDimLengthBytes));
 		}

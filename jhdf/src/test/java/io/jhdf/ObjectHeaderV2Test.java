@@ -10,10 +10,13 @@
 package io.jhdf;
 
 import io.jhdf.ObjectHeader.ObjectHeaderV2;
+import io.jhdf.exceptions.HdfException;
+import io.jhdf.object.message.AttributeMessage;
 import io.jhdf.object.message.GroupInfoMessage;
 import io.jhdf.object.message.LinkInfoMessage;
 import io.jhdf.object.message.LinkMessage;
 import io.jhdf.object.message.Message;
+import io.jhdf.object.message.ObjectHeaderContinuationMessage;
 import io.jhdf.storage.HdfBackingStorage;
 import io.jhdf.storage.HdfFileChannel;
 import io.jhdf.storage.HdfInMemoryByteBuffer;
@@ -26,14 +29,20 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ObjectHeaderV2Test {
 
@@ -41,6 +50,10 @@ class ObjectHeaderV2Test {
 	 * This will need to be updated each time the test files are regenerated
 	 */
 	private static final long TIMESTAMP = 1553279213L;
+
+	private static final int FIRST_CONTINUATION_BLOCK_OFFSET = 512;
+	private static final int CONTINUATION_BLOCK_SIZE = 28; // Signature + continuation message + checksum
+	private static final int OBJECT_HEADER_SPACING = 64;
 
 	private HdfBackingStorage hdfBackingStorage;
 
@@ -203,6 +216,163 @@ class ObjectHeaderV2Test {
 		assertThat(oh.isAttributeCreationOrderTracked(), is(true));
 
 		hdfBackingStorage.close();
+	}
+
+	@Test
+	void testContinuationMessagePointingAtItsOwnObjectHeaderThrowsHdfException() {
+		HdfBackingStorage inMemoryStorage = new HdfInMemoryByteBuffer(
+			createObjectHeaderWithContinuation(0, CONTINUATION_BLOCK_SIZE),
+			new Superblock.SuperblockV2V3());
+
+		HdfException exception = assertThrows(HdfException.class,
+			() -> ObjectHeader.readObjectHeader(inMemoryStorage, 0));
+
+		assertThat(exception.getCause(), is(instanceOf(HdfException.class)));
+		assertThat(exception.getCause().getMessage(), containsString("its own object header"));
+	}
+
+	@Test
+	void testContinuationMessageCycleThrowsHdfException() {
+		ByteBuffer file = ByteBuffer.allocate(FIRST_CONTINUATION_BLOCK_OFFSET + CONTINUATION_BLOCK_SIZE)
+			.order(LITTLE_ENDIAN);
+		file.put(createObjectHeaderWithContinuation(FIRST_CONTINUATION_BLOCK_OFFSET, CONTINUATION_BLOCK_SIZE));
+		file.position(FIRST_CONTINUATION_BLOCK_OFFSET);
+		file.put(createContinuationBlock(FIRST_CONTINUATION_BLOCK_OFFSET, CONTINUATION_BLOCK_SIZE));
+
+		HdfBackingStorage inMemoryStorage = new HdfInMemoryByteBuffer(file, new Superblock.SuperblockV2V3());
+
+		HdfException exception = assertThrows(HdfException.class,
+			() -> ObjectHeader.readObjectHeader(inMemoryStorage, 0));
+
+		assertThat(exception.getCause(), is(instanceOf(HdfException.class)));
+		assertThat(exception.getCause().getMessage(), containsString("already been read"));
+	}
+
+	@Test
+	void testTooManyContinuationBlocksThrowsHdfException() {
+		final int numberOfBlocks = 100;
+		ByteBuffer file = ByteBuffer
+			.allocate(FIRST_CONTINUATION_BLOCK_OFFSET + (numberOfBlocks + 1) * CONTINUATION_BLOCK_SIZE)
+			.order(LITTLE_ENDIAN);
+		file.put(createObjectHeaderWithContinuation(FIRST_CONTINUATION_BLOCK_OFFSET, CONTINUATION_BLOCK_SIZE));
+		for (int i = 0; i < numberOfBlocks; i++) {
+			long nextOffset = FIRST_CONTINUATION_BLOCK_OFFSET + (long) (i + 1) * CONTINUATION_BLOCK_SIZE;
+			file.position(FIRST_CONTINUATION_BLOCK_OFFSET + i * CONTINUATION_BLOCK_SIZE);
+			file.put(createContinuationBlock(nextOffset, CONTINUATION_BLOCK_SIZE));
+		}
+
+		HdfBackingStorage inMemoryStorage = new HdfInMemoryByteBuffer(file, new Superblock.SuperblockV2V3());
+
+		HdfException exception = assertThrows(HdfException.class,
+			() -> ObjectHeader.readObjectHeader(inMemoryStorage, 0));
+
+		assertThat(exception.getCause(), is(instanceOf(HdfException.class)));
+		assertThat(exception.getCause().getMessage(), containsString("maximum depth"));
+	}
+
+	@Test
+	void testRecursiveSharedMessageCycleThrowsHdfException() {
+		HdfBackingStorage inMemoryStorage = new HdfInMemoryByteBuffer(
+			createObjectHeaderWithSharedDatatype(0),
+			new Superblock.SuperblockV2V3());
+
+		HdfException exception = assertThrows(HdfException.class,
+			() -> ObjectHeader.readObjectHeader(inMemoryStorage, 0));
+
+		assertThat(findCauseContaining(exception, "Recursive object header reference"), is(notNullValue()));
+	}
+
+	@Test
+	void testSharedMessageChainDepthExceededThrowsHdfException() {
+		final int numberOfObjectHeaders = 20;
+		ByteBuffer file = ByteBuffer.allocate(numberOfObjectHeaders * OBJECT_HEADER_SPACING)
+			.order(LITTLE_ENDIAN);
+		for (int i = 0; i < numberOfObjectHeaders; i++) {
+			file.position(i * OBJECT_HEADER_SPACING);
+			file.put(createObjectHeaderWithSharedDatatype((long) (i + 1) * OBJECT_HEADER_SPACING));
+		}
+
+		HdfBackingStorage inMemoryStorage = new HdfInMemoryByteBuffer(file, new Superblock.SuperblockV2V3());
+
+		HdfException exception = assertThrows(HdfException.class,
+			() -> ObjectHeader.readObjectHeader(inMemoryStorage, 0));
+
+		assertThat(findCauseContaining(exception, "maximum depth"), is(notNullValue()));
+	}
+
+	private static Throwable findCauseContaining(Throwable throwable, String messagePart) {
+		for (Throwable cause = throwable; cause != null; cause = cause.getCause()) {
+			if (cause.getMessage() != null && cause.getMessage().contains(messagePart)) {
+				return cause;
+			}
+		}
+		return null;
+	}
+
+	private static ByteBuffer createObjectHeaderWithSharedDatatype(long targetAddress) {
+		ByteBuffer sharedMessage = new BufferBuilder()
+			.writeByte(1) // Shared message version
+			.writeByte(0) // Shared message type
+			.writeBytes(new byte[6]) // Reserved
+			.writeLong(targetAddress)
+			.build();
+
+		ByteBuffer attributeMessage = new BufferBuilder()
+			.writeByte(2) // Attribute message version
+			.writeByte(1) // Flags: datatype is shared
+			.writeShort(1) // Name size including null terminator
+			.writeShort(sharedMessage.capacity())
+			.writeShort(0) // Dataspace size, not reached before the cycle is detected
+			.writeByte(0) // Empty null terminated name
+			.writeBuffer(sharedMessage)
+			.build();
+
+		ByteBuffer message = new BufferBuilder()
+			.writeByte(AttributeMessage.MESSAGE_TYPE)
+			.writeShort(attributeMessage.capacity())
+			.writeByte(0) // Message flags
+			.writeBuffer(attributeMessage)
+			.build();
+
+		return new BufferBuilder()
+			.writeBytes("OHDR".getBytes(StandardCharsets.US_ASCII))
+			.writeByte(2) // Version
+			.writeByte(0b10) // Size of chunk 0 is stored in 4 bytes
+			.writeInt(message.capacity())
+			.writeBuffer(message)
+			.appendChecksum()
+			.build();
+	}
+
+	private static ByteBuffer createObjectHeaderWithContinuation(long continuationOffset, int continuationLength) {
+		ByteBuffer message = createContinuationMessage(continuationOffset, continuationLength);
+		return new BufferBuilder()
+			.writeBytes("OHDR".getBytes(StandardCharsets.US_ASCII))
+			.writeByte(2) // Version
+			.writeByte(0b10) // Size of chunk 0 is stored in 4 bytes
+			.writeInt(message.capacity())
+			.writeBuffer(message)
+			.appendChecksum()
+			.build();
+	}
+
+	private static ByteBuffer createContinuationBlock(long nextOffset, int nextLength) {
+		ByteBuffer message = createContinuationMessage(nextOffset, nextLength);
+		return new BufferBuilder()
+			.writeBytes("OCHK".getBytes(StandardCharsets.US_ASCII))
+			.writeBuffer(message)
+			.appendChecksum()
+			.build();
+	}
+
+	private static ByteBuffer createContinuationMessage(long offset, int length) {
+		return new BufferBuilder()
+			.writeByte(ObjectHeaderContinuationMessage.MESSAGE_TYPE)
+			.writeShort(16) // Size of offset and length
+			.writeByte(0) // Flags
+			.writeLong(offset)
+			.writeLong(length)
+			.build();
 	}
 
 	@Test
