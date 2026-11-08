@@ -9,6 +9,7 @@
  */
 package io.jhdf.api;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Utils;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataSpace;
@@ -62,7 +63,7 @@ public class WritableAttributeImpl implements Attribute {
 
 	@Override
 	public long getSizeInBytes() {
-		return Utils.multiplyExact(getSize(), dataType.getSize());
+		return ArithmeticUtils.multiplyExact(getSize(), dataType.getSize());
 	}
 
 	@Override

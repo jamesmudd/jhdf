@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.BufferBuilder;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
@@ -191,7 +192,7 @@ public class StringData extends DataType {
 	public void writeData(Object data, int[] dimensions, HdfFileChannel hdfFileChannel) {
 		if (data.getClass().isArray()) {
 			final int fastDimSize = dimensions[dimensions.length - 1];
-			final ByteBuffer buffer = ByteBuffer.allocate(Utils.multiplyExact(fastDimSize, getSize()));
+			final ByteBuffer buffer = ByteBuffer.allocate(ArithmeticUtils.multiplyExact(fastDimSize, getSize()));
 			writeArrayData(data, dimensions, buffer, hdfFileChannel);
 		} else {
 			writeScalarData(data, hdfFileChannel);
@@ -216,7 +217,7 @@ public class StringData extends DataType {
 				String str = strings[i];
 				buffer.put(charset.encode(str))
 					.put(NULL)
-					.position(Utils.multiplyExact(i + 1, getSize()));
+					.position(ArithmeticUtils.multiplyExact(i + 1, getSize()));
 			}
 			buffer.rewind();
 			hdfFileChannel.write(buffer);
@@ -238,7 +239,7 @@ public class StringData extends DataType {
 		if (data.getClass().isArray()) {
 			final int[] dimensions = Utils.getDimensions(data);
 			final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
-			final ByteBuffer buffer = ByteBuffer.allocate(Utils.multiplyExact(totalElements, getSize()));
+			final ByteBuffer buffer = ByteBuffer.allocate(ArithmeticUtils.multiplyExact(totalElements, getSize()));
 			encodeDataInternal(data, dimensions, buffer);
 			return buffer;
 		} else {
@@ -259,7 +260,7 @@ public class StringData extends DataType {
                 String str = strings[i];
                 buffer.put(this.charset.encode(str))
                         .put(NULL)
-                        .position(Utils.addExact(offset, Utils.multiplyExact(i + 1, getSize())));
+                        .position(ArithmeticUtils.addExact(offset, ArithmeticUtils.multiplyExact(i + 1, getSize())));
             }
 		}
 	}

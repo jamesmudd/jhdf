@@ -9,7 +9,6 @@
  */
 package io.jhdf;
 
-import io.jhdf.exceptions.HdfException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -29,7 +28,6 @@ import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -43,16 +41,6 @@ class UtilsTest {
 	@Test
 	void testToHexWithUndefinedAddress() {
 		assertThat(Utils.toHex(Constants.UNDEFINED_ADDRESS), is(equalTo("UNDEFINED")));
-	}
-
-	@Test
-	void testCheckedArithmeticWrapsArithmeticExceptionInHdfException() {
-		HdfException e = assertThrows(HdfException.class, () -> Utils.addExact(Integer.MAX_VALUE, 1));
-		assertThat(e.getCause(), is(instanceOf(ArithmeticException.class)));
-
-		assertThrows(HdfException.class, () -> Utils.multiplyExact(Long.MAX_VALUE, 2));
-		assertThrows(HdfException.class, () -> Utils.toIntExact(Long.MAX_VALUE));
-		assertThrows(HdfException.class, () -> Utils.floorDiv(1, 0));
 	}
 
 	@Test

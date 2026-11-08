@@ -9,6 +9,7 @@
  */
 package io.jhdf.object.datatype;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfTypeException;
 import io.jhdf.exceptions.UnsupportedHdfException;
@@ -314,7 +315,7 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		if (data.getClass().isArray()) {
 			final int[] dimensions = Utils.getDimensions(data);
 			final int totalElements = Arrays.stream(dimensions).reduce(1, Math::multiplyExact);
-			final ByteBuffer buffer = ByteBuffer.allocate(Utils.multiplyExact(totalElements, getSize()))
+			final ByteBuffer buffer = ByteBuffer.allocate(ArithmeticUtils.multiplyExact(totalElements, getSize()))
 				.order(order);
 			if(type == float.class) {
 				encodeFloatData(data, dimensions, buffer.asFloatBuffer(), true);
@@ -351,7 +352,7 @@ public class FloatingPoint extends DataType implements OrderedDataType {
 		if (data.getClass().isArray()) {
 			final int fastDimSize = dimensions[dimensions.length - 1];
 			// This buffer is reused
-			final ByteBuffer buffer = ByteBuffer.allocate(Utils.multiplyExact(fastDimSize, getSize()))
+			final ByteBuffer buffer = ByteBuffer.allocate(ArithmeticUtils.multiplyExact(fastDimSize, getSize()))
 				.order(order);
 
 			if(type == float.class) {

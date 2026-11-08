@@ -9,6 +9,7 @@
  */
 package io.jhdf.dataset.chunked.indexing;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Utils;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.DatasetInfo;
@@ -52,8 +53,8 @@ public class ImplicitChunkIndex implements ChunkIndex {
 							throw new NoSuchElementException();
 						}
 						long chunkIndex = index++;
-						long chunkAddress = Utils.addExact(baseAddress,
-							Utils.multiplyExact(chunkIndex, (long) chunkSize));
+						long chunkAddress = ArithmeticUtils.addExact(baseAddress,
+							ArithmeticUtils.multiplyExact(chunkIndex, (long) chunkSize));
 						return new ChunkImpl(chunkAddress,
 							chunkSize,
 							Utils.chunkIndexToChunkOffset(chunkIndex, chunkDimensions, datasetDimensions));

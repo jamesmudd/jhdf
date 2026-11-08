@@ -9,6 +9,7 @@
  */
 package io.jhdf.dataset.chunked.indexing;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Utils;
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.dataset.chunked.Chunk;
@@ -114,13 +115,13 @@ public class FixedArrayIndex implements ChunkIndex {
 
 		private FixedArrayDataBlock(HdfBackingStorage hdfBackingStorage, long address) {
 
-			int pageBitmapBytes = Utils.toIntExact((pages + 7L) / 8);
+			int pageBitmapBytes = ArithmeticUtils.toIntExact((pages + 7L) / 8);
 			long headerSize = 6L + hdfBackingStorage.getSizeOfOffsets()
 				+ (long) FixedArrayIndex.this.entrySize * FixedArrayIndex.this.maxNumberOfEntries + 4;
 			if(pages > 1) {
 				headerSize += pageBitmapBytes + (4L * pages);
 			}
-			final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, Utils.toIntExact(headerSize));
+			final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, ArithmeticUtils.toIntExact(headerSize));
 			bb.mark();
 
 			byte[] formatSignatureBytes = new byte[4];

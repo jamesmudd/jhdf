@@ -9,6 +9,7 @@
  */
 package io.jhdf.btree.record;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Utils;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.DatasetInfo;
@@ -32,14 +33,14 @@ public class FilteredDatasetChunks extends BTreeDatasetChunkRecord {
 		final int chunkSizeBytes = buffer.limit()
 			- 8 // size of offsets
 			- 4 // filter mask
-			- Utils.multiplyExact(datasetInfo.getDatasetDimensions().length, 8); // dimension offsets
+			- ArithmeticUtils.multiplyExact(datasetInfo.getDatasetDimensions().length, 8); // dimension offsets
 
 		final int chunkSize = Utils.readBytesAsUnsignedInt(buffer, chunkSizeBytes);
 		final BitSet filterMask = BitSet.valueOf(new byte[]{buffer.get(), buffer.get(), buffer.get(), buffer.get()});
 
 		long[] chunkOffset = new long[datasetInfo.getDatasetDimensions().length];
 		for (int i = 0; i < chunkOffset.length; i++) {
-			chunkOffset[i] = Utils.multiplyExact(
+			chunkOffset[i] = ArithmeticUtils.multiplyExact(
 				Utils.readBytesAsUnsignedLong(buffer, 8), datasetInfo.getChunkDimensions()[i]);
 		}
 

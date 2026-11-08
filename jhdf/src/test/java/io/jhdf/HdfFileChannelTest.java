@@ -9,6 +9,7 @@
  */
 package io.jhdf;
 
+import io.jhdf.exceptions.HdfArithmeticException;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.storage.HdfFileChannel;
 import org.junit.jupiter.api.BeforeEach;
@@ -113,7 +114,7 @@ class HdfFileChannelTest {
 		when(sb.getBaseAddressByte()).thenReturn(Long.MAX_VALUE);
 
 		// address + base address overflows, exact arithmetic detects this before the bounds check
-		assertThrows(HdfException.class, () -> hdfFc.readBufferFromAddress(1, 5));
+		assertThrows(HdfArithmeticException.class, () -> hdfFc.readBufferFromAddress(1, 5));
 
 		Mockito.verify(fc, Mockito.never()).read(any(ByteBuffer.class), anyLong());
 	}
