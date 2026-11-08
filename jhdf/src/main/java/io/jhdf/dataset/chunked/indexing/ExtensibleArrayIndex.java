@@ -9,6 +9,7 @@
  */
 package io.jhdf.dataset.chunked.indexing;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Utils;
 import io.jhdf.checksum.ChecksumUtils;
 import io.jhdf.dataset.chunked.Chunk;
@@ -139,7 +140,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 				+ 4; // checksum
 
 
-			final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, Math.toIntExact(headerSize));
+			final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, ArithmeticUtils.toIntExact(headerSize));
 
 			verifySignature(bb, EXTENSIBLE_ARRAY_INDEX_BLOCK_SIGNATURE);
 
@@ -197,7 +198,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 					+ (long) numberOfElementsInDataBlock * extensibleArrayElementSize // elements (chunks)
 					+ 4; // checksum
 
-				final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, Math.toIntExact(headerSize));
+				final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, ArithmeticUtils.toIntExact(headerSize));
 
 				verifySignature(bb, EXTENSIBLE_ARRAY_DATA_BLOCK_SIGNATURE);
 
@@ -246,7 +247,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 					4; // checksum
 
 
-				final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, Math.toIntExact(secondaryBlockSize));
+				final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(address, ArithmeticUtils.toIntExact(secondaryBlockSize));
 
 				verifySignature(bb, EXTENSIBLE_ARRAY_SECONDARY_BLOCK_SIGNATURE);
 
@@ -351,14 +352,14 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 				blockCounter++;
 			} else if (increaseNumberOfBlocksNext) {
 				increaseNumberOfBlocksNext = false;
-				numberOfBlocks = Math.multiplyExact(numberOfBlocks, 2);
+				numberOfBlocks = ArithmeticUtils.multiplyExact(numberOfBlocks, 2);
 				blockCounter = 1;
 			} else {
 				increaseNumberOfBlocksNext = true;
-				blockSizeMultiplier = Math.multiplyExact(blockSizeMultiplier, 2);
+				blockSizeMultiplier = ArithmeticUtils.multiplyExact(blockSizeMultiplier, 2);
 				blockCounter = 1;
 			}
-			return Math.multiplyExact(blockSizeMultiplier, minNumberOfElementsInDataBlock);
+			return ArithmeticUtils.multiplyExact(blockSizeMultiplier, minNumberOfElementsInDataBlock);
 		}
 
 		@Override
@@ -388,7 +389,7 @@ public class ExtensibleArrayIndex implements ChunkIndex {
 			if (counter < REPEATS) {
 				counter++;
 			} else {
-				numberOfPointers = Math.multiplyExact(numberOfPointers, 2);
+				numberOfPointers = ArithmeticUtils.multiplyExact(numberOfPointers, 2);
 				counter = 1;
 			}
 			return numberOfPointers;

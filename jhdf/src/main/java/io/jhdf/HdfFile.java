@@ -116,7 +116,7 @@ public class HdfFile implements Group, AutoCloseable {
 		// Find out if the buffer is a HDF5 file
 		boolean validSignature = false;
 		int offset;
-		for (offset = 0; offset < byteBuffer.capacity(); offset = Math.toIntExact(nextOffset(offset))) {
+		for (offset = 0; offset < byteBuffer.capacity(); offset = ArithmeticUtils.toIntExact(nextOffset(offset))) {
 			logger.trace("Checking for signature at offset = {}", offset);
 			validSignature = Superblock.verifySignature(byteBuffer, offset);
 			if (validSignature) {
@@ -238,7 +238,7 @@ public class HdfFile implements Group, AutoCloseable {
 		if (offset == 0) {
 			return 512L;
 		}
-		return Math.multiplyExact(offset, 2);
+		return ArithmeticUtils.multiplyExact(offset, 2);
 	}
 
 	/**

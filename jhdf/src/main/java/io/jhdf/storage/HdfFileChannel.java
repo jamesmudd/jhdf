@@ -9,8 +9,10 @@
  */
 package io.jhdf.storage;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.HdfFile;
 import io.jhdf.Superblock;
+import io.jhdf.Utils;
 import io.jhdf.exceptions.HdfException;
 import io.jhdf.exceptions.HdfWritingException;
 
@@ -53,7 +55,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 	 */
 	@Override
 	public ByteBuffer readBufferFromAddress(long address, int length) {
-		long rawAddress = Math.addExact(address, sb.getBaseAddressByte());
+		long rawAddress = ArithmeticUtils.addExact(address, sb.getBaseAddressByte());
 		try {
 			return readBufferNoOffset(rawAddress, length);
 		} catch (IOException e) {
@@ -64,7 +66,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 
 	@Override
 	public ByteBuffer map(long address, long length) {
-		return mapNoOffset(Math.addExact(address, sb.getBaseAddressByte()), length);
+		return mapNoOffset(ArithmeticUtils.addExact(address, sb.getBaseAddressByte()), length);
 	}
 
 	@Override
@@ -90,7 +92,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 				}
 			}
 			// read channel into buffer instead of mapping it to memory
-			return readBufferNoOffset(address, Math.toIntExact(length));
+			return readBufferNoOffset(address, ArithmeticUtils.toIntExact(length));
 		} catch (IOException e) {
 			throw new HdfException("Failed to map buffer at address '" + address
 				+ "' of length '" + length + "'", e);
@@ -106,7 +108,7 @@ public class HdfFileChannel implements HdfBackingStorage {
 			if (numberOfBytesRead <= 0) {
 				throw new IOException("Trying to read more bytes than available");
 			}
-			totalNumberOfBytesRead = Math.addExact(totalNumberOfBytesRead, numberOfBytesRead);
+			totalNumberOfBytesRead = ArithmeticUtils.addExact(totalNumberOfBytesRead, numberOfBytesRead);
 		}
 		bb.order(LITTLE_ENDIAN);
 		bb.flip();

@@ -9,6 +9,7 @@
  */
 package io.jhdf.btree.record;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Utils;
 import io.jhdf.dataset.chunked.Chunk;
 import io.jhdf.dataset.chunked.DatasetInfo;
@@ -30,7 +31,7 @@ public class NonFilteredDatasetChunks extends BTreeDatasetChunkRecord {
 
 		long[] chunkOffset = new long[datasetInfo.getDatasetDimensions().length];
 		for (int i = 0; i < chunkOffset.length; i++) {
-			chunkOffset[i] = Math.multiplyExact(
+			chunkOffset[i] = ArithmeticUtils.multiplyExact(
 				Utils.readBytesAsUnsignedLong(buffer, 8), datasetInfo.getChunkDimensions()[i]);
 		}
 

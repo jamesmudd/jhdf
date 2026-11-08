@@ -9,6 +9,7 @@
  */
 package io.jhdf.btree;
 
+import io.jhdf.ArithmeticUtils;
 import io.jhdf.Superblock;
 import io.jhdf.Utils;
 import io.jhdf.dataset.chunked.Chunk;
@@ -47,10 +48,10 @@ public abstract class BTreeV1Data extends BTreeV1 {
 		/* package */ BTreeV1DataLeafNode(HdfBackingStorage hdfBackingStorage, long address, int dataDimensions) {
 			super(hdfBackingStorage, address);
 
-			final int keySize = Math.addExact(8, Math.multiplyExact(Math.addExact(dataDimensions, 1), 8));
-			final int keyBytes = Math.multiplyExact(Math.addExact(entriesUsed, 1), keySize);
-			final int childPointerBytes = Math.multiplyExact(entriesUsed, hdfBackingStorage.getSizeOfOffsets());
-			final int keysAndPointersBytes = Math.addExact(keyBytes, childPointerBytes);
+			final int keySize = ArithmeticUtils.addExact(8, ArithmeticUtils.multiplyExact(ArithmeticUtils.addExact(dataDimensions, 1), 8));
+			final int keyBytes = ArithmeticUtils.multiplyExact(ArithmeticUtils.addExact(entriesUsed, 1), keySize);
+			final int childPointerBytes = ArithmeticUtils.multiplyExact(entriesUsed, hdfBackingStorage.getSizeOfOffsets());
+			final int keysAndPointersBytes = ArithmeticUtils.addExact(keyBytes, childPointerBytes);
 
 			final long keysAddress = address + 8L + 2L * hdfBackingStorage.getSizeOfOffsets();
 			final ByteBuffer bb = hdfBackingStorage.readBufferFromAddress(keysAddress, keysAndPointersBytes);
@@ -99,10 +100,10 @@ public abstract class BTreeV1Data extends BTreeV1 {
 										  Set<Long> visitedAddresses, int depth) {
 			super(hdfBackingStorage, address);
 
-			final int keySize = Math.addExact(8, Math.multiplyExact(Math.addExact(dataDimensions, 1), 8));
-			final int keyBytes = Math.multiplyExact(Math.addExact(entriesUsed, 1), keySize);
-			final int childPointerBytes = Math.multiplyExact(entriesUsed, hdfBackingStorage.getSizeOfOffsets());
-			final int keysAndPointersBytes = Math.addExact(keyBytes, childPointerBytes);
+			final int keySize = ArithmeticUtils.addExact(8, ArithmeticUtils.multiplyExact(ArithmeticUtils.addExact(dataDimensions, 1), 8));
+			final int keyBytes = ArithmeticUtils.multiplyExact(ArithmeticUtils.addExact(entriesUsed, 1), keySize);
+			final int childPointerBytes = ArithmeticUtils.multiplyExact(entriesUsed, hdfBackingStorage.getSizeOfOffsets());
+			final int keysAndPointersBytes = ArithmeticUtils.addExact(keyBytes, childPointerBytes);
 
 			final long keysAddress = address + 8L + 2L * hdfBackingStorage.getSizeOfOffsets();
 			final ByteBuffer keysAndPointersBuffer = hdfBackingStorage.readBufferFromAddress(keysAddress, keysAndPointersBytes);
