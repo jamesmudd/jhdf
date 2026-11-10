@@ -1,5 +1,15 @@
 # jHDF Change Log
 
+## v0.14.0 - November 2026
+- Add `Dataset.getDataFlat(offset, dimensions)` to read a slice as a flat 1D array, which can be faster than reading a multi-dimensional array. https://github.com/jamesmudd/jhdf/issues/726
+- Add writing of chunked datasets from a `ChunkProvider` so the whole dataset need not fit in memory. Thanks to @jcschaff https://github.com/jamesmudd/jhdf/pull/865
+- Add streaming writing of chunked datasets via `WritableGroup.newStreamingDataset(...)`, allowing chunks to be written as the data arrives. Thanks to @jcschaff https://github.com/jamesmudd/jhdf/pull/891
+- Fix decoding of chunked datasets where per-chunk filter masks indicate filters that were not applied. Thanks to @jkielmann-localite https://github.com/jamesmudd/jhdf/pull/874
+- SECURITY [GHSA-3292-p22p-xf84](https://github.com/jamesmudd/jhdf/security/advisories/GHSA-3292-p22p-xf84) Fix potential unbounded recursion. https://github.com/jamesmudd/jhdf/pull/910 and https://github.com/jamesmudd/jhdf/pull/913. Credit to Nathan Cross (CyberBadger)
+- SECURITY [GHSA-f54v-9rmh-w427](https://github.com/jamesmudd/jhdf/security/advisories/GHSA-f54v-9rmh-w427) Fix potential `OutOfMemoryError` reading a specially crafted HDF5 file. https://github.com/jamesmudd/jhdf/pull/911. Credit to Nathan Cross (CyberBadger)
+- Fix `ArithmeticException` escaping the library and wrap with `HdfArithmeticException` https://github.com/jamesmudd/jhdf/issues/457
+- Build and dependency updates
+
 ## v0.13.0 - July 2026
 - Add support for writing chunked datasets with compression. Chunking and filters are requested via the new `DatasetCreationOptions` e.g. `putDataset(name, data, DatasetCreationOptions.builder().chunkDimensions(64, 64).shuffle().deflate(6).build())`. Deflate (gzip) and byte shuffle filters are supported for writing, and custom filters can encode via the new `Filter.encode` method. Chunked datasets are written using the v4 data layout message with single chunk or fixed array indexing. Thanks to @ebremer https://github.com/jamesmudd/jhdf/pull/841
 - Add support for writing unsigned datasets. Thanks to @laeubi https://github.com/jamesmudd/jhdf/pull/845
