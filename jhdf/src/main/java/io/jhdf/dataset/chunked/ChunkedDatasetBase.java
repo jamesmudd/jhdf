@@ -18,13 +18,16 @@ import io.jhdf.exceptions.HdfException;
 import io.jhdf.filter.FilterManager;
 import io.jhdf.filter.FilterPipeline;
 import io.jhdf.filter.PipelineFilterWithData;
+import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.FilterPipelineMessage;
 import io.jhdf.storage.HdfBackingStorage;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.Math.toIntExact;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedDataset {
 	private static final Logger logger = LoggerFactory.getLogger(ChunkedDatasetBase.class);
@@ -226,12 +230,16 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 	}
 
 	private byte[] decompressChunk(Chunk chunk) {
-		// Get the encoded (i.e. compressed buffer)
-		final ByteBuffer encodedBuffer = getDataBuffer(chunk);
-
-		// Get the encoded data from buffer
-		final byte[] encodedBytes = new byte[encodedBuffer.remaining()];
-		encodedBuffer.get(encodedBytes);
+		// Read the encoded chunk data from backing storage without memory mapping
+		// to avoid FileChannel map locks during parallel chunk reads
+		final ByteBuffer encodedBuffer = hdfBackingStorage.readBufferFromAddress(chunk.getAddress(), Math.toIntExact(chunk.getSize()));
+		final byte[] encodedBytes;
+		if (encodedBuffer.hasArray()) {
+			encodedBytes = encodedBuffer.array();
+		} else {
+			encodedBytes = new byte[encodedBuffer.remaining()];
+			encodedBuffer.get(encodedBytes);
+		}
 
 		try {
 			final FilterPipeline pipeline = this.lazyPipeline.get();
@@ -327,11 +335,109 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		final byte[] dataArray = new byte[sliceSize];
 
 		final List<Chunk> overlappingChunks = findOverlappingChunks(sliceOffset, sliceShape);
-		for (Chunk chunk : overlappingChunks) {
-			copyChunkSliceToBuffer(chunk, sliceOffset, sliceShape, dataArray, elementSize);
+		if (overlappingChunks.size() == 1) {
+			copyChunkSliceToBuffer(overlappingChunks.get(0), sliceOffset, sliceShape, dataArray, elementSize);
+		} else {
+			overlappingChunks.parallelStream().forEach(chunk -> copyChunkSliceToBuffer(chunk, sliceOffset, sliceShape, dataArray, elementSize));
 		}
 
 		return ByteBuffer.wrap(dataArray);
+	}
+
+	@Override
+	public Object getData(long[] sliceOffset, int[] sliceDimensions) {
+		if (isEmpty()) {
+			throw new HdfException("Cannot slice empty dataset");
+		}
+		if (isScalar()) {
+			throw new HdfException("Cannot slice scalar dataset");
+		}
+
+		validateSliceRequest(sliceOffset, sliceDimensions);
+
+		if (useDirectFillPath()) {
+			final StopWatch stopWatch = StopWatch.createStarted();
+			final Object data = Array.newInstance(getDataType().getJavaType(), sliceDimensions);
+			fillTypedDataSliceInParallel(data, sliceOffset, sliceDimensions);
+			stopWatch.stop();
+			logger.debug("Finished getting parallel sliced data for [{}] took [{}ms]", getPath(), stopWatch.getTime(MILLISECONDS));
+			return data;
+		}
+
+		return super.getData(sliceOffset, sliceDimensions);
+	}
+
+	private void fillTypedDataSliceInParallel(final Object data, final long[] sliceOffset, final int[] sliceDimensions) {
+		final int elementSize = getDataType().getSize();
+		final List<Chunk> overlappingChunks = findOverlappingChunks(sliceOffset, sliceDimensions);
+
+		if (overlappingChunks.size() == 1) {
+			fillTypedDataSliceFromChunk(overlappingChunks.get(0), data, sliceOffset, sliceDimensions, elementSize);
+		} else {
+			overlappingChunks.parallelStream().forEach(chunk -> fillTypedDataSliceFromChunk(chunk, data, sliceOffset, sliceDimensions, elementSize));
+		}
+	}
+
+	private void fillTypedDataSliceFromChunk(Chunk chunk, Object data, long[] sliceOffset, int[] sliceDimensions, int elementSize) {
+		final byte[] chunkData = decompressChunk(chunk);
+		final ByteBuffer chunkBuffer = ByteBuffer.wrap(chunkData);
+		final DataType.RowFiller rowFiller = getDataType().createRowFiller(chunkBuffer);
+		final long[] chunkOffset = chunk.getChunkOffset();
+		final int[] chunkDims = getChunkDimensions();
+		final int rank = getDimensionsAsLong().length;
+
+		long[] intersectStart = new long[rank];
+		long[] intersectEnd = new long[rank];
+		for (int i = 0; i < rank; i++) {
+			intersectStart[i] = Math.max(sliceOffset[i], chunkOffset[i]);
+			intersectEnd[i] = Math.min(sliceOffset[i] + sliceDimensions[i], chunkOffset[i] + chunkDims[i]);
+		}
+
+		int[] copyShape = new int[rank];
+		int[] chunkStart = new int[rank];
+		int[] sliceStart = new int[rank];
+		for (int i = 0; i < rank; i++) {
+			copyShape[i] = Math.toIntExact(intersectEnd[i] - intersectStart[i]);
+			chunkStart[i] = Math.toIntExact(intersectStart[i] - chunkOffset[i]);
+			sliceStart[i] = Math.toIntExact(intersectStart[i] - sliceOffset[i]);
+		}
+
+		int[] chunkStrides = getStrides(chunkDims);
+		final int fastestDimLength = copyShape[rank - 1];
+
+		int totalRows = 1;
+		for (int dimension = 0; dimension < rank - 1; dimension++) {
+			totalRows *= copyShape[dimension];
+		}
+
+		if (rank > 1) {
+			recursiveFill(data, 0, 0, copyShape, chunkStart, sliceStart, chunkStrides, rowFiller, fastestDimLength);
+		} else {
+			// 1D case
+			for (int i = 0; i < totalRows; i++) {
+				rowFiller.fillRow(data, sliceStart[0] + i, chunkStart[0] + i, fastestDimLength);
+			}
+		}
+	}
+
+	private void recursiveFill(Object array, int dim, int currentChunkOffset, int[] copyShape, int[] chunkStart, int[] sliceStart, int[] chunkStrides, DataType.RowFiller rowFiller, int fastestDimLength) {
+		final int rank = chunkStart.length;
+		if (dim == rank - 2) {
+			// We are at the level of innermost arrays
+			final int rowOffset = sliceStart[rank - 1];
+			for (int i = 0; i < copyShape[dim]; i++) {
+				Object innermost = Array.get(array, sliceStart[dim] + i);
+				int chunkLinearOffset = currentChunkOffset + (chunkStart[dim] + i) * chunkStrides[dim] + chunkStart[rank - 1];
+				rowFiller.fillRow(innermost, rowOffset, chunkLinearOffset, fastestDimLength);
+			}
+		} else {
+			// Higher level arrays
+			for (int i = 0; i < copyShape[dim]; i++) {
+				Object nextArray = Array.get(array, sliceStart[dim] + i);
+				int nextChunkOffset = currentChunkOffset + (chunkStart[dim] + i) * chunkStrides[dim];
+				recursiveFill(nextArray, dim + 1, nextChunkOffset, copyShape, chunkStart, sliceStart, chunkStrides, rowFiller, fastestDimLength);
+			}
+		}
 	}
 
 	/**
@@ -470,5 +576,188 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 		} catch (ConcurrentException e) {
 			throw new HdfException("Failed to create filter pipeline", e);
 		}
+	}
+
+	@Override
+	public Object getData() {
+		if (!useDirectFillPath()) {
+			return super.getData();
+		}
+
+		logger.info("Getting data for '{}'...", getPath());
+
+		final int[] dims;
+		try {
+			dims = getDimensions();
+		} catch (ArithmeticException e) {
+			throw new HdfException("Dataset '" + getPath() + "' has dimensions that exceed Integer.MAX_VALUE. Use getData(sliceOffset, sliceDimensions) to read slices instead.", e);
+		}
+
+		final StopWatch stopWatch = StopWatch.createStarted();
+
+		// Create the correctly typed and sized output array up front, then read, decompress,
+		// convert and fill each chunk into it in parallel
+		final Object data = Array.newInstance(getDataType().getJavaType(), dims);
+		fillDataInParallel(data, dims);
+
+		stopWatch.stop();
+		logger.info("Finished getting data for [{}] took [{}ms]", getPath(), stopWatch.getTime(MILLISECONDS));
+		return data;
+	}
+
+	@Override
+	public Object getDataFlat() {
+		if (!useDirectFillPath()) {
+			return super.getDataFlat();
+		}
+
+		logger.info("Getting flat data for '{}'...", getPath());
+
+		final int elements;
+		try {
+			elements = Math.toIntExact(getSize());
+		} catch (ArithmeticException e) {
+			throw new HdfException("Dataset '" + getPath() + "' has more than Integer.MAX_VALUE elements. Use getData(sliceOffset, sliceDimensions) to read slices instead.", e);
+		}
+
+		final StopWatch stopWatch = StopWatch.createStarted();
+
+		// As getData but into a flat 1-D array
+		final Object data = Array.newInstance(getDataType().getJavaType(), elements);
+		fillDataInParallel(data, new int[]{elements});
+
+		stopWatch.stop();
+		logger.info("Finished getting flat data for [{}] took [{}ms]", getPath(), stopWatch.getTime(MILLISECONDS));
+		return data;
+	}
+
+	/**
+	 * The direct fill path can be used when the dataset is not empty or scalar and the data type
+	 * supports converting elements straight from the decompressed chunk buffer into the output
+	 * array. Otherwise the fallback path via an intermediate {@link ByteBuffer} is used.
+	 *
+	 * @return true if this dataset can be read using the direct fill path
+	 */
+	private boolean useDirectFillPath() {
+		return !isEmpty() && !isScalar() && getDataType().supportsDirectFill();
+	}
+
+	/**
+	 * Reads, decompresses, converts and fills each chunk into the final typed output array in
+	 * parallel. Multiple threads write to disjoint regions of the output array concurrently.
+	 *
+	 * @param data    the typed output array to fill
+	 * @param navDims the dimensions used to navigate {@code data} (the dataset dimensions, or a
+	 *                single total elements dimension for flat reads)
+	 */
+	private void fillDataInParallel(final Object data, final int[] navDims) {
+		final int elementSize = getDataType().getSize();
+
+		// Get all chunks because we're reading the whole dataset
+		final Collection<Chunk> chunks = getAllChunks();
+
+		// These are all the same for every chunk
+		final int[] chunkDimensions = getChunkDimensions();
+		final int[] chunkInternalOffsets = getChunkInternalOffsets(chunkDimensions, elementSize);
+		final int[] dataOffsets = getDataOffsets(chunkInternalOffsets);
+		final int fastestChunkDim = chunkDimensions[chunkDimensions.length - 1];
+
+		// Parallel reading, decompression, conversion and filling, this is where all the work is done
+		chunks.parallelStream().forEach(chunk -> fillTypedDataFromChunk(chunk, data, navDims, chunkDimensions, chunkInternalOffsets, dataOffsets, fastestChunkDim, elementSize));
+	}
+
+	/**
+	 * Reads and decompresses a single chunk then converts its rows into the dataset data type
+	 * writing them directly into the correct locations of the output array.
+	 */
+	private void fillTypedDataFromChunk(final Chunk chunk, final Object data, final int[] navDims, final int[] chunkDimensions, final int[] chunkInternalOffsets, final int[] dataOffsets, final int fastestChunkDim, final int elementSize) {
+
+		logger.trace("Filling typed data from chunk '{}'", chunk);
+
+		final int[] datasetDimensions = getDimensions();
+		final DataType dataType = getDataType();
+
+		// Read and un-filter (decompress) the data in this chunk
+		final byte[] chunkData = decompressChunk(chunk);
+		final ByteBuffer chunkBuffer = ByteBuffer.wrap(chunkData);
+
+		// Now need to figure out how to put this chunks data into the output array
+		final int[] chunkOffset = toIntArray(chunk.getChunkOffset());
+		final int initialChunkOffset = Utils.dimensionIndexToLinearIndex(chunkOffset, datasetDimensions);
+
+		if (!isPartialChunk(chunk)) {
+			// Not a partial chunk so can always copy the max amount
+			for (int i = 0; i < chunkInternalOffsets.length; i++) {
+				fillRow(data, navDims, dataOffsets[i] + initialChunkOffset, // dest
+						dataType, chunkBuffer, chunkInternalOffsets[i] / elementSize, // src
+						fastestChunkDim); // length
+			}
+		} else {
+			logger.trace("Handling partial chunk '{}'", chunk);
+			// Partial chunk
+			final int highestDimIndex = datasetDimensions.length - 1;
+			final int totalBytes = toIntExact(getSizeInBytes());
+
+			for (int i = 0; i < chunkInternalOffsets.length; i++) {
+				// Quick check first if the data starts outside then we know this part of the chunk can be skipped
+				// Does not consider dimensions
+				if (dataOffsets[i] > totalBytes) {
+					continue;
+				}
+				// Is this part of the chunk outside the dataset including dimensions?
+				if (partOfChunkIsOutsideDataset(chunkInternalOffsets[i] / elementSize, chunkDimensions, chunkOffset)) {
+					continue;
+				}
+
+				// Its inside so we need to copy at least something. Now work out how much?
+				final int length = Math.min(fastestChunkDim, fastestChunkDim - (chunkOffset[highestDimIndex] + chunkDimensions[highestDimIndex] - datasetDimensions[highestDimIndex]));
+
+				fillRow(data, navDims, dataOffsets[i] + initialChunkOffset, // dest
+						dataType, chunkBuffer, chunkInternalOffsets[i] / elementSize, // src
+						length); // length
+			}
+		}
+	}
+
+	/**
+	 * Converts one contiguous run of elements from the decompressed chunk buffer into the dataset
+	 * data type and writes it into the correct innermost row of the output array.
+	 *
+	 * @param data              the typed output array being filled
+	 * @param navDims           the dimensions used to navigate {@code data}
+	 * @param destElementOffset the linear element offset in the dataset this run starts at
+	 * @param dataType          the data type used to convert the raw bytes
+	 * @param chunkBuffer       the decompressed chunk data
+	 * @param srcElementOffset  the element offset inside the chunk this run starts at
+	 * @param length            the number of elements in this run
+	 */
+	private static void fillRow(final Object data, final int[] navDims, final int destElementOffset, final DataType dataType, final ByteBuffer chunkBuffer, final int srcElementOffset, final int length) {
+		final int rowLength = navDims[navDims.length - 1];
+
+		final Object rowArray;
+		final int rowOffset;
+		if (navDims.length > 1) {
+			// Runs never cross rows so this run lies entirely within one innermost row array
+			final int rowIndex = destElementOffset / rowLength;
+			rowOffset = destElementOffset % rowLength;
+			// Navigate to the innermost row array containing this run
+			rowArray = getInnermostArray(data, rowIndex, navDims);
+		} else {
+			// 1-D (or flat) output, the whole array is the row
+			rowArray = data;
+			rowOffset = destElementOffset;
+		}
+
+		dataType.fillElements(rowArray, rowOffset, chunkBuffer, srcElementOffset, length);
+	}
+
+	private static Object getInnermostArray(Object data, int rowIndex, int[] navDims) {
+		int[] leadingDims = Arrays.copyOf(navDims, navDims.length - 1);
+		int[] indices = Utils.linearIndexToDimensionIndex(rowIndex, leadingDims);
+		Object array = data;
+		for (int index : indices) {
+			array = Array.get(array, index);
+		}
+		return array;
 	}
 }

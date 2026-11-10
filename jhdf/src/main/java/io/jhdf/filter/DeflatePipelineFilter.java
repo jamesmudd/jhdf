@@ -11,7 +11,6 @@ package io.jhdf.filter;
 
 import io.jhdf.ArithmeticUtils;
 import io.jhdf.exceptions.HdfFilterException;
-import io.jhdf.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +28,13 @@ public class DeflatePipelineFilter implements Filter {
 
 	private static final int DEFAULT_COMPRESSION_LEVEL = 6;
 
+	/**
+	 * Buffer size of 32 KiB (32,768 bytes) matches the maximum Deflate (zlib) sliding window size.
+	 * This value provides an optimal balance by minimizing JNI transitions during inflation and deflation
+	 * while maintaining a low memory footprint across concurrent chunk operations.
+	 */
+	private static final int BUFFER_SIZE = 32 * 1024; // 32 KiB
+
 	@Override
 	public int getId() {
 		return ID;
@@ -43,13 +49,13 @@ public class DeflatePipelineFilter implements Filter {
 	public byte[] decode(byte[] compressedData, int[] filterData) {
 		final Inflater inflater = new Inflater();
 
-		// Make a guess that the decompressed data is 3 times larger than compressed.
+		// Make a guess that the decompressed data is 4 times larger than compressed.
 		// This is a performance optimisation to avoid resizing of the stream byte
 		// array.
-		try (final ByteArrayOutputStream baos = new ByteArrayOutputStream(ArithmeticUtils.multiplyExact(compressedData.length, 3))) {
+		try (final ByteArrayOutputStream baos = new ByteArrayOutputStream(Math.max(ArithmeticUtils.multiplyExact(compressedData.length, 4), BUFFER_SIZE))) {
 			// Setup the inflater
 			inflater.setInput(compressedData);
-			final byte[] buffer = new byte[4096];
+			final byte[] buffer = new byte[BUFFER_SIZE];
 
 			// Do the decompression
 			while (!inflater.finished()) {
@@ -91,7 +97,7 @@ public class DeflatePipelineFilter implements Filter {
 		try (final ByteArrayOutputStream baos = new ByteArrayOutputStream(data.length / 3 + 16)) {
 			deflater.setInput(data);
 			deflater.finish();
-			final byte[] buffer = new byte[4096];
+			final byte[] buffer = new byte[BUFFER_SIZE];
 
 			// Do the compression
 			while (!deflater.finished()) {

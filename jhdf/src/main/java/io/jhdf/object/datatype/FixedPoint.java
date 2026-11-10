@@ -174,6 +174,168 @@ public class FixedPoint extends DataType implements OrderedDataType, WritableDat
 		return data;
 	}
 
+	@Override
+	public boolean supportsDirectFill() {
+		return true;
+	}
+
+	@Override
+	public RowFiller createRowFiller(ByteBuffer buffer) {
+		final ByteOrder byteOrder = getByteOrder();
+		if (isSigned()) {
+			switch (getSize()) {
+				case 1:
+					if (buffer.hasArray()) {
+						final byte[] array = buffer.array();
+						final int base = buffer.arrayOffset();
+						return (rowArray, rowOffset, bufferElementOffset, length) ->
+							System.arraycopy(array, base + bufferElementOffset, (byte[]) rowArray, rowOffset, length);
+					} else {
+						final ByteBuffer dup = buffer.duplicate().order(byteOrder);
+						return (rowArray, rowOffset, bufferElementOffset, length) ->
+							dup.get(bufferElementOffset, (byte[]) rowArray, rowOffset, length);
+					}
+				case 2:
+					final ShortBuffer shortBuf = buffer.duplicate().order(byteOrder).asShortBuffer();
+					return (rowArray, rowOffset, bufferElementOffset, length) ->
+						shortBuf.get(bufferElementOffset, (short[]) rowArray, rowOffset, length);
+				case 4:
+					final IntBuffer intBuf = buffer.duplicate().order(byteOrder).asIntBuffer();
+					return (rowArray, rowOffset, bufferElementOffset, length) ->
+						intBuf.get(bufferElementOffset, (int[]) rowArray, rowOffset, length);
+				case 8:
+					final LongBuffer longBuf = buffer.duplicate().order(byteOrder).asLongBuffer();
+					return (rowArray, rowOffset, bufferElementOffset, length) ->
+						longBuf.get(bufferElementOffset, (long[]) rowArray, rowOffset, length);
+				default:
+					throw new HdfTypeException(
+						"Unsupported signed integer type size " + getSize() + " bytes");
+			}
+		} else { // Unsigned
+			switch (getSize()) {
+				case 1:
+					if (buffer.hasArray()) {
+						final byte[] array = buffer.array();
+						final int base = buffer.arrayOffset();
+						return (rowArray, rowOffset, bufferElementOffset, length) -> {
+							final int[] intData = (int[]) rowArray;
+							final int srcOffset = base + bufferElementOffset;
+							for (int i = 0; i < length; i++) {
+								intData[rowOffset + i] = array[srcOffset + i] & 0xFF;
+							}
+						};
+					} else {
+						final ByteBuffer dup = buffer.duplicate().order(byteOrder);
+						return (rowArray, rowOffset, bufferElementOffset, length) ->
+							fillUnsignedBytes(rowArray, rowOffset, dup, bufferElementOffset, length);
+					}
+				case 2:
+					final ShortBuffer shortBuf = buffer.duplicate().order(byteOrder).asShortBuffer();
+					return (rowArray, rowOffset, bufferElementOffset, length) ->
+						fillUnsignedShorts(rowArray, rowOffset, shortBuf, bufferElementOffset, length);
+				case 4:
+					final IntBuffer intBuf = buffer.duplicate().order(byteOrder).asIntBuffer();
+					return (rowArray, rowOffset, bufferElementOffset, length) ->
+						fillUnsignedInts(rowArray, rowOffset, intBuf, bufferElementOffset, length);
+				case 8:
+					final LongBuffer longBuf = buffer.duplicate().order(byteOrder).asLongBuffer();
+					return (rowArray, rowOffset, bufferElementOffset, length) ->
+						fillUnsignedLongs(rowArray, rowOffset, longBuf, bufferElementOffset, length);
+				default:
+					throw new HdfTypeException(
+						"Unsupported unsigned integer type size " + getSize() + " bytes");
+			}
+		}
+	}
+
+	@Override
+	public void fillElements(Object rowArray, int rowOffset, ByteBuffer buffer, int bufferElementOffset, int length) {
+		final ByteOrder byteOrder = getByteOrder();
+		if (isSigned()) {
+			switch (getSize()) {
+				case 1:
+					if (buffer.hasArray()) {
+						System.arraycopy(buffer.array(), buffer.arrayOffset() + bufferElementOffset, (byte[]) rowArray, rowOffset, length);
+					} else {
+						buffer.duplicate().order(byteOrder)
+								.get(bufferElementOffset, (byte[]) rowArray, rowOffset, length);
+					}
+					break;
+				case 2:
+					buffer.duplicate().order(byteOrder).asShortBuffer()
+							.get(bufferElementOffset, (short[]) rowArray, rowOffset, length);
+					break;
+				case 4:
+					buffer.duplicate().order(byteOrder).asIntBuffer()
+							.get(bufferElementOffset, (int[]) rowArray, rowOffset, length);
+					break;
+				case 8:
+					buffer.duplicate().order(byteOrder).asLongBuffer()
+							.get(bufferElementOffset, (long[]) rowArray, rowOffset, length);
+					break;
+				default:
+					throw new HdfTypeException(
+						"Unsupported signed integer type size " + getSize() + " bytes");
+			}
+		} else { // Unsigned needs promotion to the next larger Java type
+			switch (getSize()) {
+				case 1:
+					fillUnsignedBytes(rowArray, rowOffset, buffer.duplicate().order(byteOrder), bufferElementOffset, length);
+					break;
+				case 2:
+					fillUnsignedShorts(rowArray, rowOffset, buffer.duplicate().order(byteOrder).asShortBuffer(), bufferElementOffset, length);
+					break;
+				case 4:
+					fillUnsignedInts(rowArray, rowOffset, buffer.duplicate().order(byteOrder).asIntBuffer(), bufferElementOffset, length);
+					break;
+				case 8:
+					fillUnsignedLongs(rowArray, rowOffset, buffer.duplicate().order(byteOrder).asLongBuffer(), bufferElementOffset, length);
+					break;
+				default:
+					throw new HdfTypeException(
+						"Unsupported unsigned integer type size " + getSize() + " bytes");
+			}
+		}
+	}
+
+	private static void fillUnsignedBytes(Object rowArray, int rowOffset, ByteBuffer buffer, int bufferElementOffset, int length) {
+		final int[] intData = (int[]) rowArray;
+		if (buffer.hasArray()) {
+			final byte[] array = buffer.array();
+			final int base = buffer.arrayOffset() + bufferElementOffset;
+			for (int i = 0; i < length; i++) {
+				intData[rowOffset + i] = array[base + i] & 0xFF;
+			}
+		} else {
+			for (int i = 0; i < length; i++) {
+				intData[rowOffset + i] = Byte.toUnsignedInt(buffer.get(bufferElementOffset + i));
+			}
+		}
+	}
+
+	private static void fillUnsignedShorts(Object rowArray, int rowOffset, ShortBuffer buffer, int bufferElementOffset, int length) {
+		final int[] intData = (int[]) rowArray;
+		for (int i = 0; i < length; i++) {
+			intData[rowOffset + i] = Short.toUnsignedInt(buffer.get(bufferElementOffset + i));
+		}
+	}
+
+	private static void fillUnsignedInts(Object rowArray, int rowOffset, IntBuffer buffer, int bufferElementOffset, int length) {
+		final long[] longData = (long[]) rowArray;
+		for (int i = 0; i < length; i++) {
+			longData[rowOffset + i] = Integer.toUnsignedLong(buffer.get(bufferElementOffset + i));
+		}
+	}
+
+	private static void fillUnsignedLongs(Object rowArray, int rowOffset, LongBuffer buffer, int bufferElementOffset, int length) {
+		final ByteBuffer tempByteBuffer = ByteBuffer.allocate(8);
+		final BigInteger[] bigIntData = (BigInteger[]) rowArray;
+		for (int i = 0; i < length; i++) {
+			tempByteBuffer.putLong(0, buffer.get(bufferElementOffset + i));
+			bigIntData[rowOffset + i] = new BigInteger(1, tempByteBuffer.array());
+		}
+	}
+
     @Override
     public ByteBuffer encodeData(Object data) {
 		Objects.requireNonNull(data, "Cannot encode null");

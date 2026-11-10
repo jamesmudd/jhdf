@@ -11,9 +11,11 @@ package io.jhdf.dataset;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
+import io.jhdf.exceptions.InvalidSliceHdfException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 
@@ -27,6 +29,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -85,6 +88,34 @@ class ChunkedDatasetTest {
 				assertThat(Double.valueOf(flatData[i].toString()), is(equalTo((double) i)));
 			}
 		};
+	}
+
+	@Test
+	void testChunkedDatasetInvalidSliceRequests() {
+		Dataset dataset = latestHdfFile.getDatasetByPath("/float/float32");
+
+		// Mismatched dimensions (e.g. 1D requested on 3D dataset)
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{1}, new int[]{3}));
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{1, 1}, new int[]{3, 3}));
+
+		// Negative slice offset
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{1, -1, 1}, new int[]{1, 1, 1}));
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{1, 1, -1}, new int[]{1, 1, 1}));
+
+		// Zero or negative slice dimensions
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{0, 0, 0}, new int[]{1, 0, 1}));
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{0, 0, 0}, new int[]{1, -1, 1}));
+
+		// Out-of-bounds slice
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{8, 1, 1}, new int[]{1, 1, 1}));
+		assertThrows(InvalidSliceHdfException.class, () -> dataset.getData(new long[]{0, 0, 0}, new int[]{7, 5, 4}));
+	}
+
+	@Test
+	void testChunkedDatasetValidSlice() {
+		Dataset dataset = latestHdfFile.getDatasetByPath("/float/float32");
+		Object slice = dataset.getData(new long[]{1, 1, 1}, new int[]{2, 2, 1});
+		assertThat(getDimensions(slice), is(equalTo(new int[]{2, 2, 1})));
 	}
 
 }

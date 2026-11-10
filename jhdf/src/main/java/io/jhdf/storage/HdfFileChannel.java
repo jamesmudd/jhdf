@@ -104,7 +104,8 @@ public class HdfFileChannel implements HdfBackingStorage {
 		ByteBuffer bb = ByteBuffer.allocate(length);
 		int totalNumberOfBytesRead = 0;
 		while (totalNumberOfBytesRead < length) {
-			int numberOfBytesRead = fc.read(bb, address);
+			long currentAddress = ArithmeticUtils.addExact(address, totalNumberOfBytesRead);
+			int numberOfBytesRead = fc.read(bb, currentAddress);
 			if (numberOfBytesRead <= 0) {
 				throw new IOException("Trying to read more bytes than available");
 			}
