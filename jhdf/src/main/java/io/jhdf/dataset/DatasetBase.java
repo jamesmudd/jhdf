@@ -212,7 +212,7 @@ public abstract class DatasetBase extends AbstractNode implements Dataset {
 		return DatasetReader.readDataset(getDataType(), sliceDataBuffer, sliceDimensions, hdfBackingStorage);
 	}
 
-	private void validateSliceRequest(long[] sliceOffset, int[] sliceDimensions) {
+	protected void validateSliceRequest(long[] sliceOffset, int[] sliceDimensions) {
 		final long[] datasetDimensions = getDimensionsAsLong();
 		final int numberOfDimensions = datasetDimensions.length;
 		if (sliceOffset.length != numberOfDimensions

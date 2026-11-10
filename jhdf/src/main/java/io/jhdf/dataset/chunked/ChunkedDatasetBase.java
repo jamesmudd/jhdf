@@ -353,11 +353,7 @@ public abstract class ChunkedDatasetBase extends DatasetBase implements ChunkedD
 			throw new HdfException("Cannot slice scalar dataset");
 		}
 
-		// Use superclass validation
-		// validateSliceRequest(sliceOffset, sliceDimensions);
-		// Actually let's just let it fail later or call it if we can access it.
-		// It's public in DatasetBase so it's fine.
-		// wait, it's private in DatasetBase. I should probably make it protected or just re-validate.
+		validateSliceRequest(sliceOffset, sliceDimensions);
 
 		if (useDirectFillPath()) {
 			final StopWatch stopWatch = StopWatch.createStarted();

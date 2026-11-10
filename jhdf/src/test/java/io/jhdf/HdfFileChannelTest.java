@@ -80,6 +80,33 @@ class HdfFileChannelTest {
 	}
 
 	@Test
+	void testReadingBufferWithShortReads() throws IOException {
+		when(fc.size()).thenReturn(20L);
+
+		Mockito.doAnswer(invocation -> {
+			ByteBuffer bb = invocation.getArgument(0);
+			bb.put("HE".getBytes(US_ASCII));
+			return 2;
+		}).when(fc).read(any(ByteBuffer.class), eq(5L));
+
+		Mockito.doAnswer(invocation -> {
+			ByteBuffer bb = invocation.getArgument(0);
+			bb.put("LL".getBytes(US_ASCII));
+			return 2;
+		}).when(fc).read(any(ByteBuffer.class), eq(7L));
+
+		Mockito.doAnswer(invocation -> {
+			ByteBuffer bb = invocation.getArgument(0);
+			bb.put("O".getBytes(US_ASCII));
+			return 1;
+		}).when(fc).read(any(ByteBuffer.class), eq(9L));
+
+		ByteBuffer bb = hdfFc.readBufferFromAddress(5, 5);
+		assertThat(bb.capacity(), is(equalTo(5)));
+		assertThat(US_ASCII.decode(bb).toString(), is(equalTo("HELLO")));
+	}
+
+	@Test
 	void testReadingMoreBytesThanTheFileContainsThrows() throws IOException {
 		when(fc.size()).thenReturn(100L);
 
