@@ -60,6 +60,13 @@ public class Lz4Filter implements Filter {
 		final long blocks = totalDecompressedSize / decompressedBlockSize
 			+ (totalDecompressedSize % decompressedBlockSize == 0 ? 0 : 1);
 
+		final LZ4FastDecompressor decompressor;
+		try {
+			decompressor = lzz4Decompressor.get();
+		} catch (Exception e) {
+			throw new HdfFilterException("Failed to get LZ4 decompressor", e);
+		}
+
 		int offset = 0;
 		byte[] compressedBlock = new byte[0];
 
@@ -68,15 +75,16 @@ public class Lz4Filter implements Filter {
 			if (compressedBlockSize > compressedBlock.length) {
 				compressedBlock = new byte[compressedBlockSize];
 			}
-			byteBuffer.get(compressedBlock, 0, compressedBlockSize);
 
 			final int blockSize = Math.min(decompressed.length - offset, decompressedBlockSize);
 
 			if (compressedBlockSize == blockSize) {
-				System.arraycopy(compressedBlock, 0, decompressed, offset, blockSize);
+				// Uncompressed block, copy it directly into the output array.
+				byteBuffer.get(decompressed, offset, blockSize);
 			} else {
+				byteBuffer.get(compressedBlock, 0, compressedBlockSize);
 				try {
-					lzz4Decompressor.get().decompress(compressedBlock, 0,
+					decompressor.decompress(compressedBlock, 0,
 						decompressed, offset,
 						blockSize);
 				} catch (Exception e) {
