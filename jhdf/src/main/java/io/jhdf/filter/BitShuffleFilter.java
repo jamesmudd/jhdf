@@ -76,6 +76,13 @@ public class BitShuffleFilter implements Filter {
 		final byte[] decomressedBuffer = new byte[decompressedBlockSize];
 		byte[] compressedBuffer = new byte[0];
 
+		final LZ4SafeDecompressor decompressor;
+		try {
+			decompressor = lzz4Decompressor.get();
+		} catch (Exception e) {
+			throw new HdfFilterException("Failed to get LZ4 decompressor", e);
+		}
+
 		long blocks2;
 		if (decompressedBlockSize > totalDecompressedSize) {
 			blocks2 = 1;
@@ -92,7 +99,7 @@ public class BitShuffleFilter implements Filter {
 			byteBuffer.get(compressedBuffer, 0, compressedBlockLength);
 
 			try {
-				final int decompressedBytes = lzz4Decompressor.get().decompress(compressedBuffer, 0, compressedBlockLength, decomressedBuffer, 0);
+				final int decompressedBytes = decompressor.decompress(compressedBuffer, 0, compressedBlockLength, decomressedBuffer, 0);
 				unshuffle(decomressedBuffer, decompressedBytes, decompressed, offset, filterData[2]);
 				offset = ArithmeticUtils.addExact(offset, decompressedBytes);
 			} catch (Exception e) {
