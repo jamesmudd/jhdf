@@ -1,5 +1,10 @@
 # jHDF Change Log
 
+## v0.15.0 - November 2026
+- Rework parallel reading of chunked datasets to combine decompression and data conversion in a single pass, and optimize chunk reading, buffer allocation, and decompression throughput. This provides significant performance improvements, particularly for large, compressed datasets. https://github.com/jamesmudd/jhdf/pull/905
+- Improve LZ4 and bitshuffle decompression performance by reusing decompressors across blocks. https://github.com/jamesmudd/jhdf/pull/921
+- Build and dependency updates
+
 ## v0.14.0 - November 2026
 - Add `Dataset.getDataFlat(offset, dimensions)` to read a slice as a flat 1D array, which can be faster than reading a multi-dimensional array. https://github.com/jamesmudd/jhdf/issues/726
 - Add writing of chunked datasets from a `ChunkProvider` so the whole dataset need not fit in memory. Thanks to @jcschaff https://github.com/jamesmudd/jhdf/pull/865
