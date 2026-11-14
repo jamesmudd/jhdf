@@ -165,7 +165,8 @@ class HdfFileChannelTest {
 	}
 
 	@Test
-	@DisabledForJreRange(min = JRE.JAVA_17)
+	// Mockito can't mock MappedByteBuffer on JDK 21+ as it became sealed there
+	@DisabledForJreRange(min = JRE.JAVA_21)
 	void testMap() throws IOException {
 		MappedByteBuffer mockMappedByteBuffer = mock(MappedByteBuffer.class);
 		when(fc.map(any(MapMode.class), anyLong(), anyLong())).thenReturn(mockMappedByteBuffer);
