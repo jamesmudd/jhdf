@@ -23,7 +23,10 @@ import java.util.Collection;
 
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static io.jhdf.Utils.flatten;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class ScaleOffsetDatasetTest {
@@ -31,8 +34,8 @@ class ScaleOffsetDatasetTest {
 	private static final String HDF5_TEST_EARLIEST_FILE_NAME = "test_scale_offset_datasets_earliest.hdf5";
 	private static final String HDF5_TEST_LATEST_FILE_NAME = "test_scale_offset_datasets_latest.hdf5";
 
-	private static final int[] DIMENSIONS_2D = new int[]{7, 5};
-	private static final int[] DIMENSIONS_1D = new int[]{32};
+	private static final int[] DIMENSIONS_2D = {7, 5};
+	private static final int[] DIMENSIONS_1D = {32};
 
 	private static HdfFile earliestHdfFile;
 	private static HdfFile latestHdfFile;
