@@ -3,7 +3,7 @@
  *
  * https://jhdf.io
  *
- * Copyright (c) 2025 James Mudd
+ * Copyright (c) 2026 James Mudd
  *
  * MIT License see 'LICENSE' file
  */
@@ -23,10 +23,7 @@ import java.util.Collection;
 
 import static io.jhdf.TestUtils.loadTestHdfFile;
 import static io.jhdf.Utils.flatten;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class ScaleOffsetDatasetTest {
