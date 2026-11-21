@@ -10,6 +10,9 @@
 
 package io.jhdf.api;
 
+import org.jspecify.annotations.NullMarked;
+
+@NullMarked
 public interface WritableDataset extends Dataset, WritableNode {
 
 }

@@ -13,16 +13,19 @@ import io.jhdf.ArithmeticUtils;
 import io.jhdf.Utils;
 import io.jhdf.object.datatype.DataType;
 import io.jhdf.object.message.DataSpace;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 
+@NullMarked
 public class WritableAttributeImpl implements Attribute {
 
 	private final String name;
 	private final Node node;
-	private final Object data;
+	private final @Nullable Object data;
 	private final DataType dataType;
 	private final DataSpace dataSpace;
 
@@ -77,7 +80,7 @@ public class WritableAttributeImpl implements Attribute {
 	}
 
 	@Override
-	public Object getData() {
+	public @Nullable Object getData() {
 		return data;
 	}
 

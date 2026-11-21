@@ -51,6 +51,8 @@ dependencyLocking {
 }
 
 dependencies {
+    // Nullness annotations
+    api("org.jspecify:jspecify:1.0.1")
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     implementation 'org.slf4j:slf4j-api:2.0.20'
     implementation 'org.apache.commons:commons-lang3:3.22.0'

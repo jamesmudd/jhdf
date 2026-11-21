@@ -10,6 +10,8 @@
 package io.jhdf.api;
 
 import io.jhdf.HdfFile;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -20,6 +22,7 @@ import java.util.Map;
  *
  * @author James Mudd
  */
+@NullMarked
 public interface Node {
 
 	/**
@@ -28,7 +31,7 @@ public interface Node {
 	 *
 	 * @return the parent of this node.
 	 */
-	Group getParent();
+	@Nullable Group getParent();
 
 	/**
 	 * Gets the name of this {@link Node}
@@ -59,7 +62,7 @@ public interface Node {
 	 * @param name of the requested attribute
 	 * @return the attribute of the given name or <code>null</code> if not available
 	 */
-	Attribute getAttribute(String name);
+	@Nullable Attribute getAttribute(String name);
 
 	/**
 	 * Gets the type of this {@link Node}.

@@ -13,6 +13,8 @@ import io.jhdf.filter.ByteShuffleFilter;
 import io.jhdf.filter.DeflatePipelineFilter;
 import io.jhdf.filter.Filter;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +38,7 @@ import java.util.Objects;
  * @author James Mudd
  * @since v0.13.0
  */
+@NullMarked
 public final class DatasetCreationOptions {
 
 	/**
@@ -74,7 +77,7 @@ public final class DatasetCreationOptions {
 	/**
 	 * @return the requested chunk dimensions, or null if not specified
 	 */
-	public int[] getChunkDimensions() {
+	public @Nullable int[] getChunkDimensions() {
 		return ArrayUtils.clone(chunkDimensions);
 	}
 

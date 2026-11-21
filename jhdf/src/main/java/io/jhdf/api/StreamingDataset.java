@@ -9,6 +9,8 @@
  */
 package io.jhdf.api;
 
+import org.jspecify.annotations.NullMarked;
+
 /**
  * A chunked dataset written a chunk at a time, as the data becomes available.
  * <p>
@@ -22,6 +24,7 @@ package io.jhdf.api;
  *
  * @since v0.14.0
  */
+@NullMarked
 public interface StreamingDataset extends WritableDataset, AutoCloseable {
 
 	/**
