@@ -108,24 +108,54 @@ public class ScaleOffsetFilter implements Filter {
 				swapEndianInPlace(decoded, elementBytes);
 			}
 			return decoded;
-		} else if (minBits != 0) {
-			decompress(decoded, elementCount, encodedData, BUFFER_OFFSET, elementBytes, minBits, nativeOrder());
 		}
 
-		if (dtypeClass == CLS_INTEGER) {
-			long fillValue = 0L;
-			if (fillAvailable == FILL_DEFINED) {
-				int fillValuesNeeded = (elementBytes + Integer.BYTES - 1) / Integer.BYTES;
-				if (filterData.length < PARM_FILVAL + fillValuesNeeded) {
-					throw new HdfFilterException("Scale-offset fill value data is incomplete. Expected at least "
-						+ (PARM_FILVAL + fillValuesNeeded) + " values but got " + filterData.length);
-				}
-				fillValue = readFillValue(filterData, elementBytes);
-			}
-			postDecompressInteger(decoded, elementCount, elementBytes, dtypeSign, fillAvailable, minBits, minVal,
-				fillValue);
-		} else if (dtypeClass == CLS_FLOAT) {
+		if (dtypeClass == CLS_FLOAT) {
 			throw new UnsupportedHdfException("Scale-offset filter float support is not implemented");
+		}
+
+		// Integer datatype
+		long fillValue = 0L;
+		if (fillAvailable == FILL_DEFINED) {
+			int fillValuesNeeded = (elementBytes + Integer.BYTES - 1) / Integer.BYTES;
+			if (filterData.length < PARM_FILVAL + fillValuesNeeded) {
+				throw new HdfFilterException("Scale-offset fill value data is incomplete. Expected at least "
+					+ (PARM_FILVAL + fillValuesNeeded) + " values but got " + filterData.length);
+			}
+			fillValue = readFillValue(filterData, elementBytes);
+		}
+
+		long maxValue = fillAvailable == FILL_DEFINED ? (minBits == 64 ? -1L : (1L << minBits) - 1L) : 0L;
+		long offset = dtypeSign == SIGN_2 ? toSignedMin(minVal, elementBytes) : minVal;
+
+		// Validate the bit stream is long enough before reading it
+		if (minBits != 0) {
+			long bitsNeeded = (long) elementCount * minBits;
+			if (encodedData.length - BUFFER_OFFSET < (bitsNeeded + 7) / 8) {
+				throw new HdfFilterException("Scale-offset buffer too short for " + elementCount + " elements of "
+					+ minBits + " bits");
+			}
+			if (fillAvailable == FILL_DEFINED) {
+				if (minBits <= 56) {
+					decompressFused(decoded, elementCount, encodedData, BUFFER_OFFSET, elementBytes, minBits, maxValue,
+						offset, fillValue);
+				} else {
+					decompressCarry(decoded, elementCount, encodedData, BUFFER_OFFSET, elementBytes, minBits, maxValue,
+						offset, fillValue);
+				}
+			} else {
+				if (minBits <= 56) {
+					decompressFusedNoFill(decoded, elementCount, encodedData, BUFFER_OFFSET, elementBytes, minBits,
+						offset);
+				} else {
+					decompressCarryNoFill(decoded, elementCount, encodedData, BUFFER_OFFSET, elementBytes, minBits,
+						offset);
+				}
+			}
+		} else {
+			// minbits == 0: every element has the same (fill) value
+			long value = fillAvailable == FILL_DEFINED ? fillValue : offset;
+			fillAllElements(decoded, elementCount, elementBytes, value);
 		}
 
 		if (needsByteSwap(dtypeOrder)) {
@@ -176,69 +206,27 @@ public class ScaleOffsetFilter implements Filter {
 		};
 	}
 
-	private static void postDecompressInteger(byte[] data, int elementCount, int elementBytes, int dtypeSign,
-		int fillAvailable, int minBits, long minVal, long fillValue) {
-		long maxValue = fillAvailable == FILL_DEFINED ? (minBits == 64 ? -1L : (1L << minBits) - 1L) : 0L;
-		long offset = dtypeSign == SIGN_2 ? toSignedMin(minVal, elementBytes) : minVal;
-
+	private static void fillAllElements(byte[] data, int elementCount, int elementBytes, long value) {
+		ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.nativeOrder());
 		switch (elementBytes) {
-			case 1 -> postDecompressByte(data, elementCount, fillAvailable, maxValue, offset, fillValue);
-			case 2 -> postDecompressShort(data, elementCount, fillAvailable, maxValue, offset, fillValue);
-			case 4 -> postDecompressInt(data, elementCount, fillAvailable, maxValue, offset, fillValue);
-			case 8 -> postDecompressLong(data, elementCount, fillAvailable, maxValue, offset, fillValue);
+			case 1 -> Arrays.fill(data, (byte) value);
+			case 2 -> {
+				for (int i = 0; i < elementCount; i++) {
+					buffer.putShort(i * 2, (short) value);
+				}
+			}
+			case 4 -> {
+				for (int i = 0; i < elementCount; i++) {
+					buffer.putInt(i * 4, (int) value);
+				}
+			}
+			case 8 -> {
+				for (int i = 0; i < elementCount; i++) {
+					buffer.putLong(i * 8, value);
+				}
+			}
 			default -> throw new HdfFilterException("Unsupported integer size: " + elementBytes);
 		}
-	}
-
-	private static void postDecompressByte(byte[] data, int elementCount, int fillAvailable, long maxValue, long offset,
-		long fillValue) {
-		for (int i = 0; i < elementCount; i++) {
-			long value = data[i] & 0xFF;
-			data[i] = (byte) applyOffset(value, fillAvailable, maxValue, offset, fillValue);
-		}
-	}
-
-	private static void postDecompressShort(byte[] data, int elementCount, int fillAvailable, long maxValue, long offset,
-		long fillValue) {
-		// The decompressed data is in native byte order
-		ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.nativeOrder());
-		for (int i = 0; i < elementCount; i++) {
-			long value = Short.toUnsignedLong(buffer.getShort(i * 2));
-			buffer.putShort(i * 2, (short) applyOffset(value, fillAvailable, maxValue, offset, fillValue));
-		}
-	}
-
-	private static void postDecompressInt(byte[] data, int elementCount, int fillAvailable, long maxValue, long offset,
-		long fillValue) {
-		// The decompressed data is in native byte order
-		ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.nativeOrder());
-		for (int i = 0; i < elementCount; i++) {
-			long value = Integer.toUnsignedLong(buffer.getInt(i * 4));
-			buffer.putInt(i * 4, (int) applyOffset(value, fillAvailable, maxValue, offset, fillValue));
-		}
-	}
-
-	private static void postDecompressLong(byte[] data, int elementCount, int fillAvailable, long maxValue, long offset,
-		long fillValue) {
-		// The decompressed data is in native byte order
-		ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.nativeOrder());
-		for (int i = 0; i < elementCount; i++) {
-			long value = buffer.getLong(i * 8);
-			long updated = applyOffset(value, fillAvailable, maxValue, offset, fillValue);
-			buffer.putLong(i * 8, updated);
-		}
-	}
-
-	/**
-	 * Reconstructs the original value from the decompressed code applying the
-	 * stored minimum and, if defined, substituting the fill value for the
-	 * maximum code value.
-	 */
-	private static long applyOffset(long value, int fillAvailable, long maxValue, long offset, long fillValue) {
-		if (fillAvailable == FILL_DEFINED && value == maxValue) {
-			return fillValue;
-		}
-		return value + offset;
 	}
 
 	private static long toSignedMin(long minVal, int elementBytes) {
@@ -251,63 +239,152 @@ public class ScaleOffsetFilter implements Filter {
 		};
 	}
 
-	private static void decompress(byte[] output, int elementCount, byte[] buffer, int bufferOffset,
-		int elementBytes, int minBits, int memOrder) {
-		int dtypeLen = elementBytes * 8;
-		BitCursor cursor = new BitCursor(bufferOffset);
+	/**
+	 * Single pass over the bit stream reconstructing the values. The code for each
+	 * element is read MSB-first into a 64 bit buffer, the offset/fill applied and
+	 * the element written to the output in native byte order. This avoids the
+	 * separate decompress and post-decompress passes (and the associated buffer
+	 * zeroing) of the reference implementation.
+	 */
+	private static void decompressFused(byte[] output, int elementCount, byte[] buffer, int bufferOffset,
+		int elementBytes, int minBits, long maxValue, long offset, long fillValue) {
+		long bitBuffer = 0;
+		int bitsInBuffer = 0;
+		int index = bufferOffset;
+		long codeMask = minBits == 64 ? -1L : (1L << minBits) - 1L;
 
-		Arrays.fill(output, (byte) 0);
+		ByteBuffer out = ByteBuffer.wrap(output).order(ByteOrder.nativeOrder());
 
-		if (memOrder == ORDER_LE) {
-			int begin = elementBytes - 1 - (dtypeLen - minBits) / 8;
-			for (int i = 0; i < elementCount; i++) {
-				int elementOffset = i * elementBytes;
-				for (int k = begin; k >= 0; k--) {
-					decompressOneByte(output, elementOffset, k, begin, buffer, cursor, minBits, dtypeLen);
-				}
+		for (int i = 0; i < elementCount; i++) {
+			while (bitsInBuffer < minBits) {
+				bitBuffer = (bitBuffer << 8) | (buffer[index++] & 0xFFL);
+				bitsInBuffer += 8;
 			}
-		} else {
-			int begin = (dtypeLen - minBits) / 8;
-			for (int i = 0; i < elementCount; i++) {
-				int elementOffset = i * elementBytes;
-				for (int k = begin; k <= elementBytes - 1; k++) {
-					decompressOneByte(output, elementOffset, k, begin, buffer, cursor, minBits, dtypeLen);
-				}
+			long code = (bitBuffer >>> (bitsInBuffer - minBits)) & codeMask;
+			bitsInBuffer -= minBits;
+
+			long value = (code == maxValue) ? fillValue : code + offset;
+
+			switch (elementBytes) {
+				case 1 -> output[i] = (byte) value;
+				case 2 -> out.putShort(i * 2, (short) value);
+				case 4 -> out.putInt(i * 4, (int) value);
+				case 8 -> out.putLong(i * 8, value);
+				default -> throw new HdfFilterException("Unsupported integer size: " + elementBytes);
 			}
 		}
 	}
 
-	private static void decompressOneByte(byte[] output, int elementOffset, int k, int begin, byte[] buffer,
-		BitCursor cursor, int minBits, int dtypeLen) {
-		if (cursor.index >= buffer.length) {
-			throw new HdfFilterException("Scale-offset buffer too short");
-		}
-		int val = buffer[cursor.index] & 0xFF;
-		int bitsToCopy = (k == begin) ? 8 - (dtypeLen - minBits) % 8 : 8;
+	/**
+	 * As {@link #decompressFused} but for chunks without a fill value, avoiding the
+	 * per element fill check.
+	 */
+	private static void decompressFusedNoFill(byte[] output, int elementCount, byte[] buffer, int bufferOffset,
+		int elementBytes, int minBits, long offset) {
+		long bitBuffer = 0;
+		int bitsInBuffer = 0;
+		int index = bufferOffset;
+		long codeMask = minBits == 64 ? -1L : (1L << minBits) - 1L;
 
-		if (cursor.bitsToFill > bitsToCopy) {
-			output[elementOffset + k] = (byte) ((val >> (cursor.bitsToFill - bitsToCopy)) & ((1 << bitsToCopy) - 1));
-			cursor.bitsToFill -= bitsToCopy;
-			return;
-		}
+		ByteBuffer out = ByteBuffer.wrap(output).order(ByteOrder.nativeOrder());
 
-		output[elementOffset + k] = (byte) ((val & ((1 << cursor.bitsToFill) - 1)) << (bitsToCopy - cursor.bitsToFill));
-		bitsToCopy -= cursor.bitsToFill;
-		cursor.index++;
-		cursor.bitsToFill = 8;
-		if (bitsToCopy == 0) {
-			return;
+		for (int i = 0; i < elementCount; i++) {
+			while (bitsInBuffer < minBits) {
+				bitBuffer = (bitBuffer << 8) | (buffer[index++] & 0xFFL);
+				bitsInBuffer += 8;
+			}
+			long value = ((bitBuffer >>> (bitsInBuffer - minBits)) & codeMask) + offset;
+			bitsInBuffer -= minBits;
+
+			switch (elementBytes) {
+				case 1 -> output[i] = (byte) value;
+				case 2 -> out.putShort(i * 2, (short) value);
+				case 4 -> out.putInt(i * 4, (int) value);
+				case 8 -> out.putLong(i * 8, value);
+				default -> throw new HdfFilterException("Unsupported integer size: " + elementBytes);
+			}
 		}
-		if (cursor.index >= buffer.length) {
-			throw new HdfFilterException("Scale-offset buffer too short");
-		}
-		val = buffer[cursor.index] & 0xFF;
-		output[elementOffset + k] |= (byte) ((val >> (cursor.bitsToFill - bitsToCopy)) & ((1 << bitsToCopy) - 1));
-		cursor.bitsToFill -= bitsToCopy;
 	}
 
 	private static int nativeOrder() {
 		return ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? ORDER_LE : ORDER_BE;
+	}
+
+	/**
+	 * Single pass over the bit stream for large {@code minBits} (more than 56 bits)
+	 * where the code may not fit in a single 64 bit buffer between elements. Uses a
+	 * running carry analogous to the reference implementation instead. Correct for
+	 * all element sizes including 8 byte types.
+	 */
+	private static void decompressCarry(byte[] output, int elementCount, byte[] buffer, int bufferOffset,
+		int elementBytes, int minBits, long maxValue, long offset, long fillValue) {
+		int index = bufferOffset;
+		int bitsToFill = 8;
+
+		ByteBuffer out = ByteBuffer.wrap(output).order(ByteOrder.nativeOrder());
+
+		for (int i = 0; i < elementCount; i++) {
+			long code = 0;
+			int bitsLeft = minBits;
+			while (bitsLeft > 0) {
+				int bitsToCopy = Math.min(bitsLeft, bitsToFill);
+				int val = buffer[index] & 0xFF;
+				int shift = bitsToFill - bitsToCopy;
+				code = (code << bitsToCopy) | ((val >> shift) & ((1 << bitsToCopy) - 1));
+				bitsLeft -= bitsToCopy;
+				bitsToFill -= bitsToCopy;
+				if (bitsToFill == 0) {
+					index++;
+					bitsToFill = 8;
+				}
+			}
+			long value = (code == maxValue) ? fillValue : code + offset;
+
+			switch (elementBytes) {
+				case 1 -> output[i] = (byte) value;
+				case 2 -> out.putShort(i * 2, (short) value);
+				case 4 -> out.putInt(i * 4, (int) value);
+				case 8 -> out.putLong(i * 8, value);
+				default -> throw new HdfFilterException("Unsupported integer size: " + elementBytes);
+			}
+		}
+	}
+
+	/**
+	 * As {@link #decompressCarry} but for chunks without a fill value.
+	 */
+	private static void decompressCarryNoFill(byte[] output, int elementCount, byte[] buffer, int bufferOffset,
+		int elementBytes, int minBits, long offset) {
+		int index = bufferOffset;
+		int bitsToFill = 8;
+
+		ByteBuffer out = ByteBuffer.wrap(output).order(ByteOrder.nativeOrder());
+
+		for (int i = 0; i < elementCount; i++) {
+			long code = 0;
+			int bitsLeft = minBits;
+			while (bitsLeft > 0) {
+				int bitsToCopy = Math.min(bitsLeft, bitsToFill);
+				int val = buffer[index] & 0xFF;
+				int shift = bitsToFill - bitsToCopy;
+				code = (code << bitsToCopy) | ((val >> shift) & ((1 << bitsToCopy) - 1));
+				bitsLeft -= bitsToCopy;
+				bitsToFill -= bitsToCopy;
+				if (bitsToFill == 0) {
+					index++;
+					bitsToFill = 8;
+				}
+			}
+			long value = code + offset;
+
+			switch (elementBytes) {
+				case 1 -> output[i] = (byte) value;
+				case 2 -> out.putShort(i * 2, (short) value);
+				case 4 -> out.putInt(i * 4, (int) value);
+				case 8 -> out.putLong(i * 8, value);
+				default -> throw new HdfFilterException("Unsupported integer size: " + elementBytes);
+			}
+		}
 	}
 
 	private static boolean needsByteSwap(int dtypeOrder) {
@@ -342,16 +419,6 @@ public class ScaleOffsetFilter implements Filter {
 				}
 			}
 			default -> throw new HdfFilterException("Unsupported integer size: " + elementBytes);
-		}
-	}
-
-	private static final class BitCursor {
-		private int index;
-		private int bitsToFill;
-
-		private BitCursor(int index) {
-			this.index = index;
-			this.bitsToFill = 8;
 		}
 	}
 }
