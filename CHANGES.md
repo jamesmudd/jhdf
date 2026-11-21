@@ -1,5 +1,9 @@
 # jHDF Change Log
 
+## v0.16.0 - November 2026
+- Add support for reading datasets compressed with the scale-offset filter (filter id 6). Integer datatypes are supported. https://github.com/jamesmudd/jhdf/pull/794
+- Build and dependency updates
+
 ## v0.15.0 - November 2026
 - Rework parallel reading of chunked datasets to combine decompression and data conversion in a single pass, and optimize chunk reading, buffer allocation, and decompression throughput. This provides significant performance improvements, particularly for large, compressed datasets. https://github.com/jamesmudd/jhdf/pull/905
 - Improve LZ4 and bitshuffle decompression performance by reusing decompressors across blocks. https://github.com/jamesmudd/jhdf/pull/921
