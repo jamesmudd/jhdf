@@ -12,6 +12,8 @@ package io.jhdf.filter;
 import io.jhdf.ArithmeticUtils;
 import io.jhdf.exceptions.HdfFilterException;
 import io.jhdf.exceptions.UnsupportedHdfException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -26,6 +28,8 @@ import java.util.Arrays;
  * @author James Mudd
  */
 public class ScaleOffsetFilter implements Filter {
+
+	private static final Logger logger = LoggerFactory.getLogger(ScaleOffsetFilter.class);
 
 	// Filter client data parameter indices, see the H5Zfilter docs
 	private static final int PARM_SCALETYPE = 0;
@@ -96,6 +100,16 @@ public class ScaleOffsetFilter implements Filter {
 		long minVal = readUnsignedLongLE(encodedData, 5, minValSize);
 
 		final int outputSize = ArithmeticUtils.multiplyExact(elementCount, elementBytes);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Decoding scale-offset chunk. minBits = {}, elements = {}, element size = {} bytes, "
+					+ "encoded = {} bytes, decoded = {} bytes",
+				minBits,
+				elementCount,
+				elementBytes,
+				encodedData.length,
+				outputSize);
+		}
 
 		byte[] decoded = new byte[outputSize];
 		if (minBits == elementBytes * 8) {
