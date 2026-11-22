@@ -81,6 +81,15 @@ public class FletcherChecksumFilter implements Filter {
 			throw new HdfChecksumMismatchException(storedChecksum, calculatedChecksum);
 		}
 
+		if (logger.isDebugEnabled()) {
+			if (storedChecksum == reversedChecksum) {
+				logger.debug("Fletcher32 checksum verified (legacy byte-swapped checksum from pre-v1.6.3 HDF5) for {} bytes of data",
+					dataLength);
+			} else {
+				logger.debug("Fletcher32 checksum verified for {} bytes of data", dataLength);
+			}
+		}
+
 		// Remove the checksum, the remaining data is returned
 		return copyOf(encodedData, dataLength);
 	}
