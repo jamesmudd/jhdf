@@ -11,6 +11,7 @@ package io.jhdf.api.dataset;
 
 import io.jhdf.api.Dataset;
 import io.jhdf.exceptions.HdfException;
+import org.jspecify.annotations.NullMarked;
 
 import java.nio.ByteBuffer;
 
@@ -19,6 +20,7 @@ import java.nio.ByteBuffer;
  *
  * @author James Mudd
  */
+@NullMarked
 public interface ChunkedDataset extends Dataset {
 
 	/**
